@@ -1,0 +1,17 @@
+PYTHON = "PYTHONPATH=./ python"
+BUILD = "../model/"
+
+rule all:
+    message: "Build Euro Calliope."
+
+
+rule clean: # removes all generated results
+    shell:
+        """
+        rm -r {BUILD}*
+        """
+
+
+rule test:
+    shell:
+        "py.test"

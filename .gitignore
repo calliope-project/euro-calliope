@@ -1,0 +1,12 @@
+# Python
+*.pyc
+build/
+dist/
+__pycache__
+*.egg-info
+.cache/
+src/.pytest_cache
+
+# Snakemake
+src/.snakemake/
+dag.pdf

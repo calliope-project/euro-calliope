@@ -1,0 +1,11 @@
+name: build-euro-calliope
+channels:
+    - conda-forge
+    - bioconda
+dependencies:
+    - python=3.6
+    - numpy=1.15.2
+    - pandas=0.23.4
+    - pytest=3.8.2
+    - click=7.0
+    - snakemake=5.3
