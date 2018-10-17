@@ -4,5 +4,5 @@ channels:
 dependencies:
     - python=3.6
     - numpy=1.15.2
-    - pandas=0.23.4
+    - pandas=0.22
     - calliope=0.6.3

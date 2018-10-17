@@ -1,0 +1,32 @@
+model:
+    name: 'Simple one node model'
+    timeseries_data_path: '.'
+run:
+    solver: glpk
+    mode: plan
+techs:
+    demand_elec:
+        essentials:
+            name: 'Electricity demand'
+            parent: demand
+            carrier: electricity
+        constraints:
+            resource: file=demand.csv:demand
+    supply_elec:
+        essentials:
+            name: 'Electricity supply'
+            parent: supply
+            carrier_out: electricity
+        constraints:
+            resource: inf
+            energy_cap_max: 40000  # kW
+            lifetime: 25
+        costs:
+            monetary:
+                interest_rate: 0.10
+                energy_cap: 750  # USD per kW
+locations:
+    region1:
+        techs:
+            demand_elec:
+            supply_elec:
