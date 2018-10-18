@@ -1,0 +1,16 @@
+techs:
+    battery:
+        essentials:
+            name: 'Battery storage'
+            parent: storage
+            carrier: electricity
+        constraints:
+            energy_cap_max: inf
+            storage_cap_max: inf
+            charge_rate: 1
+            energy_eff: 0.95  # 0.95 * 0.95 = 0.9025 round trip efficiency
+            storage_loss: 0  # No loss over time assumed
+            lifetime: 20
+        costs:
+            monetary:
+                storage_cap: 200  # USD per kWh storage capacity
