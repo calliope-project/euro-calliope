@@ -1,0 +1,27 @@
+techs:
+    pv:
+        essentials:
+            name: PV
+            carrier: electricity
+            parent: supply
+        constraints:
+            energy_cap_max: inf
+            resource: 0.12 # static capacity factor
+            lifetime: 20
+        costs:
+            monetary:
+                energy_cap: 1550.26 # from IRENA (Figure 3.4), valid for 2016, given in USD2016/kW
+                om_annual: 14 # from IRENA "Renewable Power Generation Costs in 2017", p69, given in USD/kW
+    wind_onshore:
+        essentials:
+            name: Onshore wind
+            carrier: electricity
+            parent: supply
+        constraints:
+            energy_cap_max: inf
+            resource: 0.20 # static capacity factor
+            lifetime: 20
+        costs:
+            monetary:
+                energy_cap: 1456 # from IRENA (Figure 5.2), valid for 2016, given in USD2016/kW
+                om_annual: 55 # from IRENA (Table 5.1), given in USD2016/kW
