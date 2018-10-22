@@ -36,7 +36,7 @@ Don't forget to activate the environment.
 
 Further, you need all data files that cannot be retrieved automatically:
 
-    * national technical potential of renewables, to be place in `./src/data/national-technical-potential.geojson`
+* national technical potential of renewables, to be place in `./src/data/national-technical-potential.geojson`
 
 ### Regenerate the model
 
@@ -46,4 +46,4 @@ Running the generation step will override files in the `./model` folder. Make su
 
 ### Run the tests
 
-    snakemake test
+    snakemake test --use-conda
