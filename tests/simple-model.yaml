@@ -5,7 +5,8 @@ import:
     - '../model/countries.yaml'
 model:
     name: 'Simple disconnected nodes model'
-    timeseries_data_path: '.'
+    timeseries_data_path: '../model/'
+    subset_time: ['2017-01-01', '2017-01-01']
 run:
     solver: glpk
     mode: plan
@@ -16,4 +17,4 @@ techs:
             parent: demand
             carrier: electricity
         constraints:
-            resource: file=demand.csv:demand
+            resource: file=electricity-demand.csv

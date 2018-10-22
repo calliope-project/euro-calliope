@@ -1,3 +1,7 @@
+# Model parts
+model/electricity-demand.csv
+model/model.done
+
 # Python
 *.pyc
 build/

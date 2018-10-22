@@ -10,3 +10,4 @@ dependencies:
     - pytest=3.8.2
     - click=7.0
     - snakemake-minimal=5.3
+    - pycountry
