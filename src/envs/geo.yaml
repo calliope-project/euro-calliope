@@ -1,0 +1,9 @@
+name: geo-euro-calliope
+channels:
+    - conda-forge
+    - nodefaults # will be fixed with conda 4.6: https://github.com/conda/conda/issues/7656
+dependencies:
+    - python=3.6
+    - numpy=1.15.2
+    - pandas=0.22
+    - geopandas=0.4.0

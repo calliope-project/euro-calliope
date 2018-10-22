@@ -5,8 +5,9 @@ dist/
 __pycache__
 *.egg-info
 .cache/
-src/.pytest_cache
+.pytest_cache
+src/data
 
 # Snakemake
-src/.snakemake/
+.snakemake/
 dag.pdf

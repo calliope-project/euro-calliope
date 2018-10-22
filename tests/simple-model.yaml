@@ -2,8 +2,9 @@ import:
     - '../model/interest-rate.yaml'
     - '../model/renewable-techs.yaml'
     - '../model/storage-techs.yaml'
+    - '../model/countries.yaml'
 model:
-    name: 'Simple one node model'
+    name: 'Simple disconnected nodes model'
     timeseries_data_path: '.'
 run:
     solver: glpk
@@ -16,10 +17,3 @@ techs:
             carrier: electricity
         constraints:
             resource: file=demand.csv:demand
-locations:
-    region1:
-        techs:
-            demand_elec:
-            pv:
-            wind_onshore:
-            battery:
