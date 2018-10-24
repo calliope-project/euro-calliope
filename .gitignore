@@ -1,6 +1,7 @@
 # Model parts
 model/electricity-demand.csv
 model/model.done
+model/tests.done
 
 # Python
 *.pyc

@@ -4,10 +4,12 @@ URL_LOAD = "https://data.open-power-system-data.org/time_series/2018-06-30/time_
 
 TECHNICAL_POTENTIAL_COUNTRIES = "src/data/national-technical-potential.geojson"
 
+
 rule all:
-    message: "Generate Euro Calliope."
+    message: "Generate Euro Calliope and run tests."
     input:
-        "model/model.done"
+        "model/model.done",
+        "model/tests.done"
 
 
 rule countries:
@@ -64,5 +66,7 @@ rule test:
     message: "Run tests"
     input:
         rules.model.output
+    conda: "src/envs/test.yaml"
+    output: touch("model/tests.done")
     shell:
         "py.test"

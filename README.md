@@ -30,7 +30,7 @@ The following applies to you if you want to manipulate the structure of Euro Cal
 
 You need [conda](https://conda.io/docs/index.html) to generate the model. Using conda, you can create a conda environment from within you can generate it:
 
-    conda env create -f src/envs/default.yml
+    conda env create -f src/envs/default.yaml
 
 Don't forget to activate the environment.
 

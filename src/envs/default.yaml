@@ -1,0 +1,14 @@
+name: gen-euro-calliope
+channels:
+    - conda-forge
+    - bioconda
+dependencies:
+    - python=3.6
+    - numpy=1.15.2
+    - pandas=0.22
+    - calliope=0.6.3
+    - pytest=3.8.2
+    - click=7.0
+    - snakemake-minimal=5.3
+    - pycountry
+    - pytest
