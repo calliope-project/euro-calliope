@@ -24,14 +24,14 @@ SUB_LOCATIONS = [
     ),
     SubLocation(
         "pv_or_wind_farm",
-        ["pv", "wind_onshore"],
+        ["open_field_pv", "wind_onshore"],
         ["eligibility_onshore_wind_and_pv_other_km2", "eligibility_onshore_wind_and_pv_farmland_km2",
          "eligibility_onshore_wind_and_pv_other_protected_km2",
          "eligibility_onshore_wind_and_pv_farmland_protected_km2"]
     ),
     SubLocation(
         "roof_mounted_pv",
-        ["pv"],
+        ["roof_mounted_pv"],
         ["eligibility_rooftop_pv_km2"]
     )
 ]

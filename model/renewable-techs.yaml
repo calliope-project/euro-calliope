@@ -1,4 +1,4 @@
-techs:
+tech_groups:
     pv:
         essentials:
             name: PV
@@ -15,6 +15,20 @@ techs:
             monetary:
                 energy_cap: 1550.26 # from IRENA (Figure 3.4), valid for 2016, given in USD2016/kW
                 om_annual: 14 # from IRENA "Renewable Power Generation Costs in 2017", p69, given in USD/kW
+
+techs:
+    open_field_pv:
+        essentials:
+            name: Open field PV
+            parent: pv
+        constraints:
+            resource_area_per_energy_cap: 0.0000125 # [km^2/kW] from (Gagnon:2016, Klauser:2016, Wirth:2017)
+    roof_mounted_pv:
+        essentials:
+            name: Roof mounted PV
+            parent: pv
+        constraints:
+            resource_area_per_energy_cap: 0.00000625 # [km^2/kW] from (Gagnon:2016, Klauser:2016)
     wind_onshore:
         essentials:
             name: Onshore wind
