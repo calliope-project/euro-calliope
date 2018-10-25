@@ -36,6 +36,7 @@ rule electricity_load_national:
     params:
         number_rows_valid = 10654293, # see https://github.com/Open-Power-System-Data/time_series/issues/22
         year = 2017
+    conda: "src/envs/default.yaml"
     script: "src/national_load.py"
 
 
