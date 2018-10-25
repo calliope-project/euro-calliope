@@ -1,5 +1,6 @@
 # Model parts
 model/electricity-demand.csv
+model/countries.yaml
 model/model.done
 model/tests.done
 

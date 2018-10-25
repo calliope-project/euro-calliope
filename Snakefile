@@ -2,7 +2,8 @@ PYTHON = "PYTHONPATH=./ python"
 
 URL_LOAD = "https://data.open-power-system-data.org/time_series/2018-06-30/time_series_60min_stacked.csv"
 
-TECHNICAL_POTENTIAL_COUNTRIES = "src/data/national-technical-potential.geojson"
+COUNTRIES = "src/data/national-technical-potential.geojson"
+LAND_ELIGIBILITY = "src/data/national-eligibility.csv"
 
 
 rule all:
@@ -14,7 +15,9 @@ rule all:
 
 rule countries:
     message: "Generate locations for all countries."
-    input: TECHNICAL_POTENTIAL_COUNTRIES
+    input:
+        ids = COUNTRIES,
+        land_eligibility = LAND_ELIGIBILITY
     output: "model/countries.yaml"
     conda: "src/envs/geo.yaml"
     script: "src/locations.py"
@@ -39,7 +42,7 @@ rule electricity_load_national:
 rule electricity_load:
     message: "Generate electricity load time series for every location."
     input:
-        units = TECHNICAL_POTENTIAL_COUNTRIES,
+        units = COUNTRIES,
         national_load = rules.electricity_load_national.output[0]
     output: "model/electricity-demand.csv"
     conda: "src/envs/geo.yaml"

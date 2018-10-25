@@ -36,7 +36,8 @@ Don't forget to activate the environment.
 
 Further, you need all data files that cannot be retrieved automatically:
 
-* national technical potential of renewables, to be place in `./src/data/national-technical-potential.geojson`
+* country shapes and their national electricity demand, to be place in `./src/data/national-technical-potential.geojson` # FIXME should come from Zenodo
+* national land eligibility of renewables, to be placed in `./src/data/national-eligibility.csv` # FIXME should come from Zenodo
 
 ### Regenerate the model
 

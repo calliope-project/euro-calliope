@@ -1,7 +1,0 @@
-locations:
-  AT,BE,BG,HR,CY,CZ,DK,EE,FI,FR,DE,EL,HU,IE,IT,LV,LT,LU,NL,PL,PT,RO,SK,SI,ES,SE,UK,ALB,BIH,MKD,MNE,NO,SRB,CH:
-    techs:
-      demand_elec:
-      pv:
-      wind_onshore:
-      battery:

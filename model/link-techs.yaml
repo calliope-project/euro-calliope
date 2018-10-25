@@ -1,0 +1,12 @@
+techs:
+    free_transmission:
+        essentials:
+            name: 'Local power transmission'
+            parent: transmission
+            carrier: electricity
+        constraints:
+            energy_cap_max: inf
+            energy_eff: 1.0
+        costs:
+            monetary:
+                om_prod: 0
