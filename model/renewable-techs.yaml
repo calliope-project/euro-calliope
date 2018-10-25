@@ -15,6 +15,17 @@ tech_groups:
             monetary:
                 energy_cap: 1550.26 # from IRENA (Figure 3.4), valid for 2016, given in USD2016/kW
                 om_annual: 14 # from IRENA "Renewable Power Generation Costs in 2017", p69, given in USD/kW
+    wind:
+        essentials:
+            name: Wind
+            carrier: electricity
+            parent: supply
+        constraints:
+            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
+            energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
+            resource: 0.20 # static capacity factor
+            resource_unit: energy_per_cap
+            lifetime: 20
 
 techs:
     open_field_pv:
@@ -32,16 +43,20 @@ techs:
     wind_onshore:
         essentials:
             name: Onshore wind
-            carrier: electricity
-            parent: supply
+            parent: wind
         constraints:
             resource_area_per_energy_cap: 0.000125 # [km^2/kW] from (European Environment Agency, 2009)
-            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
-            energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
-            resource: 0.20 # static capacity factor
-            resource_unit: energy_per_cap
-            lifetime: 20
         costs:
             monetary:
                 energy_cap: 1456 # from IRENA (Figure 5.2), valid for 2016, given in USD2016/kW
                 om_annual: 55 # from IRENA (Table 5.1), given in USD2016/kW
+    wind_offshore:
+        essentials:
+            name: Offshore wind
+            parent: wind
+        constraints:
+            resource_area_per_energy_cap: 0.000066667 # [km^2/kW] from (European Environment Agency, 2009)
+        costs:
+            monetary:
+                energy_cap: 4697 # from IRENA p.101, valid for 2016, given in USD2016/kW
+                om_annual: 125 # from IRENA p.109, given in US/kW
