@@ -1,8 +1,6 @@
-PYTHON = "PYTHONPATH=./ python"
-
 URL_LOAD = "https://data.open-power-system-data.org/time_series/2018-06-30/time_series_60min_stacked.csv"
 
-COUNTRIES = "src/data/national-technical-potential.geojson"
+LOCATIONS = "src/data/national-technical-potential.geojson"
 LAND_ELIGIBILITY = "src/data/national-eligibility.csv"
 
 
@@ -13,12 +11,12 @@ rule all:
         "model/tests.done"
 
 
-rule countries:
-    message: "Generate locations for all countries."
+rule locations:
+    message: "Generate locations."
     input:
-        ids = COUNTRIES,
-        land_eligibility = LAND_ELIGIBILITY
-    output: "model/countries.yaml"
+        ids = LOCATIONS,
+        land_eligibility_km2 = LAND_ELIGIBILITY
+    output: "model/locations.yaml"
     conda: "src/envs/geo.yaml"
     script: "src/locations.py"
 
@@ -43,7 +41,7 @@ rule electricity_load_national:
 rule electricity_load:
     message: "Generate electricity load time series for every location."
     input:
-        units = COUNTRIES,
+        units = LOCATIONS,
         national_load = rules.electricity_load_national.output[0]
     output: "model/electricity-demand.csv"
     conda: "src/envs/geo.yaml"
@@ -53,7 +51,7 @@ rule electricity_load:
 rule model:
     message: "Generate Euro Calliope"
     input:
-        rules.countries.output,
+        rules.locations.output,
         rules.electricity_load.output
     output: touch("model/model.done")
 

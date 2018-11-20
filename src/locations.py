@@ -18,21 +18,17 @@ SUB_LOCATIONS = [
     SubLocation(
         "wind_onshore",
         ["wind_onshore"],
-        ["eligibility_onshore_wind_other_km2", "eligibility_onshore_wind_farmland_km2",
-         "eligibility_onshore_wind_forest_km2", "eligibility_onshore_wind_other_protected_km2",
-         "eligibility_onshore_wind_farmland_protected_km2", "eligibility_onshore_wind_forest_protected_km2"]
+        ["eligibility_onshore_wind_km2"]
     ),
     SubLocation(
         "wind_offshore",
         ["wind_offshore"],
-        ["eligibility_offshore_wind_km2", "eligibility_offshore_wind_protected_km2"]
+        ["eligibility_offshore_wind_km2"]
     ),
     SubLocation(
         "pv_or_wind_farm",
         ["open_field_pv", "wind_onshore"],
-        ["eligibility_onshore_wind_and_pv_other_km2", "eligibility_onshore_wind_and_pv_farmland_km2",
-         "eligibility_onshore_wind_and_pv_other_protected_km2",
-         "eligibility_onshore_wind_and_pv_farmland_protected_km2"]
+        ["eligibility_onshore_wind_and_pv_km2"]
     ),
     SubLocation(
         "roof_mounted_pv",
@@ -42,19 +38,19 @@ SUB_LOCATIONS = [
 ]
 
 
-def generate_locations(path_to_ids, path_to_eligibility, path_to_result):
+def generate_locations(path_to_ids, path_to_land_eligibility_km2, path_to_result):
     """Generate a file that represents locations in Calliope.
 
     Takes as input a GeoJSON that defines administrative units and creates one
     Calliope location for each administrative unit.
     """
     units = gpd.read_file(path_to_ids)
-    land_eligibility = pd.read_csv(path_to_eligibility, index_col=0)
+    land_eligibility_km2 = pd.read_csv(path_to_land_eligibility_km2, index_col=0)
     ids = units.id.values
 
     locations = generate_main_locations(ids)
     locations.union(generate_sub_locations(ids))
-    locations.union(generate_sub_location_area_constraints(ids, land_eligibility))
+    locations.union(generate_sub_location_area_constraints(ids, land_eligibility_km2))
     locations.union(generate_sub_links(ids))
     locations.to_yaml(Path(path_to_result))
 
@@ -89,11 +85,11 @@ def generate_sub_locations(ids):
     return config
 
 
-def generate_sub_location_area_constraints(ids, land_eligibility):
+def generate_sub_location_area_constraints(ids, land_eligibility_km2):
     config = AttrDict()
     for id in ids:
         for sub_location in SUB_LOCATIONS:
-            available_area = land_eligibility.loc[id, sub_location.eligibilities].sum()
+            available_area = land_eligibility_km2.loc[id, sub_location.eligibilities].sum()
             sub_id = id + "_" + sub_location.name
             config.union(
                 AttrDict.from_yaml_string(
@@ -124,4 +120,4 @@ def generate_sub_links(ids):
 
 
 if __name__ == "__main__":
-    generate_locations(snakemake.input.ids, snakemake.input.land_eligibility, snakemake.output[0])
+    generate_locations(snakemake.input.ids, snakemake.input.land_eligibility_km2, snakemake.output[0])
