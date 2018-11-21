@@ -1,8 +1,12 @@
 # Model parts
 model/electricity-demand.csv
 model/locations.yaml
+model/capacityfactors-open-field-pv.csv
+model/capacityfactors-rooftop-pv.csv
+model/capacityfactors-wind-onshore.csv
+model/capacityfactors-wind-offshore.csv
 model/model.done
-model/tests.done
+model/test-report.html
 
 # Python
 *.pyc

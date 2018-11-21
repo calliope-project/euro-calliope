@@ -7,3 +7,4 @@ dependencies:
     - pandas=0.22
     - calliope=0.6.3
     - pytest=3.8.2
+    - pytest-html=1.19.0

@@ -2,12 +2,12 @@ import:
     - '../model/interest-rate.yaml'
     - '../model/renewable-techs.yaml'
     - '../model/storage-techs.yaml'
-    - '../model/countries.yaml'
+    - '../model/locations.yaml'
     - '../model/link-techs.yaml'
 model:
     name: 'Simple disconnected nodes model'
     timeseries_data_path: '../model/'
-    subset_time: ['2017-01-01', '2017-01-01']
+    subset_time: ['2016-01-01', '2016-01-01']
 run:
     solver: glpk
     mode: plan

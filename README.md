@@ -36,8 +36,13 @@ Don't forget to activate the environment.
 
 Further, you need all data files that cannot be retrieved automatically:
 
-* country shapes and their national electricity demand, to be place in `./src/data/national-technical-potential.geojson` # FIXME should come from Zenodo
+* country shapes and their national electricity demand, to be placed in `./src/data/national-technical-potential.geojson` # FIXME should come from Zenodo
+* shapes of exclusive economic zones (eez), to be placed in `./src/data/eez-in-europe.geojson` # FIXME should come from Zenodo
+* fraction of shared coasts, nations to eez, to be placed in `./src/data/national-shared-coast.csv`
 * national land eligibility of renewables, to be placed in `./src/data/national-eligibility.csv` # FIXME should come from Zenodo
+* spatio-temporal capacity factors in `./src/data/capacityfactors/`, where time and space dimensions are defined by two files: # FIXME should come from Zenodo
+    * an id map, where each pixel points to a time series: `./src/data/capacityfactors/{technology}-ids.tif`
+    * all indexed time series: `./src/data/capacityfactors/{technology}-timeseries.nc`
 
 ### Regenerate the model
 

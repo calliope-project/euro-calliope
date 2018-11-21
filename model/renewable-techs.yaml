@@ -8,8 +8,6 @@ tech_groups:
             resource_area_per_energy_cap: 0.0000125 # [km^2/kW] from (Gagnon:2016, Klauser:2016, Wirth:2017)
             resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
             energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
-            resource: 0.12 # static capacity factor
-            resource_unit: energy_per_cap
             lifetime: 20
         costs:
             monetary:
@@ -23,8 +21,6 @@ tech_groups:
         constraints:
             resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
             energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
-            resource: 0.20 # static capacity factor
-            resource_unit: energy_per_cap
             lifetime: 20
 
 techs:
@@ -34,18 +30,24 @@ techs:
             parent: pv
         constraints:
             resource_area_per_energy_cap: 0.0000125 # [km^2/kW] from (Gagnon:2016, Klauser:2016, Wirth:2017)
+            resource: file=capacityfactors-open-field-pv.csv
+            resource_unit: energy_per_cap
     roof_mounted_pv:
         essentials:
             name: Roof mounted PV
             parent: pv
         constraints:
             resource_area_per_energy_cap: 0.00000625 # [km^2/kW] from (Gagnon:2016, Klauser:2016)
+            resource: file=capacityfactors-rooftop-pv.csv
+            resource_unit: energy_per_cap
     wind_onshore:
         essentials:
             name: Onshore wind
             parent: wind
         constraints:
             resource_area_per_energy_cap: 0.000125 # [km^2/kW] from (European Environment Agency, 2009)
+            resource: file=capacityfactors-wind-onshore.csv
+            resource_unit: energy_per_cap
         costs:
             monetary:
                 energy_cap: 1456 # from IRENA (Figure 5.2), valid for 2016, given in USD2016/kW
@@ -56,6 +58,8 @@ techs:
             parent: wind
         constraints:
             resource_area_per_energy_cap: 0.000066667 # [km^2/kW] from (European Environment Agency, 2009)
+            resource: file=capacityfactors-wind-offshore.csv
+            resource_unit: energy_per_cap
         costs:
             monetary:
                 energy_cap: 4697 # from IRENA p.101, valid for 2016, given in USD2016/kW
