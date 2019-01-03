@@ -2,35 +2,13 @@
 
 A model of the European power system built using Calliope.
 
-This repository contains the model and the routines that automatically generate the model from source data.
+This repository contains the routines that automatically generate the model from source data.
 
 ## Get ready
 
-You need [conda](https://conda.io/docs/index.html) to use the model. Using conda, you can create a conda environment from within you can run it:
+You need [conda](https://conda.io/docs/index.html) to build and use the model. Using conda, you can create a conda environment from within you can run it:
 
     conda env create -f requirements.yml
-
-Don't forget to activate the environment.
-
-## Example use of the model
-
-Coming soon.
-
-## Repo structure
-
-* `model`: contains the entire model, including Calliope definition files and data
-* `src`: contains the source data and source code to generate the model
-* `tests`: contains a test usage of the model
-
-## Generate the model
-
-The following applies to you if you want to manipulate the structure of Euro Calliope itself. It does not apply to you when you intend to _use_ Euro Calliope.
-
-### Get ready
-
-You need [conda](https://conda.io/docs/index.html) to generate the model. Using conda, you can create a conda environment from within you can generate it:
-
-    conda env create -f src/envs/default.yaml
 
 Don't forget to activate the environment.
 
@@ -44,12 +22,28 @@ Further, you need all data files that cannot be retrieved automatically:
     * an id map, where each pixel points to a time series: `./src/data/capacityfactors/{technology}-ids.tif`
     * all indexed time series: `./src/data/capacityfactors/{technology}-timeseries.nc`
 
-### Regenerate the model
+## Generate the model
 
-Running the generation step will override files in the `./model` folder. Make sure this is what you want to do and that you have a copy.
+Because input data is large, the actual model including this data is not part of this repository. To use the model, you first need to generate it from input data and scripts. Running the generation step will generate the model in the `./model` folder.
 
     snakemake --use-conda
 
-### Run the tests
+## Example use of the model
+
+The generation step created all single parts of `euro-calliope`, like technologies and time series. These can be combined to eventually build a final model to run simulations with. For an example of such a model, see `./tests/simple-model.yaml`. It is a complete Calliope model and can be used like any other, for example like this:
+
+```Bash
+$ calliope run ./tests/simple-model.yaml
+```
+
+For more information on how to use Calliope models, see [Calliope's documentation](https://www.callio.pe).
+
+## Repo structure
+
+* `model`: contains the entire model after the generation step, including Calliope definition files and data
+* `src`: contains the source data and source code to generate the model
+* `tests`: contains a test usage of the model
+
+## Run the tests
 
     snakemake test --use-conda

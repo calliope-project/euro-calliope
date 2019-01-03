@@ -28,7 +28,9 @@ rule capacity_factors:
         locations = LOCATIONS,
         ids = "src/data/capacityfactors/{technology}-ids.tif",
         timeseries = "src/data/capacityfactors/{technology}-timeseries.nc"
-    output: "model/capacityfactors-{technology,^((?!offshore).)*}.csv"
+    wildcard_constraints:
+        technology = "((wind-onshore)|(rooftop-pv)|(open-field-pv))"
+    output: "model/capacityfactors-{technology}.csv"
     conda: "src/envs/geo.yaml"
     script: "src/capacityfactors.py"
 
