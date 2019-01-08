@@ -16,6 +16,7 @@ rule all:
 rule locations:
     message: "Generate locations."
     input:
+        src = "src/locations.py",
         land_eligibility_km2 = LAND_ELIGIBILITY
     output: "model/locations.yaml"
     conda: "src/envs/default.yaml"
@@ -25,6 +26,7 @@ rule locations:
 rule capacity_factors:
     message: "Generate capacityfactor time series disaggregated by location for {wildcards.technology}."
     input:
+        src = "src/capacityfactors.py",
         locations = LOCATIONS,
         ids = "src/data/capacityfactors/{technology}-ids.tif",
         timeseries = "src/data/capacityfactors/{technology}-timeseries.nc"
@@ -38,6 +40,7 @@ rule capacity_factors:
 rule capacity_factors_offshore:
     message: "Generate capacityfactor time series disaggregated by location for wind-offshore."
     input:
+        src = "src/capacityfactors_offshore.py",
         eez = EEZ,
         shared_coast = SHARED_COAST,
         ids = "src/data/capacityfactors/wind-offshore-ids.tif",
@@ -55,7 +58,9 @@ rule raw_load:
 
 rule electricity_load_national:
     message: "Preprocess raw electricity load data and retrieve load time series per country."
-    input: rules.raw_load.output
+    input:
+        src = "src/national_load.py",
+        load = rules.raw_load.output
     output: "src/data/generated/electricity-demand-national.csv"
     params:
         number_rows_valid = 10654293, # see https://github.com/Open-Power-System-Data/time_series/issues/22
@@ -67,6 +72,7 @@ rule electricity_load_national:
 rule electricity_load:
     message: "Generate electricity load time series for every location."
     input:
+        src = "src/load.py",
         units = LOCATIONS,
         national_load = rules.electricity_load_national.output[0]
     output: "model/electricity-demand.csv"

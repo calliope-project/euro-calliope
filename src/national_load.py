@@ -63,7 +63,7 @@ def handle_outliers(all_time_series):
 
 if __name__ == "__main__":
     national_load(
-        path_to_raw_load=snakemake.input[0],
+        path_to_raw_load=snakemake.input.load[0],
         number_rows_valid=snakemake.params.number_rows_valid,
         year=snakemake.params.year,
         path_to_output=snakemake.output[0]
