@@ -13,6 +13,13 @@ rule all:
         "model/test-report.html"
 
 
+rule copy_template:
+    message: "Copy file {wildcards.definition_file}.yaml from templates."
+    input: "src/template/{definition_file}.yaml",
+    output: "model/{definition_file}.yaml"
+    shell: "cp {input} {output}"
+
+
 rule locations:
     message: "Generate locations."
     input:
@@ -83,6 +90,10 @@ rule electricity_load:
 rule model:
     message: "Generate Euro Calliope"
     input:
+        "model/interest-rate.yaml",
+        "model/link-techs.yaml",
+        "model/renewable-techs.yaml",
+        "model/storage-techs.yaml",
         rules.locations.output,
         rules.electricity_load.output,
         expand(
