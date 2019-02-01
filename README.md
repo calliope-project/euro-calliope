@@ -6,13 +6,14 @@ This repository contains the routines that automatically generate the model from
 
 ## Get ready
 
-You need [conda](https://conda.io/docs/index.html) to build and use the model. Using conda, you can create a conda environment from within you can run it:
+1. You need [conda](https://conda.io/docs/index.html) to build and use the model. Using conda, you can create a conda environment from within you can run it:
 
     conda env create -f requirements.yml
+    conda activate euro-calliope
 
-Don't forget to activate the environment.
+2. Because of many recent changes in the way conda works, there is currently a [compatibility issue](https://bitbucket.org/snakemake/snakemake/issues/1029/subshells-and-conda-44) between `Snakemake 5.4` and recent conda versions (at least starting from `conda 4.6`). A workaround is to have the `<path-to-conda-root>/bin` folder on your `PATH` (make sure the folder contains `activate`). Because this is discouraged by the conda devs, it is a good idea to add it to `PATH` only when calling `snakemake` -- for example in a function ([my setup as example](https://github.com/timtroendle/.settings/blob/a5afc0c5f37afe4f5b1b924639e03c130fc7bdb7/fish/functions/smake.fish#L1)).
 
-Further, you need all data files that cannot be retrieved automatically:
+3. Further, you need all data files that cannot be retrieved automatically:
 
 * country shapes and their national electricity demand, to be placed in `./src/data/national-technical-potential.geojson` # FIXME should come from Zenodo
 * shapes of exclusive economic zones (eez), to be placed in `./src/data/eez-in-europe.geojson` # FIXME should come from Zenodo
