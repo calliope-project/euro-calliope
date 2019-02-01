@@ -29,6 +29,14 @@ Because input data is large, the actual model including this data is not part of
 
     snakemake --use-conda
 
+## Run on Euler cluster
+
+To run on Euler, use the following command:
+
+    snakemake --use-conda --profile config/euler
+
+If you want to run on another cluster, read [snakemake's documentation on cluster execution](https://snakemake.readthedocs.io/en/stable/executable.html#cluster-execution) and take `config/euler` as a starting point.
+
 ## Example use of the model
 
 The generation step created all single parts of `euro-calliope`, like technologies and time series. These can be combined to eventually build a final model to run simulations with. For an example of such a model, see `./tests/simple-model.yaml`. It is a complete Calliope model and can be used like any other, for example like this:

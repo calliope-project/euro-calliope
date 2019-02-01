@@ -5,6 +5,8 @@ EEZ = "src/data/eez-in-europe.geojson"
 SHARED_COAST = "src/data/national-shared-coast.csv"
 LAND_ELIGIBILITY = "src/data/national-eligibility.csv"
 
+localrules: all, raw_load, model, clean, copy_template
+
 
 rule all:
     message: "Generate Euro Calliope and run tests."

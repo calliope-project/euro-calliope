@@ -1,0 +1,8 @@
+__default__:
+    runtime: 10
+    cores: 1
+    memory: 16000
+test:
+    runtime: 15
+    cores: 1
+    memory: 16000
