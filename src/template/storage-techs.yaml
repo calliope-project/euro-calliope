@@ -13,4 +13,4 @@ techs:
             lifetime: 20
         costs:
             monetary:
-                storage_cap: 200  # USD per kWh storage capacity
+                storage_cap: 180.81  # EUR per kWh storage capacity # FIXME source
