@@ -12,5 +12,25 @@ techs:
             storage_loss: 0  # No loss over time assumed
             lifetime: 20
         costs:
-            monetary:
-                storage_cap: 180.81  # EUR per kWh storage capacity # FIXME source
+            monetary: # FIXME outdated
+                storage_cap: 322.73  # EUR/kWh, from 318 2008 USD in {budischak2013}
+                energy_cap: 713.47  # EUR/kW, from 703 2008 USD in {budischak2013}
+                om_annual: 12.48  # EUR/kW/year, from 12.3 2008 USD in {budischak2013}
+                om_prod: 0.0028  # EUR/kWh, assumption
+    hydrogen:
+        essentials:
+            name: Hydrogen power storage
+            parent: storage
+            carrier: electricity
+        constraints:
+            energy_cap_max: inf
+            storage_cap_max: inf
+            energy_eff: 0.66  # 0.438 round-trip, {budischak2013}
+            storage_loss: 1.50e-08
+            lifetime: 20
+        costs:
+            monetary: # FIXME outdated
+                storage_cap: 28.52  # EUR/kWh, from 28.1 2008 USD in {budischak2013}
+                energy_cap: 1708.06  # EUR/kW, from 1683 2008 USD in {budischak2013}
+                om_annual: 27.91  # EUR/kW/year, from 27.5 2008 USD in {budischak2013}
+                om_prod: 0.0028  # EUR/kWh, assumption

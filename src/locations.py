@@ -8,6 +8,7 @@ TEMPLATE = """locations:
         techs:
             demand_elec:
             battery:
+            hydrogen:
     {% for country, eligibility in eligibilities.iterrows() %}
     {{ country }}_pv_or_wind_farm:
         available_area: {{ eligibility.eligibility_onshore_wind_and_pv_km2 }}
