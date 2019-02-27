@@ -2,6 +2,13 @@
 import jinja2
 import pandas as pd
 
+FLAT_ROOF_SHARE = 0.302 # TODO add source (own publication)
+MAXIMUM_INSTALLABLE_POWER_DENSITY = {
+    "pv-on-tilted-roofs": 160, # [W/m^2] from (Gagnon:2016, Klauser:2016), i.e. 16% efficiency
+    "pv-on-flat-areas": 80, # [W/m^2] from (Gagnon:2016, Klauser:2016, Wirth:2017) # FIXME also defined in renewable-techs.yaml
+    "onshore-wind": 8, # [W/m^2] from (European Environment Agency, 2009) # FIXME also defined in renewable-techs.yaml
+    "offshore-wind": 15 # [W/m^2] from (European Environment Agency, 2009)
+}
 
 TEMPLATE = """locations:
     {{ eligibilities.index | join(', ') }}:
@@ -9,49 +16,21 @@ TEMPLATE = """locations:
             demand_elec:
             battery:
             hydrogen:
-    {% for country, eligibility in eligibilities.iterrows() %}
-    {{ country }}_pv_or_wind_farm:
-        available_area: {{ eligibility.eligibility_onshore_wind_and_pv_km2 }}
-        techs:
             open_field_pv:
-                constraints:
-                    resource: file=capacityfactors-open-field-pv.csv:{{ country }}
-            wind_onshore:
-                constraints:
-                    resource: file=capacityfactors-wind-onshore.csv:{{ country }}
-    {{ country }}_roof_mounted_pv:
-        available_area: {{ eligibility.eligibility_rooftop_pv_km2 }}
+            wind_onshore_competing:
+    {% for country, eligibility in eligibilities.iterrows() %}
+    {{ country }}:
+        available_area: {{ eligibility.eligibility_onshore_wind_and_pv_km2 }} # usable by onshore wind or open field pv
         techs:
+            wind_onshore_monopoly:
+                constraints:
+                    energy_cap_max: {{ eligibility.eligibility_onshore_wind_monopoly_kw }}
             roof_mounted_pv:
                 constraints:
-                    resource: file=capacityfactors-rooftop-pv.csv:{{ country }}
-    {{ country }}_wind_offshore:
-        available_area: {{ eligibility.eligibility_offshore_wind_km2 }}
-        techs:
+                    energy_cap_max: {{ eligibility.eligibility_rooftop_pv_kw }}
             wind_offshore:
                 constraints:
-                    resource: file=capacityfactors-wind-offshore.csv:{{ country }}
-    {{ country }}_wind_onshore:
-        available_area: {{ eligibility.eligibility_onshore_wind_km2 }}
-        techs:
-            wind_onshore:
-                constraints:
-                    resource: file=capacityfactors-wind-onshore.csv:{{ country }}
-    {% endfor %}
-links:
-    {% for country, _ in eligibilities.iterrows() %}
-    {{ country }},{{ country}}_pv_or_wind_farm:
-        techs:
-            free_transmission:
-    {{ country }},{{ country}}_roof_mounted_pv:
-        techs:
-            free_transmission:
-    {{ country }},{{ country}}_wind_offshore:
-        techs:
-            free_transmission:
-    {{ country }},{{ country}}_wind_onshore:
-        techs:
-            free_transmission:
+                    energy_cap_max: {{ eligibility.eligibility_offshore_wind_kw }}
     {% endfor %}
 """
 
@@ -60,10 +39,29 @@ def construct_locations(path_to_land_eligibility_km2, path_to_result):
     """Generate a file that represents locations in Calliope."""
     template = jinja2.Template(TEMPLATE)
     rendered = template.render(
-        eligibilities=pd.read_csv(path_to_land_eligibility_km2, index_col=0)
+        eligibilities=_from_area_to_installed_capacity(
+            land_eligibiligy_km2=pd.read_csv(path_to_land_eligibility_km2, index_col=0),
+            flat_roof_share=FLAT_ROOF_SHARE,
+            maximum_installable_power_density=MAXIMUM_INSTALLABLE_POWER_DENSITY
+        )
     )
     with open(path_to_result, "w") as result_file:
         result_file.write(rendered)
+
+
+def _from_area_to_installed_capacity(land_eligibiligy_km2, flat_roof_share,
+                                     maximum_installable_power_density):
+    cap = land_eligibiligy_km2.copy()
+    factor_rooftop = (
+        maximum_installable_power_density["pv-on-flat-areas"] * flat_roof_share
+        + maximum_installable_power_density["pv-on-tilted-roofs"] * (1 - flat_roof_share)
+    ) * 1000 # MW/km2 to kW/km2
+    factor_onshore = maximum_installable_power_density["onshore-wind"] * 1000 # MW/km2 to kW/km2
+    factor_offshore = maximum_installable_power_density["offshore-wind"] * 1000 # MW/km2 to kW/km2
+    cap["eligibility_rooftop_pv_kw"] = cap["eligibility_rooftop_pv_km2"] * factor_rooftop
+    cap["eligibility_offshore_wind_kw"] = cap["eligibility_offshore_wind_km2"] * factor_offshore
+    cap["eligibility_onshore_wind_monopoly_kw"] = cap["eligibility_onshore_wind_km2"] * factor_onshore
+    return cap
 
 
 if __name__ == "__main__":

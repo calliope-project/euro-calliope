@@ -5,8 +5,6 @@ tech_groups:
             carrier: electricity
             parent: supply
         constraints:
-            resource_area_per_energy_cap: 0.0000125 # [km^2/kW] from (Gagnon:2016, Klauser:2016, Wirth:2017)
-            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
             energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
             lifetime: 20
         costs:
@@ -19,9 +17,19 @@ tech_groups:
             carrier: electricity
             parent: supply
         constraints:
-            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
             energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
             lifetime: 20
+    wind_onshore:
+        essentials:
+            name: Onshore wind
+            parent: wind
+        constraints:
+            resource: file=capacityfactors-wind-onshore.csv
+            resource_unit: energy_per_cap
+        costs:
+            monetary:
+                energy_cap: 1316.28 # EUR2016/kW from IRENA (Figure 5.2), valid for 2016
+                om_annual: 49.72 # EUR2016/kW from IRENA (Table 5.1)
 
 techs:
     open_field_pv:
@@ -29,7 +37,10 @@ techs:
             name: Open field PV
             parent: pv
         constraints:
+            # open_field_pv and wind_onshore_competing are the only technologies with area footprints
+            # as they are the only technologies competing on the same land.
             resource_area_per_energy_cap: 0.0000125 # [km^2/kW] from (Gagnon:2016, Klauser:2016, Wirth:2017)
+            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
             resource: file=capacityfactors-open-field-pv.csv
             resource_unit: energy_per_cap
     roof_mounted_pv:
@@ -37,27 +48,26 @@ techs:
             name: Roof mounted PV
             parent: pv
         constraints:
-            resource_area_per_energy_cap: 0.00000625 # [km^2/kW] from (Gagnon:2016, Klauser:2016)
             resource: file=capacityfactors-rooftop-pv.csv
             resource_unit: energy_per_cap
-    wind_onshore:
+    wind_onshore_monopoly:
         essentials:
-            name: Onshore wind
-            parent: wind
+            name: Onshore wind without land competition
+            parent: wind_onshore
+    wind_onshore_competing:
+        essentials:
+            name: Onshore wind competing with open field PV on land
+            parent: wind_onshore
         constraints:
+            # open_field_pv and wind_onshore_competing are the only technologies with area footprints
+            # as they are the only technologies competing on the same land.
             resource_area_per_energy_cap: 0.000125 # [km^2/kW] from (European Environment Agency, 2009)
-            resource: file=capacityfactors-wind-onshore.csv
-            resource_unit: energy_per_cap
-        costs:
-            monetary:
-                energy_cap: 1316.28 # EUR2016/kW from IRENA (Figure 5.2), valid for 2016
-                om_annual: 49.72 # EUR2016/kW from IRENA (Table 5.1)
+            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
     wind_offshore:
         essentials:
             name: Offshore wind
             parent: wind
         constraints:
-            resource_area_per_energy_cap: 0.000066667 # [km^2/kW] from (European Environment Agency, 2009)
             resource: file=capacityfactors-wind-offshore.csv
             resource_unit: energy_per_cap
         costs:

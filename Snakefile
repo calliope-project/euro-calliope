@@ -8,6 +8,10 @@ LAND_ELIGIBILITY = "src/data/national-eligibility.csv"
 localrules: all, raw_load, model, clean, copy_template
 
 
+onstart:
+    shell("mkdir -p build/logs")
+
+
 rule all:
     message: "Generate Euro Calliope and run tests."
     input:
