@@ -13,10 +13,10 @@ techs:
             lifetime: 20
         costs:
             monetary: # FIXME outdated
-                storage_cap: 322.73  # EUR/kWh, from 318 2008 USD in {budischak2013}
-                energy_cap: 713.47  # EUR/kW, from 703 2008 USD in {budischak2013}
-                om_annual: 12.48  # EUR/kW/year, from 12.3 2008 USD in {budischak2013}
-                om_prod: 0.0028  # EUR/kWh, assumption
+                storage_cap: 322730  # EUR/MWh, from 318 2008 USD in {budischak2013}
+                energy_cap: 713470  # EUR/MW, from 703 2008 USD in {budischak2013}
+                om_annual: 12480  # EUR/MW/year, from 12.3 2008 USD in {budischak2013}
+                om_prod: 2.8  # EUR/MWh, assumption
     hydrogen:
         essentials:
             name: Hydrogen power storage
@@ -30,7 +30,7 @@ techs:
             lifetime: 20
         costs:
             monetary: # FIXME outdated
-                storage_cap: 28.52  # EUR/kWh, from 28.1 2008 USD in {budischak2013}
-                energy_cap: 1708.06  # EUR/kW, from 1683 2008 USD in {budischak2013}
-                om_annual: 27.91  # EUR/kW/year, from 27.5 2008 USD in {budischak2013}
-                om_prod: 0.0028  # EUR/kWh, assumption
+                storage_cap: 28520  # EUR/MWh, from 28.1 2008 USD in {budischak2013}
+                energy_cap: 1708060  # EUR/MW, from 1683 2008 USD in {budischak2013}
+                om_annual: 27910  # EUR/MW/year, from 27.5 2008 USD in {budischak2013}
+                om_prod: 2.8  # EUR/MWh, assumption
