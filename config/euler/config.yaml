@@ -1,3 +1,3 @@
-cluster: bsub -oo model/cluster.log -W {cluster.runtime} -n {cluster.cores} -R "rusage[mem={cluster.memory}]" <
+cluster: bsub -oo {cluster.log} -W {cluster.runtime} -n {cluster.cores} -R "rusage[mem={cluster.memory}]" <
 jobs: 999
 cluster-config: "config/euler/cluster-config.yaml"

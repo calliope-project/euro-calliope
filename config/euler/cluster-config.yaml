@@ -2,6 +2,7 @@ __default__:
     runtime: 10
     cores: 1
     memory: 16000
+    log: "build/logs/{rule}.{wildcards}.log"
 test:
     runtime: 15
     cores: 1

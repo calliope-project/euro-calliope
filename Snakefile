@@ -1,9 +1,9 @@
 URL_LOAD = "https://data.open-power-system-data.org/time_series/2018-06-30/time_series_60min_stacked.csv"
 
-LOCATIONS = "src/data/national-technical-potential.geojson"
-EEZ = "src/data/eez-in-europe.geojson"
-SHARED_COAST = "src/data/national-shared-coast.csv"
-LAND_ELIGIBILITY = "src/data/national-eligibility.csv"
+LOCATIONS = "data/national-technical-potential.geojson"
+EEZ = "data/eez-in-europe.geojson"
+SHARED_COAST = "data/national-shared-coast.csv"
+LAND_ELIGIBILITY = "data/national-eligibility.csv"
 
 localrules: all, raw_load, model, clean, copy_template
 
@@ -15,14 +15,14 @@ onstart:
 rule all:
     message: "Generate Euro Calliope and run tests."
     input:
-        "model/model.done",
-        "model/test-report.html"
+        "build/logs/model.done",
+        "build/logs/test-report.html"
 
 
 rule copy_template:
     message: "Copy file {wildcards.definition_file}.yaml from templates."
     input: "src/template/{definition_file}.yaml",
-    output: "model/{definition_file}.yaml"
+    output: "build/model/{definition_file}.yaml"
     shell: "cp {input} {output}"
 
 
@@ -31,8 +31,8 @@ rule locations:
     input:
         src = "src/locations.py",
         land_eligibility_km2 = LAND_ELIGIBILITY
-    output: "model/locations.yaml"
-    conda: "src/envs/default.yaml"
+    output: "build/model/locations.yaml"
+    conda: "envs/default.yaml"
     script: "src/locations.py"
 
 
@@ -41,12 +41,12 @@ rule capacity_factors:
     input:
         src = "src/capacityfactors.py",
         locations = LOCATIONS,
-        ids = "src/data/capacityfactors/{technology}-ids.tif",
-        timeseries = "src/data/capacityfactors/{technology}-timeseries.nc"
+        ids = "data/capacityfactors/{technology}-ids.tif",
+        timeseries = "data/capacityfactors/{technology}-timeseries.nc"
     wildcard_constraints:
         technology = "((wind-onshore)|(rooftop-pv)|(open-field-pv))"
-    output: "model/capacityfactors-{technology}.csv"
-    conda: "src/envs/geo.yaml"
+    output: "build/model/capacityfactors-{technology}.csv"
+    conda: "envs/geo.yaml"
     script: "src/capacityfactors.py"
 
 
@@ -56,16 +56,16 @@ rule capacity_factors_offshore:
         src = "src/capacityfactors_offshore.py",
         eez = EEZ,
         shared_coast = SHARED_COAST,
-        ids = "src/data/capacityfactors/wind-offshore-ids.tif",
-        timeseries = "src/data/capacityfactors/wind-offshore-timeseries.nc"
-    output: "model/capacityfactors-wind-offshore.csv"
-    conda: "src/envs/geo.yaml"
+        ids = "data/capacityfactors/wind-offshore-ids.tif",
+        timeseries = "data/capacityfactors/wind-offshore-timeseries.nc"
+    output: "build/model/capacityfactors-wind-offshore.csv"
+    conda: "envs/geo.yaml"
     script: "src/capacityfactors_offshore.py"
 
 
 rule raw_load:
     message: "Download raw load."
-    output: protected("src/data/automatic/raw-load-data.csv")
+    output: protected("data/automatic/raw-load-data.csv")
     shell: "curl -sLo {output} '{URL_LOAD}'"
 
 
@@ -74,11 +74,11 @@ rule electricity_load_national:
     input:
         src = "src/national_load.py",
         load = rules.raw_load.output
-    output: "src/data/generated/electricity-demand-national.csv"
+    output: "build/data/electricity-demand-national.csv"
     params:
         number_rows_valid = 10654293, # see https://github.com/Open-Power-System-Data/time_series/issues/22
         year = 2016
-    conda: "src/envs/default.yaml"
+    conda: "envs/default.yaml"
     script: "src/national_load.py"
 
 
@@ -88,32 +88,31 @@ rule electricity_load:
         src = "src/load.py",
         units = LOCATIONS,
         national_load = rules.electricity_load_national.output[0]
-    output: "model/electricity-demand.csv"
-    conda: "src/envs/geo.yaml"
+    output: "build/model/electricity-demand.csv"
+    conda: "envs/geo.yaml"
     script: "src/load.py"
 
 
 rule model:
     message: "Generate Euro Calliope"
     input:
-        "model/interest-rate.yaml",
-        "model/link-techs.yaml",
-        "model/renewable-techs.yaml",
-        "model/storage-techs.yaml",
+        "build/model/interest-rate.yaml",
+        "build/model/link-techs.yaml",
+        "build/model/renewable-techs.yaml",
+        "build/model/storage-techs.yaml",
         rules.locations.output,
         rules.electricity_load.output,
         expand(
-            "model/capacityfactors-{technology}.csv",
+            "build/model/capacityfactors-{technology}.csv",
             technology=["rooftop-pv", "open-field-pv", "wind-onshore", "wind-offshore"]
         )
-    output: touch("model/model.done")
+    output: touch("build/logs/model.done")
 
 
 rule clean: # removes all generated results
     shell:
         """
-        rm -r model/
-        rm -r src/data/generated/
+        rm -r build/
         """
 
 
@@ -121,7 +120,7 @@ rule test:
     message: "Run tests"
     input:
         rules.model.output
-    conda: "src/envs/test.yaml"
-    output: "model/test-report.html"
+    conda: "envs/test.yaml"
+    output: "build/logs/test-report.html"
     shell:
         "py.test --html={output} --self-contained-html"

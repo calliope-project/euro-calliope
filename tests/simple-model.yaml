@@ -1,12 +1,12 @@
 import:
-    - '../model/interest-rate.yaml'
-    - '../model/renewable-techs.yaml'
-    - '../model/storage-techs.yaml'
-    - '../model/locations.yaml'
-    - '../model/link-techs.yaml'
+    - '../build/model/interest-rate.yaml'
+    - '../build/model/renewable-techs.yaml'
+    - '../build/model/storage-techs.yaml'
+    - '../build/model/locations.yaml'
+    - '../build/model/link-techs.yaml'
 model:
     name: 'Simple disconnected nodes model'
-    timeseries_data_path: '../model/'
+    timeseries_data_path: '../build/model/'
     subset_time: ['2016-01-01', '2016-01-01']
 run:
     solver: glpk

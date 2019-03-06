@@ -8,20 +8,22 @@ This repository contains the routines that automatically generate the model from
 
 1. You need [conda](https://conda.io/docs/index.html) to build and use the model. Using conda, you can create a conda environment from within you can run it:
 
-    conda env create -f requirements.yml
-    conda activate euro-calliope
+```
+conda env create -f requirements.yml
+conda activate euro-calliope
+```
 
 2. Because of many recent changes in the way conda works, there is currently a [compatibility issue](https://bitbucket.org/snakemake/snakemake/issues/1029/subshells-and-conda-44) between `Snakemake 5.4` and recent conda versions (at least starting from `conda 4.6`). A workaround is to have the `<path-to-conda-root>/bin` folder on your `PATH` (make sure the folder contains `activate`). Because this is discouraged by the conda devs, it is a good idea to add it to `PATH` only when calling `snakemake` -- for example in a function ([my setup as example](https://github.com/timtroendle/.settings/blob/a5afc0c5f37afe4f5b1b924639e03c130fc7bdb7/fish/functions/smake.fish#L1)).
 
 3. Further, you need all data files that cannot be retrieved automatically:
 
-* country shapes and their national electricity demand, to be placed in `./src/data/national-technical-potential.geojson` # FIXME should come from Zenodo
-* shapes of exclusive economic zones (eez), to be placed in `./src/data/eez-in-europe.geojson` # FIXME should come from Zenodo
-* fraction of shared coasts, nations to eez, to be placed in `./src/data/national-shared-coast.csv`
-* national land eligibility of renewables, to be placed in `./src/data/national-eligibility.csv` # FIXME should come from Zenodo
-* spatio-temporal capacity factors in `./src/data/capacityfactors/`, where time and space dimensions are defined by two files: # FIXME should come from Zenodo
-    * an id map, where each pixel points to a time series: `./src/data/capacityfactors/{technology}-ids.tif`
-    * all indexed time series: `./src/data/capacityfactors/{technology}-timeseries.nc`
+* country shapes and their national electricity demand, to be placed in `./data/national-technical-potential.geojson` # FIXME should come from Zenodo
+* shapes of exclusive economic zones (eez), to be placed in `./data/eez-in-europe.geojson` # FIXME should come from Zenodo
+* fraction of shared coasts, nations to eez, to be placed in `./data/national-shared-coast.csv`
+* national land eligibility of renewables, to be placed in `./data/national-eligibility.csv` # FIXME should come from Zenodo
+* spatio-temporal capacity factors in `./data/capacityfactors/`, where time and space dimensions are defined by two files: # FIXME should come from Zenodo
+    * an id map, where each pixel points to a time series: `./data/capacityfactors/{technology}-ids.tif`
+    * all indexed time series: `./data/capacityfactors/{technology}-timeseries.nc`
 
 ## Generate the model
 
@@ -49,8 +51,9 @@ For more information on how to use Calliope models, see [Calliope's documentatio
 
 ## Repo structure
 
-* `model`: contains the entire model after the generation step, including Calliope definition files and data
+* `build/model`: contains the entire model after the generation step, including Calliope definition files and data (does not exist initially)
 * `src`: contains the source data and source code to generate the model
+* `envs`: contains files defining the environment to run the built steps in
 * `tests`: contains a test usage of the model
 
 ## Run the tests
