@@ -9,7 +9,8 @@ model:
     timeseries_data_path: '../build/model/national'
     subset_time: ['2016-01-01', '2016-01-01']
 run:
-    solver: glpk
+    solver: gurobi
+    solver_io: python
     mode: plan
 techs:
     demand_elec:

@@ -15,7 +15,9 @@ conda activate euro-calliope
 
 2. Because of many recent changes in the way conda works, there is currently a [compatibility issue](https://bitbucket.org/snakemake/snakemake/issues/1029/subshells-and-conda-44) between `Snakemake 5.4` and recent conda versions (at least starting from `conda 4.6`). A workaround is to have the `<path-to-conda-root>/bin` folder on your `PATH` (make sure the folder contains `activate`). Because this is discouraged by the conda devs, it is a good idea to add it to `PATH` only when calling `snakemake` -- for example in a function ([my setup as example](https://github.com/timtroendle/.settings/blob/a5afc0c5f37afe4f5b1b924639e03c130fc7bdb7/fish/functions/smake.fish#L1)).
 
-3. Further, you need all data files that cannot be retrieved automatically:
+3. You need a Gurobi license installed on your computer, or you need to choose a different solver.
+
+4. Further, you need all data files that cannot be retrieved automatically:
 
 * country shapes and their national electricity demand, to be placed in `./data/national-technical-potential.geojson` # FIXME should come from Zenodo
 * shapes of exclusive economic zones (eez), to be placed in `./data/eez-in-europe.geojson` # FIXME should come from Zenodo
