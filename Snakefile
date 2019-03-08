@@ -1,9 +1,9 @@
 URL_LOAD = "https://data.open-power-system-data.org/time_series/2018-06-30/time_series_60min_stacked.csv"
 
-LOCATIONS = "data/national-technical-potential.geojson"
+LOCATIONS = "data/{resolution}/units.geojson"
 EEZ = "data/eez-in-europe.geojson"
-SHARED_COAST = "data/national-shared-coast.csv"
-LAND_ELIGIBILITY = "data/national-eligibility.csv"
+SHARED_COAST = "data/{resolution}/shared-coast.csv"
+LAND_ELIGIBILITY = "data/{resolution}/eligibility.csv"
 
 localrules: all, raw_load, model, clean, copy_template
 
@@ -15,7 +15,8 @@ onstart:
 rule all:
     message: "Generate Euro Calliope and run tests."
     input:
-        "build/logs/model.done",
+        "build/logs/national-model.done",
+        "build/logs/regional-model.done",
         "build/logs/test-report.html"
 
 
@@ -27,17 +28,18 @@ rule copy_template:
 
 
 rule locations:
-    message: "Generate locations."
+    message: "Generate locations for {wildcards.resolution} resolution."
     input:
         src = "src/locations.py",
         land_eligibility_km2 = LAND_ELIGIBILITY
-    output: "build/model/locations.yaml"
+    output: "build/model/{resolution}/locations.yaml"
     conda: "envs/default.yaml"
     script: "src/locations.py"
 
 
 rule capacity_factors:
-    message: "Generate capacityfactor time series disaggregated by location for {wildcards.technology}."
+    message: "Generate capacityfactor time series disaggregated by location on "
+             "{wildcards.resolution} resolution for {wildcards.technology}."
     input:
         src = "src/capacityfactors.py",
         locations = LOCATIONS,
@@ -45,20 +47,21 @@ rule capacity_factors:
         timeseries = "data/capacityfactors/{technology}-timeseries.nc"
     wildcard_constraints:
         technology = "((wind-onshore)|(rooftop-pv)|(open-field-pv))"
-    output: "build/model/capacityfactors-{technology}.csv"
+    output: "build/model/{resolution}/capacityfactors-{technology}.csv"
     conda: "envs/geo.yaml"
     script: "src/capacityfactors.py"
 
 
 rule capacity_factors_offshore:
-    message: "Generate capacityfactor time series disaggregated by location for wind-offshore."
+    message: "Generate capacityfactor time series disaggregated by location on "
+             "{wildcards.resolution} resolution for wind-offshore."
     input:
         src = "src/capacityfactors_offshore.py",
         eez = EEZ,
         shared_coast = SHARED_COAST,
         ids = "data/capacityfactors/wind-offshore-ids.tif",
         timeseries = "data/capacityfactors/wind-offshore-timeseries.nc"
-    output: "build/model/capacityfactors-wind-offshore.csv"
+    output: "build/model/{resolution}/capacityfactors-wind-offshore.csv"
     conda: "envs/geo.yaml"
     script: "src/capacityfactors_offshore.py"
 
@@ -83,18 +86,18 @@ rule electricity_load_national:
 
 
 rule electricity_load:
-    message: "Generate electricity load time series for every location."
+    message: "Generate electricity load time series for every location on {wildcards.resolution} resolution."
     input:
         src = "src/load.py",
         units = LOCATIONS,
         national_load = rules.electricity_load_national.output[0]
-    output: "build/model/electricity-demand.csv"
+    output: "build/model/{resolution}/electricity-demand.csv"
     conda: "envs/geo.yaml"
     script: "src/load.py"
 
 
 rule model:
-    message: "Generate Euro Calliope"
+    message: "Generate Euro Calliope with {wildcards.resolution} resolution."
     input:
         "build/model/interest-rate.yaml",
         "build/model/link-techs.yaml",
@@ -103,10 +106,10 @@ rule model:
         rules.locations.output,
         rules.electricity_load.output,
         expand(
-            "build/model/capacityfactors-{technology}.csv",
+            "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=["rooftop-pv", "open-field-pv", "wind-onshore", "wind-offshore"]
         )
-    output: touch("build/logs/model.done")
+    output: touch("build/logs/{resolution}-model.done")
 
 
 rule clean: # removes all generated results
@@ -117,9 +120,10 @@ rule clean: # removes all generated results
 
 
 rule test:
-    message: "Run tests"
+    message: "Run tests for national and regional models."
     input:
-        rules.model.output
+        "build/logs/national-model.done",
+        "build/logs/regional-model.done",
     conda: "envs/test.yaml"
     output: "build/logs/test-report.html"
     shell:

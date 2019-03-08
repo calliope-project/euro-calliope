@@ -11,17 +11,15 @@ MAXIMUM_INSTALLABLE_POWER_DENSITY = {
 }
 
 TEMPLATE = """locations:
-    {{ eligibilities.index | join(', ') }}:
+    {% for country, eligibility in eligibilities.iterrows() %}
+    {{ country | replace(".", "-") }}:
+        available_area: {{ eligibility.eligibility_onshore_wind_and_pv_km2 }} # [km2] usable by onshore wind or open field pv
         techs:
             demand_elec:
             battery:
             hydrogen:
             open_field_pv:
             wind_onshore_competing:
-    {% for country, eligibility in eligibilities.iterrows() %}
-    {{ country }}:
-        available_area: {{ eligibility.eligibility_onshore_wind_and_pv_km2 }} # [km2] usable by onshore wind or open field pv
-        techs:
             wind_onshore_monopoly:
                 constraints:
                     energy_cap_max: {{ eligibility.eligibility_onshore_wind_monopoly_mw }} # [MW]

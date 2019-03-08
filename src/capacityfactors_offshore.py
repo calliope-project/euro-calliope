@@ -14,6 +14,7 @@ def capacityfactors(path_to_eez, path_to_shared_coast, path_to_id_map, path_to_t
     """Generate offshore capacityfactor time series for each location."""
     eez = gpd.read_file(path_to_eez).set_index("id").geometry
     shared_coast = pd.read_csv(path_to_shared_coast, index_col=0)
+    shared_coast.index = shared_coast.index.map(lambda x: x.replace(".", "-"))
     ts = xr.open_dataset(path_to_timeseries)
     with rasterio.open(path_to_id_map, "r") as src:
         id_map = src.read(1)

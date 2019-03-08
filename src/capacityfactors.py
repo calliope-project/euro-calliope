@@ -13,6 +13,7 @@ CAPACITY_FACTOR_VAR = "electricity"
 def capacityfactors(path_to_locations, path_to_id_map, path_to_timeseries, path_to_result):
     """Generate capacityfactor time series for each location."""
     locations = gpd.read_file(path_to_locations).set_index("id").geometry
+    locations.index = locations.index.map(lambda x: x.replace(".", "-"))
     ts = xr.open_dataset(path_to_timeseries)
     with rasterio.open(path_to_id_map, "r") as src:
         id_map = src.read(1)

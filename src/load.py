@@ -22,7 +22,7 @@ def unit_time_series(unit, national_load):
     country_code = unit.country_code
     multiplier = unit.fraction_of_national_load
     unit_ts = national_load.loc[:, country_code].copy() * multiplier * (-1)
-    unit_ts.name = unit.id
+    unit_ts.name = unit.id.replace(".", "-")
     return unit_ts
 
 
