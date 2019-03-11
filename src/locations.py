@@ -18,6 +18,7 @@ TEMPLATE = """locations:
             demand_elec:
             battery:
             hydrogen:
+            pumped_hydro:
             open_field_pv:
             wind_onshore_competing:
             wind_onshore_monopoly:
