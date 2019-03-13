@@ -10,3 +10,10 @@ techs:
         costs:
             monetary:
                 om_prod: 0
+    ac_transmission:
+        essentials:
+            name: "High voltage AC transmission line"
+            parent: transmission
+            carrier: electricity
+        constraints:
+            energy_eff_per_distance: 0.99999995 # [1/m]

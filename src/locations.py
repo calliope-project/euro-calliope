@@ -1,6 +1,7 @@
 """Creates Calliope location files."""
 import jinja2
 import pandas as pd
+import geopandas as gpd
 
 FLAT_ROOF_SHARE = 0.302 # TODO add source (own publication)
 MAXIMUM_INSTALLABLE_POWER_DENSITY = {
@@ -11,9 +12,10 @@ MAXIMUM_INSTALLABLE_POWER_DENSITY = {
 }
 
 TEMPLATE = """locations:
-    {% for country, eligibility in eligibilities.iterrows() %}
-    {{ country | replace(".", "-") }}:
-        available_area: {{ eligibility.eligibility_onshore_wind_and_pv_km2 }} # [km2] usable by onshore wind or open field pv
+    {% for id, location in locations.iterrows() %}
+    {{ id | replace(".", "-") }}:
+        coordinates: {lat: {{ location.centroid.y }}, lon: {{ location.centroid.x }}}
+        available_area: {{ location.eligibility_onshore_wind_and_pv_km2 }} # [km2] usable by onshore wind or open field pv
         techs:
             demand_elec:
             battery:
@@ -23,26 +25,38 @@ TEMPLATE = """locations:
             wind_onshore_competing:
             wind_onshore_monopoly:
                 constraints:
-                    energy_cap_max: {{ eligibility.eligibility_onshore_wind_monopoly_mw }} # [MW]
+                    energy_cap_max: {{ location.eligibility_onshore_wind_monopoly_mw }} # [MW]
             roof_mounted_pv:
                 constraints:
-                    energy_cap_max: {{ eligibility.eligibility_rooftop_pv_mw }} # [MW]
+                    energy_cap_max: {{ location.eligibility_rooftop_pv_mw }} # [MW]
             wind_offshore:
                 constraints:
-                    energy_cap_max: {{ eligibility.eligibility_offshore_wind_mw }} # [MW]
+                    energy_cap_max: {{ location.eligibility_offshore_wind_mw }} # [MW]
     {% endfor %}
 """
 
 
-def construct_locations(path_to_land_eligibility_km2, path_to_result):
+def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_result):
     """Generate a file that represents locations in Calliope."""
+    locations = gpd.GeoDataFrame(
+        gpd.read_file(path_to_shapes).set_index("id").centroid.rename("centroid")
+    )
+    capacities = _from_area_to_installed_capacity(
+        land_eligibiligy_km2=pd.read_csv(path_to_land_eligibility_km2, index_col=0),
+        flat_roof_share=FLAT_ROOF_SHARE,
+        maximum_installable_power_density=MAXIMUM_INSTALLABLE_POWER_DENSITY
+    )
+    locations = locations.merge(
+        capacities,
+        how="left",
+        left_index=True,
+        right_index=True,
+        validate="one_to_one"
+    )
+
     template = jinja2.Template(TEMPLATE)
     rendered = template.render(
-        eligibilities=_from_area_to_installed_capacity(
-            land_eligibiligy_km2=pd.read_csv(path_to_land_eligibility_km2, index_col=0),
-            flat_roof_share=FLAT_ROOF_SHARE,
-            maximum_installable_power_density=MAXIMUM_INSTALLABLE_POWER_DENSITY
-        )
+        locations=locations
     )
     with open(path_to_result, "w") as result_file:
         result_file.write(rendered)
@@ -65,6 +79,7 @@ def _from_area_to_installed_capacity(land_eligibiligy_km2, flat_roof_share,
 
 if __name__ == "__main__":
     construct_locations(
+        path_to_shapes=snakemake.input.shapes,
         path_to_land_eligibility_km2=snakemake.input.land_eligibility_km2,
         path_to_result=snakemake.output[0]
     )

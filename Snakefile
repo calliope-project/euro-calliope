@@ -31,9 +31,10 @@ rule locations:
     message: "Generate locations for {wildcards.resolution} resolution."
     input:
         src = "src/locations.py",
+        shapes = LOCATIONS,
         land_eligibility_km2 = LAND_ELIGIBILITY
     output: "build/model/{resolution}/locations.yaml"
-    conda: "envs/default.yaml"
+    conda: "envs/geo.yaml"
     script: "src/locations.py"
 
 
