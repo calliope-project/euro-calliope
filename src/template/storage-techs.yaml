@@ -28,9 +28,9 @@ techs:
             energy_eff: 0.922 # 0.85 round-trip [JRC ETRI 2014]
             lifetime: 60 # [JRC ETRI 2014]
         costs:
-        monetary:
-            energy_cap: 1500000 # EUR2013/MW [JRC ETRI 2014]
-            om_annual: 225000 # EUR2013/kW/year [JRC ETRI 2014]
+            monetary:
+                energy_cap: 1500000 # EUR2013/MW [JRC ETRI 2014]
+                om_annual: 225000 # EUR2013/MW/year [JRC ETRI 2014]
     hydrogen:
         essentials:
             name: Hydrogen power storage
