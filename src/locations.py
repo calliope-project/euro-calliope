@@ -15,7 +15,7 @@ TEMPLATE = """locations:
     {% for id, location in locations.iterrows() %}
     {{ id | replace(".", "-") }}:
         coordinates: {lat: {{ location.centroid.y }}, lon: {{ location.centroid.x }}}
-        available_area: {{ location.eligibility_onshore_wind_and_pv_km2 }} # [km2] usable by onshore wind or open field pv
+        available_area: {{ location.eligibility_onshore_wind_and_pv_km2 * scaling_factors.area }} # [{{ 1 / scaling_factors.area }} km2] usable by onshore wind or open field pv
         techs:
             demand_elec:
             battery:
@@ -25,18 +25,18 @@ TEMPLATE = """locations:
             wind_onshore_competing:
             wind_onshore_monopoly:
                 constraints:
-                    energy_cap_max: {{ location.eligibility_onshore_wind_monopoly_mw }} # [MW]
+                    energy_cap_max: {{ location.eligibility_onshore_wind_monopoly_mw * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
             roof_mounted_pv:
                 constraints:
-                    energy_cap_max: {{ location.eligibility_rooftop_pv_mw }} # [MW]
+                    energy_cap_max: {{ location.eligibility_rooftop_pv_mw * scaling_factors.power  }} # [{{ 1 / scaling_factors.power }} MW]
             wind_offshore:
                 constraints:
-                    energy_cap_max: {{ location.eligibility_offshore_wind_mw }} # [MW]
+                    energy_cap_max: {{ location.eligibility_offshore_wind_mw * scaling_factors.power  }} # [{{ 1 / scaling_factors.power }} MW]
     {% endfor %}
 """
 
 
-def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_result):
+def construct_locations(path_to_shapes, path_to_land_eligibility_km2, scaling_factors, path_to_result):
     """Generate a file that represents locations in Calliope."""
     locations = gpd.GeoDataFrame(
         gpd.read_file(path_to_shapes).set_index("id").centroid.rename("centroid")
@@ -56,7 +56,8 @@ def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_re
 
     template = jinja2.Template(TEMPLATE)
     rendered = template.render(
-        locations=locations
+        locations=locations,
+        scaling_factors=scaling_factors
     )
     with open(path_to_result, "w") as result_file:
         result_file.write(rendered)
@@ -81,5 +82,6 @@ if __name__ == "__main__":
     construct_locations(
         path_to_shapes=snakemake.input.shapes,
         path_to_land_eligibility_km2=snakemake.input.land_eligibility_km2,
-        path_to_result=snakemake.output[0]
+        path_to_result=snakemake.output[0],
+        scaling_factors=snakemake.params["scaling_factors"]
     )

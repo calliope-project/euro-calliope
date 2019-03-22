@@ -13,10 +13,10 @@ techs:
             lifetime: 20
         costs:
             monetary: # FIXME outdated
-                storage_cap: 322730  # EUR/MWh, from 318 2008 USD in {budischak2013}
-                energy_cap: 713470  # EUR/MW, from 703 2008 USD in {budischak2013}
-                om_annual: 12480  # EUR/MW/year, from 12.3 2008 USD in {budischak2013}
-                om_prod: 2.8  # EUR/MWh, assumption
+                storage_cap: {{ 322730 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh], from 318 2008 USD in {budischak2013}
+                energy_cap: {{ 713470 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} EUR/MW], from 703 2008 USD in {budischak2013}
+                om_annual: {{ 12480 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MW/year], from 12.3 2008 USD in {budischak2013}
+                om_prod: {{ 2.8 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh], assumption
     pumped_hydro:
         essentials:
             name: 'Pumped hydro power storage'
@@ -29,8 +29,8 @@ techs:
             lifetime: 60 # [JRC ETRI 2014]
         costs:
             monetary:
-                energy_cap: 1500000 # EUR2013/MW [JRC ETRI 2014]
-                om_annual: 225000 # EUR2013/MW/year [JRC ETRI 2014]
+                energy_cap: {{ 1500000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2013/MW] [JRC ETRI 2014]
+                om_annual: {{ 225000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2013/MW/year] [JRC ETRI 2014]
     hydrogen:
         essentials:
             name: Hydrogen power storage
@@ -44,7 +44,7 @@ techs:
             lifetime: 20
         costs:
             monetary: # FIXME outdated
-                storage_cap: 28520  # EUR/MWh, from 28.1 2008 USD in {budischak2013}
-                energy_cap: 1708060  # EUR/MW, from 1683 2008 USD in {budischak2013}
-                om_annual: 27910  # EUR/MW/year, from 27.5 2008 USD in {budischak2013}
-                om_prod: 2.8  # EUR/MWh, assumption
+                storage_cap: {{ 28520 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh], from 28.1 2008 USD in {budischak2013}
+                energy_cap: {{ 1708060 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} EUR/MW], from 1683 2008 USD in {budischak2013}
+                om_annual: {{ 27910 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MW/year], from 27.5 2008 USD in {budischak2013}
+                om_prod: {{ 2.8 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh], assumption

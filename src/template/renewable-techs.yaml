@@ -9,8 +9,8 @@ tech_groups:
             lifetime: 20
         costs:
             monetary:
-                energy_cap: 1401490 # EUR2016/MW from IRENA (Figure 3.4), valid for 2016
-                om_annual: 12660 # EUR2016/MW from IRENA "Renewable Power Generation Costs in 2017", p69
+                energy_cap: {{ 1401490 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2016/MW] from IRENA (Figure 3.4), valid for 2016
+                om_annual: {{ 12660 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from IRENA "Renewable Power Generation Costs in 2017", p69
     wind:
         essentials:
             name: Wind
@@ -28,8 +28,8 @@ tech_groups:
             resource_unit: energy_per_cap
         costs:
             monetary:
-                energy_cap: 1316280 # EUR2016/MW from IRENA (Figure 5.2), valid for 2016
-                om_annual: 49720 # EUR2016/MW from IRENA (Table 5.1)
+                energy_cap: {{ 1316280 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from IRENA (Figure 5.2), valid for 2016
+                om_annual: {{ 49720 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from IRENA (Table 5.1)
 
 techs:
     open_field_pv:
@@ -39,7 +39,7 @@ techs:
         constraints:
             # open_field_pv and wind_onshore_competing are the only technologies with area footprints
             # as they are the only technologies competing on the same land.
-            resource_area_per_energy_cap: 0.0125 # [km^2/MW] from (Gagnon:2016, Klauser:2016, Wirth:2017)
+            resource_area_per_energy_cap: {{ 0.0125 * scaling_factors.area / scaling_factors.power }} # [{{ scaling_factors.power / scaling_factors.area }} km^2/MW] from (Gagnon:2016, Klauser:2016, Wirth:2017)
             resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
             resource: file=capacityfactors-open-field-pv.csv
             resource_unit: energy_per_cap
@@ -61,7 +61,7 @@ techs:
         constraints:
             # open_field_pv and wind_onshore_competing are the only technologies with area footprints
             # as they are the only technologies competing on the same land.
-            resource_area_per_energy_cap: 0.125 # [km^2/MW] from (European Environment Agency, 2009)
+            resource_area_per_energy_cap: {{ 0.125 * scaling_factors.area / scaling_factors.power }} # [{{ scaling_factors.power / scaling_factors.area }} km^2/MW] from (European Environment Agency, 2009)
             resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
     wind_offshore:
         essentials:
@@ -72,5 +72,5 @@ techs:
             resource_unit: energy_per_cap
         costs:
             monetary:
-                energy_cap: 4246250 # EUR2016/MW from IRENA p.101, valid for 2016
-                om_annual: 113000 # EUR2016/MW from IRENA p.109
+                energy_cap: {{ 4246250 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from IRENA p.101, valid for 2016
+                om_annual: {{ 113000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from IRENA p.109

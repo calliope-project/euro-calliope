@@ -51,6 +51,10 @@ $ calliope run ./tests/simple-model.yaml
 
 For more information on how to use Calliope models, see [Calliope's documentation](https://www.callio.pe).
 
+## Units and scaling
+
+The default units for Euro-Calliope are `MW`, `MWh`, `EUR`, and `km2`, but you can scale all of these using the configuration values in `config/default.yaml`. Apart from convenience, this may be important to handle numerical issues with your solver.
+
 ## Repo structure
 
 * `build/model`: contains the entire model after the generation step, including Calliope definition files and data (does not exist initially)

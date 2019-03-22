@@ -5,7 +5,8 @@ EEZ = "data/eez-in-europe.geojson"
 SHARED_COAST = "data/{resolution}/shared-coast.csv"
 LAND_ELIGIBILITY = "data/{resolution}/eligibility.csv"
 
-localrules: all, raw_load, model, clean, copy_template
+localrules: all, raw_load, model, clean, scale_template
+configfile: "config/default.yaml"
 
 
 onstart:
@@ -20,11 +21,14 @@ rule all:
         "build/logs/test-report.html"
 
 
-rule copy_template:
-    message: "Copy file {wildcards.definition_file}.yaml from templates."
-    input: "src/template/{definition_file}.yaml",
+rule scale_template:
+    message: "Apply scaling factors to file {wildcards.definition_file}.yaml from templates."
+    input:
+        src = "src/scale_templates.py",
+        template = "src/template/{definition_file}.yaml"
+    params: scaling_factors = config["scaling-factors"]
     output: "build/model/{definition_file}.yaml"
-    shell: "cp {input} {output}"
+    script: "src/scale_templates.py"
 
 
 rule locations:
@@ -33,6 +37,7 @@ rule locations:
         src = "src/locations.py",
         shapes = LOCATIONS,
         land_eligibility_km2 = LAND_ELIGIBILITY
+    params: scaling_factors = config["scaling-factors"]
     output: "build/model/{resolution}/locations.yaml"
     conda: "envs/geo.yaml"
     script: "src/locations.py"
@@ -92,6 +97,8 @@ rule electricity_load:
         src = "src/load.py",
         units = LOCATIONS,
         national_load = rules.electricity_load_national.output[0]
+    params:
+        scaling_factor = config["scaling-factors"]["power"]
     output: "build/model/{resolution}/electricity-demand.csv"
     conda: "envs/geo.yaml"
     script: "src/load.py"
