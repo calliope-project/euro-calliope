@@ -1,5 +1,5 @@
 """Preprocess national electricity load time series."""
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pandas as pd
 import numpy as np
@@ -11,8 +11,8 @@ def national_load(path_to_raw_load, number_rows_valid, year, path_to_output):
     load = read_load_profiles(
         path_to_raw_load=path_to_raw_load,
         number_rows_valid=number_rows_valid,
-        start=datetime(year, 1, 1),
-        end=datetime(year + 1, 1, 1)
+        start=datetime(year, 1, 1, tzinfo=timezone.utc),
+        end=datetime(year + 1, 1, 1, tzinfo=timezone.utc)
     )
     load = filter_national(load)
     check_completeness(load)

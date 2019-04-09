@@ -36,7 +36,7 @@ def _capacityfactors(locations, id_map, transform, nodata, ts):
         nodata=nodata
     )
     return pd.DataFrame(
-        index=ts.time,
+        index=ts.time.to_index(),
         data={
             location_id: _location_time_series(weighted_ts_ids, ts)
             for location_id, weighted_ts_ids in zip(locations.index, weighted_ts_ids_per_location)
