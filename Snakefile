@@ -28,6 +28,7 @@ rule scale_template:
         template = "src/template/{definition_file}.yaml"
     params: scaling_factors = config["scaling-factors"]
     output: "build/model/{definition_file}.yaml"
+    conda: "envs/default.yaml"
     script: "src/scale_templates.py"
 
 

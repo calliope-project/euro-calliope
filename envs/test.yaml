@@ -1,4 +1,4 @@
-name: test-euro-calliope
+name: test
 channels:
     - conda-forge
     - gurobi
@@ -8,5 +8,5 @@ dependencies:
     - pandas=0.22
     - gurobi=8.1.0
     - calliope=0.6.3
-    - pytest=3.8.2
-    - pytest-html=1.19.0
+    - pytest=4.4.0
+    - pytest-html=1.20.0
