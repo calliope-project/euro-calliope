@@ -13,3 +13,4 @@ dependencies:
     - netcdf4=1.5.0.1
     - xarray=0.12.1
     - jinja2=2.10.1
+    - networkx=2.2

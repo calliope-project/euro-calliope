@@ -2,18 +2,17 @@ import:
     - '../build/model/interest-rate.yaml'
     - '../build/model/renewable-techs.yaml'
     - '../build/model/storage-techs.yaml'
-    - '../build/model/regional/locations.yaml'
     - '../build/model/link-techs.yaml'
+    - '../build/model/national/locations.yaml'
+    - '../build/model/national/link-all-neighbours.yaml'
 model:
-    name: 'Simple disconnected nodes model with regional spatial resolution'
-    calliope_version: 0.6.4
-    timeseries_data_path: '../build/model/regional'
+    name: 'Simple connected nodes model with national spatial resolution'
+    timeseries_data_path: '../build/model/national'
     subset_time: ['2016-01-01', '2016-01-01']
 run:
     solver: gurobi
     solver_io: python
     mode: plan
-    ensure_feasibility: true # not all regions have sufficient renewable potential
 techs:
     demand_elec:
         essentials:

@@ -105,6 +105,16 @@ rule electricity_load:
     script: "src/load.py"
 
 
+rule link_neighbours:
+    message: "Create links between all direct neighbours on {wildcards.resolution} resolution."
+    input:
+        src = "src/link_neighbours.py",
+        units = LOCATIONS
+    output: "build/model/{resolution}/link-all-neighbours.yaml"
+    conda: "envs/geo.yaml"
+    script: "src/link_neighbours.py"
+
+
 rule model:
     message: "Generate Euro Calliope with {wildcards.resolution} resolution."
     input:
@@ -114,6 +124,7 @@ rule model:
         "build/model/storage-techs.yaml",
         rules.locations.output,
         rules.electricity_load.output,
+        rules.link_neighbours.output,
         expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=["rooftop-pv", "open-field-pv", "wind-onshore", "wind-offshore"]
