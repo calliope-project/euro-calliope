@@ -10,7 +10,8 @@ WEIGHT_VAR = "weight"
 CAPACITY_FACTOR_VAR = "electricity"
 
 
-def capacityfactors(path_to_eez, path_to_shared_coast, path_to_id_map, path_to_timeseries, path_to_result):
+def capacityfactors(path_to_eez, path_to_shared_coast, path_to_id_map, path_to_timeseries,
+                    threshold, path_to_result):
     """Generate offshore capacityfactor time series for each location."""
     eez = gpd.read_file(path_to_eez).set_index("id").geometry
     shared_coast = pd.read_csv(path_to_shared_coast, index_col=0)
@@ -23,7 +24,7 @@ def capacityfactors(path_to_eez, path_to_shared_coast, path_to_id_map, path_to_t
 
     capacityfactors_per_eez = _capacityfactors(eez, id_map, transform, nodata, ts)
     capacityfactors = _allocate_to_onshore_locations(capacityfactors_per_eez, shared_coast)
-    capacityfactors.to_csv(path_to_result)
+    capacityfactors.where(capacityfactors >= threshold, 0).to_csv(path_to_result)
 
 
 def _capacityfactors(locations, id_map, transform, nodata, ts):
@@ -76,5 +77,6 @@ if __name__ == '__main__':
         path_to_shared_coast=snakemake.input.shared_coast,
         path_to_id_map=snakemake.input.ids,
         path_to_timeseries=snakemake.input.timeseries,
+        threshold=float(snakemake.params.threshold),
         path_to_result=snakemake.output[0]
     )

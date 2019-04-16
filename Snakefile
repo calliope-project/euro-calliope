@@ -52,6 +52,8 @@ rule capacity_factors:
         locations = LOCATIONS,
         ids = "data/capacityfactors/{technology}-ids.tif",
         timeseries = "data/capacityfactors/{technology}-timeseries.nc"
+    params:
+        threshold = config["minimal-capacity-factor"]
     wildcard_constraints:
         technology = "((wind-onshore)|(rooftop-pv)|(open-field-pv))"
     output: "build/model/{resolution}/capacityfactors-{technology}.csv"
@@ -68,6 +70,8 @@ rule capacity_factors_offshore:
         shared_coast = SHARED_COAST,
         ids = "data/capacityfactors/wind-offshore-ids.tif",
         timeseries = "data/capacityfactors/wind-offshore-timeseries.nc"
+    params:
+        threshold = config["minimal-capacity-factor"]
     output: "build/model/{resolution}/capacityfactors-wind-offshore.csv"
     conda: "envs/geo.yaml"
     script: "src/capacityfactors_offshore.py"

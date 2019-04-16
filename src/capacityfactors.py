@@ -10,7 +10,7 @@ WEIGHT_VAR = "weight"
 CAPACITY_FACTOR_VAR = "electricity"
 
 
-def capacityfactors(path_to_locations, path_to_id_map, path_to_timeseries, path_to_result):
+def capacityfactors(path_to_locations, path_to_id_map, path_to_timeseries, threshold, path_to_result):
     """Generate capacityfactor time series for each location."""
     locations = gpd.read_file(path_to_locations).set_index("id").geometry
     locations.index = locations.index.map(lambda x: x.replace(".", "-"))
@@ -21,7 +21,7 @@ def capacityfactors(path_to_locations, path_to_id_map, path_to_timeseries, path_
         nodata = src.nodata
 
     capacityfactors = _capacityfactors(locations, id_map, transform, nodata, ts)
-    capacityfactors.to_csv(path_to_result)
+    capacityfactors.where(capacityfactors >= threshold, 0).to_csv(path_to_result)
 
 
 def _capacityfactors(locations, id_map, transform, nodata, ts):
@@ -56,5 +56,6 @@ if __name__ == '__main__':
         path_to_locations=snakemake.input.locations,
         path_to_id_map=snakemake.input.ids,
         path_to_timeseries=snakemake.input.timeseries,
+        threshold=float(snakemake.params.threshold),
         path_to_result=snakemake.output[0]
     )
