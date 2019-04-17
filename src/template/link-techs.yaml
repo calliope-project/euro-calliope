@@ -17,3 +17,4 @@ techs:
             carrier: electricity
         constraints:
             energy_eff_per_distance: 0.99999995 # [1/m]
+            energy_cap_per_distance: {{ 0.38 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2016/MW/m] from [@Haller:2012]
