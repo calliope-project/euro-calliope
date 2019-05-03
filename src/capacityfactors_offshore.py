@@ -67,7 +67,7 @@ def _allocate_to_onshore_locations(capacityfactors_per_eez, shared_coast):
 
 
 def _onshore_timeseries(location_id, capacityfactors_per_eez, shared_coast):
-    weights = shared_coast.loc[location_id, :]
+    weights = shared_coast.loc[location_id, :].transform(lambda x: x / x.sum())
     return (capacityfactors_per_eez * weights).sum(axis="columns")
 
 
