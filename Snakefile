@@ -44,6 +44,16 @@ rule locations:
     script: "src/locations.py"
 
 
+rule load_shedding:
+    message: "Generate override allowing load shedding."
+    input:
+        src = "src/load_shedding.py",
+        shapes = LOCATIONS
+    output: "build/model/{resolution}/load-shedding.yaml"
+    conda: "envs/geo.yaml"
+    script: "src/load_shedding.py"
+
+
 rule capacity_factors:
     message: "Generate capacityfactor time series disaggregated by location on "
              "{wildcards.resolution} resolution for {wildcards.technology}."

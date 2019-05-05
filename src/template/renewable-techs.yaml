@@ -74,3 +74,13 @@ techs:
             monetary:
                 energy_cap: {{ 4246250 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from IRENA p.101, valid for 2016
                 om_annual: {{ 113000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from IRENA p.109
+    load_shedding:
+        essentials:
+            name: Load shedding as last resort
+            parent: supply
+            carrier: electricity
+        constraints:
+            energy_cap_max: inf
+        costs:
+            monetary: # TODO cite
+                om_prod: {{ 8000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh]
