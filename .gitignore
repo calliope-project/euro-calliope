@@ -1,6 +1,10 @@
 build
 data
 
+notebooks
+
+gurobi.log
+
 # Python
 *.pyc
 build/

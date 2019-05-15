@@ -84,3 +84,11 @@ techs:
         costs:
             monetary: # TODO cite
                 om_prod: {{ 8000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh]
+    hydro_run_of_river:
+        essentials:
+            name: Run of river hydro electricity
+            parent: supply
+            carrier: electricity
+        constraints:
+            resource: file=energy-inflow-hydro-electricity.csv
+            resource_unit: energy

@@ -3,3 +3,4 @@ scaling-factors:
     area: 1
     monetary: 1
 minimal-capacity-factor: 0.001 # consider smaller values to be 0; this helps numerics in the LP
+year: 2016

@@ -15,7 +15,9 @@ conda activate euro-calliope
 
 2. You need a Gurobi license installed on your computer, or you need to choose a different solver.
 
-3. Further, you need all data files that cannot be retrieved automatically:
+3. You need an account at the Copernicus Climate Data Service and you need to create a `$HOME/.cdsapirc` file with your credentials, see their [How To](https://cds.climate.copernicus.eu/api-how-to) (you do not need to manually install the client).
+
+4. Further, you need all data files that cannot be retrieved automatically:
 
 * country shapes and their national electricity demand, to be placed in `./data/national-technical-potential.geojson` # FIXME should come from Zenodo
 * shapes of exclusive economic zones (eez), to be placed in `./data/eez-in-europe.geojson` # FIXME should come from Zenodo
@@ -24,6 +26,8 @@ conda activate euro-calliope
 * spatio-temporal capacity factors in `./data/capacityfactors/`, where time and space dimensions are defined by two files: # FIXME should come from Zenodo
     * an id map, where each pixel points to a time series: `./data/capacityfactors/{technology}-ids.tif`
     * all indexed time series: `./data/capacityfactors/{technology}-timeseries.nc`
+* [hydro basins](https://www.hydrosheds.org/downloads) downloaded to `./data/hybas_eu_lev07_v1c/` # FIXME add automatic download which is unavailable 2019-05-13
+* IRENA's capacity and generation data in `./data/irena-capacity-generation.xlsx`
 
 ## Generate the model
 

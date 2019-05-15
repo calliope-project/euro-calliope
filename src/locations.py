@@ -21,6 +21,7 @@ TEMPLATE = """locations:
             battery:
             hydrogen:
             pumped_hydro:
+            hydro_run_of_river:
             open_field_pv:
             wind_onshore_competing:
             wind_onshore_monopoly:

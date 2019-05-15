@@ -5,6 +5,7 @@ EEZ = "data/eez-in-europe.geojson"
 SHARED_COAST = "data/{resolution}/shared-coast.csv"
 LAND_ELIGIBILITY = "data/{resolution}/eligibility.csv"
 
+include: "./rules/hydro.smk"
 localrules: all, raw_load, model, clean, scale_template
 configfile: "config/default.yaml"
 
@@ -87,6 +88,19 @@ rule capacity_factors_offshore:
     script: "src/capacityfactors_offshore.py"
 
 
+rule energy_inflow_run_of_river:
+    message: "Generate energy inflow time series for hydro power plants."
+    input:
+        src = "src/energy_inflow_ror.py",
+        hydro = rules.inflow_mwh.output[0],
+        locations = LOCATIONS
+    params:
+        scaling_factor = config["scaling-factors"]["power"]
+    output: "build/model/{resolution}/energy-inflow-hydro-electricity.csv"
+    conda: "envs/geo.yaml"
+    script: "src/energy_inflow_ror.py"
+
+
 rule raw_load:
     message: "Download raw load."
     output: protected("data/automatic/raw-load-data.csv")
@@ -101,7 +115,7 @@ rule electricity_load_national:
     output: "build/data/electricity-demand-national.csv"
     params:
         number_rows_valid = 10654293, # see https://github.com/Open-Power-System-Data/time_series/issues/22
-        year = 2016
+        year = config["year"]
     conda: "envs/default.yaml"
     script: "src/national_load.py"
 
@@ -139,6 +153,7 @@ rule model:
         rules.locations.output,
         rules.electricity_load.output,
         rules.link_neighbours.output,
+        rules.energy_inflow_run_of_river.output,
         expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=["rooftop-pv", "open-field-pv", "wind-onshore", "wind-offshore"]
