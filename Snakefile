@@ -89,7 +89,7 @@ rule capacity_factors_offshore:
 
 
 rule energy_inflow_run_of_river:
-    message: "Generate energy inflow time series for hydro power plants."
+    message: "Generate energy inflow time series for hydro power plants on {wildcards.resolution} resolution."
     input:
         src = "src/energy_inflow_ror.py",
         hydro = rules.inflow_mwh.output[0],
@@ -143,6 +143,19 @@ rule link_neighbours:
     script: "src/link_neighbours.py"
 
 
+rule pumped_hydro_capacities:
+    message: "Create Calliope input file defining pumped hydro capacities on {wildcards.resolution} resolution."
+    input:
+        src = "src/pumped_hydro.py",
+        locations = LOCATIONS,
+        plants = rules.stations_database.output[0]
+    params:
+        scaling_factor = config["scaling-factors"]["power"]
+    output: "build/model/{resolution}/pumped-hydro.yaml"
+    conda: "envs/geo.yaml"
+    script: "src/pumped_hydro.py"
+
+
 rule model:
     message: "Generate Euro Calliope with {wildcards.resolution} resolution."
     input:
@@ -154,6 +167,7 @@ rule model:
         rules.electricity_load.output,
         rules.link_neighbours.output,
         rules.energy_inflow_run_of_river.output,
+        rules.pumped_hydro_capacities.output,
         expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=["rooftop-pv", "open-field-pv", "wind-onshore", "wind-offshore"]

@@ -26,8 +26,8 @@ def energy_inflow(plants_with_inflow_m3, annual_national_generation_mwh):
     """Generate hydro power time series based on unscaled water time series.
 
     As inputs I am using the water inflow time series which is correct in its
-    dynamic behavior, but not in its height. To reach time series of usable energy
-    with correct height, I am using two different approaches for run of river
+    dynamic behavior, but not in its magnitude. To reach time series of usable energy
+    with correct magnitude, I am using two different approaches for run of river
     and for dammed hydropower.
 
     For run of river, I am scaling the water inflow in a way, that the total
@@ -39,6 +39,8 @@ def energy_inflow(plants_with_inflow_m3, annual_national_generation_mwh):
     total generation in the year matches the known annual generation without
     capping the time series.
     """
+    # ASSUME national fixed capacity / annual generation ratio for run of river and dammed hydro
+    # ASSUME dammed hydro never spills water
     annual_generation_MWh = allocate_generation_to_plant(plants_with_inflow_m3, annual_national_generation_mwh)
     inflow_MWh = xr.DataArray(
         dims=["id", "time"],
