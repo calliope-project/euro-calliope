@@ -20,7 +20,7 @@ def runoff(path_to_cutout, year):
         cutout_dir=path_to_cutout.parent,
         xs=X_RANGE,
         ys=Y_RANGE,
-        years=slice(year, year),
+        years=slice(year - 1, year),
         months=slice(1, 12)
     )
     cutout.prepare()

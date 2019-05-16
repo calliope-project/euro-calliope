@@ -67,7 +67,8 @@ rule inflow_m3:
         src = "src/hydro/inflow_m3.py",
         stations = rules.filtered_stations.output[0],
         basins = rules.fix_basins.output[0],
-        runoff = rules.download_runoff_data.output[0],
+        runoff = rules.download_runoff_data.output[0]
+    params: year = config["year"]
     output: "build/data/hydro-electricity-with-water-inflow.nc"
     conda: "../envs/hydro.yaml"
     script: "../src/hydro/inflow_m3.py"

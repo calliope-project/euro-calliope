@@ -8,13 +8,14 @@ from shapely.geometry import Point
 import pycountry
 
 
-def determine_water_inflow(path_to_cutout, path_to_stations, path_to_basins, path_to_output):
+def determine_water_inflow(path_to_cutout, path_to_stations, path_to_basins, year, path_to_output):
     path_to_cutout = Path(path_to_cutout)
     plants = read_plants(path_to_stations)
 
     inflow_m3 = water_inflow(plants, path_to_cutout, path_to_basins)
     (xr.merge([plants.to_xarray(), inflow_m3])
        .drop("geometry")
+       .sel(time=str(year))
        .to_netcdf(path_to_output))
 
 
@@ -34,16 +35,9 @@ def water_inflow(plants, path_to_cutout, path_to_basins):
         cutout_dir=path_to_cutout.parent
     )
     inflow = (cutout.hydro(plants, path_to_basins)
-                    .ffill(dim="time") # FIXME probably not at all necessary
-                    .bfill(dim="time") # FIXME only necessary because 2015 data not yet downloaded
                     .rename(plant="id")
                     .rename("inflow_m3"))
-    # TODO fix negative values earlier
-    # Inflow data can contain negative values, because runoff data contains tiny negative values.
-    # see https://github.com/FRESNA/atlite/issues/17
-    # see https://gist.github.com/timtroendle/832ea97fc3f594560ce7dcaf95af4fe5
-    # It would be better to fix those issues in the runoff rather than the inflow data.
-    return inflow.where(inflow >= 0, 0)
+    return inflow
 
 
 if __name__ == "__main__":
@@ -51,5 +45,6 @@ if __name__ == "__main__":
         path_to_cutout=snakemake.input.runoff,
         path_to_stations=snakemake.input.stations,
         path_to_basins=snakemake.input.basins,
+        year=snakemake.params.year,
         path_to_output=snakemake.output[0]
     )
