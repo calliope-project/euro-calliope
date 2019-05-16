@@ -88,17 +88,19 @@ rule capacity_factors_offshore:
     script: "src/capacityfactors_offshore.py"
 
 
-rule energy_inflow_run_of_river:
-    message: "Generate energy inflow time series for hydro power plants on {wildcards.resolution} resolution."
+rule energy_time_series_hydro_electricity:
+    message: "Generate energy inflow time series for hydro electricity on {wildcards.resolution} resolution."
     input:
-        src = "src/energy_inflow_ror.py",
+        src = "src/energy_timeseries_hydro.py",
         hydro = rules.inflow_mwh.output[0],
         locations = LOCATIONS
     params:
         scaling_factor = config["scaling-factors"]["power"]
-    output: "build/model/{resolution}/energy-inflow-hydro-electricity.csv"
+    output:
+        ror = "build/model/{resolution}/energy-generation-hydro-ror.csv",
+        reservoir = "build/model/{resolution}/energy-inflow-hydro-reservoir.csv"
     conda: "envs/geo.yaml"
-    script: "src/energy_inflow_ror.py"
+    script: "src/energy_timeseries_hydro.py"
 
 
 rule raw_load:
@@ -143,17 +145,17 @@ rule link_neighbours:
     script: "src/link_neighbours.py"
 
 
-rule pumped_hydro_capacities:
-    message: "Create Calliope input file defining pumped hydro capacities on {wildcards.resolution} resolution."
+rule hydro_capacities:
+    message: "Create Calliope input file defining hydro capacities on {wildcards.resolution} resolution."
     input:
-        src = "src/pumped_hydro.py",
+        src = "src/hydro.py",
         locations = LOCATIONS,
-        plants = rules.stations_database.output[0]
+        plants = rules.filtered_stations.output[0]
     params:
         scaling_factor = config["scaling-factors"]["power"]
-    output: "build/model/{resolution}/pumped-hydro.yaml"
+    output: "build/model/{resolution}/hydro-capacities.yaml"
     conda: "envs/geo.yaml"
-    script: "src/pumped_hydro.py"
+    script: "src/hydro.py"
 
 
 rule model:
@@ -166,8 +168,8 @@ rule model:
         rules.locations.output,
         rules.electricity_load.output,
         rules.link_neighbours.output,
-        rules.energy_inflow_run_of_river.output,
-        rules.pumped_hydro_capacities.output,
+        rules.energy_time_series_hydro_electricity.output,
+        rules.hydro_capacities.output,
         expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=["rooftop-pv", "open-field-pv", "wind-onshore", "wind-offshore"]

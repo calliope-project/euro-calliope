@@ -4,7 +4,7 @@ import:
     - '../build/model/storage-techs.yaml'
     - '../build/model/link-techs.yaml'
     - '../build/model/national/locations.yaml'
-    - '../build/model/national/pumped-hydro.yaml'
+    - '../build/model/national/hydro-capacities.yaml'
     - '../build/model/national/link-all-neighbours.yaml'
 model:
     name: 'Simple connected nodes model with national spatial resolution'
