@@ -4,6 +4,8 @@ LOCATIONS = "data/{resolution}/units.geojson"
 EEZ = "data/eez-in-europe.geojson"
 SHARED_COAST = "data/{resolution}/shared-coast.csv"
 LAND_ELIGIBILITY = "data/{resolution}/eligibility.csv"
+CAPACITY_FACTOR_ID_MAPS = "data/capacityfactors/{technology}-ids.tif"
+CAPACITY_FACTOR_TIME_SERIES = "data/capacityfactors/{technology}-timeseries.nc"
 
 include: "./rules/hydro.smk"
 localrules: all, raw_load, model, clean, scale_template
@@ -61,8 +63,8 @@ rule capacity_factors:
     input:
         src = "src/capacityfactors.py",
         locations = LOCATIONS,
-        ids = "data/capacityfactors/{technology}-ids.tif",
-        timeseries = "data/capacityfactors/{technology}-timeseries.nc"
+        ids = CAPACITY_FACTOR_ID_MAPS,
+        timeseries = CAPACITY_FACTOR_TIME_SERIES
     params:
         threshold = config["minimal-capacity-factor"]
     wildcard_constraints:
@@ -79,8 +81,8 @@ rule capacity_factors_offshore:
         src = "src/capacityfactors_offshore.py",
         eez = EEZ,
         shared_coast = SHARED_COAST,
-        ids = "data/capacityfactors/wind-offshore-ids.tif",
-        timeseries = "data/capacityfactors/wind-offshore-timeseries.nc"
+        ids = CAPACITY_FACTOR_ID_MAPS.format(technology="wind-offshore"),
+        timeseries = CAPACITY_FACTOR_TIME_SERIES.format(technology="wind-offshore")
     params:
         threshold = config["minimal-capacity-factor"]
     output: "build/model/{resolution}/capacityfactors-wind-offshore.csv"

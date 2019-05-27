@@ -19,10 +19,10 @@ conda activate euro-calliope
 
 4. Further, you need all data files that cannot be retrieved automatically:
 
-* country shapes and their national electricity demand, to be placed in `./data/national-technical-potential.geojson` # FIXME should come from Zenodo
-* shapes of exclusive economic zones (eez), to be placed in `./data/eez-in-europe.geojson` # FIXME should come from Zenodo
-* fraction of shared coasts, nations to eez, to be placed in `./data/national-shared-coast.csv`
-* national land eligibility of renewables, to be placed in `./data/national-eligibility.csv` # FIXME should come from Zenodo
+* location shapes, together with their ID, country code, annual electricity demand, and share of industrial electricity demand, to be placed in `./data/{resolution}/units.geojson` # FIXME should come from Zenodo
+* shapes of exclusive economic zones (EEZ), to be placed in `./data/eez-in-europe.geojson` # FIXME download original source manually and add processing steps here
+* fraction of shared coasts, a table with location IDs on the row index and EEZ IDs on the column index, to be placed in `./data/{resolution}/shared-coast.csv` # FIXME should come from Zenodo
+* national land eligibility of renewables (area in km2 that is available to renewable deployments per location), to be placed in `./data/{resolution}/eligibility.csv` # FIXME should come from Zenodo
 * spatio-temporal capacity factors in `./data/capacityfactors/`, where time and space dimensions are defined by two files: # FIXME should come from Zenodo
     * an id map, where each pixel points to a time series: `./data/capacityfactors/{technology}-ids.tif`
     * all indexed time series: `./data/capacityfactors/{technology}-timeseries.nc`
