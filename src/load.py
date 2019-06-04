@@ -8,8 +8,10 @@ import geopandas as gpd
 def load(path_to_units, path_to_electricity_load, scaling_factor, path_to_result):
     """Generate load time series for every location."""
     units = gpd.read_file(path_to_units)
-    national_load = pd.read_csv(path_to_electricity_load, index_col=0)
+    national_load = pd.read_csv(path_to_electricity_load, index_col=0, parse_dates=True)
 
+    # units.demand_twh_per_year is not necessarily the demand in the year
+    # used here and thus its absolute value must be ignored.
     units["industrial_demand"] = units.demand_twh_per_year * units.industrial_demand_fraction
     units["residential_demand"] = units.demand_twh_per_year - units.industrial_demand
     assert not units["industrial_demand"].isna().any()
@@ -30,11 +32,11 @@ def load(path_to_units, path_to_electricity_load, scaling_factor, path_to_result
         load_ts.sum().sum() * (-1) / scaling_factor,
         national_load.reindex(columns=units.country_code.unique()).sum().sum()
     )
-    load_ts.to_csv(path_to_result)
+    load_ts.tz_convert(None).to_csv(path_to_result)
 
 
 def split_national_load(national_load, units):
-    national_industrial_demand = units.groupby("country_code").industrial_demand.sum()
+    national_industrial_demand = units.groupby("country_code").industrial_demand.sum() * 1e6 # from TWh to MWh
     industrial_load = pd.DataFrame( # ASSUME flat industry load profiles
         index=national_load.index,
         data=national_industrial_demand.to_dict()
