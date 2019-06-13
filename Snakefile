@@ -1,15 +1,15 @@
 URL_LOAD = "https://data.open-power-system-data.org/time_series/2018-06-30/time_series_60min_stacked.csv"
+URL_POTENTIALS = "https://zenodo.org/record/3244985/files/possibility-for-electricitiy-autarky.zip"
 
-LOCATIONS = "data/{resolution}/units.geojson"
-EEZ = "data/eez-in-europe.geojson"
-SHARED_COAST = "data/{resolution}/shared-coast.csv"
-LAND_ELIGIBILITY = "data/{resolution}/eligibility.csv"
 CAPACITY_FACTOR_ID_MAPS = "data/capacityfactors/{technology}-ids.tif"
 CAPACITY_FACTOR_TIME_SERIES = "data/capacityfactors/{technology}-timeseries.nc"
 
+include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
-localrules: all, raw_load, model, clean, scale_template
+localrules: all, raw_load, model, clean, scale_template, potentials_zipped
 configfile: "config/default.yaml"
+wildcard_constraints:
+        resolution = "((continental)|(national)|(regional))"
 
 
 onstart:
@@ -22,6 +22,23 @@ rule all:
         "build/logs/national-model.done",
         "build/logs/regional-model.done",
         "build/logs/test-report.html"
+
+
+rule potentials_zipped:
+    message: "Download potential data."
+    output: protected("data/automatic/raw-potentials.zip")
+    shell: "curl -sLo {output} '{URL_POTENTIALS}'"
+
+
+rule potentials:
+    message: "Unzip potentials."
+    input: rules.potentials_zipped.output[0]
+    shadow: "minimal"
+    output:
+        land_eligibility_km2 = "build/data/publish/{resolution}/technical-potential/areas.csv",
+        shared_coast = "build/data/publish/{resolution}/shared-coast.csv",
+        industrial_demand = "build/data/publish/{resolution}/demand.csv"
+    shell: "unzip -o {input} -d build/data"
 
 
 rule scale_template:
@@ -39,8 +56,8 @@ rule locations:
     message: "Generate locations for {wildcards.resolution} resolution."
     input:
         src = "src/locations.py",
-        shapes = LOCATIONS,
-        land_eligibility_km2 = LAND_ELIGIBILITY
+        shapes = rules.units.output[0],
+        land_eligibility_km2 = rules.potentials.output.land_eligibility_km2
     params: scaling_factors = config["scaling-factors"]
     output: "build/model/{resolution}/locations.yaml"
     conda: "envs/geo.yaml"
@@ -51,7 +68,7 @@ rule load_shedding:
     message: "Generate override allowing load shedding."
     input:
         src = "src/load_shedding.py",
-        shapes = LOCATIONS
+        shapes = rules.units.output[0]
     output: "build/model/{resolution}/load-shedding.yaml"
     conda: "envs/geo.yaml"
     script: "src/load_shedding.py"
@@ -62,7 +79,7 @@ rule capacity_factors:
              "{wildcards.resolution} resolution for {wildcards.technology}."
     input:
         src = "src/capacityfactors.py",
-        locations = LOCATIONS,
+        locations = rules.units.output[0],
         ids = CAPACITY_FACTOR_ID_MAPS,
         timeseries = CAPACITY_FACTOR_TIME_SERIES
     params:
@@ -79,8 +96,8 @@ rule capacity_factors_offshore:
              "{wildcards.resolution} resolution for wind-offshore."
     input:
         src = "src/capacityfactors_offshore.py",
-        eez = EEZ,
-        shared_coast = SHARED_COAST,
+        eez = rules.eez.output[0],
+        shared_coast = rules.potentials.output.shared_coast,
         ids = CAPACITY_FACTOR_ID_MAPS.format(technology="wind-offshore"),
         timeseries = CAPACITY_FACTOR_TIME_SERIES.format(technology="wind-offshore")
     params:
@@ -95,7 +112,7 @@ rule energy_time_series_hydro_electricity:
     input:
         src = "src/energy_timeseries_hydro.py",
         hydro = rules.inflow_mwh.output[0],
-        locations = LOCATIONS
+        locations = rules.units.output[0]
     params:
         scaling_factor = config["scaling-factors"]["power"]
     output:
@@ -128,7 +145,8 @@ rule electricity_load:
     message: "Generate electricity load time series for every location on {wildcards.resolution} resolution."
     input:
         src = "src/load.py",
-        units = LOCATIONS,
+        units = rules.units.output[0],
+        industrial_demand = rules.potentials.output.industrial_demand,
         national_load = rules.electricity_load_national.output[0]
     params:
         scaling_factor = config["scaling-factors"]["power"]
@@ -141,7 +159,7 @@ rule link_neighbours:
     message: "Create links between all direct neighbours on {wildcards.resolution} resolution."
     input:
         src = "src/link_neighbours.py",
-        units = LOCATIONS
+        units = rules.units.output[0]
     output: "build/model/{resolution}/link-all-neighbours.yaml"
     conda: "envs/geo.yaml"
     script: "src/link_neighbours.py"
@@ -151,7 +169,7 @@ rule hydro_capacities:
     message: "Create Calliope input file defining hydro capacities on {wildcards.resolution} resolution."
     input:
         src = "src/hydro.py",
-        locations = LOCATIONS,
+        locations = rules.units.output[0],
         plants = rules.filtered_stations.output[0]
     params:
         scaling_factor = config["scaling-factors"]["power"]

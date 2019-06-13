@@ -6,7 +6,6 @@ dependencies:
     - ipython=7.5.0
     - numpy=1.16.2
     - pandas=0.24.2
-    - xlrd=1.2.0
     - gdal=2.4
     - fiona=1.8.6
     - rasterio=1.0.22

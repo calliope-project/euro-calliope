@@ -13,13 +13,12 @@ def determine_energy_inflow(path_to_stations_with_water_inflow, path_to_generati
 
 
 def read_generation(path_to_generation, year):
-    return pd.read_excel(
+    return pd.read_csv(
         path_to_generation,
-        sheet_name="Gen 10-18",
-        usecols="A,D:G",
-        index_col=[0, 1, 2, 3],
-        names=["country_code", "product", "year", "type", "generation"]
-    )["generation"].to_xarray().sel(type="ONG", year=year, product="Renewable hydropower").to_series() * 1000 # from GWh to MWh
+        index_col=[0, 1],
+        names=["country_code", "year", "generation"],
+        header=0
+    )["generation"].to_xarray().sel(year=year).to_series() * 1000 # from GWh to MWh
 
 
 def energy_inflow(plants_with_inflow_m3, annual_national_generation_mwh):

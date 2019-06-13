@@ -5,7 +5,7 @@ localrules: download_runoff_data, download_stations_database, stations_database
 
 URL_STATIONS = "https://zenodo.org/record/2669146/files/energy-modelling-toolkit/hydro-power-database-3.zip?download=1"
 BASINS = "data/hybas_eu_lev07_v1c/hybas_eu_lev07_v1c.shp"
-IRENA_GENERATION = "data/irena-capacity-generation.xlsx"
+IRENA_GENERATION = "data/irena/hydro-generation-europe.csv"
 
 
 rule download_runoff_data:

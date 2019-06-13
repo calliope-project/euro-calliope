@@ -4,3 +4,155 @@ scaling-factors:
     monetary: 1
 minimal-capacity-factor: 0.001 # consider smaller values to be 0; this helps numerics in the LP
 year: 2016
+crs: "EPSG:4326"
+scope:
+    countries:
+        - "Austria"
+        - "Belgium"
+        - "Bulgaria"
+        - "Croatia"
+        - "Cyprus"
+        - "Czech Republic"
+        - "Denmark"
+        - "Estonia"
+        - "Finland"
+        - "France"
+        - "Germany"
+        - "Greece"
+        - "Hungary"
+        - "Ireland"
+        - "Italy"
+        - "Latvia"
+        - "Lithuania"
+        - "Luxembourg"
+        - "Netherlands"
+        - "Poland"
+        - "Portugal"
+        - "Romania"
+        - "Slovakia"
+        - "Slovenia"
+        - "Spain"
+        - "Sweden"
+        - "United Kingdom"
+        - "Albania"
+        - "Bosnia and Herzegovina"
+        - "Macedonia, Republic of"
+        - "Montenegro"
+        - "Norway"
+        - "Serbia"
+        - "Switzerland"
+    bounds:
+        x_min: -15.8 # in degrees east
+        x_max: 37  # in degrees east
+        y_min: 30  # in degrees north
+        y_max: 75  # in degrees north
+shapes: # This config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
+    continental:
+        Austria: nuts0
+        Belgium: nuts0
+        Bulgaria: nuts0
+        Croatia: nuts0
+        Cyprus: nuts0
+        Czech Republic: nuts0
+        Denmark: nuts0
+        Estonia: nuts0
+        Finland: nuts0
+        France: nuts0
+        Germany: nuts0
+        Greece: nuts0
+        Hungary: nuts0
+        Ireland: nuts0
+        Italy: nuts0
+        Latvia: nuts0
+        Lithuania: nuts0
+        Luxembourg: nuts0
+        Netherlands: nuts0
+        Poland: nuts0
+        Portugal: nuts0
+        Romania: nuts0
+        Slovakia: nuts0
+        Slovenia: nuts0
+        Spain: nuts0
+        Sweden: nuts0
+        United Kingdom: nuts0
+        Albania: gadm0
+        Bosnia and Herzegovina: gadm0
+        Macedonia, Republic of: gadm0
+        Montenegro: gadm0
+        Norway: nuts0
+        Serbia: gadm0
+        Switzerland: nuts0
+    national:
+        Austria: nuts0
+        Belgium: nuts0
+        Bulgaria: nuts0
+        Croatia: nuts0
+        Cyprus: nuts0
+        Czech Republic: nuts0
+        Denmark: nuts0
+        Estonia: nuts0
+        Finland: nuts0
+        France: nuts0
+        Germany: nuts0
+        Greece: nuts0
+        Hungary: nuts0
+        Ireland: nuts0
+        Italy: nuts0
+        Latvia: nuts0
+        Lithuania: nuts0
+        Luxembourg: nuts0
+        Netherlands: nuts0
+        Poland: nuts0
+        Portugal: nuts0
+        Romania: nuts0
+        Slovakia: nuts0
+        Slovenia: nuts0
+        Spain: nuts0
+        Sweden: nuts0
+        United Kingdom: nuts0
+        Albania: gadm0
+        Bosnia and Herzegovina: gadm0
+        Macedonia, Republic of: gadm0
+        Montenegro: gadm0
+        Norway: nuts0
+        Serbia: gadm0
+        Switzerland: nuts0
+    regional:
+        # The link between NUTS and administrative units unfortunately is not obvious.
+        # It's not documented anywhere -- at least I could not find any information.
+        # Hence, I am using GADM here instead.
+        # Validation source: https://en.wikipedia.org/wiki/List_of_administrative_divisions_by_country
+        Austria: gadm1 # gadm1 and wiki match 9
+        Belgium: gadm1 # match 3
+        Bulgaria: gadm1 # match 28
+        Croatia: gadm1 # match 21
+        Cyprus: gadm1 # gadm1: 5 regions; wiki: 6 regions
+        Czech Republic: gadm1 # match 14
+        Denmark: gadm1 # match 5
+        Estonia: gadm1 # gadm1 16 regions; wiki 15 regions
+        Finland: gadm1 # gadm1 5 regions; wiki 19 regions
+        France: gadm1 # match 13
+        Germany: gadm1 # match 16
+        Greece: gadm1 # gadm1 8 regions; wiki 13 (14) regions
+        Hungary: gadm1 # match 20
+        Ireland: gadm1 # match 26
+        Italy: gadm1 # match 20
+        Latvia: gadm1 # gadm1 5 regions; wiki 119 regions
+        Lithuania: gadm1 # match 10
+        Luxembourg: gadm2 # match 12
+        Netherlands: gadm1 # gadm1 14 regions; wiki 12 regions
+        Poland: gadm1 # match 16
+        Portugal: gadm1 # match 18
+        Romania: gadm1 # match 42
+        Slovakia: gadm1 # match 8
+        Slovenia: gadm1 # match 12
+        Spain: gadm1 # match 17
+        Sweden: gadm1 # match 21
+        United Kingdom: gadm1 # match 4
+        Albania: gadm1 # match 12
+        Bosnia and Herzegovina: gadm1 # match 3
+        Macedonia, Republic of: nuts3 # match 8 (statistical, non-administrative)
+        Montenegro: gadm1 # match 21
+        Norway: gadm1 # match 19
+        Serbia: gadm1 # gadm1 25 regions; wiki 5 regions
+        Switzerland: gadm1 # match 26

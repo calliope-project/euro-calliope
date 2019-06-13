@@ -5,15 +5,16 @@ import pandas as pd
 import geopandas as gpd
 
 
-def load(path_to_units, path_to_electricity_load, scaling_factor, path_to_result):
+def load(path_to_units, path_to_industrial_load, path_to_electricity_load, scaling_factor, path_to_result):
     """Generate load time series for every location."""
-    units = gpd.read_file(path_to_units)
+    units = gpd.read_file(path_to_units).set_index("id")
+    industrial_load = pd.read_csv(path_to_industrial_load, index_col=0)
     national_load = pd.read_csv(path_to_electricity_load, index_col=0, parse_dates=True)
 
-    # units.demand_twh_per_year is not necessarily the demand in the year
+    # industrial_load.demand_twh_per_year is not necessarily the demand in the year
     # used here and thus its absolute value must be ignored.
-    units["industrial_demand"] = units.demand_twh_per_year * units.industrial_demand_fraction
-    units["residential_demand"] = units.demand_twh_per_year - units.industrial_demand
+    units["industrial_demand"] = industrial_load.demand_twh_per_year * industrial_load.industrial_demand_fraction
+    units["residential_demand"] = industrial_load.demand_twh_per_year - units.industrial_demand
     assert not units["industrial_demand"].isna().any()
     units["fraction_of_national_industrial_load"] = units.groupby("country_code").industrial_demand.transform(
         lambda x: x / x.sum()
@@ -24,8 +25,8 @@ def load(path_to_units, path_to_electricity_load, scaling_factor, path_to_result
 
     national_industrial_load, national_residential_load = split_national_load(national_load, units)
     load_ts = pd.concat(
-        [unit_time_series(unit, national_industrial_load, national_residential_load, scaling_factor)
-         for _, unit in units.iterrows()],
+        [unit_time_series(unit, unit_name, national_industrial_load, national_residential_load, scaling_factor)
+         for unit_name, unit in units.iterrows()],
         axis=1
     )
     assert math.isclose(
@@ -45,20 +46,21 @@ def split_national_load(national_load, units):
     return industrial_load, residential_load
 
 
-def unit_time_series(unit, national_industrial_load, national_residential_load, scaling_factor):
+def unit_time_series(unit, unit_name, national_industrial_load, national_residential_load, scaling_factor):
     country_code = unit.country_code
     multiplier = unit.fraction_of_national_industrial_load
     unit_industrial_ts = national_industrial_load.loc[:, country_code].copy() * multiplier * (-1) * scaling_factor
     multiplier = unit.fraction_of_national_residential_load
     unit_residential_ts = national_residential_load.loc[:, country_code].copy() * multiplier * (-1) * scaling_factor
     unit_ts = unit_industrial_ts + unit_residential_ts
-    unit_ts.name = unit.id.replace(".", "-")
+    unit_ts.name = unit_name.replace(".", "-")
     return unit_ts
 
 
 if __name__ == '__main__':
     load(
         path_to_units=snakemake.input.units,
+        path_to_industrial_load=snakemake.input.industrial_demand,
         path_to_electricity_load=snakemake.input.national_load,
         path_to_result=snakemake.output[0],
         scaling_factor=snakemake.params.scaling_factor
