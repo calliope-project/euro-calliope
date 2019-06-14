@@ -14,6 +14,8 @@ def national_load(path_to_raw_load, number_rows_valid, year, path_to_output):
         start=datetime(year, 1, 1, tzinfo=timezone.utc),
         end=datetime(year + 1, 1, 1, tzinfo=timezone.utc)
     )
+    if year < 2017: # data for Albania before 2017 is missing
+        load["AL"] = read_albania(path_to_raw_load, number_rows_valid, other_ts=load)
     load = filter_national(load)
     check_completeness(load)
     load = handle_outliers(load)
@@ -34,6 +36,19 @@ def read_load_profiles(path_to_raw_load, number_rows_valid, start, end):
     return data.pivot(columns="region", index="utc_timestamp", values="data")
 
 
+def read_albania(path_to_raw_load, number_rows_valid, other_ts):
+    albania = read_load_profiles(
+        path_to_raw_load="data/automatic/raw-load-data.csv",
+        number_rows_valid=20950674,
+        start=datetime(2017, 1, 1, tzinfo=timezone.utc),
+        end=datetime(2017 + 1, 1, 1, tzinfo=timezone.utc)
+    )["AL"]
+    if len(other_ts.index) == 8784: # leap year
+        albania = pd.concat([albania[:"2017-02"], albania["2017-02-28"], albania["2017-03":]])
+    albania.index = other_ts.index
+    return albania
+
+
 def remove_entsoe_power_statistic_data_where_possible(load):
     sorted_load = load.sort_values(
         "attribute",
@@ -43,6 +58,7 @@ def remove_entsoe_power_statistic_data_where_possible(load):
 
 
 def filter_national(load):
+    load.rename(columns={"GB_UKM": "GB"}, inplace=True)
     countries = [iso2 for iso2 in load.columns.unique() if len(iso2) == 2]
     national = load.loc[:, countries].copy()
     national.columns.name = "country_code"

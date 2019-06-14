@@ -1,4 +1,4 @@
-URL_LOAD = "https://data.open-power-system-data.org/time_series/2018-06-30/time_series_60min_stacked.csv"
+URL_LOAD = "https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv"
 URL_POTENTIALS = "https://zenodo.org/record/3244985/files/possibility-for-electricitiy-autarky.zip"
 
 CAPACITY_FACTOR_ID_MAPS = "data/capacityfactors/{technology}-ids.tif"
@@ -135,7 +135,7 @@ rule electricity_load_national:
         load = rules.raw_load.output
     output: "build/data/electricity-demand-national.csv"
     params:
-        number_rows_valid = 10654293, # see https://github.com/Open-Power-System-Data/time_series/issues/22
+        number_rows_valid = 20950674, # see https://github.com/Open-Power-System-Data/time_series/issues/22
         year = config["year"]
     conda: "envs/default.yaml"
     script: "src/national_load.py"
