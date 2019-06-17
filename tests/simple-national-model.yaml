@@ -4,7 +4,6 @@ import:
     - '../build/model/storage-techs.yaml'
     - '../build/model/link-techs.yaml'
     - '../build/model/national/locations.yaml'
-    - '../build/model/national/hydro-capacities.yaml'
 model:
     name: 'Simple disconnected nodes model with national spatial resolution'
     calliope_version: 0.6.4

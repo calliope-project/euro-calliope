@@ -90,13 +90,13 @@ techs:
             parent: supply
             carrier: electricity
         constraints:
-            resource: file=energy-generation-hydro-ror.csv
-            resource_unit: energy
+            resource: file=capacityfactors-hydro-ror.csv
+            resource_unit: energy_per_cap
     hydro_reservoir:
         essentials:
             name: Hydro electricity with a reservoir.
             parent: supply_plus
             carrier: electricity
         constraints:
-            resource: file=energy-inflow-hydro-reservoir.csv
-            resource_unit: energy
+            resource: file=capacityfactors-hydro-reservoir-inflow.csv
+            resource_unit: energy_per_cap

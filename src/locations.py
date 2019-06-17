@@ -20,8 +20,6 @@ TEMPLATE = """locations:
             demand_elec:
             battery:
             hydrogen:
-            pumped_hydro:
-            hydro_run_of_river:
             open_field_pv:
             wind_onshore_competing:
             wind_onshore_monopoly:
@@ -33,11 +31,23 @@ TEMPLATE = """locations:
             wind_offshore:
                 constraints:
                     energy_cap_max: {{ location.eligibility_offshore_wind_mw * scaling_factors.power  }} # [{{ 1 / scaling_factors.power }} MW]
+            hydro_run_of_river:
+                constraints:
+                    energy_cap_equals: {{ location.installed_capacity_hror_MW * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
+            hydro_reservoir:
+                constraints:
+                    energy_cap_equals: {{ location.installed_capacity_hdam_MW * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
+                    storage_cap_equals: {{ location.storage_capacity_hdam_MWh * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MWh]
+            pumped_hydro:
+                constraints:
+                    energy_cap_equals: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
+                    storage_cap_equals: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MWh]
     {% endfor %}
 """
 
 
-def construct_locations(path_to_shapes, path_to_land_eligibility_km2, scaling_factors, path_to_result):
+def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hydro_capacities_mw,
+                        scaling_factors, path_to_result):
     """Generate a file that represents locations in Calliope."""
     locations = gpd.GeoDataFrame(
         gpd.read_file(path_to_shapes).set_index("id").centroid.rename("centroid")
@@ -47,8 +57,9 @@ def construct_locations(path_to_shapes, path_to_land_eligibility_km2, scaling_fa
         flat_roof_share=FLAT_ROOF_SHARE,
         maximum_installable_power_density=MAXIMUM_INSTALLABLE_POWER_DENSITY
     )
+    hydro_capacities = pd.read_csv(path_to_hydro_capacities_mw, index_col=0)
     locations = locations.merge(
-        capacities,
+        pd.concat([capacities, hydro_capacities], axis="columns"),
         how="left",
         left_index=True,
         right_index=True,
@@ -83,6 +94,7 @@ if __name__ == "__main__":
     construct_locations(
         path_to_shapes=snakemake.input.shapes,
         path_to_land_eligibility_km2=snakemake.input.land_eligibility_km2,
+        path_to_hydro_capacities_mw=snakemake.input.hydro_capacities,
         path_to_result=snakemake.output[0],
         scaling_factors=snakemake.params["scaling_factors"]
     )

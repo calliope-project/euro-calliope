@@ -52,12 +52,24 @@ rule scale_template:
     script: "src/scale_templates.py"
 
 
+rule hydro_capacities:
+    message: "Determine hydro capacities on {wildcards.resolution} resolution."
+    input:
+        src = "src/hydro.py",
+        locations = rules.units.output[0],
+        plants = rules.filtered_stations.output[0]
+    output: "build/data/{resolution}/hydro-capacities-mw.csv"
+    conda: "envs/geo.yaml"
+    script: "src/hydro.py"
+
+
 rule locations:
     message: "Generate locations for {wildcards.resolution} resolution."
     input:
         src = "src/locations.py",
         shapes = rules.units.output[0],
-        land_eligibility_km2 = rules.potentials.output.land_eligibility_km2
+        land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
+        hydro_capacities = rules.hydro_capacities.output[0]
     params: scaling_factors = config["scaling-factors"]
     output: "build/model/{resolution}/locations.yaml"
     conda: "envs/geo.yaml"
@@ -107,19 +119,20 @@ rule capacity_factors_offshore:
     script: "src/capacityfactors_offshore.py"
 
 
-rule energy_time_series_hydro_electricity:
-    message: "Generate energy inflow time series for hydro electricity on {wildcards.resolution} resolution."
+rule capacity_factors_hydro:
+    message: "Generate capacityfactor time series for hydro electricity on {wildcards.resolution} resolution."
     input:
-        src = "src/energy_timeseries_hydro.py",
-        hydro = rules.inflow_mwh.output[0],
+        src = "src/capacityfactors_hydro.py",
+        capacities = rules.hydro_capacities.output[0],
+        stations = rules.inflow_mwh.output[0],
         locations = rules.units.output[0]
     params:
-        scaling_factor = config["scaling-factors"]["power"]
+        threshold = config["minimal-capacity-factor"]
     output:
-        ror = "build/model/{resolution}/energy-generation-hydro-ror.csv",
-        reservoir = "build/model/{resolution}/energy-inflow-hydro-reservoir.csv"
+        ror = "build/model/{resolution}/capacityfactors-hydro-ror.csv",
+        reservoir = "build/model/{resolution}/capacityfactors-hydro-reservoir-inflow.csv"
     conda: "envs/geo.yaml"
-    script: "src/energy_timeseries_hydro.py"
+    script: "src/capacityfactors_hydro.py"
 
 
 rule raw_load:
@@ -165,19 +178,6 @@ rule link_neighbours:
     script: "src/link_neighbours.py"
 
 
-rule hydro_capacities:
-    message: "Create Calliope input file defining hydro capacities on {wildcards.resolution} resolution."
-    input:
-        src = "src/hydro.py",
-        locations = rules.units.output[0],
-        plants = rules.filtered_stations.output[0]
-    params:
-        scaling_factor = config["scaling-factors"]["power"]
-    output: "build/model/{resolution}/hydro-capacities.yaml"
-    conda: "envs/geo.yaml"
-    script: "src/hydro.py"
-
-
 rule model:
     message: "Generate Euro Calliope with {wildcards.resolution} resolution."
     input:
@@ -188,7 +188,7 @@ rule model:
         rules.locations.output,
         rules.electricity_load.output,
         rules.link_neighbours.output,
-        rules.energy_time_series_hydro_electricity.output,
+        rules.capacity_factors_hydro.output,
         rules.hydro_capacities.output,
         expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
