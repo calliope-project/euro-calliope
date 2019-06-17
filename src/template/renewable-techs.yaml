@@ -39,7 +39,7 @@ techs:
         constraints:
             # open_field_pv and wind_onshore_competing are the only technologies with area footprints
             # as they are the only technologies competing on the same land.
-            resource_area_per_energy_cap: {{ 0.0125 * scaling_factors.area / scaling_factors.power }} # [{{ scaling_factors.power / scaling_factors.area }} km^2/MW] from (Gagnon:2016, Klauser:2016, Wirth:2017)
+            resource_area_per_energy_cap: {{ (1 / max_power_density["pv-on-flat-areas"]) * scaling_factors.area / scaling_factors.power }} # [{{ scaling_factors.power / scaling_factors.area }} km^2/MW] from (Gagnon:2016, Klauser:2016, Wirth:2017)
             resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
             resource: file=capacityfactors-open-field-pv.csv
             resource_unit: energy_per_cap
@@ -61,7 +61,7 @@ techs:
         constraints:
             # open_field_pv and wind_onshore_competing are the only technologies with area footprints
             # as they are the only technologies competing on the same land.
-            resource_area_per_energy_cap: {{ 0.125 * scaling_factors.area / scaling_factors.power }} # [{{ scaling_factors.power / scaling_factors.area }} km^2/MW] from (European Environment Agency, 2009)
+            resource_area_per_energy_cap: {{ (1 / max_power_density["onshore-wind"]) * scaling_factors.area / scaling_factors.power }} # [{{ scaling_factors.power / scaling_factors.area }} km^2/MW] from (European Environment Agency, 2009)
             resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
     wind_offshore:
         essentials:

@@ -5,6 +5,13 @@ scaling-factors:
 minimal-capacity-factor: 0.001 # consider smaller values to be 0; this helps numerics in the LP
 year: 2016
 crs: "EPSG:4326"
+parameters:
+    maximum-installable-power-density: # this is not the yield, but the density of installed power
+        pv-on-tilted-roofs: 160 # [W/m^2] from (Gagnon:2016, Klauser:2016), i.e. 16% efficiency
+        pv-on-flat-areas: 80 # [W/m^2] from (Gagnon:2016, Klauser:2016, Wirth:2017)
+        onshore-wind: 8 # [W/m^2] from (European Environment Agency, 2009)
+        offshore-wind: 15 # [W/m^2] from (European Environment Agency, 2009)
+    flat-roof-share: 0.302 # TODO add source (own publication)
 scope:
     countries:
         - "Austria"

@@ -6,7 +6,7 @@ CAPACITY_FACTOR_TIME_SERIES = "data/capacityfactors/{technology}-timeseries.nc"
 
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
-localrules: all, raw_load, model, clean, scale_template, potentials_zipped
+localrules: all, raw_load, model, clean, parameterise_template, potentials_zipped
 configfile: "config/default.yaml"
 wildcard_constraints:
         resolution = "((continental)|(national)|(regional))"
@@ -41,15 +41,17 @@ rule potentials:
     shell: "unzip -o {input} -d build/data"
 
 
-rule scale_template:
-    message: "Apply scaling factors to file {wildcards.definition_file}.yaml from templates."
+rule parameterise_template:
+    message: "Apply config parameters to file {wildcards.definition_file}.yaml from templates."
     input:
-        src = "src/scale_templates.py",
+        src = "src/parameterise_templates.py",
         template = "src/template/{definition_file}.yaml"
-    params: scaling_factors = config["scaling-factors"]
+    params:
+        scaling_factors = config["scaling-factors"],
+        max_power_density = config["parameters"]["maximum-installable-power-density"]
     output: "build/model/{definition_file}.yaml"
     conda: "envs/default.yaml"
-    script: "src/scale_templates.py"
+    script: "src/parameterise_templates.py"
 
 
 rule hydro_capacities:
@@ -70,7 +72,10 @@ rule locations:
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
         hydro_capacities = rules.hydro_capacities.output[0]
-    params: scaling_factors = config["scaling-factors"]
+    params:
+        flat_roof_share = config["parameters"]["flat-roof-share"],
+        maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],
+        scaling_factors = config["scaling-factors"]
     output: "build/model/{resolution}/locations.yaml"
     conda: "envs/geo.yaml"
     script: "src/locations.py"

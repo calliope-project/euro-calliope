@@ -3,13 +3,6 @@ import jinja2
 import pandas as pd
 import geopandas as gpd
 
-FLAT_ROOF_SHARE = 0.302 # TODO add source (own publication)
-MAXIMUM_INSTALLABLE_POWER_DENSITY = {
-    "pv-on-tilted-roofs": 160, # [MW/km^2] from (Gagnon:2016, Klauser:2016), i.e. 16% efficiency
-    "pv-on-flat-areas": 80, # [MW/km^2] from (Gagnon:2016, Klauser:2016, Wirth:2017) # FIXME also defined in renewable-techs.yaml
-    "onshore-wind": 8, # [MW/km^2] from (European Environment Agency, 2009) # FIXME also defined in renewable-techs.yaml
-    "offshore-wind": 15 # [MW/km^2] from (European Environment Agency, 2009)
-}
 
 TEMPLATE = """locations:
     {% for id, location in locations.iterrows() %}
@@ -47,15 +40,15 @@ TEMPLATE = """locations:
 
 
 def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hydro_capacities_mw,
-                        scaling_factors, path_to_result):
+                        flat_roof_share, maximum_installable_power_density, scaling_factors, path_to_result):
     """Generate a file that represents locations in Calliope."""
     locations = gpd.GeoDataFrame(
         gpd.read_file(path_to_shapes).set_index("id").centroid.rename("centroid")
     )
     capacities = _from_area_to_installed_capacity(
         land_eligibiligy_km2=pd.read_csv(path_to_land_eligibility_km2, index_col=0),
-        flat_roof_share=FLAT_ROOF_SHARE,
-        maximum_installable_power_density=MAXIMUM_INSTALLABLE_POWER_DENSITY
+        flat_roof_share=flat_roof_share,
+        maximum_installable_power_density=maximum_installable_power_density
     )
     hydro_capacities = pd.read_csv(path_to_hydro_capacities_mw, index_col=0)
     locations = locations.merge(
@@ -96,5 +89,7 @@ if __name__ == "__main__":
         path_to_land_eligibility_km2=snakemake.input.land_eligibility_km2,
         path_to_hydro_capacities_mw=snakemake.input.hydro_capacities,
         path_to_result=snakemake.output[0],
+        flat_roof_share=snakemake.params["flat_roof_share"],
+        maximum_installable_power_density=snakemake.params["maximum_installable_power_density"],
         scaling_factors=snakemake.params["scaling_factors"]
     )

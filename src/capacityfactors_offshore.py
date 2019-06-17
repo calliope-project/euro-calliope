@@ -46,7 +46,6 @@ def _capacityfactors(locations, id_map, transform, nodata, ts):
 
 
 def _location_time_series(weighted_ts_ids, ts):
-    # FIXME duplicate of the function with the same name in capacityfactors.py
     ts_ids = list(weighted_ts_ids.keys())
     ts_weights = pd.Series(list(weighted_ts_ids.values())).transform(lambda x: x / x.sum()).values
     relevant_ts = ts.sel({SITE_ID_DIM: ts_ids}).copy()
@@ -56,7 +55,6 @@ def _location_time_series(weighted_ts_ids, ts):
 
 
 def _allocate_to_onshore_locations(capacityfactors_per_eez, shared_coast):
-    # FIXME duplicate of the function with the same name in capacityfactors.py
     return pd.DataFrame(
         index=capacityfactors_per_eez.index,
         data={
