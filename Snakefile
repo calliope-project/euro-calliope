@@ -3,6 +3,7 @@ URL_POTENTIALS = "https://zenodo.org/record/3244985/files/possibility-for-electr
 
 CAPACITY_FACTOR_ID_MAPS = "data/capacityfactors/{technology}-ids.tif"
 CAPACITY_FACTOR_TIME_SERIES = "data/capacityfactors/{technology}-timeseries.nc"
+FARMLAND = "data/{resolution}/technical-potential/farmland.csv" # FIXME should come from Zenodo together with potentials
 
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
@@ -70,9 +71,11 @@ rule biomass:
     message: "Determine biomass potential on {wildcards.resolution} resolution."
     input:
         src = "src/biomass.py",
-        population = rules.potentials.output.population
+        population = rules.potentials.output.population,
+        farmland = FARMLAND
     params:
-        annual_biomass_from_waste_per_capita = config["parameters"]["biomass-from-waste"]
+        annual_biomass_from_waste_per_capita = config["parameters"]["biomass-from-waste"],
+        biomass_yield_from_crops = config["parameters"]["biomass-from-crops"]
     output: "build/data/{resolution}/biomass-potential-mwh-per-hour.csv"
     conda: "envs/default.yaml"
     script: "src/biomass.py"

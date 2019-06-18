@@ -13,6 +13,7 @@ parameters:
         offshore-wind: 15 # [MW/km^2] from (European Environment Agency, 2009)
     flat-roof-share: 0.302 # TODO add source (own publication)
     biomass-from-waste: 0.31755 # [MWh/capita/yr] from (Klaus et al., 2010) # TODO double check assumption
+    biomass-from-crops: 0.63 # [MW/km2] from (European Environment Agency, 2006) # TODO double check assumption
 scope:
     countries:
         - "Austria"
