@@ -14,6 +14,10 @@ run:
     solver_io: python
     mode: plan
     ensure_feasibility: true # not all regions have sufficient renewable potential
+    objective_options: {
+        'cost_class': {'monetary': 1},
+        'sense': 'minimize'
+    }
 techs:
     demand_elec:
         essentials:

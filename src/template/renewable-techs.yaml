@@ -100,3 +100,17 @@ techs:
         constraints:
             resource: file=capacityfactors-hydro-reservoir-inflow.csv
             resource_unit: energy_per_cap
+    biomass: # based on Anaerobic digestion from [JRC ETRI 2014]
+        essentials:
+            name: Biomass
+            parent: supply_plus
+            carrier: electricity
+        constraints:
+            energy_eff: 0.4
+            lifetime: 20
+        costs:
+            monetary:
+                energy_cap: {{ 2760000 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW]
+                om_prod: {{ 3.1 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MWh]
+                om_annual: {{ 113160 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] 2760000 * 4.1%
+                om_con: {{ 16.2 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh] medium price taken from [@EuropeanEnvironmentAgency:2013]

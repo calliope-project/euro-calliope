@@ -35,12 +35,17 @@ TEMPLATE = """locations:
                 constraints:
                     energy_cap_equals: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
                     storage_cap_equals: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MWh]
+            biomass:
+                constraints:
+                    resource: {{ location.biomass_potential_mwh_per_hour * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
+                    storage_cap_equals: {{ location.biomass_potential_mwh_per_hour * scaling_factors.power * 365 * 2 }} # [{{ 1 / scaling_factors.power }} MWh] (2x annual yield)
     {% endfor %}
 """
 
 
 def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hydro_capacities_mw,
-                        flat_roof_share, maximum_installable_power_density, scaling_factors, path_to_result):
+                        path_to_biomass_potential_mw, flat_roof_share, maximum_installable_power_density,
+                        scaling_factors, path_to_result):
     """Generate a file that represents locations in Calliope."""
     locations = gpd.GeoDataFrame(
         gpd.read_file(path_to_shapes).set_index("id").centroid.rename("centroid")
@@ -51,8 +56,9 @@ def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hy
         maximum_installable_power_density=maximum_installable_power_density
     )
     hydro_capacities = pd.read_csv(path_to_hydro_capacities_mw, index_col=0)
+    biomass = pd.read_csv(path_to_biomass_potential_mw, index_col=0)
     locations = locations.merge(
-        pd.concat([capacities, hydro_capacities], axis="columns"),
+        pd.concat([capacities, hydro_capacities, biomass], axis="columns"),
         how="left",
         left_index=True,
         right_index=True,
@@ -88,6 +94,7 @@ if __name__ == "__main__":
         path_to_shapes=snakemake.input.shapes,
         path_to_land_eligibility_km2=snakemake.input.land_eligibility_km2,
         path_to_hydro_capacities_mw=snakemake.input.hydro_capacities,
+        path_to_biomass_potential_mw=snakemake.input.biomass,
         path_to_result=snakemake.output[0],
         flat_roof_share=snakemake.params["flat_roof_share"],
         maximum_installable_power_density=snakemake.params["maximum_installable_power_density"],

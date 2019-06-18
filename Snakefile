@@ -37,7 +37,8 @@ rule potentials:
     output:
         land_eligibility_km2 = "build/data/publish/{resolution}/technical-potential/areas.csv",
         shared_coast = "build/data/publish/{resolution}/shared-coast.csv",
-        industrial_demand = "build/data/publish/{resolution}/demand.csv"
+        industrial_demand = "build/data/publish/{resolution}/demand.csv",
+        population = "build/data/publish/{resolution}/population.csv"
     shell: "unzip -o {input} -d build/data"
 
 
@@ -65,13 +66,26 @@ rule hydro_capacities:
     script: "src/hydro.py"
 
 
+rule biomass:
+    message: "Determine biomass potential on {wildcards.resolution} resolution."
+    input:
+        src = "src/biomass.py",
+        population = rules.potentials.output.population
+    params:
+        annual_biomass_from_waste_per_capita = config["parameters"]["biomass-from-waste"]
+    output: "build/data/{resolution}/biomass-potential-mwh-per-hour.csv"
+    conda: "envs/default.yaml"
+    script: "src/biomass.py"
+
+
 rule locations:
     message: "Generate locations for {wildcards.resolution} resolution."
     input:
         src = "src/locations.py",
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
-        hydro_capacities = rules.hydro_capacities.output[0]
+        hydro_capacities = rules.hydro_capacities.output[0],
+        biomass = rules.biomass.output[0]
     params:
         flat_roof_share = config["parameters"]["flat-roof-share"],
         maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],

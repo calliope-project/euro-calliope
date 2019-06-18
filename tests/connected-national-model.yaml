@@ -13,6 +13,10 @@ run:
     solver: gurobi
     solver_io: python
     mode: plan
+    objective_options: {
+        'cost_class': {'monetary': 1},
+        'sense': 'minimize'
+    }
 techs:
     demand_elec:
         essentials:
