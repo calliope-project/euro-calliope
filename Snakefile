@@ -229,6 +229,7 @@ rule clean: # removes all generated results
 rule test:
     message: "Run tests for national and regional models."
     input:
+        "build/logs/continental-model.done",
         "build/logs/national-model.done",
         "build/logs/regional-model.done"
     params: run_regional = "--include-regional-resolution" if config.get("testregional", False) else ""

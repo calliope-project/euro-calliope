@@ -11,6 +11,8 @@ def load(path_to_units, path_to_industrial_load, path_to_electricity_load, scali
     industrial_load = pd.read_csv(path_to_industrial_load, index_col=0)
     national_load = pd.read_csv(path_to_electricity_load, index_col=0, parse_dates=True)
 
+    if (len(units.index) == 1) and (units.index[0] == "EUR"): # special case for continental level
+        national_load = pd.DataFrame(national_load.sum(axis=1).rename("EUR"))
     # industrial_load.demand_twh_per_year is not necessarily the demand in the year
     # used here and thus its absolute value must be ignored.
     units["industrial_demand"] = industrial_load.demand_twh_per_year * industrial_load.industrial_demand_fraction

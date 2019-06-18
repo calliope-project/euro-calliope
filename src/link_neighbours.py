@@ -25,7 +25,8 @@ def link_neighbours(path_to_locations, path_to_result):
     connection possible.
     """
     graph = _create_graph(path_to_locations)
-    graph = _connect_graph(graph)
+    if len(graph) >= 2:
+        graph = _connect_graph(graph)
     links = jinja2.Template(TEMPLATE).render(
         graph=graph
     )
