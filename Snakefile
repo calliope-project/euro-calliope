@@ -230,8 +230,9 @@ rule test:
     message: "Run tests for national and regional models."
     input:
         "build/logs/national-model.done",
-        "build/logs/regional-model.done",
+        "build/logs/regional-model.done"
+    params: run_regional = "--include-regional-resolution" if config.get("testregional", False) else ""
     conda: "envs/test.yaml"
     output: "build/logs/test-report.html"
     shell:
-        "py.test --html={output} --self-contained-html"
+        "py.test --html={output} {params.run_regional} --self-contained-html"

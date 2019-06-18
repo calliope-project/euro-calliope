@@ -10,7 +10,8 @@ PATH_TO_CONNECTED_REGIONAL_MODEL = Path(__file__).parent / "connected-regional-m
 
 
 @pytest.mark.parametrize("path_to_model", [
-    (PATH_TO_SIMPLE_NATIONAL_MODEL), (PATH_TO_SIMPLE_REGIONAL_MODEL)
+    (PATH_TO_SIMPLE_NATIONAL_MODEL),
+    pytest.param(PATH_TO_SIMPLE_REGIONAL_MODEL, marks=pytest.mark.regional)
 ])
 def test_simple_model_runs(path_to_model):
     model = calliope.Model(path_to_model.as_posix())
@@ -19,7 +20,8 @@ def test_simple_model_runs(path_to_model):
 
 
 @pytest.mark.parametrize("path_to_model", [
-    (PATH_TO_CONNECTED_NATIONAL_MODEL), (PATH_TO_CONNECTED_REGIONAL_MODEL)
+    (PATH_TO_CONNECTED_NATIONAL_MODEL),
+    pytest.param(PATH_TO_CONNECTED_REGIONAL_MODEL, marks=pytest.mark.regional)
 ])
 def test_connected_neighbours_model_runs(path_to_model):
     model = calliope.Model(path_to_model.as_posix())

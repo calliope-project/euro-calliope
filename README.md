@@ -62,4 +62,8 @@ The default units for Euro-Calliope are `MW`, `MWh`, `EUR`, and `km2`, but you c
 
 ## Run the tests
 
-    snakemake test --use-conda
+    snakemake --use-conda test -f
+
+To run all tests, including the tests on the regional level:
+
+    snakemake --use-conda test -f --config runregional=True
