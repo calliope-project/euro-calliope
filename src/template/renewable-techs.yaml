@@ -100,9 +100,9 @@ techs:
         constraints:
             resource: file=capacityfactors-hydro-reservoir-inflow.csv
             resource_unit: energy_per_cap
-    biomass: # based on Anaerobic digestion from [JRC ETRI 2014]
+    biofuel: # based on Anaerobic digestion from [JRC ETRI 2014]
         essentials:
-            name: Biomass
+            name: Biofuel
             parent: supply_plus
             carrier: electricity
         constraints:

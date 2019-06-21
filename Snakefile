@@ -3,7 +3,7 @@ URL_POTENTIALS = "https://zenodo.org/record/3244985/files/possibility-for-electr
 
 CAPACITY_FACTOR_ID_MAPS = "data/capacityfactors/{technology}-ids.tif"
 CAPACITY_FACTOR_TIME_SERIES = "data/capacityfactors/{technology}-timeseries.nc"
-FARMLAND = "data/{resolution}/technical-potential/farmland.csv" # FIXME should come from Zenodo together with potentials
+LAND_COVER = "data/{resolution}/land-cover.csv" # FIXME should come from Zenodo together with potentials
 
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
@@ -67,18 +67,31 @@ rule hydro_capacities:
     script: "src/hydro.py"
 
 
-rule biomass:
-    message: "Determine biomass potential on {wildcards.resolution} resolution."
+rule biofuels:
+    message: "Determine biofuels potential on {wildcards.resolution} resolution."
     input:
-        src = "src/biomass.py",
+        src = "src/biofuels.py",
+        units = rules.units.output[0],
+        land_cover = LAND_COVER, # FIXME should come from Zenodo
         population = rules.potentials.output.population,
-        farmland = FARMLAND
+        national_potentials = [
+            "data/biofuels/potentials/forestry-energy-residues.csv",
+            "data/biofuels/potentials/landscape-care-residues.csv",
+            "data/biofuels/potentials/manure.csv",
+            "data/biofuels/potentials/municipal-waste.csv",
+            "data/biofuels/potentials/primary-agricultural-residues.csv",
+            "data/biofuels/potentials/roundwood-chips.csv",
+            "data/biofuels/potentials/roundwood-fuelwood.csv",
+            "data/biofuels/potentials/secondary-forestry-residues-sawdust.csv",
+            "data/biofuels/potentials/secondary-forestry-residues-woodchips.csv",
+            "data/biofuels/potentials/sludge.csv"
+        ]
     params:
-        annual_biomass_from_waste_per_capita = config["parameters"]["biomass-from-waste"],
-        biomass_yield_from_crops = config["parameters"]["biomass-from-crops"]
-    output: "build/data/{resolution}/biomass-potential-mwh-per-hour.csv"
-    conda: "envs/default.yaml"
-    script: "src/biomass.py"
+        scenario = config["parameters"]["jrc-biofuel"]["scenario"],
+        year = config["parameters"]["jrc-biofuel"]["year"]
+    output: "build/data/{resolution}/biofuel-potential-mwh-per-year.csv"
+    conda: "envs/geo.yaml"
+    script: "src/biofuels.py"
 
 
 rule locations:
@@ -88,7 +101,7 @@ rule locations:
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
         hydro_capacities = rules.hydro_capacities.output[0],
-        biomass = rules.biomass.output[0]
+        biofuel = rules.biofuels.output[0]
     params:
         flat_roof_share = config["parameters"]["flat-roof-share"],
         maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],
