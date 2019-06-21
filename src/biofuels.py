@@ -7,6 +7,7 @@ import geopandas as gpd
 import pycountry
 
 PJ_TO_MWH = 1 / 3600 * 1e9
+GJ_TO_MWH = 1 / 3600 * 1e3
 NAME = "biofuel_potential_mwh_per_year"
 
 PROXIES = {
@@ -60,26 +61,47 @@ FOREST = [GlobCover.CLOSED_TO_OPEN_BROADLEAVED_FOREST.value, GlobCover.CLOSED_BR
           GlobCover.CLOSED_REGULARLY_FLOODED_FOREST.value]
 
 
-def biofuel_potential(paths_to_national_potentials, path_to_units, path_to_land_cover,
-                      path_to_population, scenario, year, path_to_output):
+def biofuel_potential(paths_to_national_potentials, paths_to_costs, path_to_units, path_to_land_cover,
+                      path_to_population, scenario, potential_year, cost_year, path_to_potentials, path_to_costs):
     """Take national potentials from JRC report and allocate to regions based on proxies."""
+    assert scenario in ["Low availability scenario", "Medium availability scenario", "High availability scenario"]
     paths_to_national_potentials = [Path(path) for path in paths_to_national_potentials]
-    national_potentials = [pd.read_csv(path, index_col=0, header=[0, 1])
-                             .rename(index=eu_country_code_to_iso3)
-                             .loc[:, (scenario, year)]
-                             .rename(path.stem) * PJ_TO_MWH
-                           for path in paths_to_national_potentials]
+    paths_to_costs = [Path(path) for path in paths_to_costs]
+    national_potentials = pd.concat(
+        [pd.read_csv(path, index_col=0, header=[0, 1])
+           .rename(index=eu_country_code_to_iso3)
+           .loc[:, (scenario, potential_year)]
+           .rename(path.stem) * PJ_TO_MWH
+         for path in paths_to_national_potentials],
+        axis=1
+    )
+    costs = pd.concat(
+        [pd.read_csv(path, index_col=0)
+           .rename(index=eu_country_code_to_iso3)
+           .loc[:, cost_year]
+           .rename(path.stem) / GJ_TO_MWH
+         for path in paths_to_costs],
+        axis=1
+    )
+    if scenario == "Low availability scenario":
+        costs = costs * 1.1
+    elif scenario == "High availability scenario":
+        costs = costs * 0.9
     units = gpd.read_file(path_to_units).set_index("id")
     if (len(units.index) == 1) and (units.index[0] == "EUR"): # special case for continental level
-        national_potentials = [pd.Series(index=["EUR"], data=potential.sum(axis=0)).rename(potential.name)
-                               for potential in national_potentials]
+        national_potentials = pd.DataFrame(index=["EUR"], data=national_potentials.sum(axis=0).to_dict())
+        costs = pd.DataFrame(index=["EUR"], data=costs.mean(axis=0).to_dict())
+
     total_potential = allocate_potentials(
         national_potentials=national_potentials,
         units=units,
         population=pd.read_csv(path_to_population, index_col=0)["population_sum"],
         land_cover=pd.read_csv(path_to_land_cover, index_col=0)
     )
-    total_potential.to_csv(path_to_output, index=True, header=True)
+    total_potential.to_csv(path_to_potentials, index=True, header=True)
+    weighted_cost = (costs * national_potentials / national_potentials.sum().sum()).sum().sum()
+    with open(path_to_costs, "w") as f_cost:
+        f_cost.write(str(weighted_cost))
 
 
 def allocate_potentials(national_potentials, units, population, land_cover):
@@ -97,15 +119,11 @@ def allocate_potentials(national_potentials, units, population, land_cover):
                         .transform(lambda x: x / x.sum())
                         .rename("farm_share"),
     ], axis=1)
+    units = units.merge(national_potentials, right_index=True, left_on="country_code")
     return sum(
-        yessa(potential, units)
+        units[PROXIES[potential]] * units[potential]
         for potential in national_potentials
     ).rename(NAME)
-
-
-def yessa(national_potential, units):
-    merged = units.merge(national_potential, right_index=True, left_on="country_code")
-    return merged[PROXIES[national_potential.name]] * merged[national_potential.name]
 
 
 def eu_country_code_to_iso3(eu_country_code):
@@ -128,10 +146,13 @@ def eu_country_code_to_iso3(eu_country_code):
 if __name__ == "__main__":
     biofuel_potential(
         paths_to_national_potentials=snakemake.input.national_potentials,
+        paths_to_costs=snakemake.input.costs,
         path_to_units=snakemake.input.units,
         path_to_land_cover=snakemake.input.land_cover,
         path_to_population=snakemake.input.population,
         scenario=snakemake.params.scenario,
-        year=snakemake.params.year,
-        path_to_output=snakemake.output[0]
+        potential_year=snakemake.params.potential_year,
+        cost_year=snakemake.params.cost_year,
+        path_to_potentials=snakemake.output.potentials,
+        path_to_costs=snakemake.output.costs
     )

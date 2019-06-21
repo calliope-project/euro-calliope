@@ -113,4 +113,4 @@ techs:
                 energy_cap: {{ 2760000 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW]
                 om_prod: {{ 3.1 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MWh]
                 om_annual: {{ 113160 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] 2760000 * 4.1%
-                om_con: {{ 16.2 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh] medium price taken from [@EuropeanEnvironmentAgency:2013]
+                om_con: {{ biofuel_fuel_cost * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh]

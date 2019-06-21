@@ -14,7 +14,8 @@ parameters:
     flat-roof-share: 0.302 # TODO add source (own publication)
     jrc-biofuel:
         scenario: "Medium availability scenario"
-        year: "2020"
+        potential-year: "2020"
+        cost-year: "2030"
 scope:
     countries:
         - "Austria"

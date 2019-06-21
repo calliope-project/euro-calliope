@@ -47,7 +47,8 @@ rule parameterise_template:
     message: "Apply config parameters to file {wildcards.definition_file}.yaml from templates."
     input:
         src = "src/parameterise_templates.py",
-        template = "src/template/{definition_file}.yaml"
+        template = "src/template/{definition_file}.yaml",
+        biofuel_cost = "build/data/regional/biofuel-costs-eur-per-mwh.csv"
     params:
         scaling_factors = config["scaling-factors"],
         max_power_density = config["parameters"]["maximum-installable-power-density"]
@@ -67,6 +68,19 @@ rule hydro_capacities:
     script: "src/hydro.py"
 
 
+BIOFUEL_FEEDSTOCKS = [
+    "forestry-energy-residues",
+    "landscape-care-residues",
+    "manure",
+    "municipal-waste",
+    "primary-agricultural-residues",
+    "roundwood-chips",
+    "roundwood-fuelwood",
+    "secondary-forestry-residues-sawdust",
+    "secondary-forestry-residues-woodchips",
+    "sludge"
+]
+
 rule biofuels:
     message: "Determine biofuels potential on {wildcards.resolution} resolution."
     input:
@@ -74,22 +88,15 @@ rule biofuels:
         units = rules.units.output[0],
         land_cover = LAND_COVER, # FIXME should come from Zenodo
         population = rules.potentials.output.population,
-        national_potentials = [
-            "data/biofuels/potentials/forestry-energy-residues.csv",
-            "data/biofuels/potentials/landscape-care-residues.csv",
-            "data/biofuels/potentials/manure.csv",
-            "data/biofuels/potentials/municipal-waste.csv",
-            "data/biofuels/potentials/primary-agricultural-residues.csv",
-            "data/biofuels/potentials/roundwood-chips.csv",
-            "data/biofuels/potentials/roundwood-fuelwood.csv",
-            "data/biofuels/potentials/secondary-forestry-residues-sawdust.csv",
-            "data/biofuels/potentials/secondary-forestry-residues-woodchips.csv",
-            "data/biofuels/potentials/sludge.csv"
-        ]
+        national_potentials = expand("data/biofuels/potentials/{feedstock}.csv", feedstock=BIOFUEL_FEEDSTOCKS),
+        costs = expand("data/biofuels/costs/{feedstock}.csv", feedstock=BIOFUEL_FEEDSTOCKS)
     params:
         scenario = config["parameters"]["jrc-biofuel"]["scenario"],
-        year = config["parameters"]["jrc-biofuel"]["year"]
-    output: "build/data/{resolution}/biofuel-potential-mwh-per-year.csv"
+        potential_year = config["parameters"]["jrc-biofuel"]["potential-year"],
+        cost_year = config["parameters"]["jrc-biofuel"]["cost-year"]
+    output:
+        potentials = "build/data/{resolution}/biofuel-potential-mwh-per-year.csv",
+        costs = "build/data/{resolution}/biofuel-costs-eur-per-mwh.csv" # not actually resolution dependent
     conda: "envs/geo.yaml"
     script: "src/biofuels.py"
 
