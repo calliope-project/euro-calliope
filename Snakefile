@@ -4,6 +4,7 @@ URL_POTENTIALS = "https://zenodo.org/record/3244985/files/possibility-for-electr
 CAPACITY_FACTOR_ID_MAPS = "data/capacityfactors/{technology}-ids.tif"
 CAPACITY_FACTOR_TIME_SERIES = "data/capacityfactors/{technology}-timeseries.nc"
 LAND_COVER = "data/{resolution}/land-cover.csv" # FIXME should come from Zenodo together with potentials
+NATIONAL_PHS_STORAGE_CAPACITIES = "data/pumped-hydro/storage-capacities-gwh.csv"
 
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
@@ -62,7 +63,8 @@ rule hydro_capacities:
     input:
         src = "src/hydro.py",
         locations = rules.units.output[0],
-        plants = rules.filtered_stations.output[0]
+        plants = rules.filtered_stations.output[0],
+        phs_storage_capacities = NATIONAL_PHS_STORAGE_CAPACITIES
     output: "build/data/{resolution}/hydro-capacities-mw.csv"
     conda: "envs/geo.yaml"
     script: "src/hydro.py"
