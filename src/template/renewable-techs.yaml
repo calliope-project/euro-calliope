@@ -6,11 +6,11 @@ tech_groups:
             parent: supply
         constraints:
             energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
-            lifetime: 20
+            lifetime: 25 # [@JRC:2014] Table 7
         costs:
             monetary:
-                energy_cap: {{ 1401490 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2016/MW] from IRENA (Figure 3.4), valid for 2016
-                om_annual: {{ 12660 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from IRENA "Renewable Power Generation Costs in 2017", p69
+                energy_cap: {{ 520000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2013/MW] from [@JRC:2014] Table 7
+                om_annual: {{ 8840 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] from [@JRC:2014] Table 7
     wind:
         essentials:
             name: Wind
@@ -18,7 +18,6 @@ tech_groups:
             parent: supply
         constraints:
             energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
-            lifetime: 20
     wind_onshore:
         essentials:
             name: Onshore wind
@@ -26,10 +25,11 @@ tech_groups:
         constraints:
             resource: file=capacityfactors-wind-onshore.csv
             resource_unit: energy_per_cap
+            lifetime: 25 # [@JRC:2014] Table 4
         costs:
             monetary:
-                energy_cap: {{ 1316280 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from IRENA (Figure 5.2), valid for 2016
-                om_annual: {{ 49720 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from IRENA (Table 5.1)
+                energy_cap: {{ 1100000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from [@JRC:2014] Table 4
+                om_annual: {{ 18700 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from [@JRC:2014] Table 4
 
 techs:
     open_field_pv:
@@ -70,10 +70,11 @@ techs:
         constraints:
             resource: file=capacityfactors-wind-offshore.csv
             resource_unit: energy_per_cap
+            lifetime: 30 # [@JRC:2014] Table 5
         costs:
             monetary:
-                energy_cap: {{ 4246250 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from IRENA p.101, valid for 2016
-                om_annual: {{ 113000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from IRENA p.109
+                energy_cap: {{ 2280000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] from [@JRC:2014] Table 5
+                om_annual: {{ 52440 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] from [@JRC:2014] Table 5
     load_shedding:
         essentials:
             name: Load shedding as last resort
@@ -83,7 +84,7 @@ techs:
             energy_cap_max: inf
         costs:
             monetary: # TODO cite
-                om_prod: {{ 8000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh]
+                om_prod: {{ 1000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh]
     hydro_run_of_river:
         essentials:
             name: Run of river hydro electricity
@@ -100,7 +101,7 @@ techs:
         constraints:
             resource: file=capacityfactors-hydro-reservoir-inflow.csv
             resource_unit: energy_per_cap
-    biofuel: # based on Anaerobic digestion from [JRC ETRI 2014]
+    biofuel: # based on Anaerobic digestion from [JRC ETRI 2014] Table 48
         essentials:
             name: Biofuel
             parent: supply_plus
@@ -110,7 +111,7 @@ techs:
             lifetime: 20
         costs:
             monetary:
-                energy_cap: {{ 2760000 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW]
+                energy_cap: {{ 2300000 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW]
                 om_prod: {{ 3.1 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MWh]
-                om_annual: {{ 113160 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] 2760000 * 4.1%
+                om_annual: {{ 94300 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] 2300000 * 4.1%
                 om_con: {{ biofuel_fuel_cost * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh]

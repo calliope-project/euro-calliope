@@ -249,7 +249,7 @@ rule clean: # removes all generated results
 
 
 rule test:
-    message: "Run tests for national and regional models."
+    message: "Run tests."
     input:
         "build/logs/continental-model.done",
         "build/logs/national-model.done",
