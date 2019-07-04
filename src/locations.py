@@ -38,14 +38,14 @@ TEMPLATE = """locations:
             biofuel:
                 constraints:
                     resource: {{ location.biofuel_potential_mwh_per_year / 8760 * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
-                    storage_cap_equals: {{ location.biofuel_potential_mwh_per_year * 2 * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MWh] (2x annual yield)
+                    storage_cap_equals: {{ location.biofuel_potential_mwh_per_year / 2 * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MWh] (0.5x annual yield) # ASSUME < 1 for numerical range
     {% endfor %}
 """
 
 
 def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hydro_capacities_mw,
                         path_to_biofuel_potential_mw, flat_roof_share, maximum_installable_power_density,
-                        scaling_factors, path_to_result):
+                        scaling_factors, biofuel_efficiency, path_to_result):
     """Generate a file that represents locations in Calliope."""
     locations = gpd.GeoDataFrame(
         gpd.read_file(path_to_shapes).set_index("id").centroid.rename("centroid")
@@ -56,7 +56,7 @@ def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hy
         maximum_installable_power_density=maximum_installable_power_density
     )
     hydro_capacities = pd.read_csv(path_to_hydro_capacities_mw, index_col=0)
-    biofuel = pd.read_csv(path_to_biofuel_potential_mw, index_col=0)
+    biofuel = pd.read_csv(path_to_biofuel_potential_mw, index_col=0) * biofuel_efficiency
     locations = locations.merge(
         pd.concat([capacities, hydro_capacities, biofuel], axis="columns"),
         how="left",
@@ -98,5 +98,6 @@ if __name__ == "__main__":
         path_to_result=snakemake.output[0],
         flat_roof_share=snakemake.params["flat_roof_share"],
         maximum_installable_power_density=snakemake.params["maximum_installable_power_density"],
-        scaling_factors=snakemake.params["scaling_factors"]
+        scaling_factors=snakemake.params["scaling_factors"],
+        biofuel_efficiency=snakemake.params.biofuel_efficiency
     )

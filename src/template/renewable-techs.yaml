@@ -107,11 +107,11 @@ techs:
             parent: supply_plus
             carrier: electricity
         constraints:
-            energy_eff: 0.4
+            energy_eff: 1.0 # efficiency modelled within the input resource stream to avoid poor numerical scaling
             lifetime: 20
         costs:
             monetary:
                 energy_cap: {{ 2300000 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW]
-                om_prod: {{ 3.1 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MWh]
+                om_prod: 0 # 3.1 2013 EUR/MWh added to om_con, because value is very small and causing poor numerical range
                 om_annual: {{ 94300 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] 2300000 * 4.1%
-                om_con: {{ biofuel_fuel_cost * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh]
+                om_con: {{ (biofuel_fuel_cost / biofuel_efficiency + 3.1) * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh]

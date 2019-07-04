@@ -52,7 +52,8 @@ rule parameterise_template:
         biofuel_cost = "build/data/regional/biofuel-costs-eur-per-mwh.csv"
     params:
         scaling_factors = config["scaling-factors"],
-        max_power_density = config["parameters"]["maximum-installable-power-density"]
+        max_power_density = config["parameters"]["maximum-installable-power-density"],
+        biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
     output: "build/model/{definition_file}.yaml"
     conda: "envs/default.yaml"
     script: "src/parameterise_templates.py"
@@ -114,7 +115,8 @@ rule locations:
     params:
         flat_roof_share = config["parameters"]["flat-roof-share"],
         maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],
-        scaling_factors = config["scaling-factors"]
+        scaling_factors = config["scaling-factors"],
+        biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
     output: "build/model/{resolution}/locations.yaml"
     conda: "envs/geo.yaml"
     script: "src/locations.py"
