@@ -2,12 +2,16 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
 
+INVALID_ENTRIES = [
+    "H2328" # ASSUME "Parteen Weir": the numbers don't match, and it seems to be a duplicate of Ardnacrucha (H585)
+]
+
 
 def filter_stations(path_to_stations, path_to_basins, path_to_output):
     stations = pd.read_csv(path_to_stations, index_col=0)
     hydrobasins = gpd.read_file(path_to_basins)
     is_in_basin = stations.apply(station_in_any_basin(hydrobasins), axis="columns")
-    stations[is_in_basin].to_csv(
+    stations[is_in_basin].drop(index=INVALID_ENTRIES).to_csv(
         path_to_output,
         header=True,
         index=True

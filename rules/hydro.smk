@@ -51,7 +51,8 @@ rule fix_basins:
 
 rule filtered_stations:
     # Some locations of stations are imprecise and in the sea. Cannot handle those.
-    message: "Remove stations which are outside of basins." # TODO rather move those stations slightly
+    # Some other stations seem incorrect. Also remove.
+    message: "Remove invalid stations." # TODO rather move those stations slightly
     input:
         src = "src/hydro/filter_hydro_stations.py",
         stations = rules.stations_database.output[0],
