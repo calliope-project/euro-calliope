@@ -3,6 +3,7 @@ scaling-factors:
     area: 1
     monetary: 1
 minimal-capacity-factor: 0.001 # consider smaller values to be 0; this helps numerics in the LP
+maximal-capacity-factor: 10 # for hydro reservoirs, leading to a numerical range of 1e5 (hourly resolution)
 year: 2016
 crs: "EPSG:4326"
 parameters:
