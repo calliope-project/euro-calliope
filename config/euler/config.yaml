@@ -1,3 +1,5 @@
 cluster: bsub -oo {cluster.log} -W {cluster.runtime} -n {cluster.cores} -R "rusage[mem={cluster.memory}]" <
 jobs: 999
 cluster-config: "config/euler/cluster-config.yaml"
+local-cores: 1
+latency-wait: 60
