@@ -84,7 +84,7 @@ techs:
             energy_cap_max: inf
         costs:
             monetary: # TODO cite
-                om_prod: {{ 1000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh]
+                om_prod: {{ 8000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh]
     hydro_run_of_river:
         essentials:
             name: Run of river hydro electricity
