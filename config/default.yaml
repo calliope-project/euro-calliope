@@ -17,7 +17,7 @@ parameters:
         scenario: "Medium availability scenario"
         potential-year: "2020"
         cost-year: "2030"
-    biofuel-efficiency: 0.4
+    biofuel-efficiency: 0.45
 scope:
     countries:
         - "Austria"
