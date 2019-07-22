@@ -219,6 +219,8 @@ rule link_neighbours:
     input:
         src = "src/link_neighbours.py",
         units = rules.units.output[0]
+    params:
+        sea_connections = lambda wildcards: config["sea-connections"][wildcards.resolution]
     output: "build/model/{resolution}/link-all-neighbours.yaml"
     conda: "envs/geo.yaml"
     script: "src/link_neighbours.py"

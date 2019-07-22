@@ -18,15 +18,11 @@ links:
 """
 
 
-def link_neighbours(path_to_locations, path_to_result):
-    """Link all those locations that are neighbours.
-
-    If that creates unconnected islands, connect the islands with the shortest
-    connection possible.
-    """
-    graph = _create_graph(path_to_locations)
-    if len(graph) >= 2:
-        graph = _connect_graph(graph)
+def link_neighbours(path_to_locations, sea_connections, path_to_result):
+    """Link all those locations that are neighbours."""
+    graph = _create_graph_with_land_connections(path_to_locations)
+    graph.add_edges_from([(loc1, loc2) for loc1, loc2 in sea_connections])
+    assert nx.is_connected(graph), "There are electrical islands in the network graph."
     links = jinja2.Template(TEMPLATE).render(
         graph=graph
     )
@@ -34,7 +30,7 @@ def link_neighbours(path_to_locations, path_to_result):
         result_file.write(links)
 
 
-def _create_graph(path_to_locations):
+def _create_graph_with_land_connections(path_to_locations):
     regions = gpd.read_file(path_to_locations).to_crs(EPSG_3035_PROJ4).set_index("id")
     graph = nx.Graph()
     graph.add_nodes_from([
@@ -58,20 +54,9 @@ def _neighbours(region_geometry, region_index, regions):
             if (other_index is not region_index) and region_geometry.intersects(other_region.geometry)]
 
 
-def _connect_graph(graph):
-    # A graph based on direct neighbouring has disconnected components, for example UK.
-    # Hence, here the components are connected.
-    all_possible_edges = [
-        (loc1, loc2, graph.nodes[loc1]["centroid"].distance(graph.nodes[loc2]["centroid"]))
-        for loc1, loc2 in itertools.product(graph.nodes, graph.nodes)
-    ]
-    connecting_edges = nx.k_edge_augmentation(graph, K_EDGE_CONNECTION, avail=all_possible_edges)
-    graph.add_edges_from(connecting_edges)
-    return graph
-
-
 if __name__ == "__main__":
     link_neighbours(
         path_to_locations=snakemake.input.units,
+        sea_connections=snakemake.params.sea_connections,
         path_to_result=snakemake.output[0]
     )
