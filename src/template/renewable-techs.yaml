@@ -93,6 +93,12 @@ techs:
         constraints:
             resource: file=capacityfactors-hydro-ror.csv
             resource_unit: energy_per_cap
+            lifetime: 60
+        costs:
+            monetary:
+                energy_cap: {{ 5620000 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW] from [@JRC:2014] Table 14
+                om_prod: {{ 5 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] from [@JRC:2014] Table 14
+                om_annual: {{ 5620000 * 0.03 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] from [@JRC:2014] Table 14
     hydro_reservoir:
         essentials:
             name: Hydro electricity with a reservoir.
@@ -101,6 +107,12 @@ techs:
         constraints:
             resource: file=capacityfactors-hydro-reservoir-inflow.csv
             resource_unit: energy_per_cap
+            lifetime: 60
+        costs:
+            monetary:
+                energy_cap: {{ 3370000 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW] from [@JRC:2014] Table 12
+                om_prod: {{ 5 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] from [@JRC:2014] Table 12
+                om_annual: {{ 3370000 * 0.03 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] from [@JRC:2014] Table 12
     biofuel: # based on Anaerobic digestion from [JRC ETRI 2014] Table 48
         essentials:
             name: Biofuel
