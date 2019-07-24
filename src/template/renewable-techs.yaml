@@ -10,7 +10,7 @@ tech_groups:
         costs:
             monetary:
                 energy_cap: {{ 520000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2013/MW] from [@JRC:2014] Table 7
-                om_annual: {{ 8840 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] from [@JRC:2014] Table 7
+                om_annual: {{ 520000 * 0.017 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] from [@JRC:2014] Table 7
     wind:
         essentials:
             name: Wind
@@ -29,7 +29,7 @@ tech_groups:
         costs:
             monetary:
                 energy_cap: {{ 1100000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from [@JRC:2014] Table 4
-                om_annual: {{ 18700 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from [@JRC:2014] Table 4
+                om_annual: {{ 1100000 * 0.017 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from [@JRC:2014] Table 4
 
 techs:
     open_field_pv:
@@ -74,7 +74,7 @@ techs:
         costs:
             monetary:
                 energy_cap: {{ 2280000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] from [@JRC:2014] Table 5
-                om_annual: {{ 52440 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] from [@JRC:2014] Table 5
+                om_annual: {{ 2280000 * 0.023 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] from [@JRC:2014] Table 5
     load_shedding:
         essentials:
             name: Load shedding as last resort
@@ -113,5 +113,5 @@ techs:
             monetary:
                 energy_cap: {{ 2300000 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW]
                 om_prod: 0 # 3.1 2013 EUR/MWh added to om_con, because value is very small and causing poor numerical range
-                om_annual: {{ 94300 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] 2300000 * 4.1%
+                om_annual: {{ 2300000 * 0.041 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] 2300000 * 4.1%
                 om_con: {{ (biofuel_fuel_cost / biofuel_efficiency + 3.1) * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh]
