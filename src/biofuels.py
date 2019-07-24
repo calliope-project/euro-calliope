@@ -101,8 +101,8 @@ def biofuel_potential(paths_to_national_potentials, paths_to_costs, path_to_unit
     total_potential = allocate_potentials(
         national_potentials=national_potentials,
         units=units,
-        population=pd.read_csv(path_to_population, index_col=0)["population_sum"],
-        land_cover=pd.read_csv(path_to_land_cover, index_col=0)
+        population=pd.read_csv(path_to_population, index_col=0).reindex(index=units.index)["population_sum"],
+        land_cover=pd.read_csv(path_to_land_cover, index_col=0).reindex(index=units.index)
     )
     total_potential.to_csv(path_to_potentials, index=True, header=True)
     weighted_cost = (costs * national_potentials / national_potentials.sum().sum()).sum().sum()

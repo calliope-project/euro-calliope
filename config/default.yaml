@@ -36,6 +36,7 @@ sea-connections:
         - [GBR, BEL]
         - [GBR, NLD]
         - [GBR, IRL]
+        # the following do not exist today
         - [GRC, CYP]
     regional:
         - [ESP.7_1, ESP.1_1] # Ceuta and Andalucia
@@ -66,7 +67,6 @@ sea-connections:
         - [GBR.1_1, NLD.14_1] # England and Zuid-Holland
         - [GBR.4_1, IRL.17_1] # Wales and Meath
         - [GBR.3_1, GBR.4_1] # Scotland and Northern Ireland
-        - [GRC.1_1, CYP.5_1] # Aegean and Paphos
         # the following do not exist today
         - [GRC.1_1, CYP.5_1] # Aegean and Paphos
         - [CYP.1_1, CYP.2_1] # Famagusta and Larnaca

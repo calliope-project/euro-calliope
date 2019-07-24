@@ -49,7 +49,9 @@ rule parameterise_template:
     input:
         src = "src/parameterise_templates.py",
         template = "src/template/{definition_file}.yaml",
-        biofuel_cost = "build/data/regional/biofuel-costs-eur-per-mwh.csv"
+        biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
+            scenario=config["parameters"]["jrc-biofuel"]["scenario"]
+        )
     params:
         scaling_factors = config["scaling-factors"],
         max_power_density = config["parameters"]["maximum-installable-power-density"],
