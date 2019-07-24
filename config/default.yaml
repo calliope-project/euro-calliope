@@ -14,7 +14,7 @@ parameters:
         offshore-wind: 15 # [MW/km^2] from (European Environment Agency, 2009)
     flat-roof-share: 0.302 # TODO add source (own publication)
     jrc-biofuel:
-        scenario: "Medium availability scenario"
+        scenario: "medium"
         potential-year: "2020"
         cost-year: "2030"
     biofuel-efficiency: 0.45

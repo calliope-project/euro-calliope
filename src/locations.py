@@ -44,7 +44,7 @@ TEMPLATE = """locations:
 
 
 def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hydro_capacities_mw,
-                        path_to_biofuel_potential_mw, flat_roof_share, maximum_installable_power_density,
+                        path_to_biofuel_potential_mwh, flat_roof_share, maximum_installable_power_density,
                         scaling_factors, biofuel_efficiency, path_to_result):
     """Generate a file that represents locations in Calliope."""
     locations = gpd.GeoDataFrame(
@@ -56,7 +56,7 @@ def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hy
         maximum_installable_power_density=maximum_installable_power_density
     )
     hydro_capacities = pd.read_csv(path_to_hydro_capacities_mw, index_col=0)
-    biofuel = pd.read_csv(path_to_biofuel_potential_mw, index_col=0) * biofuel_efficiency
+    biofuel = pd.read_csv(path_to_biofuel_potential_mwh, index_col=0) * biofuel_efficiency
     locations = locations.merge(
         pd.concat([capacities, hydro_capacities, biofuel], axis="columns"),
         how="left",
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         path_to_shapes=snakemake.input.shapes,
         path_to_land_eligibility_km2=snakemake.input.land_eligibility_km2,
         path_to_hydro_capacities_mw=snakemake.input.hydro_capacities,
-        path_to_biofuel_potential_mw=snakemake.input.biofuel,
+        path_to_biofuel_potential_mwh=snakemake.input.biofuel,
         path_to_result=snakemake.output[0],
         flat_roof_share=snakemake.params["flat_roof_share"],
         maximum_installable_power_density=snakemake.params["maximum_installable_power_density"],

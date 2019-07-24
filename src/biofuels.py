@@ -10,6 +10,12 @@ PJ_TO_MWH = 1 / 3600 * 1e9
 GJ_TO_MWH = 1 / 3600 * 1e3
 NAME = "biofuel_potential_mwh_per_year"
 
+SCENARIOS = {
+    "low": "Low availability scenario",
+    "medium": "Medium availability scenario",
+    "high": "High availability scenario"
+}
+
 PROXIES = {
     "forestry-energy-residues": "forest_share",
     "forestry-care-residues": "forest_share",
@@ -64,7 +70,7 @@ FOREST = [GlobCover.CLOSED_TO_OPEN_BROADLEAVED_FOREST.value, GlobCover.CLOSED_BR
 def biofuel_potential(paths_to_national_potentials, paths_to_costs, path_to_units, path_to_land_cover,
                       path_to_population, scenario, potential_year, cost_year, path_to_potentials, path_to_costs):
     """Take national potentials from JRC report and allocate to regions based on proxies."""
-    assert scenario in ["Low availability scenario", "Medium availability scenario", "High availability scenario"]
+    scenario = SCENARIOS[scenario]
     paths_to_national_potentials = [Path(path) for path in paths_to_national_potentials]
     paths_to_costs = [Path(path) for path in paths_to_costs]
     national_potentials = pd.concat(
@@ -150,7 +156,7 @@ if __name__ == "__main__":
         path_to_units=snakemake.input.units,
         path_to_land_cover=snakemake.input.land_cover,
         path_to_population=snakemake.input.population,
-        scenario=snakemake.params.scenario,
+        scenario=snakemake.wildcards.scenario,
         potential_year=snakemake.params.potential_year,
         cost_year=snakemake.params.cost_year,
         path_to_potentials=snakemake.output.potentials,

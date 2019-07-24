@@ -85,7 +85,7 @@ BIOFUEL_FEEDSTOCKS = [
 ]
 
 rule biofuels:
-    message: "Determine biofuels potential on {wildcards.resolution} resolution."
+    message: "Determine biofuels potential on {wildcards.resolution} resolution for scenario {wildcards.scenario}."
     input:
         src = "src/biofuels.py",
         units = rules.units.output[0],
@@ -94,13 +94,14 @@ rule biofuels:
         national_potentials = expand("data/biofuels/potentials/{feedstock}.csv", feedstock=BIOFUEL_FEEDSTOCKS),
         costs = expand("data/biofuels/costs/{feedstock}.csv", feedstock=BIOFUEL_FEEDSTOCKS)
     params:
-        scenario = config["parameters"]["jrc-biofuel"]["scenario"],
         potential_year = config["parameters"]["jrc-biofuel"]["potential-year"],
         cost_year = config["parameters"]["jrc-biofuel"]["cost-year"]
     output:
-        potentials = "build/data/{resolution}/biofuel-potential-mwh-per-year.csv",
-        costs = "build/data/{resolution}/biofuel-costs-eur-per-mwh.csv" # not actually resolution dependent
+        potentials = "build/data/{resolution}/biofuel/{scenario}/potential-mwh-per-year.csv",
+        costs = "build/data/{resolution}/biofuel/{scenario}/costs-eur-per-mwh.csv" # not actually resolution dependent
     conda: "envs/geo.yaml"
+    wildcard_constraints:
+        scenario = "((low)|(medium)|(high))"
     script: "src/biofuels.py"
 
 
@@ -111,7 +112,7 @@ rule locations:
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
         hydro_capacities = rules.hydro_capacities.output[0],
-        biofuel = rules.biofuels.output[0]
+        biofuel = "build/data/{{resolution}}/biofuel/{scenario}/potential-mwh-per-year.csv".format(scenario=config["parameters"]["jrc-biofuel"]["scenario"])
     params:
         flat_roof_share = config["parameters"]["flat-roof-share"],
         maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],
