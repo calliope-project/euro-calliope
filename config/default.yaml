@@ -2,8 +2,14 @@ scaling-factors:
     power: 1
     area: 1
     monetary: 1
-minimal-capacity-factor: 0.001 # consider smaller values to be 0; this helps numerics in the LP
-maximal-capacity-factor: 10 # for hydro reservoirs, leading to a numerical range of 1e5 (hourly resolution)
+capacity-factors:
+    min: 0.001 # consider smaller values to be 0; this helps numerics in the LP
+    max: 10 # for hydro reservoirs, leading to a numerical range of 1e5 (hourly resolution)
+    average: # average estimation used to transform annual fixed to variable costs
+        pv: 0.139 # median of average 2016 open-field factors for ~2700 points in Europe
+        onshore: 0.3021 # median of average 2016 factors for ~2700 points in Europe
+        offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
+        ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
 year: 2016
 crs: "EPSG:4326"
 parameters:

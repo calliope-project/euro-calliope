@@ -83,7 +83,7 @@ rule inflow_mwh:
         generation = IRENA_GENERATION
     params:
         year = config["year"],
-        max_capacity_factor = config["maximal-capacity-factor"]
+        max_capacity_factor = config["capacity-factors"]["max"]
     output: "build/data/hydro-electricity-with-energy-inflow.nc"
     conda: "../envs/hydro.yaml"
     script: "../src/hydro/inflow_mwh.py"

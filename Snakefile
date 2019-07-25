@@ -54,6 +54,7 @@ rule parameterise_template:
         )
     params:
         scaling_factors = config["scaling-factors"],
+        capacity_factors = config["capacity-factors"]["average"],
         max_power_density = config["parameters"]["maximum-installable-power-density"],
         biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
     output: "build/model/{definition_file}.yaml"
@@ -144,7 +145,7 @@ rule capacity_factors:
         ids = CAPACITY_FACTOR_ID_MAPS,
         timeseries = CAPACITY_FACTOR_TIME_SERIES
     params:
-        threshold = config["minimal-capacity-factor"]
+        threshold = config["capacity-factors"]["min"]
     wildcard_constraints:
         technology = "((wind-onshore)|(rooftop-pv)|(open-field-pv))"
     output: "build/model/{resolution}/capacityfactors-{technology}.csv"
@@ -162,7 +163,7 @@ rule capacity_factors_offshore:
         ids = CAPACITY_FACTOR_ID_MAPS.format(technology="wind-offshore"),
         timeseries = CAPACITY_FACTOR_TIME_SERIES.format(technology="wind-offshore")
     params:
-        threshold = config["minimal-capacity-factor"]
+        threshold = config["capacity-factors"]["min"]
     output: "build/model/{resolution}/capacityfactors-wind-offshore.csv"
     conda: "envs/geo.yaml"
     script: "src/capacityfactors_offshore.py"
@@ -176,7 +177,7 @@ rule capacity_factors_hydro:
         stations = rules.inflow_mwh.output[0],
         locations = rules.units.output[0]
     params:
-        threshold = config["minimal-capacity-factor"]
+        threshold = config["capacity-factors"]["min"]
     output:
         ror = "build/model/{resolution}/capacityfactors-hydro-ror.csv",
         reservoir = "build/model/{resolution}/capacityfactors-hydro-reservoir-inflow.csv"

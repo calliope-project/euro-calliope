@@ -10,7 +10,8 @@ tech_groups:
         costs:
             monetary:
                 energy_cap: {{ 520000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2013/MW] from [@JRC:2014] Table 7
-                om_annual: {{ 520000 * 0.017 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] from [@JRC:2014] Table 7
+                om_annual: {{ (520000 * 0.017 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] 1.7% from [@JRC:2014] Table 7
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] stolen from om_annual for technical reasons
     wind:
         essentials:
             name: Wind
@@ -29,7 +30,8 @@ tech_groups:
         costs:
             monetary:
                 energy_cap: {{ 1100000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from [@JRC:2014] Table 4
-                om_annual: {{ 1100000 * 0.017 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] from [@JRC:2014] Table 4
+                om_annual: {{ (1100000 * 0.017 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2016/MW] 1.7% from [@JRC:2014] Table 4
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] stolen from om_annual for technical reasons
 
 techs:
     open_field_pv:
@@ -74,7 +76,8 @@ techs:
         costs:
             monetary:
                 energy_cap: {{ 2280000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] from [@JRC:2014] Table 5
-                om_annual: {{ 2280000 * 0.023 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] from [@JRC:2014] Table 5
+                om_annual: {{ (2280000 * 0.023 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] 2.3% from [@JRC:2014] Table 5
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] stolen from om_annual for technical reasons
     load_shedding:
         essentials:
             name: Load shedding as last resort
@@ -98,7 +101,7 @@ techs:
             monetary:
                 energy_cap: {{ 5620000 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW] from [@JRC:2014] Table 14
                 om_prod: {{ 5 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] from [@JRC:2014] Table 14
-                om_annual: {{ 5620000 * 0.03 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] from [@JRC:2014] Table 14
+                om_annual: {{ 5620000 * 0.03 * scaling_factors.specific_costs }}  # [{{ 1 / scaling_factors.specific_costs }} 2013 EUR/MW/yr] 3% from [@JRC:2014] Table 14
     hydro_reservoir:
         essentials:
             name: Hydro electricity with a reservoir.

@@ -3,7 +3,8 @@ import jinja2
 
 
 def parameterise_template(path_to_template, path_to_biofuel_costs, scaling_factors,
-                          biofuel_efficiency, max_power_density, path_to_result):
+                          capacity_factors, biofuel_efficiency, max_power_density,
+                          path_to_result):
     """Applies config parameters to template files."""
 
     scaling_factors["specific_costs"] = scaling_factors["monetary"] / scaling_factors["power"]
@@ -14,6 +15,7 @@ def parameterise_template(path_to_template, path_to_biofuel_costs, scaling_facto
         template = jinja2.Template(template_file.read())
     rendered = template.render(
         scaling_factors=scaling_factors,
+        capacity_factors=capacity_factors,
         max_power_density=max_power_density,
         biofuel_fuel_cost=biofuel_fuel_cost,
         biofuel_efficiency=biofuel_efficiency
@@ -26,6 +28,7 @@ if __name__ == "__main__":
     parameterise_template(
         path_to_template=snakemake.input.template,
         scaling_factors=snakemake.params["scaling_factors"],
+        capacity_factors=snakemake.params["capacity_factors"],
         max_power_density=snakemake.params["max_power_density"],
         biofuel_efficiency=snakemake.params["biofuel_efficiency"],
         path_to_biofuel_costs=snakemake.input.biofuel_cost,
