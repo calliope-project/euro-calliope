@@ -93,6 +93,16 @@ rule units:
     script: "../src/shapes/units.py"
 
 
+rule units_without_shape:
+    message: "Dataset of units on resolution {wildcards.resolution} without geo information."
+    input:
+        src = "src/shapes/nogeo.py",
+        units = rules.units.output[0]
+    output: "build/data/{resolution}/units.csv"
+    conda: "../envs/geo.yaml"
+    script: "../src/shapes/nogeo.py"
+
+
 rule eez:
     message: "Clip exclusive economic zones to study area."
     input: RAW_EEZ_DATA
