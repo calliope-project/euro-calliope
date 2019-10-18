@@ -62,7 +62,7 @@ sea-connections:
         - [SWE.13_1, DEU.15_1] # Skåne and Schleswig-Holstein
         - [DNK.4_1, DEU.8_1] # Sjællandand Mecklenburg-Vorpommern
         - [DNK.4_1, DNK.5_1] # Sjælland and Syddanmark
-        - [DNK.3_1, SWE.12_1] # Nordjylland and Östergötland
+        - [DNK.3_1, SWE.21_1] # Nordjylland and Västra Götaland
         - [NOR.18_1, DNK.3_1] # Vest-Agder and Nordjylland
         - [NOR.18_1, DEU.15_1] # Vest-Agder and Schleswig-Holstein
         - [NOR.18_1, NLD.5_1] # Vest-Agder and Groningen
