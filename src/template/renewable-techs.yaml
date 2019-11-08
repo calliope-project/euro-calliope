@@ -86,7 +86,7 @@ techs:
         constraints:
             energy_cap_max: inf
         costs:
-            monetary: # TODO cite
+            monetary:
                 om_prod: {{ 8000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR/MWh]
     hydro_run_of_river:
         essentials:
