@@ -16,9 +16,9 @@ parameters:
     maximum-installable-power-density: # this is not the yield, but the density of installed power
         pv-on-tilted-roofs: 160 # [MW/km^2] from (Gagnon:2016, Klauser:2016), i.e. 16% efficiency
         pv-on-flat-areas: 80 # [MW/km^2] from (Gagnon:2016, Klauser:2016, Wirth:2017)
-        onshore-wind: 8 # [MW/km^2] from (European Environment Agency, 2009)
-        offshore-wind: 15 # [MW/km^2] from (European Environment Agency, 2009)
-    flat-roof-share: 0.302 # TODO add source (own publication)
+        onshore-wind: 8 # [MW/km^2] from (EuropeanEnvironmentAgency:2009)
+        offshore-wind: 15 # [MW/km^2] from (EuropeanEnvironmentAgency:2009)
+    flat-roof-share: 0.302 # from (Trondle:2019)
     jrc-biofuel:
         scenario: "medium"
         potential-year: "2020"
@@ -62,7 +62,7 @@ sea-connections:
         - [SWE.13_1, DEU.15_1] # Skåne and Schleswig-Holstein
         - [DNK.4_1, DEU.8_1] # Sjællandand Mecklenburg-Vorpommern
         - [DNK.4_1, DNK.5_1] # Sjælland and Syddanmark
-        - [DNK.3_1, SWE.12_1] # Nordjylland and Östergötland
+        - [DNK.3_1, SWE.21_1] # Nordjylland and Västra Götaland
         - [NOR.18_1, DNK.3_1] # Vest-Agder and Nordjylland
         - [NOR.18_1, DEU.15_1] # Vest-Agder and Schleswig-Holstein
         - [NOR.18_1, NLD.5_1] # Vest-Agder and Groningen

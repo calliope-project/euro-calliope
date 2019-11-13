@@ -23,7 +23,7 @@ conda activate euro-calliope
 * spatio-temporal capacity factors in `./data/capacityfactors/`, where time and space dimensions are defined by two files: # FIXME should come from Zenodo
     * an id map, where each pixel points to a time series: `./data/capacityfactors/{technology}-ids.tif`
     * all indexed time series: `./data/capacityfactors/{technology}-timeseries.nc`
-* [hydroBASINS -> Standard -> Europe and Middle East -> hybas_eu_lev07_v1c](https://www.hydrosheds.org/downloads) downloaded to `./data/hybas_eu_lev07_v1c/` # FIXME add automatic download which is unavailable 2019-06-13
+* [hydroBASINS -> Standard -> Europe and Middle East -> hybas_eu_lev07_v1c](https://www.hydrosheds.org/downloads) downloaded to `./data/hybas_eu_lev07_v1c/`
 
 ## Generate the model
 

@@ -1,9 +1,8 @@
 URL_LOAD = "https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv"
-URL_POTENTIALS = "https://zenodo.org/record/3244985/files/possibility-for-electricitiy-autarky.zip"
+URL_POTENTIALS = "https://zenodo.org/record/3244985/files/possibility-for-electricity-autarky.zip"
 
 CAPACITY_FACTOR_ID_MAPS = "data/capacityfactors/{technology}-ids.tif"
 CAPACITY_FACTOR_TIME_SERIES = "data/capacityfactors/{technology}-timeseries.nc"
-LAND_COVER = "data/{resolution}/land-cover.csv" # FIXME should come from Zenodo together with potentials
 NATIONAL_PHS_STORAGE_CAPACITIES = "data/pumped-hydro/storage-capacities-gwh.csv"
 
 include: "./rules/shapes.smk"
@@ -37,10 +36,11 @@ rule potentials:
     input: rules.potentials_zipped.output[0]
     shadow: "minimal"
     output:
-        land_eligibility_km2 = "build/data/publish/{resolution}/technical-potential/areas.csv",
-        shared_coast = "build/data/publish/{resolution}/shared-coast.csv",
-        industrial_demand = "build/data/publish/{resolution}/demand.csv",
-        population = "build/data/publish/{resolution}/population.csv"
+        land_eligibility_km2 = "build/data/{resolution}/technical-potential/areas.csv",
+        shared_coast = "build/data/{resolution}/shared-coast.csv",
+        industrial_demand = "build/data/{resolution}/demand.csv",
+        population = "build/data/{resolution}/population.csv",
+        land_cover = "build/data/{resolution}/land-cover.csv"
     shell: "unzip -o {input} -d build/data"
 
 
@@ -92,7 +92,7 @@ rule biofuels:
     input:
         src = "src/biofuels.py",
         units = rules.units.output[0],
-        land_cover = LAND_COVER, # FIXME should come from Zenodo
+        land_cover = rules.potentials.output.land_cover,
         population = rules.potentials.output.population,
         national_potentials = expand("data/biofuels/potentials/{feedstock}.csv", feedstock=BIOFUEL_FEEDSTOCKS),
         costs = expand("data/biofuels/costs/{feedstock}.csv", feedstock=BIOFUEL_FEEDSTOCKS)
@@ -253,6 +253,7 @@ rule clean: # removes all generated results
     shell:
         """
         rm -r build/
+        echo "Data downloaded to data/ has not been cleaned."
         """
 
 
