@@ -1,5 +1,5 @@
 URL_LOAD = "https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv"
-URL_POTENTIALS = "https://zenodo.org/record/3244985/files/possibility-for-electricity-autarky.zip"
+URL_POTENTIALS = "https://zenodo.org/record/3533038/files/possibility-for-electricity-autarky.zip"
 
 CAPACITY_FACTOR_ID_MAPS = "data/capacityfactors/{technology}-ids.tif"
 CAPACITY_FACTOR_TIME_SERIES = "data/capacityfactors/{technology}-timeseries.nc"
