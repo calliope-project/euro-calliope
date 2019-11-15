@@ -10,14 +10,10 @@ def national_load(path_to_raw_load, number_rows_valid, year, path_to_output):
     """Extracts national load time series for all countries in a specified year."""
     load = read_load_profiles(
         path_to_raw_load=path_to_raw_load,
-        number_rows_valid=number_rows_valid,
-        start=datetime(year, 1, 1, tzinfo=timezone.utc),
-        end=datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        number_rows_valid=number_rows_valid
     )
-    if year < 2017: # data for Albania before 2017 is missing
-        load["AL"] = read_albania(path_to_raw_load, number_rows_valid, other_ts=load)
     load = filter_national(load)
-    check_completeness(load)
+    load = select_year_and_fill_gaps(load, year)
     load = handle_outliers(load)
     load.to_csv(
         path_to_output,
@@ -25,28 +21,53 @@ def national_load(path_to_raw_load, number_rows_valid, year, path_to_output):
     )
 
 
-def read_load_profiles(path_to_raw_load, number_rows_valid, start, end):
+def read_load_profiles(path_to_raw_load, number_rows_valid):
     """Reads national load data and handles outliers."""
     data = pd.read_csv(path_to_raw_load, nrows=number_rows_valid, parse_dates=[3])
     data = data[(data["variable"] == "load")]
-    data = data[(data.utc_timestamp >= start) &
-                (data.utc_timestamp < end)]
     data = remove_entsoe_power_statistic_data_where_possible(data)
     data.drop(["variable", "attribute"], axis=1, inplace=True)
     return data.pivot(columns="region", index="utc_timestamp", values="data")
 
 
-def read_albania(path_to_raw_load, number_rows_valid, other_ts):
-    albania = read_load_profiles(
-        path_to_raw_load="data/automatic/raw-load-data.csv",
-        number_rows_valid=20950674,
-        start=datetime(2017, 1, 1, tzinfo=timezone.utc),
-        end=datetime(2017 + 1, 1, 1, tzinfo=timezone.utc)
-    )["AL"]
-    if len(other_ts.index) == 8784: # leap year
-        albania = pd.concat([albania[:"2017-02"], albania["2017-02-28"], albania["2017-03":]])
-    albania.index = other_ts.index
-    return albania
+def select_year_and_fill_gaps(load_df, year):
+    """Selects relevant year then fills in all NaNs with data from other years"""
+    missing_data_regions = set(load_df.columns).difference(
+        load_df.loc[year].dropna(axis=1).columns.unique()
+    )
+
+    for region in missing_data_regions:
+        this_region_df = load_df[region].copy()
+        this_region_df[this_region_df < 0] = np.nan
+
+        all_missing_timesteps = this_region_df[year][np.isnan(this_region_df[year])].index
+        fill_years = []
+        # keep going until almost all gaps are filled and we have a frankenstein's monster of a timeseries
+        while this_region_df.loc[all_missing_timesteps].isnull().sum() > 24:
+            # Plan to take the next year's data
+            avail_years = this_region_df.loc[slice(str(int(year) + 1), None)].dropna().index
+            # If needed, take the previous year's data
+            if avail_years.empty is True:
+                avail_years = this_region_df.loc[slice(None, str(int(year) - 1))].dropna().index
+            # There might be nothing!
+            if avail_years.empty is True:
+                print('no available data for ' + region)
+                break
+
+            next_avail_year = avail_years.year.unique()[0]
+            missing_timesteps = this_region_df[year][np.isnan(this_region_df[year])].index
+            new_data = this_region_df.loc[missing_timesteps.map(lambda dt: dt.replace(year=next_avail_year))]
+            this_region_df.loc[str(next_avail_year)] = np.nan
+            new_data.index = missing_timesteps
+            this_region_df.update(new_data)
+            fill_years += [next_avail_year]
+        else:
+            load_df.update(this_region_df.loc[all_missing_timesteps].to_frame(region))
+            print('Country {} has missing load values, a working dataset was constructed '
+                  'from year(s) {}. {} missing timesteps will be filled from nearby values'
+                  .format(region, ','.join(fill_years), this_region_df.loc[all_missing_timesteps].sum()))
+
+    return load_df
 
 
 def remove_entsoe_power_statistic_data_where_possible(load):
@@ -59,15 +80,10 @@ def remove_entsoe_power_statistic_data_where_possible(load):
 
 def filter_national(load):
     load.rename(columns={"GB_UKM": "GB"}, inplace=True)
-    countries = [iso2 for iso2 in load.columns.unique() if len(iso2) == 2]
+    countries = [iso2 for iso2 in load.columns.unique() if iso2 in [i.alpha_2 for i in pycountry.countries]]
     national = load.loc[:, countries].copy()
     national.columns.name = "country_code"
     return national.rename(columns=lambda iso2: pycountry.countries.lookup(iso2).alpha_3)
-
-
-def check_completeness(load):
-    for country in load.columns[load.isnull().any()].tolist():
-        print("Country {} has missing load values.".format(pycountry.countries.lookup(country).name))
 
 
 def handle_outliers(all_time_series):
