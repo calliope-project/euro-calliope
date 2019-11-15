@@ -19,5 +19,5 @@ dependencies:
     - cdsapi=0.1.4
     - pycountry=18.12.8
     - pip:
-        - git+git://github.com/FRESNA/atlite.git@ecfd3f3eb380efa00d0b6bc7efa4a8b20e40dc34
+        - git+https://github.com/FRESNA/atlite.git@ecfd3f3eb380efa00d0b6bc7efa4a8b20e40dc34
 
