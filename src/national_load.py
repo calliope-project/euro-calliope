@@ -63,7 +63,7 @@ def select_year_and_fill_gaps(load_df, year):
             missing_timesteps = this_region_df[year][np.isnan(this_region_df[year])].index
 
             # Ignore February 29th if next available year doesn't have that data available
-            if pd.to_datetime(year + '-02-29').date() in missing_timesteps.date:
+            if pd.Period(freq='Y', year=int(year)).is_leap_year and pd.to_datetime(year + '-02-29').date() in missing_timesteps.date:
                 if not pd.Period(freq='Y', year=next_avail_year).is_leap_year:
                     missing_timesteps = missing_timesteps[
                         missing_timesteps.date != pd.to_datetime(year + '-02-29').date()
