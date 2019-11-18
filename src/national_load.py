@@ -32,18 +32,23 @@ def read_load_profiles(path_to_raw_load, number_rows_valid):
 
 def select_year_and_fill_gaps(load_df, year):
     """Selects relevant year then fills in all NaNs with data from other years"""
+
+    year = str(year)  # not sure if it comes in as a string or an int, so we make sure of its type here
     missing_data_regions = set(load_df.columns).difference(
         load_df.loc[year].dropna(axis=1).columns.unique()
     )
 
     for region in missing_data_regions:
         this_region_df = load_df[region].copy()
-        this_region_df[this_region_df < 0] = np.nan
+        this_region_df[this_region_df < 0] = np.nan  # negative values not allowed
 
         all_missing_timesteps = this_region_df[year][np.isnan(this_region_df[year])].index
+        if len(all_missing_timesteps) <= 48:
+            continue
         fill_years = []
         # keep going until almost all gaps are filled and we have a frankenstein's monster of a timeseries
-        while this_region_df.loc[all_missing_timesteps].isnull().sum() > 24:
+        # We're OK with 2 days of gap (48hrs)
+        while this_region_df.loc[all_missing_timesteps].isnull().sum() > 48:
             # Plan to take the next year's data
             avail_years = this_region_df.loc[slice(str(int(year) + 1), None)].dropna().index
             # If needed, take the previous year's data
@@ -51,21 +56,32 @@ def select_year_and_fill_gaps(load_df, year):
                 avail_years = this_region_df.loc[slice(None, str(int(year) - 1))].dropna().index
             # There might be nothing!
             if avail_years.empty is True:
-                print('no available data for ' + region)
+                print('no available data for {} national demand'.format(region))
                 break
 
             next_avail_year = avail_years.year.unique()[0]
             missing_timesteps = this_region_df[year][np.isnan(this_region_df[year])].index
+
+            # Ignore February 29th if next available year doesn't have that data available
+            if pd.to_datetime(year + '-02-29').date() in missing_timesteps.date:
+                if not pd.Period(freq='Y', year=next_avail_year).is_leap_year:
+                    missing_timesteps = missing_timesteps[
+                        missing_timesteps.date != pd.to_datetime(year + '-02-29').date()
+                    ]
+
             new_data = this_region_df.loc[missing_timesteps.map(lambda dt: dt.replace(year=next_avail_year))]
             this_region_df.loc[str(next_avail_year)] = np.nan
             new_data.index = missing_timesteps
             this_region_df.update(new_data)
-            fill_years += [next_avail_year]
+            fill_years += [str(next_avail_year)]
         else:
             load_df.update(this_region_df.loc[all_missing_timesteps].to_frame(region))
-            print('Country {} has missing load values, a working dataset was constructed '
-                  'from year(s) {}. {} missing timesteps will be filled from nearby values'
-                  .format(region, ','.join(fill_years), this_region_df.loc[all_missing_timesteps].sum()))
+            print(
+                'Country {} has {} missing load values, a working dataset was constructed '
+                'from year(s) {}. {} missing timesteps will be filled from nearby values'
+                .format(region, len(all_missing_timesteps), ','.join(fill_years), 
+                        this_region_df.loc[all_missing_timesteps].notnull().sum())
+            )
 
     return load_df
 
