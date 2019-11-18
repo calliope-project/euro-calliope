@@ -83,7 +83,7 @@ def select_year_and_fill_gaps(load_df, year):
                         this_region_df.loc[all_missing_timesteps].notnull().sum())
             )
 
-    return load_df
+    return load_df[year]
 
 
 def remove_entsoe_power_statistic_data_where_possible(load):
