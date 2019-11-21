@@ -35,7 +35,7 @@ def select_year_and_fill_gaps(load_df, year):
 
     year = str(year)  # not sure if it comes in as a string or an int, so we make sure of its type here
     missing_data_regions = set(load_df.columns).difference(
-        load_df.loc[year].dropna(axis=1).columns.unique()
+        load_df.where(load_df >= 0).loc[year].dropna(axis=1).columns.unique()
     )
 
     for region in missing_data_regions:
@@ -79,7 +79,7 @@ def select_year_and_fill_gaps(load_df, year):
             print(
                 'Country {} has {} missing load values, a working dataset was constructed '
                 'from year(s) {}. {} missing timesteps will be filled from nearby values'
-                .format(region, len(all_missing_timesteps), ','.join(fill_years), 
+                .format(region, len(all_missing_timesteps), ','.join(fill_years),
                         this_region_df.loc[all_missing_timesteps].notnull().sum())
             )
 
