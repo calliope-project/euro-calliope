@@ -88,7 +88,7 @@ def water_to_capped_energy_inflow(inflow_m3, annual_generation, cap):
 
 
 def allocate_generation_to_plant(plants, annual_national_generation_mwh):
-    inflows = plants.inflow_m3.to_pandas()
+    inflows = plants.inflow_m3.to_pandas().fillna(0)
     plants = plants[["country_code", "installed_capacity_MW"]].to_dataframe()
 
     # Capacity share is scaled to account for erroneous zero timesteps in the inflow data
