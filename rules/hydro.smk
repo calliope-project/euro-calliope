@@ -14,7 +14,7 @@ rule download_runoff_data:
         src = "src/hydro/runoff.py"
     params: year = config["year"]
     output:
-        protected(directory("data/automatic/europe-cutout"))
+        protected(directory("data/automatic/europe-cutout.{}".format(config["year"])))
     conda: "../envs/hydro.yaml"
     script: "../src/hydro/runoff.py"
 
