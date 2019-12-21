@@ -1,6 +1,4 @@
 """Link all those locations that are neighbours."""
-import itertools
-
 import geopandas as gpd
 import shapely
 import jinja2
@@ -21,7 +19,8 @@ links:
 def link_neighbours(path_to_locations, sea_connections, path_to_result):
     """Link all those locations that are neighbours."""
     graph = _create_graph_with_land_connections(path_to_locations)
-    graph.add_edges_from([(loc1, loc2) for loc1, loc2 in sea_connections])
+    if sea_connections:
+        graph.add_edges_from([(loc1, loc2) for loc1, loc2 in sea_connections])
     assert nx.is_connected(graph), "There are electrical islands in the network graph."
     links = jinja2.Template(TEMPLATE).render(
         graph=graph
