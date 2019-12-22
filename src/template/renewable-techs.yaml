@@ -7,11 +7,6 @@ tech_groups:
         constraints:
             energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
             lifetime: 25 # [@JRC:2014] Table 7
-        costs:
-            monetary:
-                energy_cap: {{ 520000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2013/MW] from [@JRC:2014] Table 7
-                om_annual: {{ (520000 * 0.017 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] 1.7% from [@JRC:2014] Table 7
-                om_prod: {{ 1 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] stolen from om_annual for technical reasons
     wind:
         essentials:
             name: Wind
@@ -45,6 +40,11 @@ techs:
             resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
             resource: file=capacityfactors-open-field-pv.csv
             resource_unit: energy_per_cap
+        costs:
+            monetary:
+                energy_cap: {{ 520000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2013/MW] from [@JRC:2014] Table 7
+                om_annual: {{ (520000 * 0.017 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] 1.7% from [@JRC:2014] Table 7
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] stolen from om_annual for technical reasons
     roof_mounted_pv:
         essentials:
             name: Roof mounted PV
@@ -52,6 +52,11 @@ techs:
         constraints:
             resource: file=capacityfactors-rooftop-pv.csv
             resource_unit: energy_per_cap
+        costs:
+            monetary:
+                energy_cap: {{ 880000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2013/MW] from [@JRC:2014] Table 9
+                om_annual: {{ (880000 * 0.02 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] 2% from [@JRC:2014] Table 9
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] stolen from om_annual for technical reasons
     wind_onshore_monopoly:
         essentials:
             name: Onshore wind without land competition
