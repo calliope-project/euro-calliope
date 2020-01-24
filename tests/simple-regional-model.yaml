@@ -6,7 +6,7 @@ import:
     - '../build/model/link-techs.yaml'
 model:
     name: 'Simple disconnected nodes model with regional spatial resolution'
-    calliope_version: 0.6.4
+    calliope_version: 0.6.5
     timeseries_data_path: '../build/model/regional'
     subset_time: ['2016-01-01', '2016-01-01']
 run:

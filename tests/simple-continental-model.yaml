@@ -6,7 +6,7 @@ import:
     - '../build/model/continental/locations.yaml'
 model:
     name: 'Simple one node model with continental spatial resolution'
-    calliope_version: 0.6.4
+    calliope_version: 0.6.5
     timeseries_data_path: '../build/model/continental'
     subset_time: ['2016-01-01', '2016-01-01']
 run:
