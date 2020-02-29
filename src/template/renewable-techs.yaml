@@ -7,6 +7,14 @@ tech_groups:
         constraints:
             energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
             lifetime: 25 # [@JRC:2014] Table 7
+    pv_on_roof:
+        essentials:
+            parent: pv
+        costs:
+            monetary:
+                energy_cap: {{ 880000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2013/MW] from [@JRC:2014] Table 9
+                om_annual: {{ (880000 * 0.02 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] 2% from [@JRC:2014] Table 9
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] stolen from om_annual for technical reasons
     wind:
         essentials:
             name: Wind
@@ -48,15 +56,10 @@ techs:
     roof_mounted_pv:
         essentials:
             name: Roof mounted PV
-            parent: pv
+            parent: pv_on_roof
         constraints:
             resource: file=capacityfactors-rooftop-pv.csv
             resource_unit: energy_per_cap
-        costs:
-            monetary:
-                energy_cap: {{ 880000 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2013/MW] from [@JRC:2014] Table 9
-                om_annual: {{ (880000 * 0.02 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] 2% from [@JRC:2014] Table 9
-                om_prod: {{ 1 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs  }} EUR2013/MW] stolen from om_annual for technical reasons
     wind_onshore_monopoly:
         essentials:
             name: Onshore wind without land competition
