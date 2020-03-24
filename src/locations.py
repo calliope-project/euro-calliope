@@ -58,7 +58,7 @@ def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hy
     hydro_capacities = pd.read_csv(path_to_hydro_capacities_mw, index_col=0)
     biofuel = pd.read_csv(path_to_biofuel_potential_mwh, index_col=0) * biofuel_efficiency
     locations = locations.merge(
-        pd.concat([capacities, hydro_capacities, biofuel], axis="columns"),
+        pd.concat([capacities, hydro_capacities, biofuel], axis="columns", sort=True),
         how="left",
         left_index=True,
         right_index=True,

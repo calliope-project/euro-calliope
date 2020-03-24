@@ -4,8 +4,8 @@ from pathlib import Path
 import atlite
 import xarray as xr
 
-X_RANGE = slice(-10.7, 34.6)
-Y_RANGE = slice(71.2, 34.5)
+X_RANGE = slice(-10.75, 34.75)
+Y_RANGE = slice(71.25, 34.5)
 
 
 def runoff(path_to_cutout, year):

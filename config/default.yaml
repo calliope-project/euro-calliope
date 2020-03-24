@@ -18,7 +18,12 @@ parameters:
         pv-on-flat-areas: 80 # [MW/km^2] from (Gagnon:2016, Klauser:2016, Wirth:2017)
         onshore-wind: 8 # [MW/km^2] from (EuropeanEnvironmentAgency:2009)
         offshore-wind: 15 # [MW/km^2] from (EuropeanEnvironmentAgency:2009)
-    flat-roof-share: 0.302 # from (Trondle:2019)
+    roof-share: # from (Trondle:2019)
+        E: 0.1660
+        N: 0.1817
+        S: 0.1821
+        W: 0.1681
+        flat: 0.3020
     jrc-biofuel:
         scenario: "medium"
         potential-year: "2020"

@@ -20,10 +20,10 @@ conda activate euro-calliope
 4. Further, you need all data files that cannot be retrieved automatically:
 
 * [Maritime Boundaries v10 -> World Exclusive Economic Zones v10](http://www.marineregions.org/downloads.php), to be placed in `./data/World_EEZ_v10_20180221`
-* spatio-temporal capacity factors in `./data/capacityfactors/`, where time and space dimensions are defined by two files: # FIXME should come from Zenodo
+* [hydroBASINS -> Standard -> Europe and Middle East -> hybas_eu_lev07_v1c](https://www.hydrosheds.org/downloads) downloaded to `./data/hybas_eu_lev07_v1c/`
+* spatio-temporal capacity factors in `./data/capacityfactors/`, where time and space dimensions are defined by two files:
     * an id map, where each pixel points to a time series: `./data/capacityfactors/{technology}-ids.tif`
     * all indexed time series: `./data/capacityfactors/{technology}-timeseries.nc`
-* [hydroBASINS -> Standard -> Europe and Middle East -> hybas_eu_lev07_v1c](https://www.hydrosheds.org/downloads) downloaded to `./data/hybas_eu_lev07_v1c/`
 
 ## Generate the model
 

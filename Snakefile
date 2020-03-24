@@ -117,13 +117,28 @@ rule locations:
         hydro_capacities = rules.hydro_capacities.output[0],
         biofuel = "build/data/{{resolution}}/biofuel/{scenario}/potential-mwh-per-year.csv".format(scenario=config["parameters"]["jrc-biofuel"]["scenario"])
     params:
-        flat_roof_share = config["parameters"]["flat-roof-share"],
+        flat_roof_share = config["parameters"]["roof-share"]["flat"],
         maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],
         scaling_factors = config["scaling-factors"],
         biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
     output: "build/model/{resolution}/locations.yaml"
     conda: "envs/geo.yaml"
     script: "src/locations.py"
+
+
+rule directional_rooftop_pv:
+    message: "Generate override for directional rooftop PV in {wildcards.resolution} resolution."
+    input:
+        src = "src/directional_rooftop.py",
+        shapes = rules.units.output[0],
+        land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
+    params:
+        roof_shares = config["parameters"]["roof-share"],
+        maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],
+        scaling_factors = config["scaling-factors"],
+    output: "build/model/{resolution}/directional-rooftop.yaml"
+    conda: "envs/geo.yaml"
+    script: "src/directional_rooftop.py"
 
 
 rule load_shedding:
@@ -147,7 +162,7 @@ rule capacity_factors:
     params:
         threshold = config["capacity-factors"]["min"]
     wildcard_constraints:
-        technology = "((wind-onshore)|(rooftop-pv)|(open-field-pv))"
+        technology = "((wind-onshore)|(rooftop-pv)|(open-field-pv)|(rooftop-pv-n)|(rooftop-pv-e-w)|(rooftop-pv-s-flat))"
     output: "build/model/{resolution}/capacityfactors-{technology}.csv"
     conda: "envs/geo.yaml"
     script: "src/capacityfactors.py"
