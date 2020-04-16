@@ -31,12 +31,13 @@ parameters:
     biofuel-efficiency: 0.45
 sea-connections:
     continental:
-    national:
+    national: # Source: https://www.entsoe.eu/data/map/
         - [ITA, GRC]
         - [EST, FIN]
         - [SWE, LTU]
         - [SWE, POL]
         - [DNK, SWE]
+        - [DNK, NLD] # Cobra link
         - [SWE, DEU]
         - [NOR, DNK]
         - [NOR, DEU]
@@ -47,9 +48,10 @@ sea-connections:
         - [GBR, BEL]
         - [GBR, NLD]
         - [GBR, IRL]
-        # the following do not exist today
+        # not on ENTSO-E map
         - [GRC, CYP]
-    regional:
+        - [DNK, GBR] # Viking link
+    regional: # Source: https://www.entsoe.eu/data/map/
         - [ESP.7_1, ESP.1_1] # Ceuta and Andalucia
         - [ESP.13_1, ESP.10_1] # Islas Baleares and Comunidad Valenciana
         - [FRA.5_1, ITA.16_1] # Corse and Toscana
@@ -65,9 +67,10 @@ sea-connections:
         - [SWE.1_1, POL.11_1] # Blekinge and Pomorskie
         - [DNK.1_1, SWE.13_1] # Hovedstaden and Skåne
         - [SWE.13_1, DEU.15_1] # Skåne and Schleswig-Holstein
-        - [DNK.4_1, DEU.8_1] # Sjællandand Mecklenburg-Vorpommern
+        - [DNK.4_1, DEU.8_1] # Sjælland and Mecklenburg-Vorpommern
         - [DNK.4_1, DNK.5_1] # Sjælland and Syddanmark
         - [DNK.3_1, SWE.21_1] # Nordjylland and Västra Götaland
+        - [DNK.5_1, NLD.5_1] # Syddanmark and Groningen (Cobra Link)
         - [NOR.18_1, DNK.3_1] # Vest-Agder and Nordjylland
         - [NOR.18_1, DEU.15_1] # Vest-Agder and Schleswig-Holstein
         - [NOR.18_1, NLD.5_1] # Vest-Agder and Groningen
@@ -77,8 +80,9 @@ sea-connections:
         - [GBR.1_1, BEL.2_1] # England and Vlaanderen
         - [GBR.1_1, NLD.14_1] # England and Zuid-Holland
         - [GBR.4_1, IRL.17_1] # Wales and Meath
-        - [GBR.3_1, GBR.4_1] # Scotland and Northern Ireland
-        # the following do not exist today
+        - [GBR.3_1, GBR.2_1] # Scotland and Northern Ireland
+        # not on ENTSO-E map
+        - [DNK.5_1, GBR.1_1] # Syddanmark and England (Viking link)
         - [GRC.1_1, CYP.5_1] # Aegean and Paphos
         - [CYP.1_1, CYP.2_1] # Famagusta and Larnaca
         - [EST.7_1, EST.2_1] # Lääne and Hiiu
