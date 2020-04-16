@@ -26,15 +26,15 @@ TEMPLATE = """locations:
                     energy_cap_max: {{ location.eligibility_offshore_wind_mw * scaling_factors.power  }} # [{{ 1 / scaling_factors.power }} MW]
             hydro_run_of_river:
                 constraints:
-                    energy_cap_equals: {{ location.installed_capacity_hror_MW * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
+                    energy_cap_max: {{ location.installed_capacity_hror_MW * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
             hydro_reservoir:
                 constraints:
-                    energy_cap_equals: {{ location.installed_capacity_hdam_MW * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
-                    storage_cap_equals: {{ location.storage_capacity_hdam_MWh * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MWh]
+                    energy_cap_max: {{ location.installed_capacity_hdam_MW * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
+                    storage_cap_max: {{ location.storage_capacity_hdam_MWh * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MWh]
             pumped_hydro:
                 constraints:
-                    energy_cap_equals: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
-                    storage_cap_equals: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MWh]
+                    energy_cap_max: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
+                    storage_cap_max: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MWh]
             biofuel:
                 constraints:
                     resource: {{ location.biofuel_potential_mwh_per_year / 8760 * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
