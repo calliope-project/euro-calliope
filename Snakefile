@@ -20,6 +20,7 @@ onstart:
 rule all:
     message: "Generate Euro Calliope and run tests."
     input:
+        "build/logs/continental-model.done",
         "build/logs/national-model.done",
         "build/logs/regional-model.done",
         "build/logs/test-report.html"
@@ -67,7 +68,7 @@ rule hydro_capacities:
     input:
         src = "src/hydro.py",
         locations = rules.units.output[0],
-        plants = rules.filtered_stations.output[0],
+        plants = rules.preprocess_hydro_stations.output[0],
         phs_storage_capacities = NATIONAL_PHS_STORAGE_CAPACITIES
     output: "build/data/{resolution}/hydro-capacities-mw.csv"
     conda: "envs/geo.yaml"

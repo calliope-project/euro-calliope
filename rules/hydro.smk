@@ -49,24 +49,25 @@ rule fix_basins:
     script: "../src/hydro/fix_basins.py"
 
 
-rule filtered_stations:
+rule preprocess_hydro_stations:
     # Some locations of stations are imprecise and in the sea. Cannot handle those.
     # Some other stations seem incorrect. Also remove.
-    message: "Remove invalid stations." # TODO rather move those stations slightly
+    # Add missing pumped hydro stations in Romania.
+    message: "Preprocess hydro stations." # TODO rather move those stations slightly
     input:
-        src = "src/hydro/filter_hydro_stations.py",
+        src = "src/hydro/preprocess_hydro_stations.py",
         stations = rules.stations_database.output[0],
         basins = rules.fix_basins.output[0]
-    output: "build/data/jrc-hydro-power-plant-database-filtered.csv"
+    output: "build/data/jrc-hydro-power-plant-database-preprocessed.csv"
     conda: "../envs/hydro.yaml"
-    script: "../src/hydro/filter_hydro_stations.py"
+    script: "../src/hydro/preprocess_hydro_stations.py"
 
 
 rule inflow_m3:
     message: "Determine water inflow time series for all hydro electricity."
     input:
         src = "src/hydro/inflow_m3.py",
-        stations = rules.filtered_stations.output[0],
+        stations = rules.preprocess_hydro_stations.output[0],
         basins = rules.fix_basins.output[0],
         runoff = rules.download_runoff_data.output[0]
     params: year = config["year"]

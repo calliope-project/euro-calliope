@@ -65,7 +65,7 @@ def read_national_phs_storage_capacities(path_to_data, locations):
     data["storage-capacity-mwh"] = data["storage-capacity-gwh"] * 1000
     if (len(locations.index) == 1) and (locations.index[0] == "EUR"): # special case for continental level
         data = pd.DataFrame(index=["EUR"], data=data.sum(axis=0).to_dict())
-    return data.reindex(locations.country_code.unique(), fill_value=0) # FIXME kills capacity in Romania
+    return data.reindex(locations.country_code.unique(), fill_value=0)
 
 
 def scale_phs_storage_capacities(hphs, locations, national_storage_capacities):
