@@ -50,14 +50,15 @@ rule fix_basins:
 
 
 rule preprocess_hydro_stations:
-    # Some locations of stations are imprecise and in the sea. Cannot handle those.
-    # Some other stations seem incorrect. Also remove.
+    # Some locations of stations are imprecise and in the sea. Slightly move them.
+    # Some other stations seem incorrect. Remove.
     # Add missing pumped hydro stations in Romania.
-    message: "Preprocess hydro stations." # TODO rather move those stations slightly
+    message: "Preprocess hydro stations."
     input:
         src = "src/hydro/preprocess_hydro_stations.py",
         stations = rules.stations_database.output[0],
         basins = rules.fix_basins.output[0]
+    params: buffer_size = 1 / 60 # move stations up to 1 arcminute < 1 km
     output: "build/data/jrc-hydro-power-plant-database-preprocessed.csv"
     conda: "../envs/hydro.yaml"
     script: "../src/hydro/preprocess_hydro_stations.py"

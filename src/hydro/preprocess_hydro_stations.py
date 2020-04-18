@@ -19,12 +19,14 @@ ROMANIAN_PHS = pd.DataFrame( # Capacity according to (Geth et al., 2015), all in
 ).rename_axis(index="id")
 
 
-def filter_stations(path_to_stations, path_to_basins, path_to_output):
-    stations = pd.read_csv(path_to_stations, index_col=0)
+def preprocess_stations(path_to_stations, path_to_basins, buffer_size, path_to_output):
+    stations = pd.read_csv(path_to_stations, index_col=0).drop(index=INVALID_ENTRIES)
     stations = add_romanian_phs(stations)
     hydrobasins = gpd.read_file(path_to_basins)
     is_in_basin = stations.apply(station_in_any_basin(hydrobasins), axis="columns")
-    stations[is_in_basin].drop(index=INVALID_ENTRIES).to_csv(
+    stations = move_stations_into_basins(stations, hydrobasins, is_in_basin, buffer_size)
+    assert stations[~is_in_basin].apply(station_in_any_basin(hydrobasins), axis="columns").all()
+    stations.to_csv(
         path_to_output,
         header=True,
         index=True
@@ -46,9 +48,27 @@ def station_in_any_basin(basins):
     return station_in_any_basin
 
 
+def move_stations_into_basins(stations, hydrobasins, is_in_basin, buffer_size):
+    stations = stations.copy()
+    ill_placed_stations = stations[~is_in_basin]
+    for station_id, station in ill_placed_stations.iterrows():
+        new_point = new_coords(station, buffer_size, hydrobasins)
+        stations.loc[station_id, "lon"] = new_point.coords[0][0]
+        stations.loc[station_id, "lat"] = new_point.coords[0][1]
+    return stations
+
+
+def new_coords(station, buffer_size, hydrobasins):
+    point = Point(station.lon, station.lat)
+    basin_id = hydrobasins.distance(point).idxmin()
+    closest_basin = hydrobasins.loc[basin_id]
+    return point.buffer(buffer_size).intersection(closest_basin.geometry).representative_point()
+
+
 if __name__ == "__main__":
-    filter_stations(
+    preprocess_stations(
         path_to_stations=snakemake.input.stations,
         path_to_basins=snakemake.input.basins,
+        buffer_size=snakemake.params.buffer_size,
         path_to_output=snakemake.output[0]
     )
