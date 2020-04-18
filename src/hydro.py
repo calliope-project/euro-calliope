@@ -28,7 +28,8 @@ def main(path_to_plants, path_to_locations, path_to_phs_storage_capacities, path
 
 
 def capacities_per_location(plants, locations, tech_type, fill_storage_capacity=True):
-    plants = fill_missing_storage_capacity_values(plants)
+    if fill_storage_capacity:
+        plants = fill_missing_storage_capacity_values(plants.copy())
     plant_centroids = gpd.GeoDataFrame(
         crs=WGS_84,
         geometry=list(map(Point, zip(plants.lon, plants.lat))),

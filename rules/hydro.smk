@@ -3,7 +3,7 @@
 configfile: "./config/default.yaml"
 localrules: download_runoff_data, download_stations_database, stations_database
 
-URL_STATIONS = "https://zenodo.org/record/2669146/files/energy-modelling-toolkit/hydro-power-database-3.zip?download=1"
+URL_STATIONS = "https://zenodo.org/record/3371462/files/energy-modelling-toolkit/hydro-power-database-v4.zip?download=1"
 BASINS = "data/hybas_eu_lev07_v1c/hybas_eu_lev07_v1c.shp"
 IRENA_GENERATION = "data/irena/hydro-generation-europe.csv"
 
@@ -35,7 +35,7 @@ rule stations_database:
     shell:
         """
         unzip {input} -d ./build/
-        mv build/energy-modelling-toolkit-hydro-power-database-e857dd4/data/jrc-hydro-power-plant-database.csv {output}
+        mv build/energy-modelling-toolkit-hydro-power-database-f616a8d/data/jrc-hydro-power-plant-database.csv {output}
         """
 
 

@@ -2,9 +2,7 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
 
-INVALID_ENTRIES = [
-    "H2328" # ASSUME "Parteen Weir": the numbers don't match, and it seems to be a duplicate of Ardnacrucha (H585)
-]
+MAXIMUM_NUMBER_OF_DROPPED_STATIONS = 5
 ROMANIAN_PHS = pd.DataFrame( # Capacity according to (Geth et al., 2015), all in the same region.
     index=["HXXX"],
     data={
@@ -20,7 +18,9 @@ ROMANIAN_PHS = pd.DataFrame( # Capacity according to (Geth et al., 2015), all in
 
 
 def preprocess_stations(path_to_stations, path_to_basins, buffer_size, path_to_output):
-    stations = pd.read_csv(path_to_stations, index_col=0).drop(index=INVALID_ENTRIES)
+    stations = pd.read_csv(path_to_stations, index_col=0)
+    assert stations.installed_capacity_MW.isna().sum() <= MAXIMUM_NUMBER_OF_DROPPED_STATIONS
+    stations.dropna(subset=["installed_capacity_MW"], inplace=True)
     stations = add_romanian_phs(stations)
     hydrobasins = gpd.read_file(path_to_basins)
     is_in_basin = stations.apply(station_in_any_basin(hydrobasins), axis="columns")
