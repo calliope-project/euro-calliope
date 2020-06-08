@@ -35,7 +35,7 @@ rule stations_database:
     shell:
         """
         unzip {input} -d ./build/
-        mv build/energy-modelling-toolkit-hydro-power-database-f616a8d/data/jrc-hydro-power-plant-database.csv {output}
+        mv build/energy-modelling-toolkit-hydro-power-database-496c500/data/jrc-hydro-power-plant-database.csv {output}
         """
 
 
