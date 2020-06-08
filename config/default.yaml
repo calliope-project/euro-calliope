@@ -14,11 +14,11 @@ year: 2016
 crs: "EPSG:4326"
 parameters:
     maximum-installable-power-density: # this is not the yield, but the density of installed power
-        pv-on-tilted-roofs: 160 # [MW/km^2] from (Gagnon:2016, Klauser:2016), i.e. 16% efficiency
-        pv-on-flat-areas: 80 # [MW/km^2] from (Gagnon:2016, Klauser:2016, Wirth:2017)
-        onshore-wind: 8 # [MW/km^2] from (EuropeanEnvironmentAgency:2009)
-        offshore-wind: 15 # [MW/km^2] from (EuropeanEnvironmentAgency:2009)
-    roof-share: # from (Trondle:2019)
+        pv-on-tilted-roofs: 160 # [MW/km^2] from [@Gagnon:2016][@Klauser:2016], i.e. 16% efficiency
+        pv-on-flat-areas: 80 # [MW/km^2] from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
+        onshore-wind: 8 # [MW/km^2] from [@EuropeanEnvironmentAgency:2009]
+        offshore-wind: 15 # [MW/km^2] from [@EuropeanEnvironmentAgency:2009]
+    roof-share: # from [@Trondle:2019]
         E: 0.1660
         N: 0.1817
         S: 0.1821
