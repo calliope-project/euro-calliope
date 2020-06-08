@@ -3,7 +3,7 @@
 configfile: "./config/default.yaml"
 localrules: download_runoff_data, download_stations_database, stations_database
 
-URL_STATIONS = "https://zenodo.org/record/3371462/files/energy-modelling-toolkit/hydro-power-database-v4.zip?download=1"
+URL_STATIONS = "https://zenodo.org/record/3862722/files/energy-modelling-toolkit/hydro-power-database-v5.zip?download=1"
 BASINS = "data/hybas_eu_lev07_v1c/hybas_eu_lev07_v1c.shp"
 IRENA_GENERATION = "data/irena/hydro-generation-europe.csv"
 
