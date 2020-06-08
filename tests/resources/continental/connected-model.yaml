@@ -1,13 +1,13 @@
 import:
-    - '../build/model/interest-rate.yaml'
-    - '../build/model/renewable-techs.yaml'
-    - '../build/model/storage-techs.yaml'
-    - '../build/model/link-techs.yaml'
-    - '../build/model/national/locations.yaml'
+    - '../../../build/model/interest-rate.yaml'
+    - '../../../build/model/renewable-techs.yaml'
+    - '../../../build/model/storage-techs.yaml'
+    - '../../../build/model/link-techs.yaml'
+    - '../../../build/model/continental/locations.yaml'
 model:
-    name: 'Simple disconnected nodes model with national spatial resolution'
+    name: 'Simple one node model with continental spatial resolution'
     calliope_version: 0.6.5
-    timeseries_data_path: '../build/model/national'
+    timeseries_data_path: '../../../build/model/continental'
     subset_time: ['2016-01-01', '2016-01-01']
 run:
     solver: gurobi

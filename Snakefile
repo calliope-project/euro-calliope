@@ -23,7 +23,8 @@ rule all:
         "build/logs/continental-model.done",
         "build/logs/national-model.done",
         "build/logs/regional-model.done",
-        "build/logs/test-report.html"
+        "build/logs/continental/test-report.html",
+        "build/logs/national/test-report.html"
 
 
 rule potentials_zipped:
@@ -161,7 +162,9 @@ rule capacity_factors:
         ids = CAPACITY_FACTOR_ID_MAPS,
         timeseries = CAPACITY_FACTOR_TIME_SERIES
     params:
-        threshold = config["capacity-factors"]["min"]
+        threshold = config["capacity-factors"]["min"],
+        year = config["year"],
+        trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
     wildcard_constraints:
         technology = "((wind-onshore)|(rooftop-pv)|(open-field-pv)|(rooftop-pv-n)|(rooftop-pv-e-w)|(rooftop-pv-s-flat))"
     output: "build/model/{resolution}/capacityfactors-{technology}.csv"
@@ -179,7 +182,9 @@ rule capacity_factors_offshore:
         ids = CAPACITY_FACTOR_ID_MAPS.format(technology="wind-offshore"),
         timeseries = CAPACITY_FACTOR_TIME_SERIES.format(technology="wind-offshore")
     params:
-        threshold = config["capacity-factors"]["min"]
+        threshold = config["capacity-factors"]["min"],
+        year = config["year"],
+        trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
     output: "build/model/{resolution}/capacityfactors-wind-offshore.csv"
     conda: "envs/geo.yaml"
     script: "src/capacityfactors_offshore.py"
@@ -274,13 +279,21 @@ rule clean: # removes all generated results
 
 
 rule test:
-    message: "Run tests."
+    message: "Run tests"
     input:
-        "build/logs/continental-model.done",
-        "build/logs/national-model.done",
-        "build/logs/regional-model.done"
-    params: run_regional = "--include-regional-resolution" if config.get("testregional", False) else ""
-    conda: "envs/test.yaml"
-    output: "build/logs/test-report.html"
-    shell:
-        "py.test --html={output} {params.run_regional} --self-contained-html"
+        "tests/test_runner.py",
+        "tests/test_model.py",
+        "tests/test_capacityfactors.py",
+        "build/logs/{resolution}-model.done",
+        connected_model = "tests/resources/{resolution}/connected-model.yaml",
+        disconnected_model = "tests/resources/{resolution}/disconnected-model.yaml",
+        capacity_factor_timeseries = expand(
+            "build/model/{{resolution}}/capacityfactors-{technology}.csv",
+            technology=["rooftop-pv", "open-field-pv", "wind-onshore", "wind-offshore",
+                        "hydro-ror", "hydro-reservoir-inflow"]
+        )
+    params:
+        config = config
+    output: "build/logs/{resolution}/test-report.html"
+    conda: "./envs/test.yaml"
+    script: "./tests/test_runner.py"

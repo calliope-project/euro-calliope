@@ -1,13 +1,13 @@
 import:
-    - '../build/model/interest-rate.yaml'
-    - '../build/model/renewable-techs.yaml'
-    - '../build/model/storage-techs.yaml'
-    - '../build/model/link-techs.yaml'
-    - '../build/model/national/locations.yaml'
-    - '../build/model/national/link-all-neighbours.yaml'
+    - '../../../build/model/interest-rate.yaml'
+    - '../../../build/model/renewable-techs.yaml'
+    - '../../../build/model/storage-techs.yaml'
+    - '../../../build/model/link-techs.yaml'
+    - '../../../build/model/national/locations.yaml'
+    - '../../../build/model/national/link-all-neighbours.yaml'
 model:
     name: 'Simple connected nodes model with national spatial resolution'
-    timeseries_data_path: '../build/model/national'
+    timeseries_data_path: '../../../build/model/national'
     subset_time: ['2016-01-01', '2016-01-01']
 run:
     solver: gurobi

@@ -10,6 +10,7 @@ capacity-factors:
         onshore: 0.3021 # median of average 2016 factors for ~2700 points in Europe
         offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
         ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
+    trim-ninja-timeseries: True # trims renewables.ninja timeseries to the year in question
 year: 2016
 crs: "EPSG:4326"
 parameters:

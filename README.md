@@ -41,10 +41,10 @@ If you want to run on another cluster, read [snakemake's documentation on cluste
 
 ## Example use of the model
 
-The generation step created all single parts of `euro-calliope`, like technologies and time series. These can be combined to eventually build a final model to run simulations with. For an example of such a model, see `./tests/simple-model.yaml`. It is a complete Calliope model and can be used like any other, for example like this:
+The generation step created all single parts of `euro-calliope`, like technologies and time series. These can be combined to eventually build a final model to run simulations with. For an example of such a model, see `./tests/resources/national/connected-model.yaml`. It is a complete Calliope model and can be used like any other, for example like this:
 
 ```Bash
-$ calliope run ./tests/simple-model.yaml
+$ calliope run ./tests/resources/national/connected-model.yaml
 ```
 
 For more information on how to use Calliope models, see [Calliope's documentation](https://www.callio.pe).
@@ -62,8 +62,8 @@ The default units for Euro-Calliope are `MW`, `MWh`, `EUR`, and `km2`, but you c
 
 ## Run the tests
 
-    snakemake --use-conda test -f
+Tests of models with continental and national resolution run automatically when you run the entire workflow. To run the tests of models with regional resolution do the following:
 
-To run all tests, including the tests on the regional level:
+    snakemake --use-conda build/logs/regional/test-report.html
 
-    snakemake --use-conda test -f --config runregional=True
+Exchanging `regional` with `national` or `continental` allows you to run tests on the respective resolution explicitly.

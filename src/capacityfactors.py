@@ -10,11 +10,14 @@ WEIGHT_VAR = "weight"
 CAPACITY_FACTOR_VAR = "electricity"
 
 
-def capacityfactors(path_to_locations, path_to_id_map, path_to_timeseries, threshold, path_to_result):
+def capacityfactors(path_to_locations, path_to_id_map, path_to_timeseries, threshold,
+                    path_to_result, year=None):
     """Generate capacityfactor time series for each location."""
     locations = gpd.read_file(path_to_locations).set_index("id").geometry
     locations.index = locations.index.map(lambda x: x.replace(".", "-"))
     ts = xr.open_dataset(path_to_timeseries)
+    if year:
+        ts = ts.sel(time=str(year))
     with rasterio.open(path_to_id_map, "r") as src:
         id_map = src.read(1)
         transform = src.transform
@@ -57,5 +60,6 @@ if __name__ == '__main__':
         path_to_id_map=snakemake.input.ids,
         path_to_timeseries=snakemake.input.timeseries,
         threshold=float(snakemake.params.threshold),
+        year=snakemake.params.year if snakemake.params.trim_ts else None,
         path_to_result=snakemake.output[0]
     )
