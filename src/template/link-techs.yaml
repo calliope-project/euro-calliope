@@ -20,5 +20,5 @@ techs:
             lifetime: 60 # [@JRC:2014]
         costs:
             monetary:
-                energy_cap_per_distance: {{ 0.9 * scaling_factors.specific_costs }} # [{{ 1 / scaling_factors.specific_costs }} EUR2013/MW/m] from [@JRC:2014], Table 39
+                energy_cap_per_distance: {{ 0.9 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW/m") }} from [@JRC:2014], Table 39
                 om_annual_investment_fraction: 0.015 # from [@JRC:2014], Table 39

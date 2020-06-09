@@ -3,12 +3,13 @@ import jinja2
 import pandas as pd
 import geopandas as gpd
 
+import filters
 
 TEMPLATE = """locations:
     {% for id, location in locations.iterrows() %}
     {{ id | replace(".", "-") }}:
         coordinates: {lat: {{ location.centroid.y }}, lon: {{ location.centroid.x }}}
-        available_area: {{ location.eligibility_onshore_wind_and_pv_km2 * scaling_factors.area }} # [{{ 1 / scaling_factors.area }} km2] usable by onshore wind or open field pv
+        available_area: {{ location.eligibility_onshore_wind_and_pv_km2 * scaling_factors.area }} # {{ (1 / scaling_factors.area) | unit("km2") }} usable by onshore wind or open field pv
         techs:
             demand_elec:
             battery:
@@ -17,28 +18,28 @@ TEMPLATE = """locations:
             wind_onshore_competing:
             wind_onshore_monopoly:
                 constraints:
-                    energy_cap_max: {{ location.eligibility_onshore_wind_monopoly_mw * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
+                    energy_cap_max: {{ location.eligibility_onshore_wind_monopoly_mw * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
             roof_mounted_pv:
                 constraints:
-                    energy_cap_max: {{ location.eligibility_rooftop_pv_mw * scaling_factors.power  }} # [{{ 1 / scaling_factors.power }} MW]
+                    energy_cap_max: {{ location.eligibility_rooftop_pv_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
             wind_offshore:
                 constraints:
-                    energy_cap_max: {{ location.eligibility_offshore_wind_mw * scaling_factors.power  }} # [{{ 1 / scaling_factors.power }} MW]
+                    energy_cap_max: {{ location.eligibility_offshore_wind_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
             hydro_run_of_river:
                 constraints:
-                    energy_cap_max: {{ location.installed_capacity_hror_MW * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
+                    energy_cap_max: {{ location.installed_capacity_hror_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
             hydro_reservoir:
                 constraints:
-                    energy_cap_max: {{ location.installed_capacity_hdam_MW * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
-                    storage_cap_max: {{ location.storage_capacity_hdam_MWh * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MWh]
+                    energy_cap_max: {{ location.installed_capacity_hdam_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                    storage_cap_max: {{ location.storage_capacity_hdam_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
             pumped_hydro:
                 constraints:
-                    energy_cap_max: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
-                    storage_cap_max: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MWh]
+                    energy_cap_max: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                    storage_cap_max: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
             biofuel:
                 constraints:
-                    resource: {{ location.biofuel_potential_mwh_per_year / 8760 * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MW]
-                    storage_cap_equals: {{ location.biofuel_potential_mwh_per_year / 2 * scaling_factors.power }} # [{{ 1 / scaling_factors.power }} MWh] (0.5x annual yield) # ASSUME < 1 for numerical range
+                    resource: {{ location.biofuel_potential_mwh_per_year / 8760 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                    storage_cap_equals: {{ location.biofuel_potential_mwh_per_year / 2 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }} (0.5x annual yield) # ASSUME < 1 for numerical range
     {% endfor %}
 """
 
@@ -65,8 +66,9 @@ def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hy
         validate="one_to_one"
     )
 
-    template = jinja2.Template(TEMPLATE)
-    rendered = template.render(
+    env = jinja2.Environment()
+    env.filters["unit"] = filters.unit
+    rendered = env.from_string(TEMPLATE).render(
         locations=locations,
         scaling_factors=scaling_factors
     )

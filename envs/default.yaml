@@ -8,4 +8,4 @@ dependencies:
     - numpy=1.16.2
     - pandas=0.24.2
     - pycountry=18.12.8
-    - jinja2=2.10.1
+    - jinja2=2.11.2

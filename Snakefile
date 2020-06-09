@@ -50,6 +50,7 @@ rule parameterise_template:
     message: "Apply config parameters to file {wildcards.definition_file}.yaml from templates."
     input:
         src = "src/parameterise_templates.py",
+        filters = "src/filters.py",
         template = "src/template/{definition_file}.yaml",
         biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
             scenario=config["parameters"]["jrc-biofuel"]["scenario"]
@@ -114,6 +115,7 @@ rule locations:
     message: "Generate locations for {wildcards.resolution} resolution."
     input:
         src = "src/locations.py",
+        filters = "src/filters.py",
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
         hydro_capacities = rules.hydro_capacities.output[0],
