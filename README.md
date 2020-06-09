@@ -51,7 +51,9 @@ For more information on how to use Calliope models, see [Calliope's documentatio
 
 ## Units and scaling
 
-The default units for Euro-Calliope are `MW`, `MWh`, `EUR`, and `km2`, but you can scale all of these using the configuration values in `config/default.yaml`. Apart from convenience, this may be important to handle numerical issues with your solver.
+The default units used within euro-calliope are `100 GW`, `100 GWh`, `billion EUR`, and `10,000 km2`. All data going into Calliope and all Calliope result data will be given using these units. While they may be unusual, these units lead to a numerical model that is well suited for the interior-point solution algorithm that is used by default. The units are tuned so as to work best for models with a time resolution of a few hours and a duration of one year. For other types of problems, or other solution algorithms, the units may need to be changed to avoid numerical issues within the solver.
+
+You can easily change the units and scale all values using the `scaling-factor` configuration values in `config/default.yaml`. However, these values must be changed before building the model. You may want to run `snakemake clean` before changing these values. The base units on which the scaling factors are applied are `1 MW`, `1 MWh`, `EUR`, and `km2`. So for example, the default unit for energy (100 GWh) is derived by scaling the base unit (1 MWh) with a scaling factor of `0.00001`.
 
 ## Repo structure
 

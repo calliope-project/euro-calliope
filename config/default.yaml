@@ -1,7 +1,7 @@
-scaling-factors:
-    power: 1
-    area: 1
-    monetary: 1
+scaling-factors: # values are tuned for models with a few hours resolution and one year duration
+    power: 0.00001 # from MW(h) to 100 GW(h)
+    area: 0.0001 # from km2 to 10,000 km2
+    monetary: 0.000000001 # from EUR to 1 billion EUR
 capacity-factors:
     min: 0.001 # consider smaller values to be 0; this helps numerics in the LP
     max: 10 # for hydro reservoirs, leading to a numerical range of 1e5 (hourly resolution)
