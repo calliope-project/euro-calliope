@@ -2,18 +2,24 @@ import:
     - '../../../build/model/interest-rate.yaml'
     - '../../../build/model/renewable-techs.yaml'
     - '../../../build/model/storage-techs.yaml'
-    - '../../../build/model/regional/locations.yaml'
     - '../../../build/model/link-techs.yaml'
+    - '../../../build/model/continental/locations.yaml'
 model:
-    name: 'Simple disconnected nodes model with regional spatial resolution'
+    name: 'Test model with continental spatial resolution'
     calliope_version: 0.6.5
-    timeseries_data_path: '../../../build/model/regional'
+    timeseries_data_path: '../../../build/model/continental'
     subset_time: ['2016-01-01', '2016-01-01']
+scenarios:
+    default: []
+    directional-pv: ["add-directional-pv"]
+overrides:
+    add-directional-pv:
+        import:
+            - './build/model/continental/directional-rooftop.yaml'
 run:
     solver: gurobi
     solver_io: python
     mode: plan
-    ensure_feasibility: true # not all regions have sufficient renewable potential
     objective_options: {
         'cost_class': {'monetary': 1},
         'sense': 'minimize'

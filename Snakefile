@@ -134,6 +134,7 @@ rule directional_rooftop_pv:
     message: "Generate override for directional rooftop PV in {wildcards.resolution} resolution."
     input:
         src = "src/directional_rooftop.py",
+        filters = "src/filters.py",
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
     params:
@@ -287,8 +288,8 @@ rule test:
         "tests/test_model.py",
         "tests/test_capacityfactors.py",
         "build/logs/{resolution}-model.done",
-        connected_model = "tests/resources/{resolution}/connected-model.yaml",
-        disconnected_model = "tests/resources/{resolution}/disconnected-model.yaml",
+        rules.directional_rooftop_pv.output,
+        model = "tests/resources/{resolution}/model.yaml",
         capacity_factor_timeseries = expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=["rooftop-pv", "open-field-pv", "wind-onshore", "wind-offshore",
