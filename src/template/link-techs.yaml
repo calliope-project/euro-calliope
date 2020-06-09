@@ -16,7 +16,7 @@ techs:
             parent: transmission
             carrier: electricity
         constraints:
-            energy_eff_per_distance: 0.99999995 # [1/m]
+            energy_eff_per_distance: 0.99999995 # (1/m)
             lifetime: 60 # [@JRC:2014]
         costs:
             monetary:

@@ -135,6 +135,6 @@ techs:
         costs:
             monetary:
                 energy_cap: {{ 2300000 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-                om_prod: 0 # 3.1 [EUR2013/MWh] added to om_con, because value is very small and causing poor numerical range
+                om_prod: 0 # 3.1 (EUR2013/MWh) added to om_con, because value is very small and causing poor numerical range
                 om_annual: {{ 2300000 * 0.041 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW/yr") }} 2300000 * 4.1%
                 om_con: {{ (biofuel_fuel_cost / biofuel_efficiency + 3.1) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR/MWh") }}
