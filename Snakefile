@@ -12,6 +12,7 @@ configfile: "config/default.yaml"
 wildcard_constraints:
         resolution = "((continental)|(national)|(regional))"
 
+__version__ = open('./VERSION').readlines()[0].strip()
 
 onstart:
     shell("mkdir -p build/logs")
@@ -20,9 +21,9 @@ onstart:
 rule all:
     message: "Generate Euro Calliope and run tests."
     input:
-        "build/logs/continental-model.done",
-        "build/logs/national-model.done",
-        "build/logs/regional-model.done",
+        "build/model/continental/build-metadata.yaml",
+        "build/model/national/build-metadata.yaml",
+        "build/model/regional/build-metadata.yaml",
         "build/logs/continental/test-report.html",
         "build/logs/national/test-report.html"
 
@@ -266,11 +267,18 @@ rule model:
         rules.link_neighbours.output,
         rules.capacity_factors_hydro.output,
         rules.hydro_capacities.output,
+        rules.directional_rooftop_pv.output,
         expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=["rooftop-pv", "open-field-pv", "wind-onshore", "wind-offshore"]
-        )
-    output: touch("build/logs/{resolution}-model.done")
+        ),
+        src = "src/metadata.py"
+    params:
+        config = config,
+        version = __version__
+    output: "build/model/{resolution}/build-metadata.yaml"
+    conda: "envs/default.yaml"
+    script: "src/metadata.py"
 
 
 rule clean: # removes all generated results
@@ -287,8 +295,7 @@ rule test:
         "tests/test_runner.py",
         "tests/test_model.py",
         "tests/test_capacityfactors.py",
-        "build/logs/{resolution}-model.done",
-        rules.directional_rooftop_pv.output,
+        "build/model/{resolution}/build-metadata.yaml",
         model = "tests/resources/{resolution}/model.yaml",
         capacity_factor_timeseries = expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
