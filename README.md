@@ -1,10 +1,14 @@
 # Euro Calliope
 
-A model of the European power system built using Calliope.
+A model of the European electricity system built using Calliope.
 
-This repository contains the routines that automatically generate the model from source data.
+This repository contains the routines that automatically build the model from source data.
 
-## Get ready
+## At a glance
+
+Euro-calliope models the European electricity system with each location representing an administrative unit. It can be built on three spatial resolutions: on the continental level as a single location, on the national level with 34 locations, and on the regional level with 497 locations. On each node, renewable generation capacities (wind, solar, bioenergy) and balancing capacities (battery, hydrogen) can be built. In addition, hydro electricity and pumped hydro storage capacities can be built up the the extent to which they exist today. All capacities are used to satisfy electricity demand on all locations which is based on historic data. Locations are connected through transmission lines of unrestricted capacity. Using Calliope, the model is formulated as a linear optimisation problem with total monetary cost of all capacities as the minimisation objective. All elements of euro-calliope can be manipulated either by changing the configuration in `config/default.yaml` or by manipulating the build workflow before building the model.
+
+## Get ready to build the model
 
 1. You need [conda](https://conda.io/docs/index.html) to build and use the model. Using conda, you can create a conda environment from within you can run it:
 
@@ -25,13 +29,13 @@ conda activate euro-calliope
     * an id map, where each pixel points to a time series: `./data/capacityfactors/{technology}-ids.tif`
     * all indexed time series: `./data/capacityfactors/{technology}-timeseries.nc`
 
-## Generate the model
+## Build the model
 
-Because input data is large, the actual model including this data is not part of this repository. To use the model, you first need to generate it from input data and scripts. Running the generation step will generate the model in the `./model` folder.
+Because input data is large, the actual model including its data is not part of this repository. To use the model, you first need to build it from input data and scripts. Running the build step will build the model in the `./model` folder.
 
     snakemake --use-conda
 
-## Run on Euler cluster
+## Build the model on Euler cluster
 
 To run on Euler, use the following command:
 
@@ -41,13 +45,33 @@ If you want to run on another cluster, read [snakemake's documentation on cluste
 
 ## Example use of the model
 
-The generation step created all single parts of `euro-calliope`, like technologies and time series. These can be combined to eventually build a final model to run simulations with. For an example of such a model, see `./tests/resources/national/connected-model.yaml`. It is a complete Calliope model and can be used like any other, for example like this:
+The build step creates all individual components of `euro-calliope`, like technologies and time series. These can be combined to eventually build a final model to run simulations with. For an example of such a model, see `./tests/resources/national/model.yaml`. It is a complete Calliope model and can be used like any other, for example like this:
 
 ```Bash
-$ calliope run ./tests/resources/national/connected-model.yaml
+$ calliope run ./tests/resources/national/model.yaml
 ```
 
-For more information on how to use Calliope models, see [Calliope's documentation](https://www.callio.pe).
+For more information on how to use Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io).
+
+## Model components
+
+After a successful full build (see "Build the model"), the following files will exist in `build/model`:
+
+```
+├── {resolution}                           <- For each spatial resolution an individual folder.
+│   ├── build-metadata.yaml                <- Metadata of the build process.
+│   ├── capacityfactors-{technology}.csv   <- Timeseries of capacityfactors of all renewables.
+│   ├── directional-rooftop.yaml           <- Override discriminating rooftop PV by orientation.
+│   ├── electricity-demand.csv             <- Timeseries of electricity demand on each node.
+│   ├── link-all-neighbours.yaml           <- Connects neighbouring locations with transmission.
+│   └── locations.yaml                     <- Defines all locations and their max capacities.
+├── interest-rate.yaml                     <- Interest rate of all capacities.
+├── link-techs.yaml                        <- Definition of link technologies.
+├── renewable-techs.yaml                   <- Definition of supply technologies.
+└── storage-techs.yaml                     <- Definition of storage technologies.
+```
+
+Alternatively to a full build, each of these model components can be built individually, by running `snakemake --use-conda <path-to-component>`. The model components can be used to [configure a Calliope model](https://calliope.readthedocs.io/en/stable/user/building.html). For an example model configuration, see "Example use of the model" above.
 
 ## Units and scaling
 
@@ -57,10 +81,14 @@ You can easily change the units and scale all values using the `scaling-factor` 
 
 ## Repo structure
 
-* `build/model`: contains the entire model after the generation step, including Calliope definition files and data (does not exist initially)
-* `src`: contains the source data and source code to generate the model
-* `envs`: contains files defining the environment to run the built steps in
-* `tests`: contains a test usage of the model
+* `build/model`: Contains the entire model after the build step, including Calliope definition files and data (does not exist initially).
+* `config`: Files with configuration parameters which influence the model build process.
+* `data`: Small input data used within the model build process.
+* `docs`: Documentation of the model and the build process.
+* `envs`: Files defining the conda environment which are used to build the model.
+* `rules`: Snakemake workflows defining the build process.
+* `src`: Contains the source code to build the model.
+* `tests`: Contains a test usage of the model.
 
 ## Run the tests
 
