@@ -270,7 +270,8 @@ rule model:
         rules.directional_rooftop_pv.output,
         expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
-            technology=["rooftop-pv", "open-field-pv", "wind-onshore", "wind-offshore"]
+            technology=["rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat",
+                        "open-field-pv", "wind-onshore", "wind-offshore"]
         ),
         src = "src/metadata.py"
     params:

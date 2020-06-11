@@ -4,6 +4,7 @@ import:
     - '../../../build/model/storage-techs.yaml'
     - '../../../build/model/link-techs.yaml'
     - '../../../build/model/regional/locations.yaml'
+    - '../../../build/model/regional/directional-rooftop.yaml'
 model:
     name: 'Test model with regional spatial resolution'
     calliope_version: 0.6.5
@@ -12,14 +13,11 @@ model:
 scenarios:
     default: []
     connected: ["connect"]
-    directional-pv: ["add-directional-pv"]
+    directional-pv: ["directional-rooftop-pv"]
 overrides:
     connect:
         import:
             - './build/model/regional/link-all-neighbours.yaml'
-    add-directional-pv:
-        import:
-            - './build/model/regional/directional-rooftop.yaml'
 run:
     solver: gurobi
     solver_io: python

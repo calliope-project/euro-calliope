@@ -4,6 +4,7 @@ import:
     - '../../../build/model/storage-techs.yaml'
     - '../../../build/model/link-techs.yaml'
     - '../../../build/model/continental/locations.yaml'
+    - '../../../build/model/continental/directional-rooftop.yaml'
 model:
     name: 'Test model with continental spatial resolution'
     calliope_version: 0.6.5
@@ -11,11 +12,7 @@ model:
     subset_time: ['2016-01-01', '2016-01-01']
 scenarios:
     default: []
-    directional-pv: ["add-directional-pv"]
-overrides:
-    add-directional-pv:
-        import:
-            - './build/model/continental/directional-rooftop.yaml'
+    directional-pv: ["directional-rooftop-pv"]
 run:
     solver: gurobi
     solver_io: python
