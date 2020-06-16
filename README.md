@@ -2,7 +2,7 @@
 
 A model of the European electricity system built using Calliope.
 
-This repository contains the routines that automatically build the model from source data.
+This repository contains the workflow routines that automatically build the model from source data.
 
 ## At a glance
 
@@ -10,24 +10,23 @@ Euro-calliope models the European electricity system with each location represen
 
 ## Get ready to build the model
 
-1. You need [conda](https://conda.io/docs/index.html) to build and use the model. Using conda, you can create a conda environment from within you can run it:
+1. The workflow is developed on macOS, should run on Linux (untested), and cannot run natively on Windows.
+
+2. You need [conda](https://conda.io/docs/index.html) to build and use the model. Using conda, you can create a conda environment from within you can build the model:
 
 ```
 conda env create -f requirements.yml
 conda activate euro-calliope
 ```
 
-2. You need a Gurobi license installed on your computer, or you need to choose a different solver.
+3. You need a Gurobi license installed on your computer, or you need to choose a different solver.
 
-3. You need an account at the Copernicus Climate Data Service and you need to create a `$HOME/.cdsapirc` file with your credentials, see their [How To](https://cds.climate.copernicus.eu/api-how-to) (you do not need to manually install the client).
+4. You need an account at the Copernicus Climate Data Service and you need to create a `$HOME/.cdsapirc` file with your credentials, see their [How To](https://cds.climate.copernicus.eu/api-how-to) (you do not need to manually install the client).
 
-4. Further, you need all data files that cannot be retrieved automatically:
+5. Further, you need all data files that cannot be retrieved automatically:
 
 * [Maritime Boundaries v10 -> World Exclusive Economic Zones v10](http://www.marineregions.org/downloads.php), to be placed in `./data/World_EEZ_v10_20180221`
 * [hydroBASINS -> Standard -> Europe and Middle East -> hybas_eu_lev07_v1c](https://www.hydrosheds.org/downloads) downloaded to `./data/hybas_eu_lev07_v1c/`
-* spatio-temporal capacity factors in `./data/capacityfactors/`, where time and space dimensions are defined by two files:
-    * an id map, where each pixel points to a time series: `./data/capacityfactors/{technology}-ids.tif`
-    * all indexed time series: `./data/capacityfactors/{technology}-timeseries.nc`
 
 ## Build the model
 
