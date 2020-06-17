@@ -186,20 +186,21 @@ rule capacity_factors_wind_and_solar:
         )
     shell:
         """
-        ln -f data/automatic/capacityfactors/onshore-locations.tif build/data/capacityfactors/wind-onshore-ids.tif
-        ln -f data/automatic/capacityfactors/onshore-locations.tif build/data/capacityfactors/open-field-pv-ids.tif
-        ln -f data/automatic/capacityfactors/onshore-locations.tif build/data/capacityfactors/rooftop-pv-ids.tif
-        ln -f data/automatic/capacityfactors/onshore-locations.tif build/data/capacityfactors/rooftop-pv-n-ids.tif
-        ln -f data/automatic/capacityfactors/onshore-locations.tif build/data/capacityfactors/rooftop-pv-e-w-ids.tif
-        ln -f data/automatic/capacityfactors/onshore-locations.tif build/data/capacityfactors/rooftop-pv-s-flat-ids.tif
-        ln -f data/automatic/capacityfactors/offshore-locations.tif build/data/capacityfactors/wind-offshore-ids.tif
-        ln -f data/automatic/capacityfactors/wind-onshore-timeseries.nc build/data/capacityfactors/
-        ln -f data/automatic/capacityfactors/wind-offshore-timeseries.nc build/data/capacityfactors/
-        ln -f data/automatic/capacityfactors/pv-timeseries.nc build/data/capacityfactors/open-field-pv-timeseries.nc
-        ln -f data/automatic/capacityfactors/pv-timeseries.nc build/data/capacityfactors/rooftop-pv-timeseries.nc
-        ln -f data/automatic/capacityfactors/pv-timeseries.nc build/data/capacityfactors/rooftop-pv-n-timeseries.nc
-        ln -f data/automatic/capacityfactors/pv-timeseries.nc build/data/capacityfactors/rooftop-pv-e-w-timeseries.nc
-        ln -f data/automatic/capacityfactors/pv-timeseries.nc build/data/capacityfactors/rooftop-pv-s-flat-timeseries.nc
+        cd build/data/capacityfactors
+        ln -sf ../../../data/automatic/capacityfactors/onshore-locations.tif wind-onshore-ids.tif
+        ln -sf ../../../data/automatic/capacityfactors/onshore-locations.tif open-field-pv-ids.tif
+        ln -sf ../../../data/automatic/capacityfactors/onshore-locations.tif rooftop-pv-ids.tif
+        ln -sf ../../../data/automatic/capacityfactors/onshore-locations.tif rooftop-pv-n-ids.tif
+        ln -sf ../../../data/automatic/capacityfactors/onshore-locations.tif rooftop-pv-e-w-ids.tif
+        ln -sf ../../../data/automatic/capacityfactors/onshore-locations.tif rooftop-pv-s-flat-ids.tif
+        ln -sf ../../../data/automatic/capacityfactors/offshore-locations.tif wind-offshore-ids.tif
+        ln -sf ../../../data/automatic/capacityfactors/wind-onshore-timeseries.nc
+        ln -sf ../../../data/automatic/capacityfactors/wind-offshore-timeseries.nc
+        ln -sf ../../../data/automatic/capacityfactors/pv-timeseries.nc open-field-pv-timeseries.nc
+        ln -sf ../../../data/automatic/capacityfactors/pv-timeseries.nc rooftop-pv-timeseries.nc
+        ln -sf ../../../data/automatic/capacityfactors/pv-timeseries.nc rooftop-pv-n-timeseries.nc
+        ln -sf ../../../data/automatic/capacityfactors/pv-timeseries.nc rooftop-pv-e-w-timeseries.nc
+        ln -sf ../../../data/automatic/capacityfactors/pv-timeseries.nc rooftop-pv-s-flat-timeseries.nc
         """
 
 
