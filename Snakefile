@@ -132,7 +132,9 @@ rule locations:
         maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],
         scaling_factors = config["scaling-factors"],
         biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
-    output: "build/model/{resolution}/locations.yaml"
+    output:
+        yaml = "build/model/{resolution}/locations.yaml",
+        csv = "build/model/{resolution}/locations.csv"
     conda: "envs/geo.yaml"
     script: "src/locations.py"
 

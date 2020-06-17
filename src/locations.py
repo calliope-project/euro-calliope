@@ -7,7 +7,7 @@ import filters
 
 TEMPLATE = """locations:
     {% for id, location in locations.iterrows() %}
-    {{ id | replace(".", "-") }}:
+    {{ id }}: # {{ location["name"] }}
         coordinates: {lat: {{ location.centroid.y }}, lon: {{ location.centroid.x }}}
         available_area: {{ location.eligibility_onshore_wind_and_pv_km2 * scaling_factors.area }} # {{ (1 / scaling_factors.area) | unit("km2") }} usable by onshore wind or open field pv
         techs:
@@ -46,10 +46,15 @@ TEMPLATE = """locations:
 
 def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hydro_capacities_mw,
                         path_to_biofuel_potential_mwh, flat_roof_share, maximum_installable_power_density,
-                        scaling_factors, biofuel_efficiency, path_to_result):
+                        scaling_factors, biofuel_efficiency, path_to_output_yaml, path_to_output_csv):
     """Generate a file that represents locations in Calliope."""
     locations = gpd.GeoDataFrame(
-        gpd.read_file(path_to_shapes).set_index("id").centroid.rename("centroid")
+        gpd.read_file(path_to_shapes).set_index("id")
+    )
+    locations = (
+        locations
+        .assign(centroid=locations.centroid.rename("centroid"))
+        .loc[:, ["name", "centroid"]]
     )
     capacities = _from_area_to_installed_capacity(
         land_eligibiligy_km2=pd.read_csv(path_to_land_eligibility_km2, index_col=0),
@@ -65,6 +70,7 @@ def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hy
         right_index=True,
         validate="one_to_one"
     )
+    locations = locations.assign(id=locations.index.str.replace(".", "-")).set_index("id")
 
     env = jinja2.Environment()
     env.filters["unit"] = filters.unit
@@ -72,8 +78,9 @@ def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hy
         locations=locations,
         scaling_factors=scaling_factors
     )
-    with open(path_to_result, "w") as result_file:
+    with open(path_to_output_yaml, "w") as result_file:
         result_file.write(rendered)
+    locations.name.to_csv(path_to_output_csv, index=True, header=True)
 
 
 def _from_area_to_installed_capacity(land_eligibiligy_km2, flat_roof_share,
@@ -97,7 +104,8 @@ if __name__ == "__main__":
         path_to_land_eligibility_km2=snakemake.input.land_eligibility_km2,
         path_to_hydro_capacities_mw=snakemake.input.hydro_capacities,
         path_to_biofuel_potential_mwh=snakemake.input.biofuel,
-        path_to_result=snakemake.output[0],
+        path_to_output_yaml=snakemake.output.yaml,
+        path_to_output_csv=snakemake.output.csv,
         flat_roof_share=snakemake.params["flat_roof_share"],
         maximum_installable_power_density=snakemake.params["maximum_installable_power_density"],
         scaling_factors=snakemake.params["scaling_factors"],

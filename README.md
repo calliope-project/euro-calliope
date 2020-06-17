@@ -63,6 +63,7 @@ After a successful full build (see "Build the model"), the following files will 
 │   ├── electricity-demand.csv             <- Timeseries of electricity demand on each node.
 │   ├── example-model.yaml                 <- Calliope model definition.
 │   ├── link-all-neighbours.yaml           <- Connects neighbouring locations with transmission.
+│   ├── locations.csv                      <- Map from Calliope location id to name of location.
 │   └── locations.yaml                     <- Defines all locations and their max capacities.
 ├── build-metadata.yaml                    <- Metadata of the build process.
 ├── demand-techs.yaml                      <- Definition of demand technologies.
