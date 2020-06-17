@@ -23,13 +23,13 @@ onstart:
 
 
 rule all:
-    message: "Generate Euro Calliope and run tests."
+    message: "Generate euro-calliope pre-built models and run tests."
     input:
-        "build/model/continental/build-metadata.yaml",
-        "build/model/national/build-metadata.yaml",
-        "build/model/regional/build-metadata.yaml",
+        "build/logs/continental/model.done",
+        "build/logs/national/model.done",
+        "build/logs/regional/model.done",
         "build/logs/continental/test-report.html",
-        "build/logs/national/test-report.html"
+        "build/logs/national/test-report.html",
 
 
 rule potentials_zipped:
@@ -52,11 +52,11 @@ rule potentials:
 
 
 rule parameterise_template:
-    message: "Apply config parameters to file {wildcards.definition_file}.yaml from templates."
+    message: "Apply config parameters to file {wildcards.template} from templates."
     input:
         src = "src/parameterise_templates.py",
         filters = "src/filters.py",
-        template = "src/template/{definition_file}.yaml",
+        template = "src/template/{template}",
         biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
             scenario=config["parameters"]["jrc-biofuel"]["scenario"]
         )
@@ -65,7 +65,9 @@ rule parameterise_template:
         capacity_factors = config["capacity-factors"]["average"],
         max_power_density = config["parameters"]["maximum-installable-power-density"],
         biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
-    output: "build/model/{definition_file}.yaml"
+    output: "build/model/{template}"
+    wildcard_constraints:
+        template = "((link-techs.yaml)|(storage-techs.yaml)|(demand-techs.yaml)|(renewable-techs.yaml)|(README.md)|(environment.yaml)|(interest-rate.yaml))"
     conda: "envs/default.yaml"
     script: "src/parameterise_templates.py"
 
@@ -302,14 +304,28 @@ rule link_neighbours:
     script: "src/link_neighbours.py"
 
 
+rule build_metadata:
+    message: "Generate build metadata."
+    input:
+        src = "src/metadata.py"
+    params:
+        config = config,
+        version = __version__
+    output: "build/model/build-metadata.yaml"
+    conda: "envs/default.yaml"
+    script: "src/metadata.py"
+
+
 rule model:
-    message: "Generate Euro Calliope with {wildcards.resolution} resolution."
+    message: "Generate euro-calliope with {wildcards.resolution} resolution."
     input:
         "build/model/interest-rate.yaml",
         "build/model/link-techs.yaml",
         "build/model/renewable-techs.yaml",
         "build/model/storage-techs.yaml",
         "build/model/demand-techs.yaml",
+        "build/model/environment.yaml",
+        "build/model/README.md",
         rules.locations.output,
         rules.electricity_load.output,
         rules.link_neighbours.output,
@@ -320,13 +336,16 @@ rule model:
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
         ),
-        src = "src/metadata.py"
-    params:
-        config = config,
-        version = __version__
-    output: "build/model/{resolution}/build-metadata.yaml"
-    conda: "envs/default.yaml"
-    script: "src/metadata.py"
+        rules.build_metadata.output,
+        example_model = "src/template/example-model.yaml"
+    output:
+        log = "build/logs/{resolution}/model.done",
+        example_model = "build/model/{resolution}/example-model.yaml"
+    shell:
+        """
+        cp {input.example_model} {output.example_model}
+        touch {output.log}
+        """
 
 
 rule clean: # removes all generated results
@@ -343,8 +362,9 @@ rule test:
         "tests/test_runner.py",
         "tests/test_model.py",
         "tests/test_capacityfactors.py",
-        "build/model/{resolution}/build-metadata.yaml",
+        "build/logs/{resolution}/model.done",
         model = "tests/resources/{resolution}/model.yaml",
+        example_model = "build/model/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES + ["hydro-ror", "hydro-reservoir-inflow"]

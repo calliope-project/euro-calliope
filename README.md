@@ -6,7 +6,7 @@ This repository contains the workflow routines that automatically build the mode
 
 ## At a glance
 
-Euro-calliope models the European electricity system with each location representing an administrative unit. It can be built on three spatial resolutions: on the continental level as a single location, on the national level with 34 locations, and on the regional level with 497 locations. On each node, renewable generation capacities (wind, solar, bioenergy) and balancing capacities (battery, hydrogen) can be built. In addition, hydro electricity and pumped hydro storage capacities can be built up the the extent to which they exist today. All capacities are used to satisfy electricity demand on all locations which is based on historic data. Locations are connected through transmission lines of unrestricted capacity. Using Calliope, the model is formulated as a linear optimisation problem with total monetary cost of all capacities as the minimisation objective. All elements of euro-calliope can be manipulated either by changing the configuration in `config/default.yaml` or by manipulating the build workflow before building the model.
+euro-calliope models the European electricity system with each location representing an administrative unit. It can be built on three spatial resolutions: on the continental level as a single location, on the national level with 34 locations, and on the regional level with 497 locations. On each node, renewable generation capacities (wind, solar, bioenergy) and balancing capacities (battery, hydrogen) can be built. In addition, hydro electricity and pumped hydro storage capacities can be built up to the extent to which they exist today. All capacities are used to satisfy electricity demand on all locations which is based on historic data. Locations are connected through transmission lines of unrestricted capacity. Using [Calliope](https://www.callio.pe), the model is formulated as a linear optimisation problem with total monetary cost of all capacities as the minimisation objective. All elements of euro-calliope can be manipulated either by changing the configuration in `config/default.yaml` or by manipulating the build workflow before building the model.
 
 ## Get ready to build the model
 
@@ -44,13 +44,13 @@ If you want to run on another cluster, read [snakemake's documentation on cluste
 
 ## Example use of the model
 
-The build step creates all individual components of `euro-calliope`, like technologies and time series. These can be combined to eventually build a final model to run simulations with. For an example of such a model, see `./tests/resources/national/model.yaml`. It is a complete Calliope model and can be used like any other, for example like this:
+The build step creates all individual components of `euro-calliope`, like technologies and time series. These can be combined to eventually build a final model to run simulations with. For an example of such a model, see `./build/model/{resolution}/example-model.yaml`. It is a complete Calliope model and can be used like any other, for example like this:
 
 ```Bash
-$ calliope run ./tests/resources/national/model.yaml
+$ calliope run ./build/model/national/example-model.yaml
 ```
 
-For more information on how to use Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io).
+For more information on how to use and modify Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io).
 
 ## Model components
 
@@ -58,15 +58,18 @@ After a successful full build (see "Build the model"), the following files will 
 
 ```
 ├── {resolution}                           <- For each spatial resolution an individual folder.
-│   ├── build-metadata.yaml                <- Metadata of the build process.
 │   ├── capacityfactors-{technology}.csv   <- Timeseries of capacityfactors of all renewables.
 │   ├── directional-rooftop.yaml           <- Override discriminating rooftop PV by orientation.
 │   ├── electricity-demand.csv             <- Timeseries of electricity demand on each node.
+│   ├── example-model.yaml                 <- Calliope model definition.
 │   ├── link-all-neighbours.yaml           <- Connects neighbouring locations with transmission.
 │   └── locations.yaml                     <- Defines all locations and their max capacities.
+├── build-metadata.yaml                    <- Metadata of the build process.
 ├── demand-techs.yaml                      <- Definition of demand technologies.
+├── environment.yaml                       <- A conda file defining an environment to run the model.
 ├── interest-rate.yaml                     <- Interest rate of all capacities.
 ├── link-techs.yaml                        <- Definition of link technologies.
+├── README.md                              <- Documentation.
 ├── renewable-techs.yaml                   <- Definition of supply technologies.
 └── storage-techs.yaml                     <- Definition of storage technologies.
 ```
@@ -97,3 +100,7 @@ Tests of models with continental and national resolution run automatically when 
     snakemake --use-conda build/logs/regional/test-report.html
 
 Exchanging `regional` with `national` or `continental` allows you to run tests on the respective resolution explicitly.
+
+## License
+
+euro-calliope has been developed and is maintained by Tim Tröndle, IASS Potsdam. The code in this repository is MIT licensed.
