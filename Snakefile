@@ -309,6 +309,7 @@ rule model:
         "build/model/link-techs.yaml",
         "build/model/renewable-techs.yaml",
         "build/model/storage-techs.yaml",
+        "build/model/demand-techs.yaml",
         rules.locations.output,
         rules.electricity_load.output,
         rules.link_neighbours.output,

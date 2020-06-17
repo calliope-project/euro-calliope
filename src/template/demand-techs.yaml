@@ -1,0 +1,8 @@
+techs:
+    demand_elec:
+        essentials:
+            name: 'Electricity demand'
+            parent: demand
+            carrier: electricity
+        constraints:
+            resource: file=electricity-demand.csv

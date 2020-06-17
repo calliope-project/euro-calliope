@@ -15,7 +15,7 @@ Euro-calliope models the European electricity system with each location represen
 2. You need [conda](https://conda.io/docs/index.html) to build and use the model. Using conda, you can create a conda environment from within you can build the model:
 
 ```
-conda env create -f requirements.yml
+conda env create -f environment.yaml
 conda activate euro-calliope
 ```
 
@@ -64,6 +64,7 @@ After a successful full build (see "Build the model"), the following files will 
 │   ├── electricity-demand.csv             <- Timeseries of electricity demand on each node.
 │   ├── link-all-neighbours.yaml           <- Connects neighbouring locations with transmission.
 │   └── locations.yaml                     <- Defines all locations and their max capacities.
+├── demand-techs.yaml                      <- Definition of demand technologies.
 ├── interest-rate.yaml                     <- Interest rate of all capacities.
 ├── link-techs.yaml                        <- Definition of link technologies.
 ├── renewable-techs.yaml                   <- Definition of supply technologies.
