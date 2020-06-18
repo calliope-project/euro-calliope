@@ -1,3 +1,4 @@
+from pathlib import Path
 import sys
 import yaml
 
@@ -41,6 +42,10 @@ def _create_config_plugin(path_to_model, path_to_example_model, paths_to_cf_time
         def model(self, scenario):
             return calliope.Model(path_to_model, scenario=scenario)
 
+        @pytest.fixture(scope="module", params=_read_locs(paths_to_cf_timeseries[0]))
+        def location(self, request):
+            return request.param
+
         @pytest.fixture(scope="function")
         def example_model(self):
             return calliope.Model(path_to_example_model)
@@ -49,6 +54,22 @@ def _create_config_plugin(path_to_model, path_to_example_model, paths_to_cf_time
         def capacity_factor_timeseries(self, request):
             return pd.read_csv(request.param, index_col=0, parse_dates=True)
 
+        @pytest.fixture(scope="module")
+        def open_field_pv_capacity_factor_timeseries(self):
+            path = self._select_capacity_factor_time_series("open-field-pv")
+            return pd.read_csv(path, index_col=0, parse_dates=True)
+
+        @pytest.fixture(scope="module")
+        def rooftop_pv_capacity_factor_timeseries(self):
+            path = self._select_capacity_factor_time_series("rooftop-pv")
+            return pd.read_csv(path, index_col=0, parse_dates=True)
+
+        def _select_capacity_factor_time_series(self, technology):
+            selected = [path for path in paths_to_cf_timeseries
+                        if Path(path).name == f"capacityfactors-{technology}.csv"]
+            assert len(selected) == 1
+            return selected[0]
+
     return SnakemakeConfigPlugin()
 
 
@@ -56,6 +77,10 @@ def _read_scenario_names_from_yaml(path_to_model):
     with open(path_to_model, 'r') as stream:
         model = yaml.safe_load(stream)
     return model["scenarios"].keys()
+
+
+def _read_locs(path_to_cf_timeseries):
+    return pd.read_csv(path_to_cf_timeseries, index_col=0, parse_dates=True).columns
 
 
 if __name__ == "__main__":

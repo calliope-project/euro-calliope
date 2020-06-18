@@ -21,3 +21,10 @@ def test_capacity_factors_are_floored(capacity_factor_timeseries, config):
 def test_capacity_factors_are_capped(capacity_factor_timeseries, config):
     cap = config["capacity-factors"]["max"]
     assert capacity_factor_timeseries[capacity_factor_timeseries > 0].max().max() <= cap
+
+
+def test_open_field_vs_rooftop(open_field_pv_capacity_factor_timeseries,
+                               rooftop_pv_capacity_factor_timeseries, location):
+    of = open_field_pv_capacity_factor_timeseries.loc[:, location].mean()
+    rt = rooftop_pv_capacity_factor_timeseries.loc[:, location].mean()
+    assert of > rt

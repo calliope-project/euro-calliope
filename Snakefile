@@ -1,6 +1,6 @@
 URL_LOAD = "https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv"
 URL_POTENTIALS = "https://zenodo.org/record/3533038/files/possibility-for-electricity-autarky.zip"
-URL_CAPACITY_FACTORS = "https://zenodo.org/record/3891481/files/{wildcards.filename}?download=1"
+URL_CAPACITY_FACTORS = "https://zenodo.org/record/3899687/files/{wildcards.filename}?download=1"
 
 NATIONAL_PHS_STORAGE_CAPACITIES = "data/pumped-hydro/storage-capacities-gwh.csv"
 ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
@@ -11,7 +11,7 @@ ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
 localrules: all, raw_load, model, clean, parameterise_template, potentials_zipped
-localrules: download_capacity_factors_wind_and_solar, capacity_factors_wind_and_solar
+localrules: download_capacity_factors_wind_and_solar
 configfile: "config/default.yaml"
 wildcard_constraints:
         resolution = "((continental)|(national)|(regional))"
@@ -171,51 +171,14 @@ rule download_capacity_factors_wind_and_solar:
     shell: f"curl -sLo {{output}} '{URL_CAPACITY_FACTORS}'"
 
 
-rule capacity_factors_wind_and_solar:
-    message: "Prepare capacity factors for wind and solar."
-    input:
-        "data/automatic/capacityfactors/onshore-locations.tif",
-        "data/automatic/capacityfactors/offshore-locations.tif",
-        "data/automatic/capacityfactors/pv-timeseries.nc",
-        "data/automatic/capacityfactors/wind-onshore-timeseries.nc",
-        "data/automatic/capacityfactors/wind-offshore-timeseries.nc",
-    output:
-        locations = expand(
-            "build/data/capacityfactors/{technology}-ids.tif",
-            technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
-        ),
-        timeseries = expand(
-            "build/data/capacityfactors/{technology}-timeseries.nc",
-            technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
-        )
-    shell:
-        """
-        cd build/data/capacityfactors
-        ln -sf ../../../data/automatic/capacityfactors/onshore-locations.tif wind-onshore-ids.tif
-        ln -sf ../../../data/automatic/capacityfactors/onshore-locations.tif open-field-pv-ids.tif
-        ln -sf ../../../data/automatic/capacityfactors/onshore-locations.tif rooftop-pv-ids.tif
-        ln -sf ../../../data/automatic/capacityfactors/onshore-locations.tif rooftop-pv-n-ids.tif
-        ln -sf ../../../data/automatic/capacityfactors/onshore-locations.tif rooftop-pv-e-w-ids.tif
-        ln -sf ../../../data/automatic/capacityfactors/onshore-locations.tif rooftop-pv-s-flat-ids.tif
-        ln -sf ../../../data/automatic/capacityfactors/offshore-locations.tif wind-offshore-ids.tif
-        ln -sf ../../../data/automatic/capacityfactors/wind-onshore-timeseries.nc
-        ln -sf ../../../data/automatic/capacityfactors/wind-offshore-timeseries.nc
-        ln -sf ../../../data/automatic/capacityfactors/pv-timeseries.nc open-field-pv-timeseries.nc
-        ln -sf ../../../data/automatic/capacityfactors/pv-timeseries.nc rooftop-pv-timeseries.nc
-        ln -sf ../../../data/automatic/capacityfactors/pv-timeseries.nc rooftop-pv-n-timeseries.nc
-        ln -sf ../../../data/automatic/capacityfactors/pv-timeseries.nc rooftop-pv-e-w-timeseries.nc
-        ln -sf ../../../data/automatic/capacityfactors/pv-timeseries.nc rooftop-pv-s-flat-timeseries.nc
-        """
-
-
 rule capacity_factors_onshore_wind_and_solar:
     message: "Generate capacityfactor time series disaggregated by location on "
              "{wildcards.resolution} resolution for {wildcards.technology}."
     input:
         src = "src/capacityfactors.py",
         locations = rules.units.output[0],
-        ids = "build/data/capacityfactors/{technology}-ids.tif",
-        timeseries = "build/data/capacityfactors/{technology}-timeseries.nc"
+        ids = ancient("data/automatic/capacityfactors/onshore-locations.tif"),
+        timeseries = ancient("data/automatic/capacityfactors/{technology}-timeseries.nc")
     params:
         threshold = config["capacity-factors"]["min"],
         year = config["year"],
@@ -234,8 +197,8 @@ rule capacity_factors_offshore:
         src = "src/capacityfactors_offshore.py",
         eez = rules.eez.output[0],
         shared_coast = rules.potentials.output.shared_coast,
-        ids = "build/data/capacityfactors/wind-offshore-ids.tif",
-        timeseries = "build/data/capacityfactors/wind-offshore-timeseries.nc"
+        ids = ancient("data/automatic/capacityfactors/offshore-locations.tif"),
+        timeseries = ancient("data/automatic/capacityfactors/wind-offshore-timeseries.nc")
     params:
         threshold = config["capacity-factors"]["min"],
         year = config["year"],
