@@ -41,6 +41,24 @@ TEMPLATE = """locations:
                     resource: {{ location.biofuel_potential_mwh_per_year / 8760 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
                     storage_cap_equals: {{ location.biofuel_potential_mwh_per_year / 2 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }} (0.5x annual yield) # ASSUME < 1 for numerical range
     {% endfor %}
+overrides:
+    freeze-hydro-capacities:
+        locations:
+            {% for id, location in locations.iterrows() %}
+            {{ id }}.techs: # {{ location["name"] }}
+                hydro_run_of_river:
+                    constraints:
+                        energy_cap_equals: {{ location.installed_capacity_hror_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                hydro_reservoir:
+                    constraints:
+                        energy_cap_equals: {{ location.installed_capacity_hdam_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                        storage_cap_equals: {{ location.storage_capacity_hdam_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+                pumped_hydro:
+                    constraints:
+                        energy_cap_equals: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                        storage_cap_equals: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+            {% endfor %}
+
 """
 
 

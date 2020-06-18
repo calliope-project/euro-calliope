@@ -15,6 +15,7 @@ scenarios:
     default: []
     connected: ["connect"]
     directional-pv: ["directional-rooftop-pv"]
+    frozen-hydro: ["freeze-hydro-capacities"]
 overrides:
     connect:
         import:

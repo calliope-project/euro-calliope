@@ -29,6 +29,26 @@ $ calliope run ./continental/example-model.yaml
 
 For more information on how to use and modify Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io).
 
+## Manipulating the model using overrides
+
+Calliope [overrides](https://calliope.readthedocs.io/en/stable/user/building.html#scenarios-and-overrides) allow to easily manipulate models. An override named `freeze-hydro-capacities` can be used for example in this way:
+
+```bash
+calliope run build/model/continental/example-model.yaml --scenario=freeze-hydro-capacities
+```
+
+You can define your own overrides to manipulate any model component. The following overrides are built into euro-calliope:
+
+> directional-rooftop-pv
+
+By default, euro-calliope contains a single technology for rooftop PV. This technology comprises the total rooftop PV potential in each location, in particular including east-, west-, and north-facing rooftops. While this allows to fully exploit the potential of rooftop PV, it leads to less than optimal capacity factors as long as the potential is not fully exploited. That is because, one would likely first exploit all south-facing rooftop, then east- and west-facing rooftops, and only then -- if at all -- north-facing rooftops. By default, euro-calliope cannot model that.
+
+When using the `directional-rooftop-pv` override, there are three instead of just one technologies for rooftop PV. The three technologies comprise (1) south-facing and flat rooftops, (2) east- and west-facing rooftops, and (3) north-facing rooftops. This leads to higher capacity factors of rooftop PV as long as the potential of rooftop PV is not fully exploited. However, this also increases the complexity of the model.
+
+> freeze-hydro-capacities
+
+By default, euro-calliope allows capacities of run-of-river hydro, reservoir hydro, and pumped storage hydro capacities up to today's levels. Alternatively, it's possible to freeze these capacities to today's levels using the `freeze-hydro-capacities` override.
+
 ## Model components
 
 The models contain the following files. All files in the root directory are independent of the spatial resolution. All files that depend on the spatial resolution are within subfolders named by the resolution.

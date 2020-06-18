@@ -14,6 +14,7 @@ model:
 scenarios:
     default: []
     directional-pv: ["directional-rooftop-pv"]
+    frozen-hydro: ["freeze-hydro-capacities"]
 run:
     solver: gurobi
     solver_io: python
