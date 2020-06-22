@@ -83,6 +83,7 @@ sea-connections:
         - [CYP.1_1, CYP.2_1] # Famagusta and Larnaca
         - [EST.7_1, EST.2_1] # Lääne and Hiiu
         - [EST.7_1, EST.12_1] # Lääne and Saare
+
 scope:
     countries:
         - "Austria"
@@ -114,7 +115,7 @@ scope:
         - "United Kingdom"
         - "Albania"
         - "Bosnia and Herzegovina"
-        - "Macedonia, Republic of"
+        - "North Macedonia"
         - "Montenegro"
         - "Norway"
         - "Serbia"
@@ -155,7 +156,7 @@ shapes: # This config must be consistent with data from https://doi.org/10.5281/
         United Kingdom: nuts0
         Albania: gadm0
         Bosnia and Herzegovina: gadm0
-        Macedonia, Republic of: gadm0
+        North Macedonia: gadm0
         Montenegro: gadm0
         Norway: nuts0
         Serbia: gadm0
@@ -190,7 +191,7 @@ shapes: # This config must be consistent with data from https://doi.org/10.5281/
         United Kingdom: nuts0
         Albania: gadm0
         Bosnia and Herzegovina: gadm0
-        Macedonia, Republic of: gadm0
+        North Macedonia: gadm0
         Montenegro: gadm0
         Norway: nuts0
         Serbia: gadm0
@@ -229,7 +230,7 @@ shapes: # This config must be consistent with data from https://doi.org/10.5281/
         United Kingdom: gadm1 # match 4
         Albania: gadm1 # match 12
         Bosnia and Herzegovina: gadm1 # match 3
-        Macedonia, Republic of: nuts3 # match 8 (statistical, non-administrative)
+        North Macedonia: nuts3 # match 8 (statistical, non-administrative)
         Montenegro: gadm1 # match 21
         Norway: gadm1 # match 19
         Serbia: gadm1 # gadm1 25 regions; wiki 5 regions

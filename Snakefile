@@ -5,12 +5,19 @@ CAPACITY_FACTOR_ID_MAPS = "data/capacityfactors/{technology}-ids.tif"
 CAPACITY_FACTOR_TIME_SERIES = "data/capacityfactors/{technology}-timeseries.nc"
 NATIONAL_PHS_STORAGE_CAPACITIES = "data/pumped-hydro/storage-capacities-gwh.csv"
 
+
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
+
+subworkflow landeligibility:
+    workdir: "../land-eligibility"
+    snakefile: "../land-eligibility/Snakefile"
+    configfile: "../land-eligibility/config/default.yaml"
+
 localrules: all, raw_load, model, clean, parameterise_template, potentials_zipped
 configfile: "config/default.yaml"
 wildcard_constraints:
-        resolution = "((continental)|(national)|(regional))"
+        resolution = "((national)|(regional)|(eurospores))"
 
 
 onstart:
@@ -22,17 +29,34 @@ rule all:
     input:
         "build/logs/national-model.done",
         "build/logs/regional-model.done",
-        "build/logs/test-report.html"
+        "build/logs/eurospores-model.done",
+
+
+rule get_eurospores_units:
+    message: "Get EuroSPORES clustered data"
+    input:
+        units = landeligibility("build/eurospores/units.geojson")
+    conda: "../envs/default.yaml"
+    output:
+        "build/data/eurospores/units.geojson"
+    shell:
+        "ln {input.units} {output}"
 
 
 rule potentials_zipped:
-    message: "Download potential data."
-    output: protected("data/automatic/raw-potentials.zip")
-    shell: "curl -sLo {output} '{URL_POTENTIALS}'"
+    message: "Bring in data from land-eligibility"
+    input:
+        rules.get_eurospores_units.output,
+        csvs = landeligibility("build/raw-potentials.zip")
+    conda: "../envs/default.yaml"
+    output:
+        "data/automatic/raw-potentials.zip"
+    shell:
+        "ln {input.csvs} {output}"
 
 
 rule potentials:
-    message: "Unzip potentials."
+    message: "Unzip {wildcards.resolution} potentials."
     input: rules.potentials_zipped.output[0]
     shadow: "minimal"
     output:
@@ -270,16 +294,3 @@ rule clean: # removes all generated results
         rm -r build/
         echo "Data downloaded to data/ has not been cleaned."
         """
-
-
-rule test:
-    message: "Run tests."
-    input:
-        "build/logs/continental-model.done",
-        "build/logs/national-model.done",
-        "build/logs/regional-model.done"
-    params: run_regional = "--include-regional-resolution" if config.get("testregional", False) else ""
-    conda: "envs/test.yaml"
-    output: "build/logs/test-report.html"
-    shell:
-        "py.test --html={output} {params.run_regional} --self-contained-html"

@@ -1,7 +1,7 @@
 techs:
-    free_transmission:
+    dc_transmission:
         essentials:
-            name: 'Local power transmission'
+            name: 'DC power transmission'
             parent: transmission
             carrier: electricity
         constraints:
