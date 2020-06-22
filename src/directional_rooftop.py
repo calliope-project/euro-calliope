@@ -3,6 +3,7 @@ import jinja2
 import pandas as pd
 import geopandas as gpd
 
+import filters
 
 TEMPLATE = """overrides:
     directional-rooftop-pv:
@@ -36,13 +37,13 @@ TEMPLATE = """overrides:
                         exists: False
                     roof_mounted_pv_s_flat:
                         constraints:
-                            energy_cap_max: {{ location.eligibility_rooftop_pv_s_flat_mw * scaling_factors.power  }} # [{{ 1 / scaling_factors.power }} MW]
+                            energy_cap_max: {{ location.eligibility_rooftop_pv_s_flat_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
                     roof_mounted_pv_n:
                         constraints:
-                            energy_cap_max: {{ location.eligibility_rooftop_pv_n_mw * scaling_factors.power  }} # [{{ 1 / scaling_factors.power }} MW]
+                            energy_cap_max: {{ location.eligibility_rooftop_pv_n_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
                     roof_mounted_pv_e_w:
                         constraints:
-                            energy_cap_max: {{ location.eligibility_rooftop_pv_e_w_mw * scaling_factors.power  }} # [{{ 1 / scaling_factors.power }} MW]
+                            energy_cap_max: {{ location.eligibility_rooftop_pv_e_w_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
             {% endfor %}
 """
 
@@ -66,8 +67,9 @@ def directional_rooftop(path_to_shapes, path_to_land_eligibility_km2,
         right_index=True,
         validate="one_to_one"
     )
-    template = jinja2.Template(TEMPLATE)
-    rendered = template.render(
+    env = jinja2.Environment()
+    env.filters["unit"] = filters.unit
+    rendered = env.from_string(TEMPLATE).render(
         locations=locations,
         scaling_factors=scaling_factors
     )
