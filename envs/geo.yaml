@@ -1,0 +1,18 @@
+name: geo
+channels:
+    - conda-forge
+dependencies:
+    - python=3.7
+    - ipython=7.5.0
+    - numpy=1.16.2
+    - pandas=0.24.2
+    - gdal=2.4
+    - fiona=1.8.6
+    - rasterio=1.0.23
+    - rasterstats=0.13.1
+    - geopandas=0.5.0
+    - netcdf4=1.5.0.1
+    - xarray=0.12.1
+    - jinja2=2.11.2
+    - networkx=2.2
+    - pycountry=18.12.8

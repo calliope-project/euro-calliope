@@ -1,0 +1,22 @@
+import:
+    - '../interest-rate.yaml'
+    - '../renewable-techs.yaml'
+    - '../storage-techs.yaml'
+    - '../link-techs.yaml'
+    - '../demand-techs.yaml'
+    - 'locations.yaml'
+    - 'directional-rooftop.yaml'
+    - 'link-all-neighbours.yaml'
+model:
+    name: 'Example model'
+    calliope_version: 0.6.5
+    timeseries_data_path: '.'
+    subset_time: ['2016-01-01', '2016-01-01']
+run:
+    solver: gurobi
+    solver_io: python
+    mode: plan
+    objective_options: {
+        'cost_class': {'monetary': 1},
+        'sense': 'minimize'
+    }

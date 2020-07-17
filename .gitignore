@@ -1,3 +1,10 @@
+build
+data
+
+notebooks
+
+gurobi.log
+
 # Python
 *.pyc
 build/
@@ -5,8 +12,14 @@ dist/
 __pycache__
 *.egg-info
 .cache/
-src/.pytest_cache
+.pytest_cache
+src/data
 
 # Snakemake
-src/.snakemake/
+.snakemake/
 dag.pdf
+
+# Sync infrastructure
+.syncignore
+.syncignore-build
+rules/sync.smk

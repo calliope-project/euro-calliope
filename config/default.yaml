@@ -1,0 +1,241 @@
+scaling-factors: # values are tuned for models with a few hours resolution and one year duration
+    power: 0.00001 # from MW(h) to 100 GW(h)
+    area: 0.0001 # from km2 to 10,000 km2
+    monetary: 0.000000001 # from EUR to 1 billion EUR
+capacity-factors:
+    min: 0.001 # consider smaller values to be 0; this helps numerics in the LP
+    max: 10 # for hydro reservoirs, leading to a numerical range of 1e5 (hourly resolution)
+    average: # average estimation used to transform annual fixed to variable costs
+        pv: 0.139 # median of average 2016 open-field factors for ~2700 points in Europe
+        onshore: 0.3021 # median of average 2016 factors for ~2700 points in Europe
+        offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
+        ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
+    trim-ninja-timeseries: True # trims renewables.ninja timeseries to the year in question
+year: 2016
+crs: "EPSG:4326"
+parameters:
+    maximum-installable-power-density: # this is not the yield, but the density of installed power
+        pv-on-tilted-roofs: 160 # (MW/km^2) from [@Gagnon:2016][@Klauser:2016], i.e. 16% efficiency
+        pv-on-flat-areas: 80 # (MW/km^2) from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
+        onshore-wind: 8 # (MW/km^2) from [@EuropeanEnvironmentAgency:2009]
+        offshore-wind: 15 # (MW/km^2) from [@EuropeanEnvironmentAgency:2009]
+    roof-share: # from [@Trondle:2019]
+        E: 0.1660
+        N: 0.1817
+        S: 0.1821
+        W: 0.1681
+        flat: 0.3020
+    jrc-biofuel:
+        scenario: "medium"
+        potential-year: "2020"
+        cost-year: "2030"
+    biofuel-efficiency: 0.45
+sea-connections:
+    continental:
+    national: # Source: https://www.entsoe.eu/data/map/
+        - [ITA, GRC]
+        - [EST, FIN]
+        - [SWE, LTU]
+        - [SWE, POL]
+        - [DNK, SWE]
+        - [DNK, NLD] # Cobra link
+        - [SWE, DEU]
+        - [NOR, DNK]
+        - [NOR, DEU]
+        - [NOR, NLD]
+        - [NOR, GBR]
+        - [FIN, SWE]
+        - [GBR, FRA]
+        - [GBR, BEL]
+        - [GBR, NLD]
+        - [GBR, IRL]
+        # not on ENTSO-E map
+        - [GRC, CYP]
+        - [DNK, GBR] # Viking link
+    regional: # Source: https://www.entsoe.eu/data/map/
+        - [ESP.7_1, ESP.1_1] # Ceuta and Andalucia
+        - [ESP.13_1, ESP.10_1] # Islas Baleares and Comunidad Valenciana
+        - [FRA.5_1, ITA.16_1] # Corse and Toscana
+        - [FRA.5_1, ITA.14_1] # Corse and Sardegna
+        - [ITA.14_1, ITA.8_1] # Sardegna and Lazio
+        - [ITA.4_1, ITA.15_1] # Calabria and Sicily
+        - [ITA.2_1, GRC.5_1] # Apulia and Epirus and Western Macedonia
+        - [GRC.7_1, GRC.4_1] # Peloponnese, Western Greece and the Ionian Islands and Crete
+        - [GRC.3_1, GRC.1_1] # Attica and Aegean
+        - [EST.1_1, FIN.4_1] # Harju and Southern Finland
+        - [SWE.8_1, LTU.3_1] # Kalmar and Klaipedos
+        - [SWE.8_1, SWE.4_1] # Kalmar and Gotland
+        - [SWE.1_1, POL.11_1] # Blekinge and Pomorskie
+        - [DNK.1_1, SWE.13_1] # Hovedstaden and Skåne
+        - [SWE.13_1, DEU.15_1] # Skåne and Schleswig-Holstein
+        - [DNK.4_1, DEU.8_1] # Sjælland and Mecklenburg-Vorpommern
+        - [DNK.4_1, DNK.5_1] # Sjælland and Syddanmark
+        - [DNK.3_1, SWE.21_1] # Nordjylland and Västra Götaland
+        - [DNK.5_1, NLD.5_1] # Syddanmark and Groningen (Cobra Link)
+        - [NOR.18_1, DNK.3_1] # Vest-Agder and Nordjylland
+        - [NOR.18_1, DEU.15_1] # Vest-Agder and Schleswig-Holstein
+        - [NOR.18_1, NLD.5_1] # Vest-Agder and Groningen
+        - [NOR.13_1, GBR.1_1] # Rogaland and England
+        - [FIN.5_1, SWE.16_1] # Western Finland and Uppsala
+        - [GBR.1_1, FRA.7_1] # England and Hauts-de-France
+        - [GBR.1_1, BEL.2_1] # England and Vlaanderen
+        - [GBR.1_1, NLD.14_1] # England and Zuid-Holland
+        - [GBR.4_1, IRL.17_1] # Wales and Meath
+        - [GBR.3_1, GBR.2_1] # Scotland and Northern Ireland
+        # not on ENTSO-E map
+        - [DNK.5_1, GBR.1_1] # Syddanmark and England (Viking link)
+        - [GRC.1_1, CYP.5_1] # Aegean and Paphos
+        - [CYP.1_1, CYP.2_1] # Famagusta and Larnaca
+        - [EST.7_1, EST.2_1] # Lääne and Hiiu
+        - [EST.7_1, EST.12_1] # Lääne and Saare
+scope:
+    countries:
+        - "Austria"
+        - "Belgium"
+        - "Bulgaria"
+        - "Croatia"
+        - "Cyprus"
+        - "Czech Republic"
+        - "Denmark"
+        - "Estonia"
+        - "Finland"
+        - "France"
+        - "Germany"
+        - "Greece"
+        - "Hungary"
+        - "Ireland"
+        - "Italy"
+        - "Latvia"
+        - "Lithuania"
+        - "Luxembourg"
+        - "Netherlands"
+        - "Poland"
+        - "Portugal"
+        - "Romania"
+        - "Slovakia"
+        - "Slovenia"
+        - "Spain"
+        - "Sweden"
+        - "United Kingdom"
+        - "Albania"
+        - "Bosnia and Herzegovina"
+        - "Macedonia, Republic of"
+        - "Montenegro"
+        - "Norway"
+        - "Serbia"
+        - "Switzerland"
+    bounds:
+        x_min: -15.8 # in degrees east
+        x_max: 37  # in degrees east
+        y_min: 30  # in degrees north
+        y_max: 75  # in degrees north
+shapes: # This config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
+    continental:
+        Austria: nuts0
+        Belgium: nuts0
+        Bulgaria: nuts0
+        Croatia: nuts0
+        Cyprus: nuts0
+        Czech Republic: nuts0
+        Denmark: nuts0
+        Estonia: nuts0
+        Finland: nuts0
+        France: nuts0
+        Germany: nuts0
+        Greece: nuts0
+        Hungary: nuts0
+        Ireland: nuts0
+        Italy: nuts0
+        Latvia: nuts0
+        Lithuania: nuts0
+        Luxembourg: nuts0
+        Netherlands: nuts0
+        Poland: nuts0
+        Portugal: nuts0
+        Romania: nuts0
+        Slovakia: nuts0
+        Slovenia: nuts0
+        Spain: nuts0
+        Sweden: nuts0
+        United Kingdom: nuts0
+        Albania: gadm0
+        Bosnia and Herzegovina: gadm0
+        Macedonia, Republic of: gadm0
+        Montenegro: gadm0
+        Norway: nuts0
+        Serbia: gadm0
+        Switzerland: nuts0
+    national:
+        Austria: nuts0
+        Belgium: nuts0
+        Bulgaria: nuts0
+        Croatia: nuts0
+        Cyprus: nuts0
+        Czech Republic: nuts0
+        Denmark: nuts0
+        Estonia: nuts0
+        Finland: nuts0
+        France: nuts0
+        Germany: nuts0
+        Greece: nuts0
+        Hungary: nuts0
+        Ireland: nuts0
+        Italy: nuts0
+        Latvia: nuts0
+        Lithuania: nuts0
+        Luxembourg: nuts0
+        Netherlands: nuts0
+        Poland: nuts0
+        Portugal: nuts0
+        Romania: nuts0
+        Slovakia: nuts0
+        Slovenia: nuts0
+        Spain: nuts0
+        Sweden: nuts0
+        United Kingdom: nuts0
+        Albania: gadm0
+        Bosnia and Herzegovina: gadm0
+        Macedonia, Republic of: gadm0
+        Montenegro: gadm0
+        Norway: nuts0
+        Serbia: gadm0
+        Switzerland: nuts0
+    regional:
+        # The link between NUTS and administrative units unfortunately is not obvious.
+        # It's not documented anywhere -- at least I could not find any information.
+        # Hence, I am using GADM here instead.
+        # Validation source: https://en.wikipedia.org/wiki/List_of_administrative_divisions_by_country
+        Austria: gadm1 # gadm1 and wiki match 9
+        Belgium: gadm1 # match 3
+        Bulgaria: gadm1 # match 28
+        Croatia: gadm1 # match 21
+        Cyprus: gadm1 # gadm1: 5 regions; wiki: 6 regions
+        Czech Republic: gadm1 # match 14
+        Denmark: gadm1 # match 5
+        Estonia: gadm1 # gadm1 16 regions; wiki 15 regions
+        Finland: gadm1 # gadm1 5 regions; wiki 19 regions
+        France: gadm1 # match 13
+        Germany: gadm1 # match 16
+        Greece: gadm1 # gadm1 8 regions; wiki 13 (14) regions
+        Hungary: gadm1 # match 20
+        Ireland: gadm1 # match 26
+        Italy: gadm1 # match 20
+        Latvia: gadm1 # gadm1 5 regions; wiki 119 regions
+        Lithuania: gadm1 # match 10
+        Luxembourg: gadm2 # match 12
+        Netherlands: gadm1 # gadm1 14 regions; wiki 12 regions
+        Poland: gadm1 # match 16
+        Portugal: gadm1 # match 18
+        Romania: gadm1 # match 42
+        Slovakia: gadm1 # match 8
+        Slovenia: gadm1 # match 12
+        Spain: gadm1 # match 17
+        Sweden: gadm1 # match 21
+        United Kingdom: gadm1 # match 4
+        Albania: gadm1 # match 12
+        Bosnia and Herzegovina: gadm1 # match 3
+        Macedonia, Republic of: nuts3 # match 8 (statistical, non-administrative)
+        Montenegro: gadm1 # match 21
+        Norway: gadm1 # match 19
+        Serbia: gadm1 # gadm1 25 regions; wiki 5 regions
+        Switzerland: gadm1 # match 26

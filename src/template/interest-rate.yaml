@@ -1,0 +1,25 @@
+tech_groups:
+    conversion:
+        costs:
+            monetary:
+                interest_rate: 0.073 # average wind onshore WACC OECD from [@Steffen:2019]
+    conversion_plus:
+        costs:
+            monetary:
+                interest_rate: 0.073 # average wind onshore WACC OECD from [@Steffen:2019]
+    storage:
+        costs:
+            monetary:
+                interest_rate: 0.073 # average wind onshore WACC OECD from [@Steffen:2019]
+    supply:
+        costs:
+            monetary:
+                interest_rate: 0.073 # average wind onshore WACC OECD from [@Steffen:2019]
+    supply_plus:
+        costs:
+            monetary:
+                interest_rate: 0.073 # average wind onshore WACC OECD from [@Steffen:2019]
+    transmission:
+        costs:
+            monetary:
+                interest_rate: 0.073 # average wind onshore WACC OECD from [@Steffen:2019]
