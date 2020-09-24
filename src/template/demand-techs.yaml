@@ -6,3 +6,89 @@ techs:
             carrier: electricity
         constraints:
             resource: file=electricity-demand.csv
+    # buildings
+    demand_space_heat:
+        essentials:
+            name: 'Space heat demand'
+            parent: demand
+            carrier: space_heat
+        constraints:
+            resource: file=space-heat-demand.csv
+    demand_water_heat:
+        essentials:
+            name: 'Hot water demand'
+            parent: demand
+            carrier: water_heat
+        constraints:
+            resource: file=water-heat-demand.csv
+    demand_cooking:
+        essentials:
+            name: 'Cooking demand'
+            parent: demand
+            carrier: cooking
+        constraints:
+            resource: file=cooking-demand.csv
+    # Transport (in km)
+    demand_passenger_transport:
+        essentials:
+            name: 'Passenger road transport demand'
+            parent: demand
+            carrier: passenger_transport
+    demand_bus_transport:
+        essentials:
+            name: 'Bus transport demand'
+            parent: demand
+            carrier: bus_transport
+    demand_motorcycle_transport:
+        essentials:
+            name: 'Motorcycle transport demand'
+            parent: demand
+            carrier: motorcycle_transport
+    demand_ldv_transport:
+        essentials:
+            name: 'Light duty vehicle transport demand'
+            parent: demand
+            carrier: ldv_transport
+    demand_hdv_transport:
+        essentials:
+            name: 'Heavy duty vehicle demand'
+            parent: demand
+            carrier: hdv_transport
+    # Transport (as fuel)
+    demand_air_transport:
+        essentials:
+            name: 'Air transport kerosene demand'
+            parent: demand
+            carrier: kerosene
+    demand_shipping_transport:
+        essentials:
+            name: 'Shipping transport demand'
+            parent: demand
+            carrier: diesel
+    # Industry feedstock
+    demand_industry_hydrogen:
+        essentials:
+            name: 'Industry hydrogen feedstock demand'
+            parent: demand
+            carrier: hydrogen
+    demand_industry_methanol:
+        essentials:
+            name: 'Industry methane feedstock demand'
+            parent: demand
+            carrier: methanol
+    demand_industry_co2:
+        essentials:
+            name: 'Industry co2 feedstock demand'
+            parent: demand
+            carrier: co2
+    # Industry processes
+    demand_industry_methane:
+        essentials:
+            name: 'Industry high enthalpy process methane demand'
+            parent: demand
+            carrier: methane
+    demand_industry_diesel:
+        essentials:
+            name: 'Industry motor diesel demand'
+            parent: demand
+            carrier: diesel

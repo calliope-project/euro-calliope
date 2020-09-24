@@ -1,0 +1,67 @@
+
+techs:
+    hdv_transport:
+        essentials:
+            name: Heavy duty vehicles
+            parent: conversion
+            carrier_in: diesel
+            carrier_out: hdv_transport
+        constraints:
+            energy_eff: {{ transport_efficiency.hdv.diesel }}  # TODO: scale to energy/transport
+            lifetime: 20
+    ldv_transport:
+        essentials:
+            name: Light duty vehicles
+            parent: conversion
+            carrier_in: [diesel, electricity]
+            carrier_out: ldv_transport
+        constraints:
+            energy_eff: 1
+            carrier_ratios:
+                carrier_in:
+                    diesel: {{ transport_efficiency.ldv.diesel }}  # TODO: scale to energy/transport
+                    electricity: {{ transport_efficiency.ldv.electricity }}  # TODO: scale to energy/transport
+            lifetime: 20
+    bus_transport:
+        essentials:
+            name: Buses
+            parent: conversion
+            carrier_in: [diesel, electricity]
+            carrier_out: bus_transport
+        constraints:
+            energy_eff: 1
+            carrier_ratios:
+                carrier_in:
+                    diesel: {{ transport_efficiency.bus.diesel }}  # TODO: scale to energy/transport
+                    electricity: {{ transport_efficiency.bus.electricity }}  # TODO: scale to energy/transport
+            lifetime: 20
+    motorcycle_transport:
+        essentials:
+            name: Motorcycles
+            parent: conversion
+            carrier_in: [diesel, electricity]
+            carrier_out: motorcycle_transport
+        constraints:
+            energy_eff: 1
+            carrier_ratios:
+                carrier_in:
+                    diesel: {{ transport_efficiency.motorcycle.diesel }}  # TODO: scale to energy/transport
+                    electricity: {{ transport_efficiency.motorcycle.electricity }}  # TODO: scale to energy/transport
+            lifetime: 20
+    passenger_car:
+        essentials:
+            name: Passenger cars
+            parent: conversion
+            carrier_in: [diesel, electricity]
+            carrier_out: passenger_transport
+        constraints:
+            energy_eff: 1
+            carrier_ratios:
+                carrier_in:
+                    diesel: {{ transport_efficiency.ldv.diesel }}  # TODO: scale to energy/transport
+                    electricity: {{ transport_efficiency.ldv.electricity }}  # TODO: scale to energy/transport
+            # TODO: Implement constraint
+            time_varying_energy_cap_max:
+                carrier_in:
+                    electricity: file=energy-cap-ev.csv
+            lifetime: 20

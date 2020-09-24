@@ -13,9 +13,9 @@ include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
 
 subworkflow landeligibility:
-    workdir: "../land-eligibility"
-    snakefile: "../land-eligibility/Snakefile"
-    configfile: "../land-eligibility/config/default.yaml"
+    workdir: "./land-eligibility"
+    snakefile: "./land-eligibility/Snakefile"
+    configfile: "./land-eligibility/config/default.yaml"
 
 localrules: all, raw_load, model, clean, parameterise_template, potentials_zipped
 localrules: download_capacity_factors_wind_and_solar
@@ -41,7 +41,6 @@ rule get_eurospores_units:
     message: "Get EuroSPORES clustered data"
     input:
         units = landeligibility("build/eurospores/units.geojson")
-    conda: "../envs/default.yaml"
     output:
         "build/data/eurospores/units.geojson"
     shell:
@@ -53,7 +52,6 @@ rule potentials_zipped:
     input:
         rules.get_eurospores_units.output,
         csvs = landeligibility("build/raw-potentials.zip")
-    conda: "../envs/default.yaml"
     output:
         "data/automatic/raw-potentials.zip"
     shell:

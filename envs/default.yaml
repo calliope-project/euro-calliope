@@ -4,8 +4,8 @@ channels:
     - bioconda
 dependencies:
     - python=3.7
-    - ipython=7.5.0
-    - numpy=1.16.2
-    - pandas=0.24.2
-    - pycountry=18.12.8
-    - jinja2=2.11.2
+    - ipython
+    - numpy=1.18.5
+    - pandas=1.0.5
+    - pycountry=19.8.18
+    - jinja2

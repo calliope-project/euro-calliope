@@ -1,0 +1,87 @@
+techs:
+    boiler:
+        essentials:
+            name: Boiler
+            parent: conversion_plus
+            carrier_in: methane
+            carrier_out: [space_heat, water_heat]
+        constraints:
+            energy_eff: {{ heat-end-use.space-heating-techs.gas_eff }}
+            lifetime: 20
+
+    ashp:
+        essentials:
+            name: Air source heat pump
+            parent: conversion_plus
+            carrier_in: electricity
+            carrier_out: [space_heat, water_heat]
+        constraints:
+            energy_eff: 1  # modelled in the carrier_ratios
+            carrier_ratios:
+                carrier_out:
+                    space_heat: file=cop-ashp-space-heat.csv  # TODO: check if COP is what works here
+                    water_heat: file=cop-ashp-water-heat.csv  # TODO: check if COP is what works here
+            # TODO: Implement constraint
+            time_varying_energy_cap_max:
+                carrier_out:
+                    space_heat: file=energy-cap-ashp-space-heat.csv
+                    water_heat: file=energy-cap-ashp-water-heat.csv
+            lifetime: 20
+
+    gshp:
+        essentials:
+            name: Ground source heat pump
+            parent: conversion_plus
+            carrier_in: electricity
+            carrier_out: [space_heat, water_heat]
+        constraints:
+            energy_eff: 1  # modelled in the carrier_ratios
+            carrier_ratios:
+                carrier_out:
+                    space_heat: file=cop-gshp-space-heat.csv  # TODO: check if COP is what works here
+                    water_heat: file=cop-gshp-water-heat.csv  # TODO: check if COP is what works here
+            # TODO: Implement constraint
+            time_varying_energy_cap_max:
+                carrier_out:
+                    space_heat: file=energy-cap-ashp-space-heat.csv
+                    water_heat: file=energy-cap-ashp-water-heat.csv
+            lifetime: 20
+
+    solar_thermal_collector:
+        essentials:
+            name: Solar thermal collector
+            parent: conversion_plus
+            carrier_in: solar_thermal
+            carrier_out: [space_heat, water_heat]
+        constraints:
+            energy_eff: 1  # modelled in the "solar_thermal_energy" tech
+            lifetime: 20
+
+    solar_thermal_energy:
+        essentials:
+            name: Solar thermal energy generator
+            parent: supply
+            carrier_out: solar_thermal
+        constraints:
+            resource: file=capacityfactors-solar-thermal.csv
+            lifetime: 20
+
+    electric_hob:
+        essentials:
+            name: Electric cooking element
+            parent: conversion
+            carrier_in: electricity
+            carrier_out: cooking
+        constraints:
+            efficiency: {{ heat-end-use.cooking-techs.electricity_eff }}
+            lifetime: 20
+
+    gas_hob:
+        essentials:
+            name: Electric cooking element
+            parent: conversion
+            carrier_in: methane
+            carrier_out: cooking
+        constraints:
+            efficiency: {{ heat-end-use.cooking-techs.gas_eff }}
+            lifetime: 20
