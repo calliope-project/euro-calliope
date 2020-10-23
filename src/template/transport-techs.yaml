@@ -1,67 +1,89 @@
-
+# TODO: scale efficiency as energy/transport
 techs:
-    hdv_transport:
+    hdv_transport_ice:
         essentials:
-            name: Heavy duty vehicles
+            name: Internal combustion engine heavy duty vehicles
             parent: conversion
             carrier_in: diesel
             carrier_out: hdv_transport
         constraints:
-            energy_eff: {{ transport_efficiency.hdv.diesel }}  # TODO: scale to energy/transport
-            lifetime: 20
-    ldv_transport:
+            energy_eff: {{ transport.efficiency.hdv.diesel * scaling_factors.transport_efficiency }}  # {{ (1 / scaling_factors.transport_efficiency) | unit("10MWh/Miokm") }}
+
+    ldv_transport_ice:
         essentials:
-            name: Light duty vehicles
+            name: Internal combustion engine light duty vehicles
             parent: conversion
-            carrier_in: [diesel, electricity]
+            carrier_in: diesel
             carrier_out: ldv_transport
         constraints:
-            energy_eff: 1
-            carrier_ratios:
-                carrier_in:
-                    diesel: {{ transport_efficiency.ldv.diesel }}  # TODO: scale to energy/transport
-                    electricity: {{ transport_efficiency.ldv.electricity }}  # TODO: scale to energy/transport
-            lifetime: 20
-    bus_transport:
+            energy_eff: {{ transport.efficiency.ldv.diesel * scaling_factors.transport_efficiency }}  # {{ (1 / scaling_factors.transport_efficiency) | unit("10MWh/Miokm") }}
+    ldv_transport_ev:
         essentials:
-            name: Buses
-            parent: conversion
-            carrier_in: [diesel, electricity]
-            carrier_out: bus_transport
+            name: Electric light duty vehicles
+            parent: conversion_plus
+            carrier_in: electricity
+            carrier_out: ldv_transport
         constraints:
-            energy_eff: 1
-            carrier_ratios:
-                carrier_in:
-                    diesel: {{ transport_efficiency.bus.diesel }}  # TODO: scale to energy/transport
-                    electricity: {{ transport_efficiency.bus.electricity }}  # TODO: scale to energy/transport
-            lifetime: 20
-    motorcycle_transport:
-        essentials:
-            name: Motorcycles
-            parent: conversion
-            carrier_in: [diesel, electricity]
-            carrier_out: motorcycle_transport
-        constraints:
-            energy_eff: 1
-            carrier_ratios:
-                carrier_in:
-                    diesel: {{ transport_efficiency.motorcycle.diesel }}  # TODO: scale to energy/transport
-                    electricity: {{ transport_efficiency.motorcycle.electricity }}  # TODO: scale to energy/transport
-            lifetime: 20
-    passenger_car:
-        essentials:
-            name: Passenger cars
-            parent: conversion
-            carrier_in: [diesel, electricity]
-            carrier_out: passenger_transport
-        constraints:
-            energy_eff: 1
-            carrier_ratios:
-                carrier_in:
-                    diesel: {{ transport_efficiency.ldv.diesel }}  # TODO: scale to energy/transport
-                    electricity: {{ transport_efficiency.ldv.electricity }}  # TODO: scale to energy/transport
-            # TODO: Implement constraint
-            time_varying_energy_cap_max:
+            energy_eff: {{ transport.efficiency.ldv.electricity * scaling_factors.transport_efficiency }}  # {{ (1 / scaling_factors.transport_efficiency) | unit("10MWh/Miokm") }}
+            energy_cap_max_time_varying:
                 carrier_in:
                     electricity: file=energy-cap-ev.csv
             lifetime: 20
+
+    bus_transport_ice:
+        essentials:
+            name: Internal combustion engine buses
+            parent: conversion_plus
+            carrier_in: diesel
+            carrier_out: bus_transport
+        constraints:
+            energy_eff: {{ transport.efficiency.bus.diesel * scaling_factors.transport_efficiency }}  # {{ (1 / scaling_factors.transport_efficiency) | unit("10MWh/Miokm") }}
+    bus_transport_ev:
+        essentials:
+            name: Electric engine buses
+            parent: conversion_plus
+            carrier_in: electricity
+            carrier_out: bus_transport
+        constraints:
+            energy_eff: {{ transport.efficiency.bus.electricity * scaling_factors.transport_efficiency }}  # {{ (1 / scaling_factors.transport_efficiency) | unit("10MWh/Miokm") }}
+
+    motorcycle_transport_ice:
+        essentials:
+            name: Internal combustion engine motorcycles
+            parent: conversion_plus
+            carrier_in: diesel
+            carrier_out: motorcycle_transport
+        constraints:
+            energy_eff: {{ transport.efficiency.motorcycle.diesel * scaling_factors.transport_efficiency }}  # {{ (1 / scaling_factors.transport_efficiency) | unit("10MWh/Miokm") }}
+    motorcycle_transport_ev:
+        essentials:
+            name: Electric motorcycles
+            parent: conversion_plus
+            carrier_in: electricity
+            carrier_out: motorcycle_transport
+        constraints:
+            energy_eff: {{ transport.efficiency.motorcycle.electricity * scaling_factors.transport_efficiency }}  # {{ (1 / scaling_factors.transport_efficiency) | unit("10MWh/Miokm") }}
+            energy_cap_max_time_varying:
+                carrier_in:
+                    electricity: file=energy-cap-ev.csv
+
+    passenger_car_transport_ice:
+        essentials:
+            name: Internal combustion engine passenger cars
+            parent: conversion_plus
+            carrier_in: diesel
+            carrier_out: passenger_transport
+        constraints:
+            energy_eff: {{ transport.efficiency.ldv.diesel * scaling_factors.transport_efficiency }}  # {{ (1 / scaling_factors.transport_efficiency) | unit("10MWh/Miokm") }}
+    passenger_car_transport_ev:
+        essentials:
+            name: Electric passenger cars
+            parent: conversion_plus
+            carrier_in: electricity
+            carrier_out: passenger_transport
+        constraints:
+            energy_eff: {{ transport.efficiency.ldv.electricity * scaling_factors.transport_efficiency }}  # {{ (1 / scaling_factors.transport_efficiency) | unit("10MWh/Miokm") }}
+            energy_cap_equals: {{ transport.efficiency.ldv.electricity * scaling_factors.transport_efficiency }}  # {{ (1 / scaling_factors.transport_efficiency) | unit("10MWh/Miokm") }}
+            energy_cap_max_time_varying:
+                carrier_in:
+                    electricity: file=energy-cap-ev.csv

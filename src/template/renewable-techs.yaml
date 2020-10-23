@@ -12,8 +12,8 @@ tech_groups:
             parent: pv
         costs:
             monetary:
-                energy_cap: {{ 880000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 9
-                om_annual: {{ (880000 * 0.02 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2% from [@JRC:2014] Table 9
+                energy_cap: {{ 880000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 9; 0.56 Eur2015/Wp from Danish energy agency (technology data for el/dh, 22 photovoltaics small, 2050)
+                om_annual: {{ (880000 * 0.02 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2% from [@JRC:2014] Table 9; 8700 Eur2015/MWp/y from Danish energy agency (technology data for el/dh, 22 photovoltaics small 2050)
                 om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
     wind:
         essentials:
@@ -32,9 +32,9 @@ tech_groups:
             lifetime: 25 # [@JRC:2014] Table 4
         costs:
             monetary:
-                energy_cap: {{ 1100000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 4
-                om_annual: {{ (1100000 * 0.017 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% from [@JRC:2014] Table 4
-                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+                energy_cap: {{ 1100000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 4; 0.96 MEur2015/MW from Danish energy agency (technology data for el/dh, 20 onshore turbines, 2050)
+                om_annual: {{ (1100000 * 0.017 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% from [@JRC:2014] Table 4; 11340 Eur2015/MW/y from Danish energy agency (technology data for el/dh, 20 onshore turbines, 2050)
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons; 1.22 Eur2015/MWh from Danish energy agency (technology data for el/dh, 20 onshore turbines, 2050)
 
 techs:
     open_field_pv:
@@ -50,8 +50,8 @@ techs:
             resource_unit: energy_per_cap
         costs:
             monetary:
-                energy_cap: {{ 520000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 7
-                om_annual: {{ (520000 * 0.017 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% from [@JRC:2014] Table 7
+                energy_cap: {{ 520000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 7; 0.24 Eur2015/Wp from Danish energy agency (technology data for el/dh, 22 photovoltaics large, 2050)
+                om_annual: {{ (520000 * 0.017 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% from [@JRC:2014] Table 7; 5000 Eur2015/MWp/y from Danish energy agency (technology data for el/dh, 22 photovoltaics large, 2050)
                 om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
     roof_mounted_pv:
         essentials:
@@ -83,9 +83,9 @@ techs:
             lifetime: 30 # [@JRC:2014] Table 5
         costs:
             monetary:
-                energy_cap: {{ 2280000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 5
-                om_annual: {{ (2280000 * 0.023 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2.3% from [@JRC:2014] Table 5
-                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+                energy_cap: {{ 2280000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 5; 1.78/1.58 MEur2015/MW from Danish energy agency (technology data for el/dh, 21 offshore/nearshore turbines, 2050)
+                om_annual: {{ (2280000 * 0.023 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2.3% from [@JRC:2014] Table 5; 32448/32538 Eur2015/MW/y from Danish energy agency (technology data for el/dh, 21 offshore/nearshore turbines, 2050)
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons; 2.4/2.4 Eur2015/MWh from Danish energy agency (technology data for el/dh, 21 offshore/nearshore turbines, 2050)
     load_shedding:
         essentials:
             name: Load shedding as last resort
@@ -124,7 +124,7 @@ techs:
                 energy_cap: {{ 3370000 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 12
                 om_prod: {{ 5 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW/yr") }} from [@JRC:2014] Table 12
                 om_annual: {{ 3370000 * 0.03 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW/yr") }} from [@JRC:2014] Table 12
-    biofuel: # based on Anaerobic digestion from [@JRC:2014] Table 48
+    biofuel_supply: # based on Anaerobic digestion from [@JRC:2014] Table 48
         essentials:
             name: Biofuel
             parent: supply_plus

@@ -2,22 +2,21 @@ name: hydro
 channels:
     - conda-forge
 dependencies:
-    - python>=3.7
+    - python=3.7
     - ipython
     - numpy
-    - pandas
+    - pandas=1.0.5
     - gdal
-    - fiona
-    - rasterio
-    - pyproj
-    - geopandas
-    - netcdf4
-    - xarray
+    - fiona=1.8.13
+    - rasterio=1.1.5
+    - geopandas=0.8.0
+    - netcdf4=1.5.3
+    - xarray=0.15.1
     - pip
     - dask
     - bottleneck
     - cdsapi
-    - pycountry
+    - pycountry=19.8.18
     - pip:
-        - git+https://github.com/FRESNA/atlite.git@ecfd3f3eb380efa00d0b6bc7efa4a8b20e40dc34
+        - git+git://github.com/PyPSA/atlite.git@87fd114622644fd162d8f56a966026a67e05ce8b
 

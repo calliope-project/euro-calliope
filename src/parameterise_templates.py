@@ -8,10 +8,11 @@ import filters
 
 def parameterise_template(path_to_template, path_to_biofuel_costs, scaling_factors,
                           capacity_factors, biofuel_efficiency, max_power_density,
-                          path_to_result):
+                          heat, transport, path_to_result):
     """Applies config parameters to template files."""
 
     scaling_factors["specific_costs"] = scaling_factors["monetary"] / scaling_factors["power"]
+    scaling_factors["transport_efficiency"] = scaling_factors["power"] / scaling_factors["transport"]
     with open(path_to_biofuel_costs, "r") as f_biofuel_costs:
         biofuel_fuel_cost = float(f_biofuel_costs.readline())
 
@@ -23,7 +24,9 @@ def parameterise_template(path_to_template, path_to_biofuel_costs, scaling_facto
         capacity_factors=capacity_factors,
         max_power_density=max_power_density,
         biofuel_fuel_cost=biofuel_fuel_cost,
-        biofuel_efficiency=biofuel_efficiency
+        biofuel_efficiency=biofuel_efficiency,
+        heat=heat,
+        transport=transport
     )
     with open(path_to_result, "w") as result_file:
         result_file.write(rendered)
@@ -36,6 +39,8 @@ if __name__ == "__main__":
         capacity_factors=snakemake.params["capacity_factors"],
         max_power_density=snakemake.params["max_power_density"],
         biofuel_efficiency=snakemake.params["biofuel_efficiency"],
+        heat=snakemake.params["heat"],
+        transport=snakemake.params["transport"],
         path_to_biofuel_costs=snakemake.input.biofuel_cost,
         path_to_result=snakemake.output[0]
     )

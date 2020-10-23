@@ -32,7 +32,7 @@ techs:
                 energy_cap: {{ 1017973 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}, 1129 $2015
                 om_annual: {{ 7213 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}, 8 $2015
                 om_prod: {{ 1 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 1 $2015, rounded to 1€ for numeric range
-    hydrogen: # based on [@Schmidt:2019]
+    hydrogen_storage: # based on [@Schmidt:2019]
         essentials:
             name: Hydrogen power storage
             parent: storage

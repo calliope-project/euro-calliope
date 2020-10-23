@@ -13,8 +13,9 @@ TEMPLATE = """locations:
         techs:
             demand_elec:
             battery:
-            hydrogen:
+            hydrogen_storage:
             open_field_pv:
+            biofuel_supply:
             wind_onshore_competing:
             wind_onshore_monopoly:
                 constraints:
@@ -36,10 +37,7 @@ TEMPLATE = """locations:
                 constraints:
                     energy_cap_max: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
                     storage_cap_max: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
-            biofuel:
-                constraints:
-                    resource: {{ location.biofuel_potential_mwh_per_year / 8760 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-                    storage_cap_equals: {{ location.biofuel_potential_mwh_per_year / 2 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }} (0.5x annual yield) # ASSUME < 1 for numerical range
+
     {% endfor %}
 overrides:
     freeze-hydro-capacities:
@@ -57,6 +55,15 @@ overrides:
                     constraints:
                         energy_cap_equals: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
                         storage_cap_equals: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+            {% endfor %}
+    biofuel_maximum:
+        group_constraints:
+            {% for id, location in locations.iterrows() %}
+            biofuel_{{ id }}:
+                locs: [{{ id }}]
+                techs: [biofuel_supply]
+                carrier_prod_max:
+                    biofuel: {{ location.biofuel_potential_mwh_per_year * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
             {% endfor %}
 
 """

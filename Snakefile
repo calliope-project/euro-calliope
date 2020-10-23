@@ -32,9 +32,9 @@ onstart:
 rule all:
     message: "Generate euro-calliope pre-built models and run tests."
     input:
-        "build/logs/national-model.done",
-        "build/logs/regional-model.done",
-        "build/logs/eurospores-model.done",
+        "build/logs/national/model.done",
+        "build/logs/regional/model.done",
+        "build/logs/eurospores/model.done",
 
 
 rule get_eurospores_units:
@@ -84,10 +84,12 @@ rule parameterise_template:
         scaling_factors = config["scaling-factors"],
         capacity_factors = config["capacity-factors"]["average"],
         max_power_density = config["parameters"]["maximum-installable-power-density"],
-        biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
+        biofuel_efficiency = config["parameters"]["biofuel-efficiency"],
+        transport = config["parameters"]["transport"],
+        heat = config["parameters"]["heat-end-use"]
     output: "build/model/{template}"
     wildcard_constraints:
-        template = "((link-techs.yaml)|(storage-techs.yaml)|(demand-techs.yaml)|(renewable-techs.yaml)|(README.md)|(environment.yaml)|(interest-rate.yaml))"
+        template = "((link-techs.yaml)|(storage-techs.yaml)|(demand-techs.yaml)|(renewable-techs.yaml)|(README.md)|(environment.yaml)|(interest-rate.yaml)|(heat-techs.yaml)|(transformation-techs.yaml)|(transport-techs.yaml))"
     conda: "envs/default.yaml"
     script: "src/parameterise_templates.py"
 
