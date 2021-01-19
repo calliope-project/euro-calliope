@@ -2,10 +2,14 @@ techs:
     methane_boiler:
         essentials:
             name: Gas boiler
+            {% if heat.carriers is string %}
+            parent: conversion
+            {% else %}
             parent: conversion_plus
+            primary_carrier_out: {{ heat.carriers[0] }}
+            {% endif %}
             carrier_in: methane
-            carrier_out: [space_heat, water_heat]
-            primary_carrier_out: space_heat
+            carrier_out: {{ heat.carriers }}
         constraints:
             energy_eff: {{ heat.space_heat_techs.gas_eff }}
             lifetime: 20
@@ -17,10 +21,14 @@ techs:
     biofuel_boiler:
         essentials:
             name: Biomass boiler
+            {% if heat.carriers is string %}
+            parent: conversion
+            {% else %}
             parent: conversion_plus
+            primary_carrier_out: {{ heat.carriers[0] }}
+            {% endif %}
             carrier_in: biofuel
-            carrier_out: [space_heat, water_heat]
-            primary_carrier_out: space_heat
+            carrier_out: {{ heat.carriers }}
         constraints:
             energy_eff: {{ heat.space_heat_techs.biofuel_eff }}
             lifetime: 20
@@ -33,20 +41,33 @@ techs:
         essentials:
             name: Air source heat pump
             parent: conversion_plus
+            {% if heat.carriers is string %}
+            primary_carrier_out: {{ heat.carriers }}
+            {% else %}
+            primary_carrier_out: {{ heat.carriers[0] }}
+            {% endif %}
             carrier_in: electricity
-            carrier_out: [space_heat, water_heat]
-            primary_carrier_out: space_heat
+            carrier_out: {{ heat.carriers }}
         constraints:
             energy_eff: 1  # modelled in the carrier_ratios
             carrier_ratios:
                 carrier_out:
-                    space_heat: file=cop-ashp-space-heat.csv  # TODO: check if COP is what works here
-                    water_heat: file=cop-ashp-water-heat.csv  # TODO: check if COP is what works here
-            # TODO: Implement constraint
+                    {% if heat.carriers is string %}
+                        {{ heat.carriers }}: "file=cop-ashp-{{ heat.carriers.replace('_', '-') }}.csv"
+                    {% else %}
+                    {% for i in heat.carriers %}
+                        {{ i }}: file=cop-ashp-{{ i.replace('_', '-') }}.csv
+                        {% endfor %}
+                    {% endif %}
             energy_cap_max_time_varying:
                 carrier_out:
-                    space_heat: file=energy-cap-ashp-space-heat.csv
-                    water_heat: file=energy-cap-ashp-water-heat.csv
+                    {% if heat.carriers is string %}
+                        {{ heat.carriers }}: "file=energy-cap-ashp-{{ heat.carriers.replace('_', '-') }}.csv"
+                    {% else %}
+                    {% for i in heat.carriers %}
+                        {{ i }}: file=energy-cap-ashp-{{ i.replace('_', '-') }}.csv
+                        {% endfor %}
+                    {% endif %}
             lifetime: 20
         costs:  # [Danish energy agency, heating installations, 207.3-6 Air to water, 2050]
             monetary:
@@ -57,43 +78,95 @@ techs:
         essentials:
             name: Ground source heat pump
             parent: conversion_plus
+            {% if heat.carriers is string %}
+            primary_carrier_out: {{ heat.carriers }}
+            {% else %}
+            primary_carrier_out: {{ heat.carriers[0] }}
+            {% endif %}
             carrier_in: electricity
-            carrier_out: [space_heat, water_heat]
-            primary_carrier_out: space_heat
+            carrier_out: {{ heat.carriers }}
         constraints:
-            energy_eff: 1  # modelled in the carrier_ratios
+            # energy_eff: 1  # modelled in the carrier_ratios
             carrier_ratios:
                 carrier_out:
-                    space_heat: file=cop-gshp-space-heat.csv  # TODO: check if COP is what works here
-                    water_heat: file=cop-gshp-water-heat.csv  # TODO: check if COP is what works here
-            # TODO: Implement constraint
+                    {% if heat.carriers is string %}
+                        {{ heat.carriers }}: "file=cop-gshp-{{ heat.carriers.replace('_', '-') }}.csv"
+                    {% else %}
+                    {% for i in heat.carriers %}
+                        {{ i }}: file=cop-gshp-{{ i.replace('_', '-') }}.csv
+                        {% endfor %}
+                    {% endif %}
             energy_cap_max_time_varying:
                 carrier_out:
-                    space_heat: file=energy-cap-ashp-space-heat.csv
-                    water_heat: file=energy-cap-ashp-water-heat.csv
+                    {% if heat.carriers is string %}
+                        {{ heat.carriers }}: "file=energy-cap-gshp-{{ heat.carriers.replace('_', '-') }}.csv"
+                    {% else %}
+                    {% for i in heat.carriers %}
+                        {{ i }}: file=energy-cap-gshp-{{ i.replace('_', '-') }}.csv
+                        {% endfor %}
+                    {% endif %}
             lifetime: 20
         costs:  # [Danish energy agency, heating installations, 207.7-10 Ground source, 2050]
             monetary:
                 energy_cap: {{ (12 / 10 + 9 / 4 + 202 / 400 + 72 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
                 om_annual: {{ (0.222 / 10 + 0.222 / 4 + 0.761 / 400 + 0.761 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
 
-    # FIXME: create capacity factor timeseries, then bring technology into existence
+    hp:  # combination of gshp and ashp
+        essentials:
+            name: Heat pump
+            parent: conversion_plus
+            {% if heat.carriers is string %}
+            primary_carrier_out: {{ heat.carriers }}
+            {% else %}
+            primary_carrier_out: {{ heat.carriers[0] }}
+            {% endif %}
+            carrier_in: electricity
+            carrier_out: {{ heat.carriers }}
+        constraints:
+            # energy_eff: 1  # modelled in the carrier_ratios
+            carrier_ratios:
+                carrier_out:
+                    {% if heat.carriers is string %}
+                        {{ heat.carriers }}: "file=cop-hp-{{ heat.carriers.replace('_', '-') }}.csv"
+                    {% else %}
+                    {% for i in heat.carriers %}
+                        {{ i }}: file=cop-hp-{{ i.replace('_', '-') }}.csv
+                        {% endfor %}
+                    {% endif %}
+            energy_cap_max_time_varying:
+                carrier_out:
+                    {% if heat.carriers is string %}
+                        {{ heat.carriers }}: "file=energy-cap-hp-{{ heat.carriers.replace('_', '-') }}.csv"
+                    {% else %}
+                    {% for i in heat.carriers %}
+                        {{ i }}: file=energy-cap-hp-{{ i.replace('_', '-') }}.csv
+                        {% endfor %}
+                    {% endif %}
+            lifetime: 20
+        costs:  # [Danish energy agency, heating installations, 207.7-10 Ground source, 2050]
+            monetary:
+                energy_cap: {{ ((7.6 / 10 + 5 / 4 + 114 / 400 + 57 / 160) * heat.heat_pump_ratio.ashp + (12 / 10 + 9 / 4 + 202 / 400 + 72 / 160) * heat.heat_pump_ratio.gshp) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH, weighted by number of installed ; TODO: modify per region based on dwelling ratio
+                om_annual: {{ ((0.250 / 10 + 0.222 / 4 + 0.761 / 400 + 0.761 / 160) * heat.heat_pump_ratio.ashp + (0.222 / 10 + 0.222 / 4 + 0.761 / 400 + 0.761 / 160) * heat.heat_pump_ratio.gshp) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH, weighted by number of installed GSHP vs ASHP; TODO: modify per region based on dwelling ratio
+
     solar_thermal_collector:  # [Danish energy agency, heating installations, 215 Solar heating, 2050]
         essentials:
             name: Solar thermal collector
+            {% if heat.carriers is string %}
+            parent: conversion
+            {% else %}
             parent: conversion_plus
+            primary_carrier_out: {{ heat.carriers[0] }}
+            {% endif %}
             carrier_in: solar_thermal
-            carrier_out: [space_heat, water_heat]
-            primary_carrier_out: space_heat
+            carrier_out: {{ heat.carriers }}
         constraints:
-            energy_eff: 1  # modelled in the "solar_thermal_energy" tech
+            # energy_eff: 1  # modelled in the "solar_thermal_energy" tech
             lifetime: 30
             resource_area_per_energy_cap: {{ 6 / 4.2 + 200 / 140 }}  # m2/kW
         costs:
             monetary:
                 energy_cap: {{ (2.7 / 4.2 + 2.4 / 4.2 + 1.9 / 4.2 + 67 / 140 + 60 / 140) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
                 om_annual: {{ (0.05 / 4.2 + 0.05 / 4.2 + 0.05 / 4.2 + 0.17 / 140 + 0.17 / 140) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
-        exists: false
 
     solar_thermal_energy:
         essentials:
@@ -103,17 +176,19 @@ techs:
         constraints:
             resource: file=capacityfactors-solar-thermal.csv  # TODO: create timeseries
             lifetime: 20
-        exists: false
 
     electric_heater:  # [Danish energy agency, heating installations, 216 Electric heating, 2050]
         essentials:
             name: Electrical heater
+            {% if heat.carriers is string %}
+            parent: conversion
+            {% else %}
             parent: conversion_plus
+            primary_carrier_out: {{ heat.carriers[0] }}
+            {% endif %}
             carrier_in: electricity
-            carrier_out: [space_heat, water_heat]
-            primary_carrier_out: space_heat
+            carrier_out: {{ heat.carriers }}
         constraints:
-            energy_eff: 1
             lifetime: 30
         costs:
             monetary:
@@ -146,14 +221,14 @@ techs:
             parent: conversion_plus
             carrier_in: biofuel
             carrier_out: electricity
-            carrier_out_2: district_heat
+            carrier_out_2: heat
             primary_carrier_out: electricity
         constraints:
             energy_eff: {{ (0.265 + 0.32 + 0.282) / 3 }}  # average of chips/pellet/straw
             cb: {{ (3 + 3.3 + 2.9) / 3 }}  # back-pressure ratio, average of chips/pellet/straw
             cv: {{ (0.34 + 0.49 + 0.43) / 3 }}  # (electricity_cap - electricity_prod) / (heat_prod), average of chips/pellet/straw
             energy_cap_ratio:
-                carrier_out_2.district_heat: {{ (3.13 + 2.2 + 2.49) / 3 }} # max heat (zero electricity) to max electricity (zero heat), average of 3.13/2.2/2.49 chips/pellet/straw
+                carrier_out_2.heat: {{ (3.13 + 2.2 + 2.49) / 3 }} # max heat (zero electricity) to max electricity (zero heat), average of 3.13/2.2/2.49 chips/pellet/straw
             lifetime: 25
         costs:
             monetary:
@@ -167,7 +242,7 @@ techs:
             parent: conversion_plus
             carrier_in: biofuel
             carrier_out: electricity
-            carrier_out_2: district_heat
+            carrier_out_2: heat
             primary_carrier_out: electricity
         constraints:
             energy_eff: {{ (0.41 + 0.426) / 2 }}  # average of  chips/pellets
@@ -186,7 +261,7 @@ techs:
             parent: conversion_plus
             carrier_in: methane
             carrier_out: electricity
-            carrier_out_2: district_heat
+            carrier_out_2: heat
             primary_carrier_out: electricity
         constraints:
             energy_eff: 0.6
@@ -205,12 +280,10 @@ techs:
             parent: conversion_plus
             carrier_in: methane
             carrier_out: electricity
-            carrier_out_2: district_heat
+            carrier_out_2: heat
             primary_carrier_out: electricity
         constraints:
-            carrier_ratios:
-                carrier_out.electricity: 0.43
-                carrier_out_2.district_heat: 1  # backpressure coefficient (electricity/heat) = 1
+            energy_eff: 0.43 # backpressure coefficient (electricity/heat) = 1, so no need for carrier_ratios
             lifetime: 25
         costs:
             monetary:
@@ -224,12 +297,12 @@ techs:
             parent: conversion_plus
             carrier_in: methane
             carrier_out: electricity
-            carrier_out_2: district_heat
+            carrier_out_2: heat
             primary_carrier_out: electricity
         constraints:
             carrier_ratios:
                 carrier_out.electricity: 0.52  # annual average
-                carrier_out_2.district_heat: 0.64  # backpressure coefficient (electricity/heat) = 1.55
+                carrier_out_2.heat: 0.64  # backpressure coefficient (electricity/heat) = 1.55
             lifetime: 25
         costs:
             monetary:
@@ -241,7 +314,7 @@ techs:
         essentials:
             name: Small water tank (90L)
             parent: storage
-            carrier: heat  # TODO: handle both heat types
+            carrier: heat
         constraints:
             energy_cap_per_storage_cap_max: 6.67  # 20kW/3kWh
             storage_loss: 0.021  # %/hour
@@ -264,20 +337,14 @@ techs:
         essentials:
             name: Big water tank (3000L)
             parent: storage
-            carrier: district_heat
+            carrier: heat
         constraints:
             energy_cap_per_storage_cap_max: 0.0166 # 2MW/175MWh
             storage_loss: 0.01  # 0.2%/day -> 0.01%/hour
             lifetime: 40
+            link_con_to_prod: [chp_biofuel, chp_biofuel_extraction, chp_methane_extraction, chp_methane_back_pressure_simple
+, hp_methane_back_pressure_combined]
         costs:
             monetary:
                 storage_cap: {{ 0.003e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_heat") }}
                 # They also give om_prod and purchase costs, but the former is in terms of storage cap
-
-    district_to_building_heat:
-        essentials:
-            name: Convert district to building heat
-            parent: conversion_plus
-            carrier_in: district_heat
-            carrier_out: [space_heat, water_heat]
-            primary_carrier_out: space_heat

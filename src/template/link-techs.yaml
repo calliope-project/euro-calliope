@@ -1,4 +1,4 @@
-techs:
+tech_groups:
     dc_transmission:
         essentials:
             name: 'DC power transmission'
@@ -7,9 +7,10 @@ techs:
         constraints:
             energy_cap_max: inf
             energy_eff: 1.0
+            lifetime: 60 # [@JRC:2014]
         costs:
             monetary:
-                om_prod: 0
+                om_annual_investment_fraction: 0.015 # from [@JRC:2014], Table 39
     ac_transmission:
         essentials:
             name: "High voltage AC transmission line"
@@ -20,5 +21,25 @@ techs:
             lifetime: 60 # [@JRC:2014]
         costs:
             monetary:
-                energy_cap_per_distance: {{ 0.9 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW/m") }} from [@JRC:2014], Table 39
                 om_annual_investment_fraction: 0.015 # from [@JRC:2014], Table 39
+techs:
+    dc_ohl_transmission:
+        essentials:
+            name: 'DC overhead power transmission'
+            parent: dc_transmission
+    dc_subsea_transmission:
+        essentials:
+            name: 'DC subsea power transmission'
+            parent: dc_transmission
+    dc_underground_transmission:
+        essentials:
+            name: 'DC underground power transmission'
+            parent: dc_transmission
+    ac_ohl_transmission:
+        essentials:
+            name: "High voltage overhead AC transmission line"
+            parent: ac_transmission
+    ac_ohl_mountain_transmission:
+        essentials:
+            name: "High voltage overhead AC transmission line through the mountains"
+            parent: ac_transmission

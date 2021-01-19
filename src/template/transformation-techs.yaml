@@ -1,30 +1,27 @@
 techs:
-    biofuel_to_liquids: # [Danish energy agency, renewable fuels, 101 Catalytic Hydropyrolysis 1, 2050]
+    biofuel_to_liquids: # [Danish energy agency, renewable fuels, 85 Gasif. Ent. Flow FT, liq fu, 2050]
         essentials:
             name: Biofuel to liquid fuels converter
             parent: conversion_plus
             carrier_in: biofuel
-            carrier_in_2: hydrogen
-            primary_carrier_in: hydrogen
             carrier_out: kerosene
-            primary_carrier_out: kerosene
-            carrier_out_2: methane
-            carrier_out_3: diesel
-            #carrier_out_3: district_heat  # ignoring for now (also the process produces biochar)
+            primary_carrier_out: diesel
+            carrier_out_2: diesel
+            carrier_out_3: electricity
+            #carrier_out_4: naphtha  # ignoring for now
         constraints:
             carrier_ratios:
-                carrier_in.biofuel: 0.77
-                carrier_in_2.hydrogen: 0.23
-                carrier_out.kerosene: {{ 0.38 * 0.6 }}  # MWh_kerosene/MWh_in @ 60% liquids content (based on hydrogen to liquids assumption)
-                carrier_out_3.diesel: {{ 0.38 * 0.4 }}  # MWh_diesel/MWh_in @ 40% liquids conten (based on hydrogen to liquids assumption)
-                carrier_out_2.methane: 0.31  # MWh_methane/MWh_in
-            lifetime: 20  # assumption, not given
+                carrier_out.kerosene: 0.015  # MWh_kerosene/MWh_in
+                carrier_out_2.diesel: 0.1  # MWh_diesel/MWh_in
+                carrier_out_3.electricity: 0.012  # MWhe/MWh_in
+                #carrier_out_4.naphtha: 0.138  # MWh_naphtha/MWh_in
+            lifetime: 25
         costs:
             monetary:
                 # TODO: sense check energy_cap vs om_annual costs (does the difference make sense?)
-                energy_cap: {{ 0.73e6 / (1000 / 8000 * 11.94) / 0.6 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_kerosene") }} | 0.73MEur/1000t/year / (1000t/8000h_operation/year * 11940MWh_kerosene/t) / 0.6MW_kerosene/MW_liquids
-                om_annual: {{ 44e3 * (228 / 160) / (1000 / 8000 * 11.94) / 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_kerosene/year") }} | 44kEur/MW_out * (228MW_out/160 1000t_liquids/year) / (1000t_liquids/8000h_operation/year * 11940MWh_kerosene/t) / 0.6MW_kerosene/MW_liquids
-                om_prod: {{ 0.02 * (228 / 160) / (1000 / 8000 * 11.94) / 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_kerosene") }} | 0.02Eur/MWh_out * (228MW_out/160 1000t_liquids/year) / (1000t_liquids/8000h_operation/year * 11940MWh_kerosene/t) / 0.6MW_kerosene/MW_liquids
+                energy_cap: {{ 3.46e6 * 0.1 / (0.015 + 0.1 + 0.138) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }} | 3.46MEur/MW_liquids/year * 0.1 MW_diesel/MW_in / 0.253 MW_liquids/MW_in
+                om_annual: {{ 104e3 * 0.1 / (0.015 + 0.1 + 0.138) * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel/year") }} | 104kEur/MW_liquids/year * 0.1 MW_diesel/MW_in / 0.253 MW_liquids/MW_in
+                om_prod: {{ 1.063 * 0.1 / (0.015 + 0.1 + 0.138) * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }} | 1.063Eur/MWh_liquids * 0.1 MWh_diesel/MWh_in / 0.253 MWh_liquids/MWh_in
 
     hydrogen_to_liquids: # [Danish energy agency, renewable fuels, 102 Hydrogen to Jet, 2050]
         essentials:
@@ -42,7 +39,7 @@ techs:
             carrier_ratios:
                 carrier_in.hydrogen: 0.995  # MWh_H2/MWh_in
                 carrier_in_2.electricity: 0.005  # MWhe/MWh_in
-                carrier_in_3.co2: {{ 3.3e-3 * 0.75 / 11.9 * scaling_factors.co2 }}  # {{ (1 / scaling_factors.co2) | unit("ktCO2/MWhe") }} | 3.3tCO2/t_fuels * 0.75MWh_fuels/MWh_in / 11.9MWh_fuels/t_fuels
+                carrier_in_3.co2: {{ 3.3e-3 * 0.75 / 11.9 * scaling_factors.co2 / scaling_factors.power}}  # {{ (1 / (scaling_factors.co2 / scaling_factors.power)) | unit("ktCO2/(MWhe + MWhH2)") }} | 3.3tCO2/t_fuels * 0.75MWh_fuels/MWh_in / 11.9MWh_fuels/t_fuels
                 carrier_out.kerosene: {{ 0.75 * 0.6 }}  # MWh_kerosene/MWh_in @ 60% liquids content
                 carrier_out_2.diesel: {{ 0.75 * 0.4 }}  # MWh_diesel/MWh_in @ 40% liquids content (combining diesel oil and light oil production)
             lifetime: 25  # 2020 technical lifetime
@@ -63,29 +60,60 @@ techs:
             carrier_out: diesel
         constraints:
             carrier_ratios:
-                carrier_in.biofuel: {{ (0.95 / 0.82) * (0.99 / 0.6) }}  # 0.95MWh_biomass/MWh_bio-oil * 0.99MWh_bio-oil/MWh_diesel
-                carrier_in_2.electricity: {{ (0.01 / 0.82) * (0.99 / 0.6) + (0.05 / 0.6) }}  # (0.01MWhe/MWh_bio-oil * 0.99MWh_bio-oil/MWh_diesel) + 0.05MWhe/MWh_diesel
-                carrier_out.diesel: 1
+                carrier_in.biofuel: {{ (0.95 / 0.82) * (0.99 / 0.6) }}  # {{ 1 | unit("MWh_biofuel/MWh_diesel") }} | 0.95MWh_biomass/MWh_bio-oil * 0.99MWh_bio-oil/MWh_diesel
+                carrier_in_2.electricity: {{ (0.01 / 0.82) * (0.99 / 0.6) + (0.05 / 0.6) }}  # {{ 1 | unit("MWhe/MWh_diesel") }} | (0.01MWhe/MWh_bio-oil * 0.99MWh_bio-oil/MWh_diesel) + 0.05MWhe/MWh_diesel
+                # carrier_out.diesel: 1  # will be set as 1 automatically
             lifetime: 20
         costs:
             monetary:
-                energy_cap: {{ (1.1 + 0.93) * 1e6 * 0.6 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }} | (1.1 bio oil plant + 0.93 hydropyrolysis plant) * 0.6 (bio oil to diesel)
-                om_annual: {{ (0.063 + 0.027) * 1e6 * 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel/year") }} | (0.063 bio oil plant + 0.027 hydropyrolysis plant) * 0.6 (bio oil to diesel)
-                om_prod: {{ (14.013 * 1.31) * 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_diesel") }} | (14.013 bio oil plant + 1.31 hydropyrolysis plant) * 0.6 (bio oil to diesel)
+                energy_cap: {{ (1.1 + 0.93) * 1e6 / 0.6 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }} | (1.1 bio oil plant + 0.93 hydropyrolysis plant) / 0.6MWh_diesel/MWh_biooil
+                om_annual: {{ (0.063 + 0.027) * 1e6 / 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel/year") }} | (0.063 bio oil plant + 0.027 hydropyrolysis plant) / 0.6MWh_diesel/MWh_biooil
+                # TODO: triple check this: the number seems too high...
+                om_prod: {{ (14.013 + 1.31) / 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_diesel") }} | (14.013Eur/MWh_biooil liquifaction + 1.31Eur/MWh_biooil hydropyrolysis plant) / 0.6MWh_diesel/MWh_biooil
+
+    biofuel_to_gas_and_liquids: # [Danish energy agency, renewable fuels, 101 Catalytic Hydropyrolysis 1, 2050]
+        essentials:
+            name: Biofuel to liquid and gas fuels converter
+            parent: conversion_plus
+            carrier_in: biofuel
+            carrier_in_2: hydrogen
+            primary_carrier_in: hydrogen
+            carrier_out: kerosene
+            primary_carrier_out: kerosene
+            carrier_out_2: methane
+            carrier_out_3: diesel
+            #carrier_out_3: district_heat  # ignoring for now (also the process produces biochar)
+        constraints:
+            carrier_ratios:
+                carrier_in.biofuel: 0.77
+                carrier_in_2.hydrogen: 0.23
+                carrier_out.kerosene: {{ 0.38 * 0.6 }}  # MWh_kerosene/MWh_in @ 60% liquids content (based on hydrogen to liquids assumption)
+                carrier_out_3.diesel: {{ 0.38 * 0.4 }}  # MWh_diesel/MWh_in @ 40% liquids content (based on hydrogen to liquids assumption)
+                carrier_out_2.methane: 0.31  # MWh_methane/MWh_in
+            lifetime: 20  # assumption, not given
+        costs:
+            monetary:
+                # TODO: sense check energy_cap vs om_annual costs (does the difference make sense?)
+                energy_cap: {{ 0.73e6 / (1000 / 8000 * 11.94) / 0.6 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_kerosene") }} | 0.73MEur/1000t/year / (1000t/8000h_operation/year * 11940MWh_kerosene/t) / 0.6MW_kerosene/MW_liquids
+                om_annual: {{ 44e3 * (228 / 160) / (1000 / 8000 * 11.94) / 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_kerosene/year") }} | 44kEur/MW_out * (228MW_out/160 1000t_liquids/year) / (1000t_liquids/8000h_operation/year * 11940MWh_kerosene/t) / 0.6MW_kerosene/MW_liquids
+                # FIXME: om_prod is '(€ /MWh of fuel)', does this mean input or output fuel? Going with it meaning 'liquid fuel'
+                # TODO: triple check this; the value seems too small.
+                om_prod: {{ 0.02 / 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_kerosene") }} | 0.02Eur/MWh_liquid_fuel / 0.6MWh_kerosene/MW_liquid_fuel
 
     biofuel_to_methanol: # [Danish energy agency, renewable fuels, 97 Methanol from biomass gasif., 2050]
         essentials:
             name: Biofuel to Methanol converter
-            parent: conversion_plus
+            parent: conversion
             carrier_in: biofuel
             carrier_out: methanol
-            primary_carrier_out: methanol
-            carrier_out_2: electricity
+            # primary_carrier_out: methanol
+            # carrier_out_2: electricity  # ignoring for now
             #carrier_out_3: district_heat  # ignoring for now
         constraints:
-            carrier_ratios:
-                carrier_out_2.electricity: 0.02  # MWhe/MWh_bio
-                carrier_out.methanol: 0.22  # MWh_methanol/MWh_bio
+            energy_eff: 0.22  # MWh_methanol/MWh_bio
+            # carrier_ratios:
+            #     carrier_out_2.electricity: 0.02  # MWhe/MWh_bio
+            #     carrier_out.methanol: 0.22  # MWh_methanol/MWh_bio
             lifetime: 20
         costs:
             monetary:
@@ -106,9 +134,9 @@ techs:
             #carrier_out_2: district_heat  # ignoring for now
         constraints:
             carrier_ratios:
-                carrier_in.electricity: 1  #MWhe
+                # carrier_in.electricity: 1  #MWhe, will be set as 1 automatically
                 carrier_in_2.hydrogen: {{ 0.192 * 33.3 * 0.65 / 5.583 }} # MWhH2/MWhe | 0.192tH2/tMethanol * 33.3MWhH2/tH2 * 0.65MWhMethanol/MWhe / 5.583MWhMethanol/tMethanol
-                carrier_in_3.co2: {{ 1.37e-3 * 0.65 / 5.583 * scaling_factors.co2 }}  # {{ (1 / scaling_factors.co2) | unit("ktCO2/MWhe") }} | 1.37e-3ktCO2/tMethanol * 0.65MWhMethanol/MWhe / 5.583MWhMethanol/tMethanol
+                carrier_in_3.co2: {{ 1.37e-3 * 0.65 / 5.583 * scaling_factors.co2 / scaling_factors.power }}  # {{ (1 / (scaling_factors.co2 / scaling_factors.power)) | unit("ktCO2/MWhe") }} | 1.37e-3ktCO2/tMethanol * 0.65MWhMethanol/MWhe / 5.583MWhMethanol/tMethanol
                 carrier_out.methanol: 0.65  # MWhMethanol/MWhe
             lifetime: 20
         costs:
@@ -129,9 +157,9 @@ techs:
             lifetime: 20
         costs:
             monetary:  # source gives in terms of carrier_in, so these are scaled by the methane production efficiency
-                energy_cap: {{ 2.14 * scaling_factors.specific_costs }}  #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_methane") }}
-                om_annual: {{ 0.0344 * scaling_factors.specific_costs }}  #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_methane/year") }}
-                om_prod: {{ 2.29 * scaling_factors.specific_costs }}  #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_methane") }}
+                energy_cap: {{ 1.5e6 / 0.7 * scaling_factors.specific_costs }}  #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_methane") }}
+                om_annual: {{ 24.1e3 / 0.7 * scaling_factors.specific_costs }}  #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_methane/year") }}
+                om_prod: {{ 1.6 / 0.7 * scaling_factors.specific_costs }}  #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_methane") }}
 
     hydrogen_to_methane:  # [Boehm_2020, 2050]
         essentials:
@@ -144,7 +172,7 @@ techs:
         constraints:
             carrier_ratios:
                 carrier_in.hydrogen: 1.21  # MW_H2/MW_methane
-                carrier_in_2.co2: {{ 0.196 * scaling_factors.co2 / scaling_factors.power }}  # {{ (1 / (scaling_factors.co2 / scaling_factors.power)) | unit("ktCO2/MW_methane") }} ktCO2/MW methane
+                carrier_in_2.co2: {{ 0.196 / 1.21 * scaling_factors.co2 / scaling_factors.power }}  # {{ (1 / (scaling_factors.co2 / scaling_factors.power)) | unit("ktCO2/MW_H2") }} 0.196 ktCO2/MW_methane / 1.21 MW_H2/MW_methane
             lifetime: 20
         costs:
             monetary:
@@ -154,7 +182,7 @@ techs:
                 om_annual_investment_fraction: 0.05  # 5% of annual CAPEX
 
     # TODO: add ramping?
-    electrolysis:  # [Calliope-Italy 2030, relatively high energy_cap comapred to Danish energy agency (~0.7 MEur/MW H2)]
+    electrolysis:  # [Calliope-Italy 2030, relatively high energy_cap compared to Danish energy agency (~0.7 MEur/MW H2)]
         essentials:
             name: Hydrogen by electrolysis
             parent: conversion
@@ -167,7 +195,7 @@ techs:
             monetary:
                 interest_rate: 0.1
                 energy_cap: {{ 1.2e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_H2") }}
-                om_annual: {{ 36e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_H2/year") }}
+                om_annual: {{ 36e3 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_H2/year") }}
 
     dac:  # [Fasihi_2019, Low T, 2050]
         essentials:
@@ -176,7 +204,7 @@ techs:
             carrier_in: electricity
             carrier_out: co2
         constraints:
-            energy_eff: {{ 0.2 * scaling_factors.power / scaling_factors.co2 }} # {{ (1 / (scaling_factors.power / scaling_factors.co2)) | unit("MWh/ktCO2") }}
+            energy_eff: {{ 5 * scaling_factors.co2 / scaling_factors.power }} # {{ (1 / (scaling_factors.co2 / scaling_factors.power)) | unit("ktCO2/MWh") }}
             lifetime: 30
         costs:
             monetary:

@@ -86,7 +86,7 @@ rule parameterise_template:
         max_power_density = config["parameters"]["maximum-installable-power-density"],
         biofuel_efficiency = config["parameters"]["biofuel-efficiency"],
         transport = config["parameters"]["transport"],
-        heat = config["parameters"]["heat-end-use"]
+        heat = config["parameters"]["heat-end-use"],
     output: "build/model/{template}"
     wildcard_constraints:
         template = "((link-techs.yaml)|(storage-techs.yaml)|(demand-techs.yaml)|(renewable-techs.yaml)|(README.md)|(environment.yaml)|(interest-rate.yaml)|(heat-techs.yaml)|(transformation-techs.yaml)|(transport-techs.yaml))"

@@ -12,12 +12,12 @@ def parameterise_template(path_to_template, path_to_biofuel_costs, scaling_facto
     """Applies config parameters to template files."""
 
     scaling_factors["specific_costs"] = scaling_factors["monetary"] / scaling_factors["power"]
-    scaling_factors["transport_efficiency"] = scaling_factors["power"] / scaling_factors["transport"]
+    scaling_factors["transport_efficiency"] = scaling_factors["transport"] / scaling_factors["power"]
     with open(path_to_biofuel_costs, "r") as f_biofuel_costs:
         biofuel_fuel_cost = float(f_biofuel_costs.readline())
 
     path_to_template = Path(path_to_template)
-    env = jinja2.Environment(loader=jinja2.FileSystemLoader(path_to_template.parent))
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(path_to_template.parent), lstrip_blocks=True, trim_blocks=True)
     env.filters['unit'] = filters.unit
     rendered = env.get_template(path_to_template.name).render(
         scaling_factors=scaling_factors,

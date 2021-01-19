@@ -21,6 +21,13 @@ techs:
             carrier: water_heat
         constraints:
             resource: file=water-heat-demand.csv
+    demand_heat:
+        essentials:
+            name: 'Heat demand'
+            parent: demand
+            carrier: heat
+        constraints:
+            resource: file=heat-demand.csv
     demand_cooking:
         essentials:
             name: 'Cooking demand'
@@ -30,101 +37,122 @@ techs:
             resource: file=cooking-demand.csv
     # Transport (in km)
     demand_passenger_car_transport:
+        exists: false
         essentials:
             name: 'Passenger car transport demand'
             parent: demand
-            carrier: passenger_transport
+            carrier: passenger_car_transport
         constraints:
             force_resource: false
-            resource: -.inf
+            resource: -.inf  # i.e. very large negative relative to model scale
     demand_bus_transport:
+        exists: false
         essentials:
             name: 'Bus transport demand'
             parent: demand
             carrier: bus_transport
         constraints:
             force_resource: false
-            resource: -.inf
+            resource: -.inf  # i.e. very large negative relative to model scale
     demand_motorcycle_transport:
+        exists: false
         essentials:
             name: 'Motorcycle transport demand'
             parent: demand
             carrier: motorcycle_transport
         constraints:
             force_resource: false
-            resource: -.inf
+            resource: -.inf  # i.e. very large negative relative to model scale
     demand_ldv_transport:
+        exists: false
         essentials:
             name: 'Light duty vehicle transport demand'
             parent: demand
             carrier: ldv_transport
         constraints:
             force_resource: false
-            resource: -.inf
+            resource: -.inf  # i.e. very large negative relative to model scale
     demand_hdv_transport:
+        exists: false
         essentials:
             name: 'Heavy duty vehicle demand'
             parent: demand
             carrier: hdv_transport
         constraints:
             force_resource: false
-            resource: -.inf
+            resource: -.inf  # i.e. very large negative relative to model scale
+    demand_light_transport:
+        exists: false
+        essentials:
+            name: 'Light vehicle transport demand'
+            parent: demand
+            carrier: light_transport
+        constraints:
+            force_resource: false
+            resource: -.inf  # i.e. very large negative relative to model scale
+    demand_heavy_transport:
+        exists: false
+        essentials:
+            name: 'Heavy vehicle demand'
+            parent: demand
+            carrier: heavy_transport
+        constraints:
+            force_resource: false
+            resource: -.inf  # i.e. very large negative relative to model scale
     # Transport (as fuel)
-    demand_air_kerosene:
+    demand_industry_kerosene:
+        exists: false
         essentials:
             name: 'Air transport kerosene demand'
             parent: demand
             carrier: kerosene
         constraints:
             force_resource: false
-            resource: -.inf
-    demand_marine_diesel:
+            resource: -.inf  # i.e. very large negative relative to model scale
+    demand_industry_diesel:
+        exists: false
         essentials:
-            name: 'Shipping transport demand'
+            name: 'Shipping transport and industry backup generator demand'
             parent: demand
             carrier: diesel
         constraints:
             force_resource: false
-            resource: -.inf
+            resource: -.inf  # i.e. very large negative relative to model scale
     # Industry feedstock
     demand_industry_hydrogen:
+        exists: false
         essentials:
             name: 'Industry hydrogen feedstock demand'
             parent: demand
             carrier: hydrogen
         constraints:
             force_resource: false
-            resource: -.inf
+            resource: -.inf  # i.e. very large negative relative to model scale
     demand_industry_methanol:
+        exists: false
         essentials:
             name: 'Industry methane feedstock demand'
             parent: demand
             carrier: methanol
         constraints:
             force_resource: false
-            resource: -.inf
+            resource: -.inf  # i.e. very large negative relative to model scale
     demand_industry_co2:
+        exists: false
         essentials:
             name: 'Industry co2 feedstock demand'
             parent: demand
             carrier: co2
         constraints:
             force_resource: false
-            resource: -.inf
+            resource: -.inf  # i.e. very large negative relative to model scale
     # Industry processes
     demand_industry_methane:
+        exists: false
         essentials:
             name: 'Industry high enthalpy process methane demand'
             parent: demand
             carrier: methane
         constraints:
             force_resource: false
-            resource: -.inf
-    demand_industry_diesel:
-        essentials:
-            name: 'Industry motor diesel demand'
-            parent: demand
-            carrier: diesel
-        constraints:
-            force_resource: false
-            resource: -.inf
+            resource: -.inf  # i.e. very large negative relative to model scale
