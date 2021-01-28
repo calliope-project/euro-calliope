@@ -1,6 +1,7 @@
 URL_LOAD = "https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv"
 URL_POTENTIALS = "https://zenodo.org/record/3533038/files/possibility-for-electricity-autarky.zip"
 URL_CAPACITY_FACTORS = "https://zenodo.org/record/3899687/files/{wildcards.filename}?download=1"
+URL_JRC_PPDB = "https://zenodo.org/record/3574566/files/JRC-PPDB-OPEN.ver1.0.zip"
 
 NATIONAL_PHS_STORAGE_CAPACITIES = "data/pumped-hydro/storage-capacities-gwh.csv"
 ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
@@ -71,6 +72,20 @@ rule potentials:
     shell: "unzip -o {input} -d build/data"
 
 
+rule jrc_power_plant_database_zipped:
+    message: "Download and unzip jrc power plant database."
+    output:  "data/automatic/jrc_power_plant_database.zip"
+    shell: "curl -sLo {output[0]} '{URL_JRC_PPDB}'"
+
+
+rule jrc_power_plant_database:
+    message: "Unzip JRC power plant units from database."
+    input: rules.jrc_power_plant_database_zipped.output[0]
+    output:
+        "data/automatic/JRC_OPEN_UNITS.csv"
+    shell: "unzip -o {input[0]} JRC_OPEN_UNITS.csv -d data/automatic/"
+
+
 rule parameterise_template:
     message: "Apply config parameters to file {wildcards.template} from templates."
     input:
@@ -89,7 +104,7 @@ rule parameterise_template:
         heat = config["parameters"]["heat-end-use"],
     output: "build/model/{template}"
     wildcard_constraints:
-        template = "((link-techs.yaml)|(storage-techs.yaml)|(demand-techs.yaml)|(renewable-techs.yaml)|(README.md)|(environment.yaml)|(interest-rate.yaml)|(heat-techs.yaml)|(transformation-techs.yaml)|(transport-techs.yaml))"
+        template = "((link-techs.yaml)|(storage-techs.yaml)|(demand-techs.yaml)|(renewable-techs.yaml)|(README.md)|(environment.yaml)|(interest-rate.yaml)|(heat-techs.yaml)|(transformation-techs.yaml)|(transport-techs.yaml)|(legacy-techs.yaml))"
     conda: "envs/default.yaml"
     script: "src/parameterise_templates.py"
 
@@ -140,6 +155,18 @@ rule biofuels:
     script: "src/biofuels.py"
 
 
+rule nuclear_regional_capacity:
+    message: "Calculate proportion of future planned nuclear capacity will be installed in each"
+             " {wildcards.resolution} region, based on location of existing capacity"
+    input:
+        power_plant_database = rules.jrc_power_plant_database.output[0],
+        nuclear_capacity = "data/nuclear_capacity_2050.csv",
+        shapes = rules.units.output[0]
+    conda: "envs/geo.yaml"
+    output: "build/data/{resolution}/nuclear_capacity_2050.csv"
+    script: "src/nuclear_capacity.py"
+
+
 rule locations:
     message: "Generate locations for {wildcards.resolution} resolution."
     input:
@@ -148,7 +175,8 @@ rule locations:
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
         hydro_capacities = rules.hydro_capacities.output[0],
-        biofuel = "build/data/{{resolution}}/biofuel/{scenario}/potential-mwh-per-year.csv".format(scenario=config["parameters"]["jrc-biofuel"]["scenario"])
+        biofuel = "build/data/{{resolution}}/biofuel/{scenario}/potential-mwh-per-year.csv".format(scenario=config["parameters"]["jrc-biofuel"]["scenario"]),
+        nuclear_capacity = rules.nuclear_regional_capacity.output[0]
     params:
         flat_roof_share = config["parameters"]["roof-share"]["flat"],
         maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],

@@ -37,6 +37,13 @@ TEMPLATE = """locations:
                 constraints:
                     energy_cap_max: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
                     storage_cap_max: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+            {% if location.installed_capacity_nuclear_max_MW > 0 %}
+            nuclear:
+                constraints:
+                    energy_cap_min: {{ location.installed_capacity_nuclear_min_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                    energy_cap_max: {{ location.installed_capacity_nuclear_max_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+            {% endif %}
+            ccgt:
 
     {% endfor %}
 overrides:
@@ -70,7 +77,8 @@ overrides:
 
 
 def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hydro_capacities_mw,
-                        path_to_biofuel_potential_mwh, flat_roof_share, maximum_installable_power_density,
+                        path_to_biofuel_potential_mwh, path_to_nuclear_capacity_mw,
+                        flat_roof_share, maximum_installable_power_density,
                         scaling_factors, biofuel_efficiency, path_to_output_yaml, path_to_output_csv):
     """Generate a file that represents locations in Calliope."""
     locations = gpd.GeoDataFrame(
@@ -88,8 +96,12 @@ def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hy
     )
     hydro_capacities = pd.read_csv(path_to_hydro_capacities_mw, index_col=0)
     biofuel = pd.read_csv(path_to_biofuel_potential_mwh, index_col=0) * biofuel_efficiency
+    nuclear_capacity = pd.read_csv(path_to_nuclear_capacity_mw, index_col=0)
     locations = locations.merge(
-        pd.concat([capacities, hydro_capacities, biofuel], axis="columns", sort=True),
+        pd.concat(
+            [capacities, hydro_capacities, biofuel, nuclear_capacity],
+            axis="columns", sort=True
+        ),
         how="left",
         left_index=True,
         right_index=True,
@@ -129,6 +141,7 @@ if __name__ == "__main__":
         path_to_land_eligibility_km2=snakemake.input.land_eligibility_km2,
         path_to_hydro_capacities_mw=snakemake.input.hydro_capacities,
         path_to_biofuel_potential_mwh=snakemake.input.biofuel,
+        path_to_nuclear_capacity_mw=snakemake.input.nuclear_capacity,
         path_to_output_yaml=snakemake.output.yaml,
         path_to_output_csv=snakemake.output.csv,
         flat_roof_share=snakemake.params["flat_roof_share"],

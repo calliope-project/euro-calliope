@@ -22,9 +22,7 @@ techs:
             carrier_in: electricity
             carrier_out: ldv_transport
         constraints:
-            energy_cap_max_time_varying:
-                carrier_in:
-                    electricity: file=energy-cap-ev.csv
+            energy_cap_max_time_varying: file=energy-cap-ev.csv
             lifetime: 20
 
     bus_transport_ice:
@@ -57,9 +55,7 @@ techs:
             carrier_in: electricity
             carrier_out: motorcycle_transport
         constraints:
-            energy_cap_max_time_varying:
-                carrier_in:
-                    electricity: file=energy-cap-ev.csv
+            energy_cap_max_time_varying: file=energy-cap-ev.csv
 
     passenger_car_transport_ice:
         exists: false
@@ -76,9 +72,7 @@ techs:
             carrier_in: electricity
             carrier_out: passenger_car_transport
         constraints:
-            energy_cap_max_time_varying:
-                carrier_in:
-                    electricity: file=energy-cap-ev.csv
+            energy_cap_max_time_varying: file=energy-cap-ev.csv
 
     heavy_transport_ice:
         exists: false
@@ -109,6 +103,4 @@ techs:
             carrier_in: electricity
             carrier_out: light_transport
         constraints:
-            energy_cap_max_time_varying:
-                carrier_in:
-                    electricity: file=energy-cap-ev.csv
+            energy_cap_max_time_varying: file=energy-cap-ev.csv
