@@ -5,6 +5,12 @@ import pandas as pd
 import numpy as np
 import pycountry
 
+SOURCE_PRIORITY = [
+    'actual_entsoe_power_statistics',
+    'actual_entsoe_transparency',
+    'actual_tso',
+    'actual_net_consumption_tso'
+]
 
 def national_load(path_to_raw_load, number_rows_valid, year, path_to_output):
     """Extracts national load time series for all countries in a specified year."""
@@ -31,9 +37,8 @@ def read_load_profiles(path_to_raw_load, number_rows_valid, start, end):
     data = data[(data["variable"] == "load")]
     data = data[(data.utc_timestamp >= start) &
                 (data.utc_timestamp < end)]
-    data = remove_entsoe_power_statistic_data_where_possible(data)
-    data.drop(["variable", "attribute"], axis=1, inplace=True)
-    return data.pivot(columns="region", index="utc_timestamp", values="data")
+    data = select_statistics_by_source_priority(data)
+    return data.unstack("region")
 
 
 def read_albania(path_to_raw_load, number_rows_valid, other_ts):
@@ -49,12 +54,29 @@ def read_albania(path_to_raw_load, number_rows_valid, other_ts):
     return albania
 
 
-def remove_entsoe_power_statistic_data_where_possible(load):
-    sorted_load = load.sort_values(
-        "attribute",
-        ascending=False
-    ) # will end with entsoe-transparency ahead of entsoe-power-statistics
-    return sorted_load.drop_duplicates(["region", "utc_timestamp"], keep="first")
+def select_statistics_by_source_priority(load):
+    """
+    Choosing `entsoe_power_statistics` as main source since OPSD states:
+        The two sources differ Values on PS (~500 TWh annaually in Germany) are
+        usually slightly higher than on the TP (~490 TWh). The reason probably
+        lies with different reporting deadlines: Values on the TP have to be
+        reported "no later than one hour after the end of the operating period".
+        For the PS, the data is published with a delay of up to 3 months,
+        which might allow for more accurate metering.
+        For a comparison of the two sources see Hirth, et al. (2018).
+    See https://nbviewer.jupyter.org/github/Open-Power-System-Data/datapackage_timeseries/blob/2020-10-06/main.ipynb for more info.
+    """
+    load_by_attribute = (
+        load
+        .set_index(["region", "utc_timestamp", "attribute"])
+        ["data"]
+        .unstack("attribute")
+    )
+    load_top_priority = load_by_attribute[SOURCE_PRIORITY[0]]
+    for source in SOURCE_PRIORITY[1:]:
+        load_top_priority = load_top_priority.fillna(load_by_attribute[source])
+
+    return load_top_priority
 
 
 def filter_national(load):
