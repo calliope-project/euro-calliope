@@ -159,6 +159,7 @@ rule nuclear_regional_capacity:
     message: "Calculate proportion of future planned nuclear capacity will be installed in each"
              " {wildcards.resolution} region, based on location of existing capacity"
     input:
+        src = "src/nuclear_capacity.py",
         power_plant_database = rules.jrc_power_plant_database.output[0],
         nuclear_capacity = "data/nuclear_capacity_2050.csv",
         shapes = rules.units.output[0]
