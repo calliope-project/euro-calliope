@@ -2,7 +2,9 @@
 
 A model of the European electricity system built using Calliope.
 
-This repository contains the workflow routines that automatically build the model from source data.
+This repository contains the workflow routines that automatically build the model from source data. Alternatively to building models yourself, you can use pre-built models that run out-of-the-box, see link below.
+
+[![pre-built models DOI](https://img.shields.io/badge/prebuilts-10.5281%2Fzenodo.3949553-blue)](https://doi.org/10.5281/zenodo.3949553)
 
 ## At a glance
 
