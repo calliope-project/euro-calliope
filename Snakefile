@@ -113,7 +113,7 @@ rule hydro_capacities:
     message: "Determine hydro capacities on {wildcards.resolution} resolution."
     input:
         src = "src/hydro.py",
-        locations = rules.units.output[0],
+        locations = landeligibility("build/{resolution}/units.geojson"),
         plants = rules.preprocess_hydro_stations.output[0],
         phs_storage_capacities = NATIONAL_PHS_STORAGE_CAPACITIES
     output: "build/data/{resolution}/hydro-capacities-mw.csv"
@@ -138,7 +138,7 @@ rule biofuels:
     message: "Determine biofuels potential on {wildcards.resolution} resolution for scenario {wildcards.scenario}."
     input:
         src = "src/biofuels.py",
-        units = rules.units.output[0],
+        units = landeligibility("build/{resolution}/units.geojson"),
         land_cover = rules.potentials.output.land_cover,
         population = rules.potentials.output.population,
         national_potentials = expand("data/biofuels/potentials/{feedstock}.csv", feedstock=BIOFUEL_FEEDSTOCKS),
@@ -162,7 +162,7 @@ rule nuclear_regional_capacity:
         src = "src/nuclear_capacity.py",
         power_plant_database = rules.jrc_power_plant_database.output[0],
         nuclear_capacity = "data/nuclear_capacity_2050.csv",
-        shapes = rules.units.output[0]
+        shapes = landeligibility("build/{resolution}/units.geojson")
     conda: "envs/geo.yaml"
     output: "build/data/{resolution}/nuclear_capacity_2050.csv"
     script: "src/nuclear_capacity.py"
@@ -173,7 +173,7 @@ rule locations:
     input:
         src = "src/locations.py",
         filters = "src/filters.py",
-        shapes = rules.units.output[0],
+        shapes = landeligibility("build/{resolution}/units.geojson"),
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
         hydro_capacities = rules.hydro_capacities.output[0],
         biofuel = "build/data/{{resolution}}/biofuel/{scenario}/potential-mwh-per-year.csv".format(scenario=config["parameters"]["jrc-biofuel"]["scenario"]),
@@ -195,7 +195,7 @@ rule directional_rooftop_pv:
     input:
         src = "src/directional_rooftop.py",
         filters = "src/filters.py",
-        shapes = rules.units.output[0],
+        shapes = landeligibility("build/{resolution}/units.geojson"),
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
     params:
         roof_shares = config["parameters"]["roof-share"],
@@ -210,7 +210,7 @@ rule load_shedding:
     message: "Generate override allowing load shedding."
     input:
         src = "src/load_shedding.py",
-        shapes = rules.units.output[0]
+        shapes = landeligibility("build/{resolution}/units.geojson")
     output: "build/model/{resolution}/load-shedding.yaml"
     conda: "envs/geo.yaml"
     script: "src/load_shedding.py"
@@ -227,7 +227,7 @@ rule capacity_factors_onshore_wind_and_solar:
              "{wildcards.resolution} resolution for {wildcards.technology}."
     input:
         src = "src/capacityfactors.py",
-        locations = rules.units.output[0],
+        locations = landeligibility("build/{resolution}/units.geojson"),
         ids = ancient("data/automatic/capacityfactors/onshore-locations.tif"),
         timeseries = ancient("data/automatic/capacityfactors/{technology}-timeseries.nc")
     params:
@@ -265,7 +265,7 @@ rule capacity_factors_hydro:
         src = "src/capacityfactors_hydro.py",
         capacities = rules.hydro_capacities.output[0],
         stations = rules.inflow_mwh.output[0],
-        locations = rules.units.output[0]
+        locations = landeligibility("build/{resolution}/units.geojson")
     params:
         threshold = config["capacity-factors"]["min"]
     output:
@@ -298,7 +298,7 @@ rule electricity_load:
     message: "Generate electricity load time series for every location on {wildcards.resolution} resolution."
     input:
         src = "src/load.py",
-        units = rules.units.output[0],
+        units = landeligibility("build/{resolution}/units.geojson"),
         industrial_demand = rules.potentials.output.industrial_demand,
         national_load = rules.electricity_load_national.output[0]
     params:
@@ -312,7 +312,7 @@ rule link_neighbours:
     message: "Create links between all direct neighbours on {wildcards.resolution} resolution."
     input:
         src = "src/link_neighbours.py",
-        units = rules.units.output[0]
+        units = landeligibility("build/{resolution}/units.geojson")
     params:
         sea_connections = lambda wildcards: config["sea-connections"][wildcards.resolution]
     output: "build/model/{resolution}/link-all-neighbours.yaml"
