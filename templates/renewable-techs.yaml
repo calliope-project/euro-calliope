@@ -5,23 +5,19 @@ tech_groups:
             carrier: electricity
             parent: supply
         constraints:
-            energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
             lifetime: 25 # [@JRC:2014] Table 7
     pv_on_roof:
         essentials:
             parent: pv
         costs:
             monetary:
-                energy_cap: {{ 880000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 9
-                om_annual: {{ (880000 * 0.02 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2% from [@JRC:2014] Table 9
-                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+                energy_cap: {{ mean([0.56e6, 0.45e6]) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} | Danish energy agency (technology data for el/dh, average of 22 photovoltaics small and medium, 2050)
+                om_annual: {{ mean([8700, 7100]) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} | Danish energy agency (technology data for el/dh, average of 22 photovoltaics small and medium, 2050)
     wind:
         essentials:
             name: Wind
             carrier: electricity
             parent: supply
-        constraints:
-            energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
     wind_onshore:
         essentials:
             name: Onshore wind
@@ -32,9 +28,9 @@ tech_groups:
             lifetime: 25 # [@JRC:2014] Table 4
         costs:
             monetary:
-                energy_cap: {{ 1100000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 4
-                om_annual: {{ (1100000 * 0.017 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% from [@JRC:2014] Table 4
-                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+                energy_cap: {{ 0.96e6 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} | Danish energy agency (technology data for el/dh, 20 onshore turbines, 2050)
+                om_annual: {{ 11340 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} | Danish energy agency (technology data for el/dh, 20 onshore turbines, 2050)
+                om_prod: {{ 1.22 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }} | Danish energy agency (technology data for el/dh, 20 onshore turbines, 2050)
 
 techs:
     open_field_pv:
@@ -45,14 +41,12 @@ techs:
             # open_field_pv and wind_onshore_competing are the only technologies with area footprints
             # as they are the only technologies competing on the same land.
             resource_area_per_energy_cap: {{ (1 / max_power_density["pv-on-flat-areas"]) * scaling_factors.area / scaling_factors.power }} # {{ (scaling_factors.power / scaling_factors.area) | unit("km^2/MW") }} from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
-            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
             resource: file=capacityfactors-open-field-pv.csv
             resource_unit: energy_per_cap
         costs:
             monetary:
-                energy_cap: {{ 520000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 7
-                om_annual: {{ (520000 * 0.017 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% from [@JRC:2014] Table 7
-                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+                energy_cap: {{ mean([0.29e6, 0.24e6]) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} | Danish energy agency (technology data for el/dh, average of 22 photovoltaics large and tracker, 2050)
+                om_annual: {{ mean([5000, 5400]) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} | Danish energy agency (technology data for el/dh, average of 22 photovoltaics medium and large, 2050)
     roof_mounted_pv:
         essentials:
             name: Roof mounted PV
@@ -72,7 +66,6 @@ techs:
             # open_field_pv and wind_onshore_competing are the only technologies with area footprints
             # as they are the only technologies competing on the same land.
             resource_area_per_energy_cap: {{ (1 / max_power_density["onshore-wind"]) * scaling_factors.area / scaling_factors.power }} # {{ (scaling_factors.power / scaling_factors.area) | unit("km^2/MW") }} from [@EuropeanEnvironmentAgency:2009]
-            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
     wind_offshore:
         essentials:
             name: Offshore wind
@@ -83,9 +76,9 @@ techs:
             lifetime: 30 # [@JRC:2014] Table 5
         costs:
             monetary:
-                energy_cap: {{ 2280000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 5
-                om_annual: {{ (2280000 * 0.023 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2.3% from [@JRC:2014] Table 5
-                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+                energy_cap: {{ mean([1.78e6, 1.58e6]) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} | Danish energy agency (technology data for el/dh, average of 21 offshore and nearshore turbines, 2050)
+                om_annual: {{ mean([32448, 32538]) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} | Danish energy agency (technology data for el/dh, average of 21 offshore and nearshore turbines, 2050)
+                om_prod: {{ mean([2.4, 2.4]) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} | Danish energy agency (technology data for el/dh, average of 21 offshore and nearshore turbines, 2050)
     load_shedding:
         essentials:
             name: Load shedding as last resort
