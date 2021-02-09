@@ -1,6 +1,7 @@
 """Applies config parameters to template files."""
 from pathlib import Path
 
+import numpy as np
 import jinja2
 
 import filters
@@ -18,7 +19,8 @@ def parameterise_template(path_to_template, path_to_biofuel_costs, scaling_facto
 
     path_to_template = Path(path_to_template)
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(path_to_template.parent), lstrip_blocks=True, trim_blocks=True)
-    env.filters['unit'] = filters.unit
+    env.filters["unit"] = filters.unit
+    env.globals["mean"] = np.mean
     rendered = env.get_template(path_to_template.name).render(
         scaling_factors=scaling_factors,
         capacity_factors=capacity_factors,

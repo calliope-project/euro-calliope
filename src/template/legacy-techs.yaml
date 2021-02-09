@@ -11,7 +11,7 @@ techs:
             capacity_factor_max: 0.85
         costs:
             monetary:
-                energy_cap: {{ 3672e3 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
+                energy_cap: {{ 3.672e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
                 om_annual: {{ 76116 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
                 om_prod:  {{ 1.75 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}
                 om_con:  {{ 8.25 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}

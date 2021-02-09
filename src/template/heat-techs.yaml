@@ -1,7 +1,7 @@
 tech_groups:
     heat_storage_small:  # [Danish energy agency, energy storage, 142 small scale hot water tank, 2050]
         essentials:
-            name: Small water tank (90L)
+            name: Small water tank
             parent: storage
             #carrier: heat
         constraints:
@@ -54,8 +54,8 @@ techs:
             lifetime: 20
         costs:  # [Danish energy agency, heating installations, 202 Natural gas boiler, 2050]
             monetary:
-                energy_cap: {{ (2.7 / 10 + 2.7 / 10 + 21.1 / 400 + 15.1 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | data given per 'unit', so the equation divides each unit cost by the unit capacity; average of new/existing and SF/MF homes; TODO: modify per region based on dwelling ratio
-                om_annual: {{ (0.168 / 10 + 0.168 / 10 + 0.561/ 400 + 0.374 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
+                energy_cap: {{ mean([2.7 / 10, 2.7 / 10, 21.1 / 400, 15.1 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | data given per 'unit', so the equation divides each unit cost by the unit capacity; average of new/existing and SF/MF homes; TODO: modify per region based on dwelling ratio
+                om_annual: {{ mean([0.168 / 10, 0.168 / 10, 0.561/ 400, 0.374 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
     methane_heat_storage_small:
         essentials.parent: heat_storage_small
         essentials.carrier: methane_heat
@@ -74,8 +74,8 @@ techs:
             lifetime: 20
         costs:  # [Danish energy agency, heating installations, 204 Biomass boiler automatic, 2050]
             monetary:
-                energy_cap: {{ (5.9 / 10 + 5.9 / 8 + 76 / 400 + 45 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
-                om_annual: {{ (0.42 / 10 + 0.42 / 10 + 1.343 / 400 + 0.889 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
+                energy_cap: {{ mean([5.9 / 10, 5.9 / 8, 76 / 400, 45 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
+                om_annual: {{ mean([0.42 / 10, 0.42 / 10, 1.343 / 400, 0.889 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
     biofuel_heat_storage_small:
         essentials.parent: heat_storage_small
         essentials.carrier: biofuel_heat
@@ -98,8 +98,8 @@ techs:
             lifetime: 20
         costs:  # [Danish energy agency, heating installations, 207.3-6 Air to water, 2050]
             monetary:
-                energy_cap: {{ (7.6 / 10 + 5 / 4 + 114 / 400 + 57 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
-                om_annual: {{ (0.250 / 10 + 0.222 / 4 + 0.761 / 400 + 0.761 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
+                energy_cap: {{ mean([7.6 / 10, 5 / 4, 114 / 400, 57 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
+                om_annual: {{ mean([0.250 / 10, 0.222 / 4, 0.761 / 400, 0.761 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
     ashp_heat_storage_small:
         essentials.parent: heat_storage_small
         essentials.carrier: ashp_heat
@@ -124,8 +124,8 @@ techs:
             lifetime: 20
         costs:  # [Danish energy agency, heating installations, 207.7-10 Ground source, 2050]
             monetary:
-                energy_cap: {{ (12 / 10 + 9 / 4 + 202 / 400 + 72 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
-                om_annual: {{ (0.222 / 10 + 0.222 / 4 + 0.761 / 400 + 0.761 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
+                energy_cap: {{ mean([12 / 10, 9 / 4, 202 / 400, 72 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
+                om_annual: {{ mean([0.222 / 10, 0.222 / 4, 0.761 / 400, 0.761 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
     gshp_heat_storage_small:
         essentials.parent: heat_storage_small
         essentials.carrier: gshp_heat
@@ -149,8 +149,8 @@ techs:
             lifetime: 20
         costs:  # [Danish energy agency, heating installations, 207.7-10 Ground source, 2050]
             monetary:
-                energy_cap: {{ ((7.6 / 10 + 5 / 4 + 114 / 400 + 57 / 160) * heat.heat_pump_ratio.ashp + (12 / 10 + 9 / 4 + 202 / 400 + 72 / 160) * heat.heat_pump_ratio.gshp) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH, weighted by number of installed ; TODO: modify per region based on dwelling ratio
-                om_annual: {{ ((0.250 / 10 + 0.222 / 4 + 0.761 / 400 + 0.761 / 160) * heat.heat_pump_ratio.ashp + (0.222 / 10 + 0.222 / 4 + 0.761 / 400 + 0.761 / 160) * heat.heat_pump_ratio.gshp) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH, weighted by number of installed GSHP vs ASHP; TODO: modify per region based on dwelling ratio
+                energy_cap: {{ (mean([7.6 / 10, 5 / 4, 114 / 400, 57 / 160]) * heat.heat_pump_ratio.ashp + mean([12 / 10, 9 / 4, 202 / 400, 72 / 160]) * heat.heat_pump_ratio.gshp) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH, weighted by number of installed ; TODO: modify per region based on dwelling ratio
+                om_annual: {{ (mean([0.250 / 10, 0.222 / 4, 0.761 / 400, 0.761 / 160]) * heat.heat_pump_ratio.ashp + mean([0.222 / 10, 0.222 / 4, 0.761 / 400, 0.761 / 160]) * heat.heat_pump_ratio.gshp) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH, weighted by number of installed GSHP vs ASHP; TODO: modify per region based on dwelling ratio
     hp_heat_storage_small:
         essentials.parent: heat_storage_small
         essentials.carrier: hp_heat
@@ -173,11 +173,11 @@ techs:
         constraints:
             # energy_eff: 1  # modelled in the "solar_thermal_energy" tech
             lifetime: 30
-            resource_area_per_energy_cap: {{ 6 / 4.2 + 200 / 140 }}  # m2/kW
+            resource_area_per_energy_cap: {{ mean([6 / 4.2, 200 / 140]) * scaling_factors.area / scaling_factors.power }}  # {{ (scaling_factors.power / scaling_factors.area) | unit("km^2/MW") }}
         costs:
             monetary:
-                energy_cap: {{ (2.7 / 4.2 + 2.4 / 4.2 + 1.9 / 4.2 + 67 / 140 + 60 / 140) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
-                om_annual: {{ (0.05 / 4.2 + 0.05 / 4.2 + 0.05 / 4.2 + 0.17 / 140 + 0.17 / 140) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
+                energy_cap: {{ mean([2.7 / 4.2, 2.4 / 4.2, 1.9 / 4.2, 67 / 140, 60 / 140]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
+                om_annual: {{ mean([0.05 / 4.2, 0.05 / 4.2, 0.05 / 4.2, 0.17 / 140, 0.17 / 140]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
 
     solar_thermal_energy:
         essentials:
@@ -198,8 +198,8 @@ techs:
             lifetime: 30
         costs:
             monetary:
-                energy_cap: {{ (2.5 / 3 + 89 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
-                om_annual: {{ (0.021 / 3 + 0.042 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
+                energy_cap: {{ mean([2.5 / 3, 89 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
+                om_annual: {{ mean([0.021 / 3, 0.042 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
     electric_heater_heat_storage_small:
         essentials.parent: heat_storage_small
         essentials.carrier: electric_heater_heat
@@ -236,17 +236,17 @@ techs:
             carrier_out_2: chp_biofuel_heat
             primary_carrier_out: electricity
         constraints:
-            energy_eff: {{ (0.265 + 0.32 + 0.282) / 3 }}  # average of chips/pellet/straw
-            cb: {{ (3 + 3.3 + 2.9) / 3 }}  # back-pressure ratio, average of chips/pellet/straw
-            cv: {{ (0.34 + 0.49 + 0.43) / 3 }}  # (electricity_cap - electricity_prod) / (heat_prod), average of chips/pellet/straw
+            energy_eff: {{ mean([0.265, 0.32, 0.282]) }}  # average of chips/pellet/straw
+            cb: {{ mean([3, 3.3, 2.9]) }}  # back-pressure ratio, average of chips/pellet/straw
+            cv: {{ mean([0.34, 0.49, 0.43]) }}  # (electricity_cap - electricity_prod) / (heat_prod), average of chips/pellet/straw
             energy_cap_ratio:
-                carrier_out_2.chp_biofuel_heat: {{ (3.13 + 2.2 + 2.49) / 3 }} # max heat (zero electricity) to max electricity (zero heat), average of 3.13/2.2/2.49 chips/pellet/straw
+                carrier_out_2.chp_biofuel_heat: {{ mean([3.13, 2.2, 2.49]) }} # max heat (zero electricity) to max electricity (zero heat), average of 3.13/2.2/2.49 chips/pellet/straw
             lifetime: 25
         costs:
             monetary:
-                energy_cap: {{ ((3.2 + 2.05 + 3.1) / 3) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_electricity") }} | average of chips/pellet/straw
-                om_annual: {{ ((0.09 + 0.058 + 0.109) / 3) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_electricity/year") }} | average of chips/pellet/straw
-                om_prod: {{ (4.7 + 1.7 + 2.1) / 3 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_electricity") }} | average of chips/pellet/straw
+                energy_cap: {{ mean([3.2, 2.05, 3.1]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_electricity") }} | average of chips/pellet/straw
+                om_annual: {{ mean([0.09, 0.058, 0.109]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_electricity/year") }} | average of chips/pellet/straw
+                om_prod: {{ mean([4.7, 1.7, 2.1]) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_electricity") }} | average of chips/pellet/straw
     chp_biofuel_heat_storage_big:
         essentials.parent: heat_storage_big
         essentials.carrier: chp_biofuel_heat
@@ -263,15 +263,15 @@ techs:
             carrier_out_2: chp_biofuel_extraction_heat
             primary_carrier_out: electricity
         constraints:
-            energy_eff: {{ (0.41 + 0.426) / 2 }}  # average of  chips/pellets
-            cb: {{ (0.4 + 0.52) / 2 }}  # back-pressure ratio, average of  chips/pellets
-            cv: {{ (0.13 + 0.15) / 2 }}  # (electricity_cap - electricity_prod) / (heat_prod), average of  chips/pellets
+            energy_eff: {{ mean([0.41, 0.426]) }}  # average of  chips/pellets
+            cb: {{ mean([0.4, 0.52]) }}  # back-pressure ratio, average of  chips/pellets
+            cv: {{ mean([0.13, 0.15]) }}  # (electricity_cap - electricity_prod) / (heat_prod), average of  chips/pellets
             lifetime: 25
         costs:
             monetary:
-                energy_cap: {{ ((2.4 + 1.9) / 2) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_electricity") }} | average of chips/pellets
-                om_annual: {{ ((0.062 + 0.049) / 2) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_electricity/year") }} | average of chips/pellets
-                om_prod: {{ (2.6 + 1.1) / 2 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_electricity") }} | average of chips/pellets
+                energy_cap: {{ mean([2.4, 1.9]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_electricity") }} | average of chips/pellets
+                om_annual: {{ mean([0.062, 0.049]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_electricity/year") }} | average of chips/pellets
+                om_prod: {{ mean([2.6, 1.1]) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_electricity") }} | average of chips/pellets
     chp_biofuel_extraction_heat_storage_big:
         essentials.parent: heat_storage_big
         essentials.carrier: chp_biofuel_extraction_heat
