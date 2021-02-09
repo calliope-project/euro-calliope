@@ -54,7 +54,7 @@ techs:
             lifetime: 20
         costs:  # [Danish energy agency, heating installations, 202 Natural gas boiler, 2050]
             monetary:
-                energy_cap: {{ (2.7 / 10 + 2.7 / 10 + 21.1 / 400 + 15.1 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
+                energy_cap: {{ (2.7 / 10 + 2.7 / 10 + 21.1 / 400 + 15.1 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }} | data given per 'unit', so the equation divides each unit cost by the unit capacity; average of new/existing and SF/MF homes; TODO: modify per region based on dwelling ratio
                 om_annual: {{ (0.168 / 10 + 0.168 / 10 + 0.561/ 400 + 0.374 / 160) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }} | average of new/existing and SFH/MFH; TODO: modify per region based on dwelling ratio
     methane_heat_storage_small:
         essentials.parent: heat_storage_small
