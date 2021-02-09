@@ -2,7 +2,6 @@ URL_LOAD = "https://data.open-power-system-data.org/time_series/2019-06-05/time_
 URL_POTENTIALS = "https://zenodo.org/record/3533038/files/possibility-for-electricity-autarky.zip"
 URL_CAPACITY_FACTORS = "https://zenodo.org/record/3899687/files/{wildcards.filename}?download=1"
 
-NATIONAL_PHS_STORAGE_CAPACITIES = "data/pumped-hydro/storage-capacities-gwh.csv"
 ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
     "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat"
@@ -77,8 +76,7 @@ rule hydro_capacities:
     input:
         src = "src/hydro.py",
         locations = rules.units.output[0],
-        plants = rules.preprocess_hydro_stations.output[0],
-        phs_storage_capacities = NATIONAL_PHS_STORAGE_CAPACITIES
+        plants = rules.preprocess_hydro_stations.output[0]
     output: "build/data/{resolution}/hydro-capacities-mw.csv"
     conda: "envs/geo.yaml"
     script: "src/hydro.py"
