@@ -5,7 +5,7 @@ from shapely.geometry import Point
 WGS_84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
 
 
-def main(path_to_plants, path_to_locations, path_to_phs_storage_capacities, path_to_output):
+def main(path_to_plants, path_to_locations, path_to_output):
     locations = gpd.read_file(path_to_locations).to_crs(WGS_84).set_index("id")
     plants = pd.read_csv(path_to_plants, index_col="id")
 

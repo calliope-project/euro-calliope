@@ -1,106 +1,89 @@
-# TODO: scale efficiency as energy/transport
+tech_groups:
+    transport_ice:
+        exists: false
+        essentials:
+            parent: conversion
+            carrier_in: diesel
+        constraints:
+            lifetime: 10
+    transport_ev:
+        exists: false
+        essentials:
+            parent: conversion_plus
+            carrier_in: electricity
+        constraints:
+            lifetime: 15
+    transport_ev_time_varying:
+        essentials.parent: transport_ev
+        constraints:
+            energy_cap_max_time_varying: file=plugin-ev.csv
 techs:
     hdv_transport_ice:
-        exists: false
         essentials:
             name: Internal combustion engine heavy duty vehicles
-            parent: conversion
-            carrier_in: diesel
+            parent: transport_ice
             carrier_out: hdv_transport
     ldv_transport_ice:
-        exists: false
         essentials:
             name: Internal combustion engine light duty vehicles
-            parent: conversion
-            carrier_in: diesel
+            parent: transport_ice
             carrier_out: ldv_transport
     ldv_transport_ev:
-        exists: false
         essentials:
             name: Electric light duty vehicles
-            parent: conversion_plus
-            carrier_in: electricity
+            parent: transport_ev_time_varying
             carrier_out: ldv_transport
-        constraints:
-            energy_cap_max_time_varying: file=energy-cap-ev.csv
-            lifetime: 20
 
     bus_transport_ice:
-        exists: false
         essentials:
             name: Internal combustion engine buses
-            parent: conversion_plus
-            carrier_in: diesel
+            parent: transport_ice
             carrier_out: bus_transport
     bus_transport_ev:
-        exists: false
         essentials:
             name: Electric engine buses
-            parent: conversion_plus
-            carrier_in: electricity
+            parent: transport_ev
             carrier_out: bus_transport
 
     motorcycle_transport_ice:
-        exists: false
         essentials:
             name: Internal combustion engine motorcycles
-            parent: conversion_plus
-            carrier_in: diesel
+            parent: transport_ice
             carrier_out: motorcycle_transport
     motorcycle_transport_ev:
-        exists: false
         essentials:
             name: Electric motorcycles
-            parent: conversion_plus
-            carrier_in: electricity
+            parent: transport_ev_time_varying
             carrier_out: motorcycle_transport
-        constraints:
-            energy_cap_max_time_varying: file=energy-cap-ev.csv
 
     passenger_car_transport_ice:
-        exists: false
         essentials:
             name: Internal combustion engine passenger cars
-            parent: conversion_plus
-            carrier_in: diesel
+            parent: transport_ice
             carrier_out: passenger_car_transport
     passenger_car_transport_ev:
-        exists: false
         essentials:
             name: Electric passenger cars
-            parent: conversion_plus
-            carrier_in: electricity
+            parent: transport_ev_time_varying
             carrier_out: passenger_car_transport
-        constraints:
-            energy_cap_max_time_varying: file=energy-cap-ev.csv
 
     heavy_transport_ice:
-        exists: false
         essentials:
             name: Internal combustion engine heavy vehicles
-            parent: conversion
-            carrier_in: diesel
+            parent: transport_ice
             carrier_out: heavy_transport
     light_transport_ice:
-        exists: false
         essentials:
             name: Internal combustion engine light vehicles
-            parent: conversion
-            carrier_in: diesel
+            parent: transport_ice
             carrier_out: light_transport
     heavy_transport_ev:
-        exists: false
         essentials:
             name: Electric heavy vehicles
-            parent: conversion_plus
-            carrier_in: electricity
+            parent: transport_ev
             carrier_out: heavy_transport
     light_transport_ev:
-        exists: false
         essentials:
             name: Electric light vehicles
-            parent: conversion_plus
-            carrier_in: electricity
+            parent: transport_ev_time_varying
             carrier_out: light_transport
-        constraints:
-            energy_cap_max_time_varying: file=energy-cap-ev.csv

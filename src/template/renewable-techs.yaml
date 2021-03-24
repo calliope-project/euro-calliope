@@ -80,6 +80,7 @@ techs:
                 om_annual: {{ mean([32448, 32538]) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} | Danish energy agency (technology data for el/dh, average of 21 offshore and nearshore turbines, 2050)
                 om_prod: {{ mean([2.4, 2.4]) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} | Danish energy agency (technology data for el/dh, average of 21 offshore and nearshore turbines, 2050)
     load_shedding:
+        exists: false
         essentials:
             name: Load shedding as last resort
             parent: supply

@@ -4,6 +4,7 @@ import geopandas as gpd
 
 TEMPLATE = """overrides:
     load-shedding:
+        techs.load_shedding.exists: true
         locations:
             {% for id, location in locations.iterrows() %}
             {{ id | replace(".", "-") }}.techs.load_shedding:
