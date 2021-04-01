@@ -1,9 +1,6 @@
 """Snakemake rules to create shapes of administrative regions and exclusive economic zones."""
 import pycountry
 
-URL_NUTS = "http://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip"
-URL_GADM = "https://biogeo.ucdavis.edu/data/gadm3.6/gpkg"
-RAW_EEZ_DATA = "data/World_EEZ_v10_20180221/eez_v10.shp"
 SCHEMA_UNITS = {
     "properties": {
         "country_code": "str", # id of the country to which the unit belongs
@@ -17,12 +14,15 @@ SCHEMA_UNITS = {
 
 configfile: "config/default.yaml"
 localrules: raw_gadm_administrative_borders_zipped, raw_gadm_administrative_borders, raw_nuts_units_zipped
+root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
+src_dir = f"{root_dir}src/"
 
 
 rule raw_gadm_administrative_borders_zipped:
     message: "Download administrative borders for {wildcards.country_code} as zip."
+    params: url = config["data-sources"]["gadm"]
     output: protected("data/automatic/raw-gadm/{country_code}.zip")
-    shell: "curl -sLo {output} '{URL_GADM}/gadm36_{wildcards.country_code}_gpkg.zip'"
+    shell: "curl -sLo {output} '{params.url}{wildcards.country_code}_gpkg.zip'"
 
 
 rule raw_gadm_administrative_borders:
@@ -35,7 +35,7 @@ rule raw_gadm_administrative_borders:
 rule administrative_borders_gadm:
     message: "Merge administrative borders of all countries up to layer {params.max_layer_depth}."
     input:
-        src = "src/shapes/gadm.py",
+        src = src_dir + "shapes/gadm.py",
         countries = ["data/automatic/raw-gadm/gadm36_{}.gpkg".format(country_code)
                      for country_code in [pycountry.countries.lookup(country).alpha_3
                                           for country in config['scope']['countries']]
@@ -55,14 +55,15 @@ rule administrative_borders_gadm:
 
 rule raw_nuts_units_zipped:
     message: "Download units as zip."
+    params: url = config["data-sources"]["nuts"]
     output: protected("data/automatic/raw-nuts-units.zip")
-    shell: "curl -sLo {output} '{URL_NUTS}'"
+    shell: "curl -sLo {output} '{params.url}'"
 
 
 rule administrative_borders_nuts:
     message: "Normalise NUTS administrative borders."
     input:
-        src = "src/shapes/nuts.py",
+        src = src_dir + "shapes/nuts.py",
         zipped = rules.raw_nuts_units_zipped.output[0]
     params:
         crs = config["crs"],
@@ -81,7 +82,7 @@ rule administrative_borders_nuts:
 rule units:
     message: "Form units of resolution {wildcards.resolution} by remixing NUTS and GADM."
     input:
-        src = "src/shapes/units.py",
+        src = src_dir + "shapes/units.py",
         nuts = rules.administrative_borders_nuts.output[0],
         gadm = rules.administrative_borders_gadm.output[0]
     params:
@@ -96,7 +97,7 @@ rule units:
 rule units_without_shape:
     message: "Dataset of units on resolution {wildcards.resolution} without geo information."
     input:
-        src = "src/shapes/nogeo.py",
+        src = src_dir + "shapes/nogeo.py",
         units = rules.units.output[0]
     output: "build/data/{resolution}/units.csv"
     conda: "../envs/geo.yaml"
@@ -105,7 +106,7 @@ rule units_without_shape:
 
 rule eez:
     message: "Clip exclusive economic zones to study area."
-    input: RAW_EEZ_DATA
+    input: config["data-sources"]["eez"]
     output: "build/data/eez.geojson"
     params:
         bounds="{x_min},{y_min},{x_max},{y_max}".format(**config["scope"]["bounds"]),

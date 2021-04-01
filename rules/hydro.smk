@@ -2,16 +2,14 @@
 
 configfile: "./config/default.yaml"
 localrules: download_runoff_data, download_stations_database, stations_database
-
-URL_STATIONS = "https://zenodo.org/record/3371462/files/energy-modelling-toolkit/hydro-power-database-v4.zip?download=1"
-BASINS = "data/hybas_eu_lev07_v1c/hybas_eu_lev07_v1c.shp"
-IRENA_GENERATION = "data/irena/hydro-generation-europe.csv"
+root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
+src_dir = f"{root_dir}src/"
 
 
 rule download_runoff_data:
     message: "Create an atlite cutout of Europe consisting of ERA5 runoff data."
     input:
-        src = "src/hydro/runoff.py"
+        src = src_dir + "hydro/runoff.py"
     params: year = config["year"]
     output:
         protected(directory("data/automatic/europe-cutout.{}".format(config["year"])))
@@ -21,10 +19,11 @@ rule download_runoff_data:
 
 rule download_stations_database:
     message: "Download database of hydro electricity stations."
+    params: url = config["data-sources"]["hydro-stations"]
     output:
         protected("data/automatic/raw-hydro-stations.zip")
     shell:
-        "curl -sLo {output} '{URL_STATIONS}'"
+        "curl -sLo {output} '{params.url}'"
 
 
 rule stations_database:
@@ -42,8 +41,8 @@ rule stations_database:
 rule fix_basins:
     message: "Fix invalid basins."
     input:
-        src = "src/hydro/fix_basins.py",
-        basins = BASINS
+        src = src_dir + "hydro/fix_basins.py",
+        basins = config["data-sources"]["hydro-basins"]
     output: "build/data/hybas_eu_lev07_v1c.gpkg"
     conda: "../envs/hydro.yaml"
     script: "../src/hydro/fix_basins.py"
@@ -55,7 +54,7 @@ rule preprocess_hydro_stations:
     # Add missing pumped hydro stations in Romania.
     message: "Preprocess hydro stations."
     input:
-        src = "src/hydro/preprocess_hydro_stations.py",
+        src = src_dir + "hydro/preprocess_hydro_stations.py",
         stations = rules.stations_database.output[0],
         basins = rules.fix_basins.output[0]
     params: buffer_size = 1 / 60 # move stations up to 1 arcminute < 1 km
@@ -67,7 +66,7 @@ rule preprocess_hydro_stations:
 rule inflow_m3:
     message: "Determine water inflow time series for all hydro electricity."
     input:
-        src = "src/hydro/inflow_m3.py",
+        src = src_dir + "hydro/inflow_m3.py",
         stations = rules.preprocess_hydro_stations.output[0],
         basins = rules.fix_basins.output[0],
         runoff = rules.download_runoff_data.output[0]
@@ -80,9 +79,9 @@ rule inflow_m3:
 rule inflow_mwh:
     message: "Determine energy inflow time series for all hydro electricity."
     input:
-        src = "src/hydro/inflow_mwh.py",
+        src = src_dir + "hydro/inflow_mwh.py",
         stations = rules.inflow_m3.output[0],
-        generation = IRENA_GENERATION
+        generation = config["data-sources"]["irena-generation"]
     params:
         year = config["year"],
         max_capacity_factor = config["capacity-factors"]["max"]

@@ -1,8 +1,3 @@
-URL_LOAD = "https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv"
-URL_POTENTIALS = "https://zenodo.org/record/3533038/files/possibility-for-electricity-autarky.zip"
-URL_CAPACITY_FACTORS = "https://zenodo.org/record/3899687/files/{wildcards.filename}?download=1"
-
-NATIONAL_PHS_STORAGE_CAPACITIES = "data/pumped-hydro/storage-capacities-gwh.csv"
 ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
     "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat"
@@ -16,7 +11,9 @@ configfile: "config/default.yaml"
 wildcard_constraints:
         resolution = "((continental)|(national)|(regional))"
 
-__version__ = open('./VERSION').readlines()[0].strip()
+root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
+__version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
+src_dir = f"{root_dir}src/"
 
 onstart:
     shell("mkdir -p build/logs")
@@ -34,8 +31,9 @@ rule all:
 
 rule potentials_zipped:
     message: "Download potential data."
+    params: url = config["data-sources"]["potentials"]
     output: protected("data/automatic/raw-potentials.zip")
-    shell: "curl -sLo {output} '{URL_POTENTIALS}'"
+    shell: "curl -sLo {output} '{params.url}'"
 
 
 rule potentials:
@@ -54,9 +52,9 @@ rule potentials:
 rule parameterise_template:
     message: "Apply config parameters to file {wildcards.template} from templates."
     input:
-        src = "src/parameterise_templates.py",
-        filters = "src/filters.py",
-        template = "src/template/{template}",
+        src = src_dir + "parameterise_templates.py",
+        filters = src_dir + "filters.py",
+        template = src_dir + "template/{template}",
         biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
             scenario=config["parameters"]["jrc-biofuel"]["scenario"]
         )
@@ -75,10 +73,10 @@ rule parameterise_template:
 rule hydro_capacities:
     message: "Determine hydro capacities on {wildcards.resolution} resolution."
     input:
-        src = "src/hydro.py",
+        src = src_dir + "hydro.py",
         locations = rules.units.output[0],
         plants = rules.preprocess_hydro_stations.output[0],
-        phs_storage_capacities = NATIONAL_PHS_STORAGE_CAPACITIES
+        phs_storage_capacities = config["data-sources"]["national-phs-storage-capacities"]
     output: "build/data/{resolution}/hydro-capacities-mw.csv"
     conda: "envs/geo.yaml"
     script: "src/hydro.py"
@@ -100,12 +98,12 @@ BIOFUEL_FEEDSTOCKS = [
 rule biofuels:
     message: "Determine biofuels potential on {wildcards.resolution} resolution for scenario {wildcards.scenario}."
     input:
-        src = "src/biofuels.py",
+        src = src_dir + "biofuels.py",
         units = rules.units.output[0],
         land_cover = rules.potentials.output.land_cover,
         population = rules.potentials.output.population,
-        national_potentials = expand("data/biofuels/potentials/{feedstock}.csv", feedstock=BIOFUEL_FEEDSTOCKS),
-        costs = expand("data/biofuels/costs/{feedstock}.csv", feedstock=BIOFUEL_FEEDSTOCKS)
+        national_potentials = expand(config["data-sources"]["biofuel-potentials"], feedstock=BIOFUEL_FEEDSTOCKS),
+        costs = expand(config["data-sources"]["biofuel-costs"], feedstock=BIOFUEL_FEEDSTOCKS)
     params:
         potential_year = config["parameters"]["jrc-biofuel"]["potential-year"],
         cost_year = config["parameters"]["jrc-biofuel"]["cost-year"]
@@ -121,8 +119,8 @@ rule biofuels:
 rule locations:
     message: "Generate locations for {wildcards.resolution} resolution."
     input:
-        src = "src/locations.py",
-        filters = "src/filters.py",
+        src = src_dir + "locations.py",
+        filters = src_dir + "filters.py",
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
         hydro_capacities = rules.hydro_capacities.output[0],
@@ -142,8 +140,8 @@ rule locations:
 rule directional_rooftop_pv:
     message: "Generate override for directional rooftop PV in {wildcards.resolution} resolution."
     input:
-        src = "src/directional_rooftop.py",
-        filters = "src/filters.py",
+        src = src_dir + "directional_rooftop.py",
+        filters = src_dir + "filters.py",
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
     params:
@@ -158,7 +156,7 @@ rule directional_rooftop_pv:
 rule load_shedding:
     message: "Generate override allowing load shedding."
     input:
-        src = "src/load_shedding.py",
+        src = src_dir + "load_shedding.py",
         shapes = rules.units.output[0]
     output: "build/model/{resolution}/load-shedding.yaml"
     conda: "envs/geo.yaml"
@@ -167,15 +165,16 @@ rule load_shedding:
 
 rule download_capacity_factors_wind_and_solar:
     message: "Download data/automatic/capacityfactors/{wildcards.filename}."
+    params: url = config["data-sources"]["capacity-factors"]
     output: protected("data/automatic/capacityfactors/{filename}")
-    shell: f"curl -sLo {{output}} '{URL_CAPACITY_FACTORS}'"
+    shell: "curl -sLo {output} '{params.url}/{wildcards.filename}?download=1'"
 
 
 rule capacity_factors_onshore_wind_and_solar:
     message: "Generate capacityfactor time series disaggregated by location on "
              "{wildcards.resolution} resolution for {wildcards.technology}."
     input:
-        src = "src/capacityfactors.py",
+        src = src_dir + "capacityfactors.py",
         locations = rules.units.output[0],
         ids = ancient("data/automatic/capacityfactors/onshore-locations.tif"),
         timeseries = ancient("data/automatic/capacityfactors/{technology}-timeseries.nc")
@@ -194,7 +193,7 @@ rule capacity_factors_offshore:
     message: "Generate capacityfactor time series disaggregated by location on "
              "{wildcards.resolution} resolution for wind-offshore."
     input:
-        src = "src/capacityfactors_offshore.py",
+        src = src_dir + "capacityfactors_offshore.py",
         eez = rules.eez.output[0],
         shared_coast = rules.potentials.output.shared_coast,
         ids = ancient("data/automatic/capacityfactors/offshore-locations.tif"),
@@ -211,7 +210,7 @@ rule capacity_factors_offshore:
 rule capacity_factors_hydro:
     message: "Generate capacityfactor time series for hydro electricity on {wildcards.resolution} resolution."
     input:
-        src = "src/capacityfactors_hydro.py",
+        src = src_dir + "capacityfactors_hydro.py",
         capacities = rules.hydro_capacities.output[0],
         stations = rules.inflow_mwh.output[0],
         locations = rules.units.output[0]
@@ -226,14 +225,15 @@ rule capacity_factors_hydro:
 
 rule raw_load:
     message: "Download raw load."
+    params: url = config["data-sources"]["load"]
     output: protected("data/automatic/raw-load-data.csv")
-    shell: "curl -sLo {output} '{URL_LOAD}'"
+    shell: "curl -sLo {output} '{params.url}'"
 
 
 rule electricity_load_national:
     message: "Preprocess raw electricity load data and retrieve load time series per country."
     input:
-        src = "src/national_load.py",
+        src = src_dir + "national_load.py",
         load = rules.raw_load.output
     output: "build/data/electricity-demand-national.csv"
     params:
@@ -246,7 +246,7 @@ rule electricity_load_national:
 rule electricity_load:
     message: "Generate electricity load time series for every location on {wildcards.resolution} resolution."
     input:
-        src = "src/load.py",
+        src = src_dir + "load.py",
         units = rules.units.output[0],
         industrial_demand = rules.potentials.output.industrial_demand,
         national_load = rules.electricity_load_national.output[0]
@@ -260,7 +260,7 @@ rule electricity_load:
 rule link_neighbours:
     message: "Create links between all direct neighbours on {wildcards.resolution} resolution."
     input:
-        src = "src/link_neighbours.py",
+        src = src_dir + "link_neighbours.py",
         units = rules.units.output[0]
     params:
         sea_connections = lambda wildcards: config["sea-connections"][wildcards.resolution]
@@ -272,7 +272,7 @@ rule link_neighbours:
 rule build_metadata:
     message: "Generate build metadata."
     input:
-        src = "src/metadata.py"
+        src = src_dir + "metadata.py"
     params:
         config = config,
         version = __version__
@@ -302,7 +302,7 @@ rule model:
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
         ),
         rules.build_metadata.output,
-        example_model = "src/template/example-model.yaml"
+        example_model = src_dir + "template/example-model.yaml"
     output:
         log = "build/logs/{resolution}/model.done",
         example_model = "build/model/{resolution}/example-model.yaml"
