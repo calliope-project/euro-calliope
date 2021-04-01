@@ -1,72 +1,34 @@
 """Retrieve runoff data from ERA5 as atlite cutout."""
+import logging
 from pathlib import Path
 
 import atlite
-import xarray as xr
-
-X_RANGE = slice(-10.75, 34.75)
-Y_RANGE = slice(71.25, 34.5)
 
 
-def runoff(path_to_cutout, year):
+def runoff(path_to_cutout, year, x_min, x_max, y_min, y_max):
     """Retrieve runoff data from ERA5 as atlite cutout."""
+    logging.basicConfig(level=logging.INFO)
     path_to_cutout = Path(path_to_cutout)
-
-    monkeypatch_atlite_to_download_runoff_only()
+    x_range = slice(x_min, x_max)
+    y_range = slice(y_max, y_min)
+    time_range = slice(f"{year - 1}-01", f"{year}-12")
 
     cutout = atlite.Cutout(
-        name=path_to_cutout.name,
+        path=path_to_cutout,
         module="era5",
-        cutout_dir=path_to_cutout.parent,
-        xs=X_RANGE,
-        ys=Y_RANGE,
-        years=slice(year - 1, year),
-        months=slice(1, 12)
+        xs=x_range,
+        ys=y_range,
+        time=time_range
     )
-    cutout.prepare()
-
-
-def prepare_month_era5(year, month, xs, ys):
-    area = atlite.datasets.era5._area(xs, ys)
-
-    # Reference of the quantities
-    # https://confluence.ecmwf.int/display/CKB/ERA5+data+documentation
-    # (shortName) | (name)                                      | (paramId)
-    # tisr        | TOA incident solar radiation                | 212
-    # ssrd        | Surface Solar Rad Downwards                 | 169
-    # ssr         | Surface net Solar Radiation                 | 176
-    # fdir        | Total sky direct solar radiation at surface | 228021
-    # ro          | Runoff                                      | 205
-    # 2t          | 2 metre temperature                         | 167
-    # sp          | Surface pressure                            | 134
-    # stl4        | Soil temperature level 4                    | 236
-    # fsr         | Forecast surface roughnes                   | 244
-
-    with atlite.datasets.era5._get_data(area=area, year=year, month=month, variable=['runoff']) as ds, \
-            atlite.datasets.era5._get_data(area=area, year=year, month=month, day=1, variable=['orography']) as ds_m:
-        ds_m = ds_m.isel(time=0, drop=True)
-        ds = xr.merge([ds, ds_m], join='left')
-
-        ds = atlite.datasets.era5._rename_and_clean_coords(ds)
-        ds = atlite.datasets.era5._add_height(ds)
-
-        ds = ds.rename({'ro': 'runoff', })
-
-        yield (year, month), ds
-
-
-def monkeypatch_atlite_to_download_runoff_only():
-    # this saves ~90% of data to download and store
-    atlite.datasets.era5.weather_data_config = {
-        '_': dict(
-            tasks_func=atlite.datasets.era5.tasks_monthly_era5,
-            prepare_func=prepare_month_era5
-        )
-    }
+    cutout.prepare(["runoff"])
 
 
 if __name__ == "__main__":
     runoff(
         year=snakemake.params.year,
+        x_min=snakemake.params.x_min,
+        x_max=snakemake.params.x_max,
+        y_min=snakemake.params.y_min,
+        y_max=snakemake.params.y_max,
         path_to_cutout=snakemake.output[0]
     )
