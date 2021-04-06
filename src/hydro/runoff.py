@@ -8,7 +8,6 @@ import atlite
 def runoff(path_to_cutout, year, x_min, x_max, y_min, y_max):
     """Retrieve runoff data from ERA5 as atlite cutout."""
     logging.basicConfig(level=logging.INFO)
-    path_to_cutout = Path(path_to_cutout)
     x_range = slice(x_min, x_max)
     y_range = slice(y_max, y_min)
     time_range = slice(f"{year - 1}-01", f"{year}-12")
