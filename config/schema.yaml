@@ -6,11 +6,11 @@ properties:
         properties:
             biofuel-potentials:
                 type: string
-                pattern: .*{feedstock}.*
+                pattern: .*{feedstock}.*\.csv$
                 description: Path to local biofuel potentials. Must contain {feedstock} placeholder.
             biofuel-costs:
                 type: string
-                pattern: .*{feedstock}.*
+                pattern: .*{feedstock}.*\.csv$
                 description: Path to local cost data. Must contain {feedstock} placeholder.
             eez:
                 type: string
@@ -20,31 +20,36 @@ properties:
                 description: Path to local geospatial basins data.
             irena-generation:
                 type: string
+                pattern: .*\.csv$
                 description: Path to local hydro generation data from IRENA.
             national-phs-storage-capacities:
                 type: string
+                pattern: .*\.csv$
                 description: Path to local storage capacities data (in GWh).
             capacity-factors:
                 type: string
-                pattern: https:\/\/.+{filename}.*
+                pattern: ^(https?|http?):\/\/.+{filename}.*
                 description: Web address of the capacity factor timeseries. Must contain {filename} placeholder.
             gadm:
                 type: string
-                pattern: https:\/\/.+{country_code}.*
+                pattern: ^(https?|http?):\/\/.+{country_code}.*
                 description: Web address of geospatial GADM data. Must contain {country_code} placeholder.
             hydro-stations:
                 type: string
-                pattern: https:\/\/.+
+                pattern: ^(https?|http?):\/\/.+
                 description: Web address of database of hydro stations.
             load:
                 type: string
-                pattern: https:\/\/.+
+                pattern: ^(https?|http?):\/\/.+
                 description: Web address of load data.
             nuts:
                 type: string
-                pattern: https:\/\/.+
+                pattern: ^(https?|http?):\/\/.+
                 description: Web address of geospatial NUTS data.
             potentials:
                 type: string
-                pattern: https:\/\/.+
+                pattern: ^(https?|http?):\/\/.+
                 description: Web address of potentials of solar and wind.
+    root-directory:
+        type: string
+        description: Path to the root directory of euro-calliope containing scripts and template folders.
