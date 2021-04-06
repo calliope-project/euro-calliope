@@ -238,7 +238,8 @@ rule electricity_load_national:
     output: "build/data/electricity-demand-national.csv"
     params:
         number_rows_valid = 20950674, # see https://github.com/Open-Power-System-Data/time_series/issues/22
-        year = config["year"]
+        year = config["year"],
+        acceptable_gap_hours = config["params"]["acceptable-load-data-gap-hours"]
     conda: "envs/default.yaml"
     script: "src/national_load.py"
 
