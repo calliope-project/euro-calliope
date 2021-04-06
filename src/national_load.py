@@ -5,20 +5,15 @@ import pandas as pd
 import numpy as np
 import pycountry
 
-SOURCE_PRIORITY = [
-    'actual_entsoe_power_statistics',
-    'actual_entsoe_transparency',
-    'actual_tso',
-    'actual_net_consumption_tso'
-]
 
-def national_load(path_to_raw_load, number_rows_valid, year, path_to_output):
+def national_load(path_to_raw_load, number_rows_valid, year, entsoe_priority, path_to_output):
     """Extracts national load time series for all countries in a specified year."""
     load = read_load_profiles(
         path_to_raw_load=path_to_raw_load,
         number_rows_valid=number_rows_valid,
         start=datetime(year, 1, 1, tzinfo=timezone.utc),
-        end=datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        end=datetime(year + 1, 1, 1, tzinfo=timezone.utc),
+        entsoe_priority=entsoe_priority
     )
     if year < 2017: # data for Albania before 2017 is missing
         load["AL"] = read_albania(path_to_raw_load, number_rows_valid, other_ts=load)
@@ -31,13 +26,13 @@ def national_load(path_to_raw_load, number_rows_valid, year, path_to_output):
     )
 
 
-def read_load_profiles(path_to_raw_load, number_rows_valid, start, end):
+def read_load_profiles(path_to_raw_load, number_rows_valid, start, end, entsoe_priority):
     """Reads national load data and handles outliers."""
     data = pd.read_csv(path_to_raw_load, nrows=number_rows_valid, parse_dates=[3])
     data = data[(data["variable"] == "load")]
     data = data[(data.utc_timestamp >= start) &
                 (data.utc_timestamp < end)]
-    data = select_statistics_by_source_priority(data)
+    data = select_statistics_by_source_priority(data, entsoe_priority)
     return data.unstack("region")
 
 
@@ -54,7 +49,7 @@ def read_albania(path_to_raw_load, number_rows_valid, other_ts):
     return albania
 
 
-def select_statistics_by_source_priority(load):
+def select_statistics_by_source_priority(load, entsoe_priority):
     """
     Choosing `entsoe_power_statistics` as main source since OPSD states:
         The two sources differ Values on PS (~500 TWh annaually in Germany) are
@@ -69,11 +64,11 @@ def select_statistics_by_source_priority(load):
     load_by_attribute = (
         load
         .set_index(["region", "utc_timestamp", "attribute"])
-        ["data"]
+        .loc[:, "data"]
         .unstack("attribute")
     )
-    load_top_priority = load_by_attribute[SOURCE_PRIORITY[0]]
-    for source in SOURCE_PRIORITY[1:]:
+    load_top_priority = load_by_attribute[entsoe_priority[0]]
+    for source in entsoe_priority[1:]:
         load_top_priority = load_top_priority.fillna(load_by_attribute[source])
 
     return load_top_priority
@@ -103,6 +98,7 @@ if __name__ == "__main__":
     national_load(
         path_to_raw_load=snakemake.input.load[0],
         number_rows_valid=snakemake.params.number_rows_valid,
+        entsoe_priority=snakemake.params.entsoe_priority,
         year=snakemake.params.year,
         path_to_output=snakemake.output[0]
     )
