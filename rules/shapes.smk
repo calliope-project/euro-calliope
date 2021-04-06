@@ -15,7 +15,7 @@ SCHEMA_UNITS = {
 configfile: "config/default.yaml"
 localrules: raw_gadm_administrative_borders_zipped, raw_gadm_administrative_borders, raw_nuts_units_zipped
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
-src_dir = f"{root_dir}src/"
+script_dir = f"{root_dir}scripts/"
 
 
 rule raw_gadm_administrative_borders_zipped:
@@ -35,7 +35,7 @@ rule raw_gadm_administrative_borders:
 rule administrative_borders_gadm:
     message: "Merge administrative borders of all countries up to layer {params.max_layer_depth}."
     input:
-        src = src_dir + "shapes/gadm.py",
+        script = script_dir + "shapes/gadm.py",
         countries = ["data/automatic/raw-gadm/gadm36_{}.gpkg".format(country_code)
                      for country_code in [pycountry.countries.lookup(country).alpha_3
                                           for country in config['scope']['countries']]
@@ -50,7 +50,7 @@ rule administrative_borders_gadm:
         y_max = config["scope"]["bounds"]["y_max"]
     output: "build/data/administrative-borders-gadm.gpkg"
     conda: "../envs/geo.yaml"
-    script: "../src/shapes/gadm.py"
+    script: "../scripts/shapes/gadm.py"
 
 
 rule raw_nuts_units_zipped:
@@ -63,7 +63,7 @@ rule raw_nuts_units_zipped:
 rule administrative_borders_nuts:
     message: "Normalise NUTS administrative borders."
     input:
-        src = src_dir + "shapes/nuts.py",
+        script = script_dir + "shapes/nuts.py",
         zipped = rules.raw_nuts_units_zipped.output[0]
     params:
         crs = config["crs"],
@@ -76,13 +76,13 @@ rule administrative_borders_nuts:
     output: "build/data/administrative-borders-nuts.gpkg"
     shadow: "minimal"
     conda: "../envs/geo.yaml"
-    script: "../src/shapes/nuts.py"
+    script: "../scripts/shapes/nuts.py"
 
 
 rule units:
     message: "Form units of resolution {wildcards.resolution} by remixing NUTS and GADM."
     input:
-        src = src_dir + "shapes/units.py",
+        script = script_dir + "shapes/units.py",
         nuts = rules.administrative_borders_nuts.output[0],
         gadm = rules.administrative_borders_gadm.output[0]
     params:
@@ -91,17 +91,17 @@ rule units:
     output:
         "build/data/{resolution}/units.geojson"
     conda: "../envs/geo.yaml"
-    script: "../src/shapes/units.py"
+    script: "../scripts/shapes/units.py"
 
 
 rule units_without_shape:
     message: "Dataset of units on resolution {wildcards.resolution} without geo information."
     input:
-        src = src_dir + "shapes/nogeo.py",
+        script = script_dir + "shapes/nogeo.py",
         units = rules.units.output[0]
     output: "build/data/{resolution}/units.csv"
     conda: "../envs/geo.yaml"
-    script: "../src/shapes/nogeo.py"
+    script: "../scripts/shapes/nogeo.py"
 
 
 rule eez:

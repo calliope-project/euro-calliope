@@ -13,7 +13,8 @@ wildcard_constraints:
 
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
-src_dir = f"{root_dir}src/"
+script_dir = f"{root_dir}scripts/"
+template_dir = f"{root_dir}templates/"
 
 onstart:
     shell("mkdir -p build/logs")
@@ -52,9 +53,9 @@ rule potentials:
 rule parameterise_template:
     message: "Apply config parameters to file {wildcards.template} from templates."
     input:
-        src = src_dir + "parameterise_templates.py",
-        filters = src_dir + "filters.py",
-        template = src_dir + "template/{template}",
+        script = script_dir + "parameterise_templates.py",
+        filters = script_dir + "filters.py",
+        template = template_dir + "{template}",
         biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
             scenario=config["parameters"]["jrc-biofuel"]["scenario"]
         )
@@ -67,19 +68,19 @@ rule parameterise_template:
     wildcard_constraints:
         template = "((link-techs.yaml)|(storage-techs.yaml)|(demand-techs.yaml)|(renewable-techs.yaml)|(README.md)|(environment.yaml)|(interest-rate.yaml))"
     conda: "envs/default.yaml"
-    script: "src/parameterise_templates.py"
+    script: "scripts/parameterise_templates.py"
 
 
 rule hydro_capacities:
     message: "Determine hydro capacities on {wildcards.resolution} resolution."
     input:
-        src = src_dir + "hydro.py",
+        script = script_dir + "hydro.py",
         locations = rules.units.output[0],
         plants = rules.preprocess_hydro_stations.output[0],
         phs_storage_capacities = config["data-sources"]["national-phs-storage-capacities"]
     output: "build/data/{resolution}/hydro-capacities-mw.csv"
     conda: "envs/geo.yaml"
-    script: "src/hydro.py"
+    script: "scripts/hydro.py"
 
 
 BIOFUEL_FEEDSTOCKS = [
@@ -98,7 +99,7 @@ BIOFUEL_FEEDSTOCKS = [
 rule biofuels:
     message: "Determine biofuels potential on {wildcards.resolution} resolution for scenario {wildcards.scenario}."
     input:
-        src = src_dir + "biofuels.py",
+        script = script_dir + "biofuels.py",
         units = rules.units.output[0],
         land_cover = rules.potentials.output.land_cover,
         population = rules.potentials.output.population,
@@ -113,14 +114,14 @@ rule biofuels:
     conda: "envs/geo.yaml"
     wildcard_constraints:
         scenario = "((low)|(medium)|(high))"
-    script: "src/biofuels.py"
+    script: "scripts/biofuels.py"
 
 
 rule locations:
     message: "Generate locations for {wildcards.resolution} resolution."
     input:
-        src = src_dir + "locations.py",
-        filters = src_dir + "filters.py",
+        script = script_dir + "locations.py",
+        filters = script_dir + "filters.py",
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
         hydro_capacities = rules.hydro_capacities.output[0],
@@ -134,14 +135,14 @@ rule locations:
         yaml = "build/model/{resolution}/locations.yaml",
         csv = "build/model/{resolution}/locations.csv"
     conda: "envs/geo.yaml"
-    script: "src/locations.py"
+    script: "scripts/locations.py"
 
 
 rule directional_rooftop_pv:
     message: "Generate override for directional rooftop PV in {wildcards.resolution} resolution."
     input:
-        src = src_dir + "directional_rooftop.py",
-        filters = src_dir + "filters.py",
+        script = script_dir + "directional_rooftop.py",
+        filters = script_dir + "filters.py",
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
     params:
@@ -150,17 +151,17 @@ rule directional_rooftop_pv:
         scaling_factors = config["scaling-factors"],
     output: "build/model/{resolution}/directional-rooftop.yaml"
     conda: "envs/geo.yaml"
-    script: "src/directional_rooftop.py"
+    script: "scripts/directional_rooftop.py"
 
 
 rule load_shedding:
     message: "Generate override allowing load shedding."
     input:
-        src = src_dir + "load_shedding.py",
+        script = script_dir + "load_shedding.py",
         shapes = rules.units.output[0]
     output: "build/model/{resolution}/load-shedding.yaml"
     conda: "envs/geo.yaml"
-    script: "src/load_shedding.py"
+    script: "scripts/load_shedding.py"
 
 
 rule download_capacity_factors_wind_and_solar:
@@ -174,7 +175,7 @@ rule capacity_factors_onshore_wind_and_solar:
     message: "Generate capacityfactor time series disaggregated by location on "
              "{wildcards.resolution} resolution for {wildcards.technology}."
     input:
-        src = src_dir + "capacityfactors.py",
+        script = script_dir + "capacityfactors.py",
         locations = rules.units.output[0],
         ids = ancient("data/automatic/capacityfactors/onshore-locations.tif"),
         timeseries = ancient("data/automatic/capacityfactors/{technology}-timeseries.nc")
@@ -186,14 +187,14 @@ rule capacity_factors_onshore_wind_and_solar:
         technology = "((wind-onshore)|(rooftop-pv)|(open-field-pv)|(rooftop-pv-n)|(rooftop-pv-e-w)|(rooftop-pv-s-flat))"
     output: "build/model/{resolution}/capacityfactors-{technology}.csv"
     conda: "envs/geo.yaml"
-    script: "src/capacityfactors.py"
+    script: "scripts/capacityfactors.py"
 
 
 rule capacity_factors_offshore:
     message: "Generate capacityfactor time series disaggregated by location on "
              "{wildcards.resolution} resolution for wind-offshore."
     input:
-        src = src_dir + "capacityfactors_offshore.py",
+        script = script_dir + "capacityfactors_offshore.py",
         eez = rules.eez.output[0],
         shared_coast = rules.potentials.output.shared_coast,
         ids = ancient("data/automatic/capacityfactors/offshore-locations.tif"),
@@ -204,13 +205,13 @@ rule capacity_factors_offshore:
         trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
     output: "build/model/{resolution}/capacityfactors-wind-offshore.csv"
     conda: "envs/geo.yaml"
-    script: "src/capacityfactors_offshore.py"
+    script: "scripts/capacityfactors_offshore.py"
 
 
 rule capacity_factors_hydro:
     message: "Generate capacityfactor time series for hydro electricity on {wildcards.resolution} resolution."
     input:
-        src = src_dir + "capacityfactors_hydro.py",
+        script = script_dir + "capacityfactors_hydro.py",
         capacities = rules.hydro_capacities.output[0],
         stations = rules.inflow_mwh.output[0],
         locations = rules.units.output[0]
@@ -220,7 +221,7 @@ rule capacity_factors_hydro:
         ror = "build/model/{resolution}/capacityfactors-hydro-ror.csv",
         reservoir = "build/model/{resolution}/capacityfactors-hydro-reservoir-inflow.csv"
     conda: "envs/geo.yaml"
-    script: "src/capacityfactors_hydro.py"
+    script: "scripts/capacityfactors_hydro.py"
 
 
 rule raw_load:
@@ -233,20 +234,20 @@ rule raw_load:
 rule electricity_load_national:
     message: "Preprocess raw electricity load data and retrieve load time series per country."
     input:
-        src = src_dir + "national_load.py",
+        script = script_dir + "national_load.py",
         load = rules.raw_load.output
     output: "build/data/electricity-demand-national.csv"
     params:
         number_rows_valid = 20950674, # see https://github.com/Open-Power-System-Data/time_series/issues/22
         year = config["year"]
     conda: "envs/default.yaml"
-    script: "src/national_load.py"
+    script: "scripts/national_load.py"
 
 
 rule electricity_load:
     message: "Generate electricity load time series for every location on {wildcards.resolution} resolution."
     input:
-        src = src_dir + "load.py",
+        script = script_dir + "load.py",
         units = rules.units.output[0],
         industrial_demand = rules.potentials.output.industrial_demand,
         national_load = rules.electricity_load_national.output[0]
@@ -254,31 +255,31 @@ rule electricity_load:
         scaling_factor = config["scaling-factors"]["power"]
     output: "build/model/{resolution}/electricity-demand.csv"
     conda: "envs/geo.yaml"
-    script: "src/load.py"
+    script: "scripts/load.py"
 
 
 rule link_neighbours:
     message: "Create links between all direct neighbours on {wildcards.resolution} resolution."
     input:
-        src = src_dir + "link_neighbours.py",
+        script = script_dir + "link_neighbours.py",
         units = rules.units.output[0]
     params:
         sea_connections = lambda wildcards: config["sea-connections"][wildcards.resolution]
     output: "build/model/{resolution}/link-all-neighbours.yaml"
     conda: "envs/geo.yaml"
-    script: "src/link_neighbours.py"
+    script: "scripts/link_neighbours.py"
 
 
 rule build_metadata:
     message: "Generate build metadata."
     input:
-        src = src_dir + "metadata.py"
+        script = script_dir + "metadata.py"
     params:
         config = config,
         version = __version__
     output: "build/model/build-metadata.yaml"
     conda: "envs/default.yaml"
-    script: "src/metadata.py"
+    script: "scripts/metadata.py"
 
 
 rule model:
@@ -302,7 +303,7 @@ rule model:
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
         ),
         rules.build_metadata.output,
-        example_model = src_dir + "template/example-model.yaml"
+        example_model = template_dir + "example-model.yaml"
     output:
         log = "build/logs/{resolution}/model.done",
         example_model = "build/model/{resolution}/example-model.yaml"
