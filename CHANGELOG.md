@@ -2,6 +2,8 @@
 
 ## 1.1 (unpublished)
 
+* *UPDATE* ENTSOE national electricity load data NaN filling priority order included in config
+
 * *UPDATE* dependencies:
     * Python 3.7 -> 3.8
     * atlite -> 0.2.1
