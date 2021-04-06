@@ -93,7 +93,8 @@ You can easily change the units and scale all values using the `scaling-factor` 
 * `docs`: Documentation of the model and the build process.
 * `envs`: Files defining the conda environment which are used to build the model.
 * `rules`: Snakemake workflows defining the build process.
-* `src`: Contains the source code to build the model.
+* `scripts`: Contains the scripts to build the model.
+* `templates`: Contains templates of Calliope model files.
 * `tests`: Contains a test usage of the model.
 
 ## Run the tests
