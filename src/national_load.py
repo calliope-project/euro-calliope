@@ -68,8 +68,9 @@ def select_statistics_by_source_priority(load, entsoe_priority):
         .unstack("attribute")
     )
     load_top_priority = load_by_attribute[entsoe_priority[0]]
-    for source in entsoe_priority[1:]:
-        load_top_priority = load_top_priority.fillna(load_by_attribute[source])
+    if len(entsoe_priority) > 1:
+        for source in entsoe_priority[1:]:
+            load_top_priority = load_top_priority.fillna(load_by_attribute[source])
 
     return load_top_priority
 
