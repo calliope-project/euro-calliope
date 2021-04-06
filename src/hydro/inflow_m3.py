@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import atlite
 import pandas as pd
 import geopandas as gpd
@@ -9,7 +7,6 @@ import pycountry
 
 
 def determine_water_inflow(path_to_cutout, path_to_stations, path_to_basins, year, path_to_output):
-    path_to_cutout = Path(path_to_cutout)
     plants = read_plants(path_to_stations)
 
     inflow_m3 = water_inflow(plants, path_to_cutout, path_to_basins)
@@ -30,10 +27,7 @@ def read_plants(path_to_stations):
 
 
 def water_inflow(plants, path_to_cutout, path_to_basins):
-    cutout = atlite.Cutout(
-        name=path_to_cutout.name,
-        cutout_dir=path_to_cutout.parent
-    )
+    cutout = atlite.Cutout(path=path_to_cutout)
     inflow = (cutout.hydro(plants, path_to_basins)
                     .rename(plant="id")
                     .rename("inflow_m3"))

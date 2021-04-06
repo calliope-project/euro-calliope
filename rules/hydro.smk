@@ -10,9 +10,14 @@ rule download_runoff_data:
     message: "Create an atlite cutout of Europe consisting of ERA5 runoff data."
     input:
         src = src_dir + "hydro/runoff.py"
-    params: year = config["year"]
+    params:
+        year = config["year"],
+        x_min = config["scope"]["bounds"]["x_min"],
+        x_max = config["scope"]["bounds"]["x_max"],
+        y_min = config["scope"]["bounds"]["y_min"],
+        y_max = config["scope"]["bounds"]["y_max"]
     output:
-        protected(directory("data/automatic/europe-cutout.{}".format(config["year"])))
+        protected("data/automatic/europe-cutout-{}.nc".format(config["year"]))
     conda: "../envs/hydro.yaml"
     script: "../src/hydro/runoff.py"
 
