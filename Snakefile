@@ -1,13 +1,29 @@
+from snakemake.utils import validate
+
 ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
     "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat"
 ]
+BIOFUEL_FEEDSTOCKS = [
+    "forestry-energy-residues",
+    "landscape-care-residues",
+    "manure",
+    "municipal-waste",
+    "primary-agricultural-residues",
+    "roundwood-chips",
+    "roundwood-fuelwood",
+    "secondary-forestry-residues-sawdust",
+    "secondary-forestry-residues-woodchips",
+    "sludge"
+]
+
 
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
 localrules: all, raw_load, model, clean, parameterise_template, potentials_zipped
 localrules: download_capacity_factors_wind_and_solar
 configfile: "config/default.yaml"
+validate(config, "config/schema.yaml")
 wildcard_constraints:
         resolution = "((continental)|(national)|(regional))"
 
@@ -83,19 +99,6 @@ rule hydro_capacities:
     script: "scripts/hydro.py"
 
 
-BIOFUEL_FEEDSTOCKS = [
-    "forestry-energy-residues",
-    "landscape-care-residues",
-    "manure",
-    "municipal-waste",
-    "primary-agricultural-residues",
-    "roundwood-chips",
-    "roundwood-fuelwood",
-    "secondary-forestry-residues-sawdust",
-    "secondary-forestry-residues-woodchips",
-    "sludge"
-]
-
 rule biofuels:
     message: "Determine biofuels potential on {wildcards.resolution} resolution for scenario {wildcards.scenario}."
     input:
@@ -166,9 +169,9 @@ rule load_shedding:
 
 rule download_capacity_factors_wind_and_solar:
     message: "Download data/automatic/capacityfactors/{wildcards.filename}."
-    params: url = config["data-sources"]["capacity-factors"]
+    params: url = lambda wildcards: config["data-sources"]["capacity-factors"].format(filename=wildcards.filename)
     output: protected("data/automatic/capacityfactors/{filename}")
-    shell: "curl -sLo {output} '{params.url}/{wildcards.filename}?download=1'"
+    shell: "curl -sLo {output} '{params.url}'"
 
 
 rule capacity_factors_onshore_wind_and_solar:

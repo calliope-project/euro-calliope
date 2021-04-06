@@ -1,15 +1,15 @@
 data-sources:
+    biofuel-potentials: data/biofuels/potentials/{feedstock}.csv
+    biofuel-costs: data/biofuels/costs/{feedstock}.csv
     eez: data/World_EEZ_v10_20180221/eez_v10.shp
     hydro-basins: data/hybas_eu_lev07_v1c/hybas_eu_lev07_v1c.shp
     irena-generation: data/irena/hydro-generation-europe.csv
     national-phs-storage-capacities: data/pumped-hydro/storage-capacities-gwh.csv
-    biofuel-potentials: data/biofuels/potentials/{feedstock}.csv
-    biofuel-costs: data/biofuels/costs/{feedstock}.csv
-    nuts: http://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
-    gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_
-    load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
+    capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
+    gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
     hydro-stations: https://zenodo.org/record/3371462/files/energy-modelling-toolkit/hydro-power-database-v4.zip?download=1
-    capacity-factors: https://zenodo.org/record/3899687/files
+    load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
+    nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
     potentials: https://zenodo.org/record/3533038/files/possibility-for-electricity-autarky.zip
 root-directory: . # point to the root directory if working directory is not root directory
 scaling-factors: # values are tuned for models with a few hours resolution and one year duration

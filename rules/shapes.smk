@@ -20,9 +20,9 @@ script_dir = f"{root_dir}scripts/"
 
 rule raw_gadm_administrative_borders_zipped:
     message: "Download administrative borders for {wildcards.country_code} as zip."
-    params: url = config["data-sources"]["gadm"]
+    params: url = lambda wildcards: config["data-sources"]["gadm"].format(country_code=wildcards.country_code)
     output: protected("data/automatic/raw-gadm/{country_code}.zip")
-    shell: "curl -sLo {output} '{params.url}{wildcards.country_code}_gpkg.zip'"
+    shell: "curl -sLo {output} '{params.url}'"
 
 
 rule raw_gadm_administrative_borders:
