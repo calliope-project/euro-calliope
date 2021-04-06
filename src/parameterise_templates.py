@@ -1,5 +1,9 @@
 """Applies config parameters to template files."""
+from pathlib import Path
+
 import jinja2
+
+import filters
 
 
 def parameterise_template(path_to_template, path_to_biofuel_costs, scaling_factors,
@@ -11,9 +15,10 @@ def parameterise_template(path_to_template, path_to_biofuel_costs, scaling_facto
     with open(path_to_biofuel_costs, "r") as f_biofuel_costs:
         biofuel_fuel_cost = float(f_biofuel_costs.readline())
 
-    with open(path_to_template, "r") as template_file:
-        template = jinja2.Template(template_file.read())
-    rendered = template.render(
+    path_to_template = Path(path_to_template)
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(path_to_template.parent))
+    env.filters['unit'] = filters.unit
+    rendered = env.get_template(path_to_template.name).render(
         scaling_factors=scaling_factors,
         capacity_factors=capacity_factors,
         max_power_density=max_power_density,

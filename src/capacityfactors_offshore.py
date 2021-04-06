@@ -11,12 +11,14 @@ CAPACITY_FACTOR_VAR = "electricity"
 
 
 def capacityfactors(path_to_eez, path_to_shared_coast, path_to_id_map, path_to_timeseries,
-                    threshold, path_to_result):
+                    threshold, path_to_result, year=None):
     """Generate offshore capacityfactor time series for each location."""
     eez = gpd.read_file(path_to_eez).set_index("id").geometry
     shared_coast = pd.read_csv(path_to_shared_coast, index_col=0)
     shared_coast.index = shared_coast.index.map(lambda x: x.replace(".", "-"))
     ts = xr.open_dataset(path_to_timeseries)
+    if year:
+        ts = ts.sel(time=str(year))
     with rasterio.open(path_to_id_map, "r") as src:
         id_map = src.read(1)
         transform = src.transform
@@ -76,5 +78,6 @@ if __name__ == '__main__':
         path_to_id_map=snakemake.input.ids,
         path_to_timeseries=snakemake.input.timeseries,
         threshold=float(snakemake.params.threshold),
+        year=snakemake.params.year if snakemake.params.trim_ts else None,
         path_to_result=snakemake.output[0]
     )
