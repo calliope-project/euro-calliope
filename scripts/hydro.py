@@ -76,7 +76,8 @@ def scale_phs_storage_capacities(hphs, locations, national_storage_capacities):
     """Scale PHS storage capacities to match (Geth et al., 2015).
 
     Storage capacities of pumped hydro within the JRC database may seem too high.
-    Thus, they can be optionally scaled here, so that the national numbers of (Geth et al., 2015) are fulfilled.
+    Thus, they are scaled here if requested by the user (`scale-phs-according-to-geth-et-al: true` in config),
+    so that the national numbers of (Geth et al., 2015) are fulfilled.
 
     Geth, F., Brijs, T., Kathan, J., Driesen, J., Belmans, R., 2015. An overview of large-scale
     stationary electricity storage plants in Europe: Current status and new developments. Renewable
