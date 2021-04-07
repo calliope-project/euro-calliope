@@ -6,7 +6,7 @@ import pycountry
 WGS_84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
 
 
-def main(path_to_plants, path_to_locations, path_to_phs_storage_capacities, path_to_output):
+def main(path_to_plants, path_to_locations, path_to_phs_storage_capacities, scale_phs, path_to_output):
     locations = gpd.read_file(path_to_locations).to_crs(WGS_84).set_index("id")
     plants = pd.read_csv(path_to_plants, index_col="id")
 
@@ -14,11 +14,14 @@ def main(path_to_plants, path_to_locations, path_to_phs_storage_capacities, path
                                    fill_storage_capacity=False)
     hdam = capacities_per_location(plants[plants.type == "HDAM"].copy(), locations, tech_type="hdam")
     hphs = capacities_per_location(plants[plants.type == "HPHS"].copy(), locations, tech_type="hphs")
-    hphs["storage_capacity_hphs_MWh"] = scale_phs_storage_capacities(
-        hphs=hphs,
-        locations=locations,
-        national_storage_capacities=read_national_phs_storage_capacities(path_to_phs_storage_capacities, locations)
-    )
+    if scale_phs:
+        hphs["storage_capacity_hphs_MWh"] = scale_phs_storage_capacities(
+            hphs=hphs,
+            locations=locations,
+            national_storage_capacities=read_national_phs_storage_capacities(
+                path_to_phs_storage_capacities, locations
+            )
+        )
 
     pd.concat([hror, hdam, hphs], axis="columns").to_csv(
         path_to_output,
@@ -72,8 +75,8 @@ def read_national_phs_storage_capacities(path_to_data, locations):
 def scale_phs_storage_capacities(hphs, locations, national_storage_capacities):
     """Scale PHS storage capacities to match (Geth et al., 2015).
 
-    Storage capacities of pumped hydro within the JRC data base seem too high. Thus, we are scaling
-    them here, so that the national numbers of (Geth et al., 2015) are fulfilled.
+    Storage capacities of pumped hydro within the JRC database may seem too high.
+    Thus, they can be optionally scaled here, so that the national numbers of (Geth et al., 2015) are fulfilled.
 
     Geth, F., Brijs, T., Kathan, J., Driesen, J., Belmans, R., 2015. An overview of large-scale
     stationary electricity storage plants in Europe: Current status and new developments. Renewable
@@ -96,5 +99,6 @@ if __name__ == "__main__":
         path_to_plants=snakemake.input.plants,
         path_to_locations=snakemake.input.locations,
         path_to_phs_storage_capacities=snakemake.input.phs_storage_capacities,
+        scale_phs=snakemake.params.scale_phs,
         path_to_output=snakemake.output[0]
     )
