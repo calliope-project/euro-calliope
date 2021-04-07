@@ -53,3 +53,9 @@ properties:
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.
+    parameters:
+        type: object
+        parameters:
+            acceptable-load-data-gap-hours:
+                type: integer
+                description: When filling data gaps in electricity load data, this specifies the minimum number of missing hours from which to start gap filling.
