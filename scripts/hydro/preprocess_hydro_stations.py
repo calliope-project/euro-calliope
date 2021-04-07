@@ -3,25 +3,12 @@ import geopandas as gpd
 from shapely.geometry import Point
 
 MAXIMUM_NUMBER_OF_DROPPED_STATIONS = 5
-ROMANIAN_PHS = pd.DataFrame( # Capacity according to (Geth et al., 2015), all in the same region.
-    index=["HXXX"],
-    data={
-        "name": "Geth 2015 PHS",
-        "installed_capacity_MW": 200,
-        "type": "HPHS",
-        "country_code": "RO",
-        "lat": 44.052607,
-        "lon": 24.584081,
-        "storage_capacity_MWh": 10.2
-    }
-).rename_axis(index="id")
 
 
 def preprocess_stations(path_to_stations, path_to_basins, buffer_size, path_to_output):
     stations = pd.read_csv(path_to_stations, index_col=0)
     assert stations.installed_capacity_MW.isna().sum() <= MAXIMUM_NUMBER_OF_DROPPED_STATIONS
     stations.dropna(subset=["installed_capacity_MW"], inplace=True)
-    stations = add_romanian_phs(stations)
     hydrobasins = gpd.read_file(path_to_basins)
     is_in_basin = stations.apply(station_in_any_basin(hydrobasins), axis="columns")
     stations = move_stations_into_basins(stations, hydrobasins, is_in_basin, buffer_size)
@@ -30,14 +17,6 @@ def preprocess_stations(path_to_stations, path_to_basins, buffer_size, path_to_o
         path_to_output,
         header=True,
         index=True
-    )
-
-
-def add_romanian_phs(stations):
-    return pd.concat(
-        [stations, ROMANIAN_PHS],
-        axis=0,
-        sort=False
     )
 
 
