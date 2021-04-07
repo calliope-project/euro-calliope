@@ -4,6 +4,7 @@
 
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
+* **ADD** automatic download of hydro basins data (#34).
 
 * **UPDATE** dependencies (#44):
     * Python 3.7 -> 3.8

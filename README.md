@@ -28,7 +28,6 @@ conda activate euro-calliope
 5. Further, you need all data files that cannot be retrieved automatically:
 
 * [Maritime Boundaries v10 -> World Exclusive Economic Zones v10](http://www.marineregions.org/downloads.php), to be placed in `./data/World_EEZ_v10_20180221`
-* [hydroBASINS -> Standard -> Europe and Middle East -> hybas_eu_lev07_v1c](https://www.hydrosheds.org/downloads) downloaded to `./data/hybas_eu_lev07_v1c/`
 
 ## Build the model
 

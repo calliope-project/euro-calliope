@@ -1,7 +1,8 @@
 """Rules to generate hydro electricity capacities and time series."""
 
 configfile: "./config/default.yaml"
-localrules: download_runoff_data, download_stations_database, stations_database
+localrules: download_runoff_data, download_basins_database, download_stations_database
+localrules: basins_database, stations_database
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 script_dir = f"{root_dir}scripts/"
 
@@ -22,6 +23,15 @@ rule download_runoff_data:
     script: "../scripts/hydro/runoff.py"
 
 
+rule download_basins_database:
+    message: "Download database of hydro basins."
+    params: url = config["data-sources"]["hydro-basins"]
+    output:
+        protected("data/automatic/raw-hydro-basins.zip")
+    shell:
+        "curl -sLo {output} '{params.url}'"
+
+
 rule download_stations_database:
     message: "Download database of hydro electricity stations."
     params: url = config["data-sources"]["hydro-stations"]
@@ -29,6 +39,13 @@ rule download_stations_database:
         protected("data/automatic/raw-hydro-stations.zip")
     shell:
         "curl -sLo {output} '{params.url}'"
+
+
+rule basins_database:
+    message: "Unzip basins database."
+    input: rules.download_basins_database.output
+    output: "build/data/basins/hybas_eu_lev07_v1c.shp"
+    shell: "unzip {input} -d ./build/data/basins/"
 
 
 rule stations_database:
@@ -47,7 +64,7 @@ rule fix_basins:
     message: "Fix invalid basins."
     input:
         script = script_dir + "hydro/fix_basins.py",
-        basins = config["data-sources"]["hydro-basins"]
+        basins = rules.basins_database.output[0]
     output: "build/data/hybas_eu_lev07_v1c.gpkg"
     conda: "../envs/hydro.yaml"
     script: "../scripts/hydro/fix_basins.py"
