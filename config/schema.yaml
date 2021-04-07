@@ -53,3 +53,9 @@ properties:
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.
+    parameters:
+        type: object
+        properties:
+            scale-phs-according-to-geth-et-al:
+                type: boolean
+                description: Whether or not to use pumped hydro capacities derived from Geth et al. (2015) to scale pumped hydro capacities givven by the JRC hydro database

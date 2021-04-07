@@ -44,6 +44,7 @@ parameters:
         potential-year: "2020"
         cost-year: "2030"
     biofuel-efficiency: 0.45
+    scale-phs-according-to-geth-et-al: false
 sea-connections:
     continental:
     national: # Source: https://www.entsoe.eu/data/map/
