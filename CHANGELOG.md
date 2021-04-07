@@ -5,6 +5,7 @@
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
 
+* **UPDATE** Make scaling pumped hydro capacity according to Geth et al. (2015) optional with a boolean config parameter `scale-phs-according-to-geth-et-al` which defaults to False (no scaling).
 * **UPDATE** dependencies (#44):
     * Python 3.7 -> 3.8
     * atlite -> 0.2.1
