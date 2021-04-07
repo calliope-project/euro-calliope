@@ -31,6 +31,7 @@ root_dir = config["root-directory"] + "/" if config["root-directory"] not in [""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
 script_dir = f"{root_dir}scripts/"
 template_dir = f"{root_dir}templates/"
+test_dir = f"{root_dir}tests/"
 
 onstart:
     shell("mkdir -p build/logs")
@@ -94,6 +95,7 @@ rule hydro_capacities:
         locations = rules.units.output[0],
         plants = rules.preprocess_hydro_stations.output[0],
         phs_storage_capacities = config["data-sources"]["national-phs-storage-capacities"]
+    params: scale_phs = config["parameters"]["scale-phs-according-to-geth-et-al"]
     output: "build/data/{resolution}/hydro-capacities-mw.csv"
     conda: "envs/geo.yaml"
     script: "scripts/hydro.py"
@@ -328,11 +330,11 @@ rule clean: # removes all generated results
 rule test:
     message: "Run tests"
     input:
-        "tests/test_runner.py",
-        "tests/test_model.py",
-        "tests/test_capacityfactors.py",
+        test_dir + "test_runner.py",
+        test_dir + "test_model.py",
+        test_dir + "test_capacityfactors.py",
         "build/logs/{resolution}/model.done",
-        model = "tests/resources/{resolution}/model.yaml",
+        model = test_dir + "resources/{resolution}/model.yaml",
         example_model = "build/model/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
