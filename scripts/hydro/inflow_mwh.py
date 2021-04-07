@@ -19,9 +19,7 @@ def read_generation(path_to_generation, year):
         .read_csv(path_to_generation, index_col=[0, 1])
         .loc[:, "generation_gwh"]
         .rename("generation")
-        .to_xarray()
-        .sel(year=year)
-        .to_series()
+        .xs(year, level="year")
         .mul(1000) # from GWh to MWh
     )
 

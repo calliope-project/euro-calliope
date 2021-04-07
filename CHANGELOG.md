@@ -5,6 +5,7 @@
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
 
+* **UPDATE** IRENA hydro generation data from 2018 to 2020 (#40).
 * **UPDATE** dependencies (#44):
     * Python 3.7 -> 3.8
     * atlite -> 0.2.1
