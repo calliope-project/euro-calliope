@@ -22,7 +22,6 @@ def preprocess_stations(path_to_stations, path_to_basins, buffer_size, path_to_o
     assert stations.installed_capacity_MW.isna().sum() <= MAXIMUM_NUMBER_OF_DROPPED_STATIONS
     stations.dropna(subset=["installed_capacity_MW"], inplace=True)
     stations = add_romanian_phs(stations)
-    stations = remove_index_duplicates(stations)
     hydrobasins = gpd.read_file(path_to_basins)
     is_in_basin = stations.apply(station_in_any_basin(hydrobasins), axis="columns")
     stations = move_stations_into_basins(stations, hydrobasins, is_in_basin, buffer_size)
@@ -40,17 +39,6 @@ def add_romanian_phs(stations):
         axis=0,
         sort=False
     )
-
-
-def remove_index_duplicates(stations):
-    # see https://github.com/energy-modelling-toolkit/hydro-power-database/issues/5
-    stations = stations.copy()
-    new_index = stations.index.values
-    mask = stations.index.duplicated()
-    new_index[mask] = [idx + "_b" for idx in stations.index[mask]]
-    stations.index = new_index
-    assert not stations.index.duplicated().any()
-    return stations.rename_axis(index="id")
 
 
 def station_in_any_basin(basins):
