@@ -14,12 +14,14 @@ def determine_energy_inflow(path_to_stations_with_water_inflow, path_to_generati
 
 
 def read_generation(path_to_generation, year):
-    return pd.read_csv(
-        path_to_generation,
-        index_col=[0, 1],
-        names=["country_code", "year", "generation"],
-        header=0
-    )["generation"].to_xarray().sel(year=year).to_series() * 1000 # from GWh to MWh
+    return (
+        pd
+        .read_csv(path_to_generation, index_col=[0, 1])
+        .loc[:, "generation_gwh"]
+        .rename("generation")
+        .xs(year, level="year")
+        .mul(1000) # from GWh to MWh
+    )
 
 
 def energy_inflow(plants_with_inflow_m3, annual_national_generation_mwh, max_capacity_factor):

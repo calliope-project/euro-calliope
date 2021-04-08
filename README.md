@@ -2,8 +2,9 @@
 
 A model of the European electricity system built using Calliope.
 
-This repository contains the workflow routines that automatically build the model from source data. Alternatively to building models yourself, you can use pre-built models that run out-of-the-box, see link below.
+This repository contains the workflow routines that automatically build models from source data. Alternatively to building models yourself, you can use [pre-built models](https://doi.org/10.5281/zenodo.3949553) that run out-of-the-box. You can find a more detailed description of the first application in a [scientific article in Joule](https://doi.org/10.1016/j.joule.2020.07.018).
 
+[![article DOI](https://img.shields.io/badge/article-10.1016/j.joule.2020.07.018-blue)](https://doi.org/10.1016/j.joule.2020.07.018)
 [![pre-built models DOI](https://img.shields.io/badge/prebuilts-10.5281%2Fzenodo.3949553-blue)](https://doi.org/10.5281/zenodo.3949553)
 
 ## At a glance
@@ -91,6 +92,7 @@ You can easily change the units and scale all values using the `scaling-factor` 
 * `data`: Small input data used within the model build process.
 * `docs`: Documentation of the model and the build process.
 * `envs`: Files defining the conda environment which are used to build the model.
+* `notebooks`: Notebooks for various data analysis or preparation steps. Not within main workflow.
 * `rules`: Snakemake workflows defining the build process.
 * `scripts`: Contains the scripts to build the model.
 * `templates`: Contains templates of Calliope model files.
