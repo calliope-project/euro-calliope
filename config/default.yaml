@@ -1,7 +1,21 @@
-scaling-factors:
-    power: 1
-    area: 1
-    monetary: 1
+data-sources:
+    biofuel-potentials: data/biofuels/potentials/{feedstock}.csv
+    biofuel-costs: data/biofuels/costs/{feedstock}.csv
+    eez: data/World_EEZ_v10_20180221/eez_v10.shp
+    hydro-basins: data/hybas_eu_lev07_v1c/hybas_eu_lev07_v1c.shp
+    irena-generation: data/irena/hydro-generation-europe.csv
+    national-phs-storage-capacities: data/pumped-hydro/storage-capacities-gwh.csv
+    capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
+    gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
+    hydro-stations: https://zenodo.org/record/4289229/files/energy-modelling-toolkit/hydro-power-database-v7.zip?download=1
+    load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
+    nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
+    potentials: https://zenodo.org/record/3533038/files/possibility-for-electricity-autarky.zip
+root-directory: . # point to the root directory if working directory is not root directory
+scaling-factors: # values are tuned for models with a few hours resolution and one year duration
+    power: 0.00001 # from MW(h) to 100 GW(h)
+    area: 0.0001 # from km2 to 10,000 km2
+    monetary: 0.000000001 # from EUR to 1 billion EUR
 capacity-factors:
     min: 0.001 # consider smaller values to be 0; this helps numerics in the LP
     max: 10 # for hydro reservoirs, leading to a numerical range of 1e5 (hourly resolution)
@@ -10,28 +24,36 @@ capacity-factors:
         onshore: 0.3021 # median of average 2016 factors for ~2700 points in Europe
         offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
         ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
+    trim-ninja-timeseries: True # trims renewables.ninja timeseries to the year in question
 year: 2016
 crs: "EPSG:4326"
 parameters:
     maximum-installable-power-density: # this is not the yield, but the density of installed power
-        pv-on-tilted-roofs: 160 # [MW/km^2] from (Gagnon:2016, Klauser:2016), i.e. 16% efficiency
-        pv-on-flat-areas: 80 # [MW/km^2] from (Gagnon:2016, Klauser:2016, Wirth:2017)
-        onshore-wind: 8 # [MW/km^2] from (EuropeanEnvironmentAgency:2009)
-        offshore-wind: 15 # [MW/km^2] from (EuropeanEnvironmentAgency:2009)
-    flat-roof-share: 0.302 # from (Trondle:2019)
+        pv-on-tilted-roofs: 160 # (MW/km^2) from [@Gagnon:2016][@Klauser:2016], i.e. 16% efficiency
+        pv-on-flat-areas: 80 # (MW/km^2) from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
+        onshore-wind: 8 # (MW/km^2) from [@EuropeanEnvironmentAgency:2009]
+        offshore-wind: 15 # (MW/km^2) from [@EuropeanEnvironmentAgency:2009]
+    roof-share: # from [@Trondle:2019]
+        E: 0.1660
+        N: 0.1817
+        S: 0.1821
+        W: 0.1681
+        flat: 0.3020
     jrc-biofuel:
         scenario: "medium"
         potential-year: "2020"
         cost-year: "2030"
     biofuel-efficiency: 0.45
+    scale-phs-according-to-geth-et-al: false
 sea-connections:
     continental:
-    national:
+    national: # Source: https://www.entsoe.eu/data/map/
         - [ITA, GRC]
         - [EST, FIN]
         - [SWE, LTU]
         - [SWE, POL]
         - [DNK, SWE]
+        - [DNK, NLD] # Cobra link
         - [SWE, DEU]
         - [NOR, DNK]
         - [NOR, DEU]
@@ -42,9 +64,10 @@ sea-connections:
         - [GBR, BEL]
         - [GBR, NLD]
         - [GBR, IRL]
-        # the following do not exist today
+        # not on ENTSO-E map
         - [GRC, CYP]
-    regional:
+        - [DNK, GBR] # Viking link
+    regional: # Source: https://www.entsoe.eu/data/map/
         - [ESP.7_1, ESP.1_1] # Ceuta and Andalucia
         - [ESP.13_1, ESP.10_1] # Islas Baleares and Comunidad Valenciana
         - [FRA.5_1, ITA.16_1] # Corse and Toscana
@@ -60,9 +83,10 @@ sea-connections:
         - [SWE.1_1, POL.11_1] # Blekinge and Pomorskie
         - [DNK.1_1, SWE.13_1] # Hovedstaden and Skåne
         - [SWE.13_1, DEU.15_1] # Skåne and Schleswig-Holstein
-        - [DNK.4_1, DEU.8_1] # Sjællandand Mecklenburg-Vorpommern
+        - [DNK.4_1, DEU.8_1] # Sjælland and Mecklenburg-Vorpommern
         - [DNK.4_1, DNK.5_1] # Sjælland and Syddanmark
         - [DNK.3_1, SWE.21_1] # Nordjylland and Västra Götaland
+        - [DNK.5_1, NLD.5_1] # Syddanmark and Groningen (Cobra Link)
         - [NOR.18_1, DNK.3_1] # Vest-Agder and Nordjylland
         - [NOR.18_1, DEU.15_1] # Vest-Agder and Schleswig-Holstein
         - [NOR.18_1, NLD.5_1] # Vest-Agder and Groningen
@@ -72,8 +96,9 @@ sea-connections:
         - [GBR.1_1, BEL.2_1] # England and Vlaanderen
         - [GBR.1_1, NLD.14_1] # England and Zuid-Holland
         - [GBR.4_1, IRL.17_1] # Wales and Meath
-        - [GBR.3_1, GBR.4_1] # Scotland and Northern Ireland
-        # the following do not exist today
+        - [GBR.3_1, GBR.2_1] # Scotland and Northern Ireland
+        # not on ENTSO-E map
+        - [DNK.5_1, GBR.1_1] # Syddanmark and England (Viking link)
         - [GRC.1_1, CYP.5_1] # Aegean and Paphos
         - [CYP.1_1, CYP.2_1] # Famagusta and Larnaca
         - [EST.7_1, EST.2_1] # Lääne and Hiiu

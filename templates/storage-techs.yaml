@@ -1,0 +1,50 @@
+techs:
+    battery: # based on [@Schmidt:2019]
+        essentials:
+            name: 'Battery storage'
+            parent: storage
+            carrier: electricity
+        constraints:
+            energy_cap_max: inf
+            storage_cap_max: inf
+            energy_eff: 0.9273  # 0.86 round trip efficiency
+            storage_loss: 0  # No loss over time assumed
+            lifetime: 10
+        costs:
+            monetary:
+                storage_cap: {{ 723130 * 0.14 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 802 $2015
+                energy_cap: {{ 611324 * 0.14 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}, 678 $2015
+                om_annual: {{ 9016 * 0.14 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}, 10 $2015
+                om_prod: {{ 2.7 * 0.14 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 3 $2015
+    pumped_hydro: # based on [@Schmidt:2019]
+        essentials:
+            name: 'Pumped hydro power storage'
+            parent: storage
+            carrier: electricity
+        constraints:
+            energy_cap_max: inf
+            storage_cap_max: inf
+            energy_eff: 0.8832 # 0.78 round-trip
+            lifetime: 55
+        costs:
+            monetary:
+                storage_cap: {{ 72133 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 80 $2015
+                energy_cap: {{ 1017973 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}, 1129 $2015
+                om_annual: {{ 7213 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}, 8 $2015
+                om_prod: {{ 1 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 1 $2015, rounded to 1€ for numeric range
+    hydrogen: # based on [@Schmidt:2019]
+        essentials:
+            name: Hydrogen power storage
+            parent: storage
+            carrier: electricity
+        constraints:
+            energy_cap_max: inf
+            storage_cap_max: inf
+            energy_eff: 0.6325  # 0.40 round-trip
+            lifetime: 15
+        costs:
+            monetary:
+                storage_cap: {{ 27951 * 0.33 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 31 $2015
+                energy_cap: {{ 4884287 * 0.33 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}, 5417 $2015
+                om_annual: {{ 41476 * 0.33 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}, 46 $2015
+                om_prod: 0

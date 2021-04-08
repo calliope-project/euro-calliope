@@ -1,0 +1,140 @@
+tech_groups:
+    pv:
+        essentials:
+            name: PV
+            carrier: electricity
+            parent: supply
+        constraints:
+            energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
+            lifetime: 25 # [@JRC:2014] Table 7
+    pv_on_roof:
+        essentials:
+            parent: pv
+        costs:
+            monetary:
+                energy_cap: {{ 880000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 9
+                om_annual: {{ (880000 * 0.02 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2% from [@JRC:2014] Table 9
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+    wind:
+        essentials:
+            name: Wind
+            carrier: electricity
+            parent: supply
+        constraints:
+            energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
+    wind_onshore:
+        essentials:
+            name: Onshore wind
+            parent: wind
+        constraints:
+            resource: file=capacityfactors-wind-onshore.csv
+            resource_unit: energy_per_cap
+            lifetime: 25 # [@JRC:2014] Table 4
+        costs:
+            monetary:
+                energy_cap: {{ 1100000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 4
+                om_annual: {{ (1100000 * 0.017 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% from [@JRC:2014] Table 4
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+
+techs:
+    open_field_pv:
+        essentials:
+            name: Open field PV
+            parent: pv
+        constraints:
+            # open_field_pv and wind_onshore_competing are the only technologies with area footprints
+            # as they are the only technologies competing on the same land.
+            resource_area_per_energy_cap: {{ (1 / max_power_density["pv-on-flat-areas"]) * scaling_factors.area / scaling_factors.power }} # {{ (scaling_factors.power / scaling_factors.area) | unit("km^2/MW") }} from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
+            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
+            resource: file=capacityfactors-open-field-pv.csv
+            resource_unit: energy_per_cap
+        costs:
+            monetary:
+                energy_cap: {{ 520000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 7
+                om_annual: {{ (520000 * 0.017 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% from [@JRC:2014] Table 7
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+    roof_mounted_pv:
+        essentials:
+            name: Roof mounted PV
+            parent: pv_on_roof
+        constraints:
+            resource: file=capacityfactors-rooftop-pv.csv
+            resource_unit: energy_per_cap
+    wind_onshore_monopoly:
+        essentials:
+            name: Onshore wind without land competition
+            parent: wind_onshore
+    wind_onshore_competing:
+        essentials:
+            name: Onshore wind competing with open field PV on land
+            parent: wind_onshore
+        constraints:
+            # open_field_pv and wind_onshore_competing are the only technologies with area footprints
+            # as they are the only technologies competing on the same land.
+            resource_area_per_energy_cap: {{ (1 / max_power_density["onshore-wind"]) * scaling_factors.area / scaling_factors.power }} # {{ (scaling_factors.power / scaling_factors.area) | unit("km^2/MW") }} from [@EuropeanEnvironmentAgency:2009]
+            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
+    wind_offshore:
+        essentials:
+            name: Offshore wind
+            parent: wind
+        constraints:
+            resource: file=capacityfactors-wind-offshore.csv
+            resource_unit: energy_per_cap
+            lifetime: 30 # [@JRC:2014] Table 5
+        costs:
+            monetary:
+                energy_cap: {{ 2280000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 5
+                om_annual: {{ (2280000 * 0.023 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2.3% from [@JRC:2014] Table 5
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+    load_shedding:
+        essentials:
+            name: Load shedding as last resort
+            parent: supply
+            carrier: electricity
+        constraints:
+            energy_cap_max: inf
+        costs:
+            monetary:
+                om_prod: {{ 8000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR/MWh") }}
+    hydro_run_of_river:
+        essentials:
+            name: Run of river hydro electricity
+            parent: supply
+            carrier: electricity
+        constraints:
+            resource: file=capacityfactors-hydro-ror.csv
+            resource_unit: energy_per_cap
+            lifetime: 60
+        costs:
+            monetary:
+                energy_cap: {{ 5620000 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2013 EUR/MW] from [@JRC:2014] Table 14
+                om_prod: {{ 5 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW/yr") }} from [@JRC:2014] Table 14
+                om_annual: {{ 5620000 * 0.03 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW/yr") }} 3% from [@JRC:2014] Table 14
+    hydro_reservoir:
+        essentials:
+            name: Hydro electricity with a reservoir.
+            parent: supply_plus
+            carrier: electricity
+        constraints:
+            resource: file=capacityfactors-hydro-reservoir-inflow.csv
+            resource_unit: energy_per_cap
+            lifetime: 60
+        costs:
+            monetary:
+                energy_cap: {{ 3370000 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} from [@JRC:2014] Table 12
+                om_prod: {{ 5 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW/yr") }} from [@JRC:2014] Table 12
+                om_annual: {{ 3370000 * 0.03 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW/yr") }} from [@JRC:2014] Table 12
+    biofuel: # based on Anaerobic digestion from [@JRC:2014] Table 48
+        essentials:
+            name: Biofuel
+            parent: supply_plus
+            carrier: electricity
+        constraints:
+            energy_eff: 1.0 # efficiency modelled within the input resource stream to avoid poor numerical scaling
+            lifetime: 20
+        costs:
+            monetary:
+                energy_cap: {{ 2300000 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+                om_prod: 0 # 3.1 (EUR2013/MWh) added to om_con, because value is very small and causing poor numerical range
+                om_annual: {{ 2300000 * 0.041 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW/yr") }} 2300000 * 4.1%
+                om_con: {{ (biofuel_fuel_cost / biofuel_efficiency + 3.1) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR/MWh") }}

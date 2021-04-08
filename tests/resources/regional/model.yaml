@@ -1,0 +1,30 @@
+import:
+    - '../../../build/model/interest-rate.yaml'
+    - '../../../build/model/renewable-techs.yaml'
+    - '../../../build/model/storage-techs.yaml'
+    - '../../../build/model/link-techs.yaml'
+    - '../../../build/model/demand-techs.yaml'
+    - '../../../build/model/regional/locations.yaml'
+    - '../../../build/model/regional/directional-rooftop.yaml'
+model:
+    name: 'Test model with regional spatial resolution'
+    calliope_version: 0.6.5
+    timeseries_data_path: '../../../build/model/regional'
+    subset_time: ['2016-01-01', '2016-01-01']
+scenarios:
+    default: []
+    connected: ["connect"]
+    directional-pv: ["directional-rooftop-pv"]
+    frozen-hydro: ["freeze-hydro-capacities"]
+overrides:
+    connect:
+        import:
+            - './build/model/regional/link-all-neighbours.yaml'
+run:
+    solver: gurobi
+    solver_io: python
+    mode: plan
+    objective_options: {
+        'cost_class': {'monetary': 1},
+        'sense': 'minimize'
+    }

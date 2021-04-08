@@ -3,9 +3,9 @@ channels:
     - conda-forge
     - bioconda
 dependencies:
-    - python=3.7
-    - ipython=7.5.0
-    - numpy=1.16.2
-    - pandas=0.24.2
+    - python=3.8
+    - ipython=7.21.0
+    - numpy=1.20.2
+    - pandas=1.2.3
     - pycountry=18.12.8
-    - jinja2=2.10.1
+    - jinja2=2.11.3

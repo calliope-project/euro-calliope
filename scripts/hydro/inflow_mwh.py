@@ -14,12 +14,14 @@ def determine_energy_inflow(path_to_stations_with_water_inflow, path_to_generati
 
 
 def read_generation(path_to_generation, year):
-    return pd.read_csv(
-        path_to_generation,
-        index_col=[0, 1],
-        names=["country_code", "year", "generation"],
-        header=0
-    )["generation"].to_xarray().sel(year=year).to_series() * 1000 # from GWh to MWh
+    return (
+        pd
+        .read_csv(path_to_generation, index_col=[0, 1])
+        .loc[:, "generation_gwh"]
+        .rename("generation")
+        .xs(year, level="year")
+        .mul(1000) # from GWh to MWh
+    )
 
 
 def energy_inflow(plants_with_inflow_m3, annual_national_generation_mwh, max_capacity_factor):
@@ -88,8 +90,15 @@ def water_to_capped_energy_inflow(inflow_m3, annual_generation, cap):
 
 
 def allocate_generation_to_plant(plants, annual_national_generation_mwh):
+    inflows = plants.inflow_m3.to_pandas().fillna(0)
     plants = plants[["country_code", "installed_capacity_MW"]].to_dataframe()
-    capacity_share = plants.groupby("country_code")["installed_capacity_MW"].transform(lambda x: x / x.sum())
+
+    # Capacity share is scaled to account for erroneous zero timesteps in the inflow data
+    inflow_count = inflows.where(inflows > 1).count(axis=1) / inflows.count(axis=1)
+    capacity_share = plants.assign(
+        scaled_capacity=plants.installed_capacity_MW.multiply(inflow_count)
+    ).groupby("country_code")["scaled_capacity"].transform(lambda x: x / x.sum())
+
     national_generation = (
         plants.reset_index()
               .merge(annual_national_generation_mwh, on="country_code", how="left", validate="many_to_one")
