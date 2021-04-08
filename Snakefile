@@ -93,9 +93,7 @@ rule hydro_capacities:
     input:
         script = script_dir + "hydro.py",
         locations = rules.units.output[0],
-        plants = rules.preprocess_hydro_stations.output[0],
-        phs_storage_capacities = config["data-sources"]["national-phs-storage-capacities"]
-    params: scale_phs = config["parameters"]["scale-phs-according-to-geth-et-al"]
+        plants = rules.preprocess_hydro_stations.output[0]
     output: "build/data/{resolution}/hydro-capacities-mw.csv"
     conda: "envs/geo.yaml"
     script: "scripts/hydro.py"

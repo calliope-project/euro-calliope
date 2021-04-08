@@ -59,26 +59,32 @@ rule stations_database:
         """
 
 
-rule fix_basins:
-    message: "Fix invalid basins."
+rule preprocess_basins:
+    message: "Preprocess basins."
     input:
-        script = script_dir + "hydro/fix_basins.py",
+        script = script_dir + "hydro/preprocess_basins.py",
         basins = rules.basins_database.output[0]
+    params:
+        x_min = config["scope"]["bounds"]["x_min"],
+        x_max = config["scope"]["bounds"]["x_max"],
+        y_min = config["scope"]["bounds"]["y_min"],
+        y_max = config["scope"]["bounds"]["y_max"]
     output: "build/data/hybas_eu_lev07_v1c.gpkg"
     conda: "../envs/hydro.yaml"
-    script: "../scripts/hydro/fix_basins.py"
+    script: "../scripts/hydro/preprocess_basins.py"
 
 
 rule preprocess_hydro_stations:
-    # Some locations of stations are imprecise and in the sea. Slightly move them.
-    # Some other stations seem incorrect. Remove.
-    # Add missing pumped hydro stations in Romania.
     message: "Preprocess hydro stations."
     input:
         script = script_dir + "hydro/preprocess_hydro_stations.py",
         stations = rules.stations_database.output[0],
-        basins = rules.fix_basins.output[0]
-    params: buffer_size = 1 / 60 # move stations up to 1 arcminute < 1 km
+        basins = rules.preprocess_basins.output[0],
+        phs_storage_capacities = config["data-sources"]["national-phs-storage-capacities"]
+    params:
+        buffer_size = 1 / 60, # move stations up to 1 arcminute < 1 km
+        countries = config["scope"]["countries"],
+        scale_phs = config["parameters"]["scale-phs-according-to-geth-et-al"]
     output: "build/data/jrc-hydro-power-plant-database-preprocessed.csv"
     conda: "../envs/hydro.yaml"
     script: "../scripts/hydro/preprocess_hydro_stations.py"
@@ -89,7 +95,7 @@ rule inflow_m3:
     input:
         script = script_dir + "hydro/inflow_m3.py",
         stations = rules.preprocess_hydro_stations.output[0],
-        basins = rules.fix_basins.output[0],
+        basins = rules.preprocess_basins.output[0],
         runoff = rules.download_runoff_data.output[0]
     params: year = config["year"]
     output: "build/data/hydro-electricity-with-water-inflow.nc"
