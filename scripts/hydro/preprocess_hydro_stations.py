@@ -1,9 +1,15 @@
+import importlib
+
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
-import pycountry
 
 MAXIMUM_NUMBER_OF_DROPPED_STATIONS = 5
+# import utility module
+assert "utils" in snakemake.input.keys(), "Make sure utils.py module is in your snakemake inputs."
+spec = importlib.util.spec_from_file_location("utils", snakemake.input.utils)
+utils = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(utils)
 
 
 def preprocess_stations(path_to_stations, path_to_basins, buffer_size, path_to_output):
@@ -36,7 +42,7 @@ def drop_stations_without_installed_capacity(stations):
 
 
 def fix_station_country_code(stations):
-    stations["country_code"] = stations.country_code.apply(eu_country_code_to_iso3)
+    stations["country_code"] = stations.country_code.apply(utils.eu_country_code_to_iso3)
     return stations
 
 
@@ -65,20 +71,6 @@ def new_coords(station, buffer_size, hydrobasins):
     basin_id = hydrobasins.distance(point).idxmin()
     closest_basin = hydrobasins.loc[basin_id]
     return point.buffer(buffer_size).intersection(closest_basin.geometry).representative_point()
-
-
-def eu_country_code_to_iso3(eu_country_code):
-    """Converts EU country code to ISO 3166 alpha 3.
-    The European Union uses its own country codes, which often but not always match ISO 3166.
-    """
-    assert len(eu_country_code) == 2, "EU country codes are of length 2, yours is '{}'.".format(eu_country_code)
-    if eu_country_code.lower() == "el":
-        iso2 = "gr"
-    elif eu_country_code.lower() == "uk":
-        iso2 = "gb"
-    else:
-        iso2 = eu_country_code
-    return pycountry.countries.lookup(iso2).alpha_3
 
 
 if __name__ == "__main__":

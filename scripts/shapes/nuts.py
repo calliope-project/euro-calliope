@@ -1,4 +1,5 @@
 """Preprocessing of raw NUTS data to bring it into normalised form."""
+import importlib
 import zipfile
 
 import fiona
@@ -7,6 +8,12 @@ import shapely.geometry
 import geopandas as gpd
 import pandas as pd
 import pycountry
+
+# import utility module
+assert "utils" in snakemake.input.keys(), "Make sure utils.py module is in your snakemake inputs."
+spec = importlib.util.spec_from_file_location("utils", snakemake.input.utils)
+utils = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(utils)
 
 
 OUTPUT_DRIVER = "GPKG"
@@ -51,7 +58,7 @@ def _layer_features(nuts_file, crs, study_area, all_countries, layer_id):
     for feature in filter(_in_layer_and_in_study_area(layer_id, study_area, all_countries), nuts_file):
         new_feature = {}
         new_feature["properties"] = {}
-        new_feature["properties"]["country_code"] = _eu_country_code_to_iso3(feature["properties"]["NUTS_ID"][:2])
+        new_feature["properties"]["country_code"] = utils.eu_country_code_to_iso3(feature["properties"]["NUTS_ID"][:2])
         new_feature["properties"]["id"] = feature["properties"]["NUTS_ID"]
         new_feature["properties"]["name"] = feature["properties"]["NAME_LATN"]
         new_feature["properties"]["type"] = "country" if layer_id == 0 else None
@@ -65,7 +72,7 @@ def _layer_features(nuts_file, crs, study_area, all_countries, layer_id):
 def _fix_country_feature(feature):
     # * IDs should have three letters instead of two
     # * many country names are broken or missing
-    feature["properties"]["id"] = _eu_country_code_to_iso3(feature["properties"]["id"])
+    feature["properties"]["id"] = utils.eu_country_code_to_iso3(feature["properties"]["id"])
     feature["properties"]["name"] = pycountry.countries.lookup(feature["properties"]["id"]).name
     return feature
 
@@ -101,7 +108,7 @@ def _in_layer(layer_id, feature):
 def _in_study_area(study_area, all_countries, feature):
     countries = [pycountry.countries.lookup(country) for country in all_countries]
     unit = shapely.geometry.shape(feature["geometry"])
-    country = pycountry.countries.lookup(_eu_country_code_to_iso3(feature["properties"]["NUTS_ID"][:2]))
+    country = pycountry.countries.lookup(utils.eu_country_code_to_iso3(feature["properties"]["NUTS_ID"][:2]))
     if (country in countries) and (study_area.contains(unit) or study_area.intersects(unit)):
         return True
     else:
@@ -121,21 +128,6 @@ def _to_multi_polygon(geometry):
 def _test_id_uniqueness(path_to_file):
     for layer_name in fiona.listlayers(path_to_file):
         assert not gpd.read_file(path_to_file, layer=layer_name).id.duplicated().any()
-
-
-def _eu_country_code_to_iso3(eu_country_code):
-    """Converts EU country code to ISO 3166 alpha 3.
-
-    The European Union uses its own country codes, which often but not always match ISO 3166.
-    """
-    assert len(eu_country_code) == 2, "EU country codes are of length 2, yours is '{}'.".format(eu_country_code)
-    if eu_country_code.lower() == "el":
-        iso2 = "gr"
-    elif eu_country_code.lower() == "uk":
-        iso2 = "gb"
-    else:
-        iso2 = eu_country_code
-    return pycountry.countries.lookup(iso2).alpha_3
 
 
 if __name__ == "__main__":

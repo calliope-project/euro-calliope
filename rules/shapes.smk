@@ -64,6 +64,7 @@ rule administrative_borders_nuts:
     message: "Normalise NUTS administrative borders."
     input:
         script = script_dir + "shapes/nuts.py",
+        utils = script_dir + "utils.py",
         zipped = rules.raw_nuts_units_zipped.output[0]
     params:
         crs = config["crs"],

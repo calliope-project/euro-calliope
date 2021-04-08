@@ -76,6 +76,7 @@ rule preprocess_hydro_stations:
     message: "Preprocess hydro stations."
     input:
         script = script_dir + "hydro/preprocess_hydro_stations.py",
+        utils = script_dir + "utils.py",
         stations = rules.stations_database.output[0],
         basins = rules.fix_basins.output[0]
     params: buffer_size = 1 / 60 # move stations up to 1 arcminute < 1 km
