@@ -58,4 +58,7 @@ properties:
         properties:
             scale-phs-according-to-geth-et-al:
                 type: boolean
-                description: Whether or not to use pumped hydro capacities derived from Geth et al. (2015) to scale pumped hydro capacities givven by the JRC hydro database
+                description: Whether or not to use pumped hydro capacities derived from Geth et al. (2015) to scale pumped hydro capacities givven by the JRC hydro database.
+            acceptable-load-data-gap-hours:
+                type: integer
+                description: When filling data gaps in electricity load data, this specifies the minimum number of missing hours from which to start gap filling.

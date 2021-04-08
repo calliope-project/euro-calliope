@@ -10,6 +10,7 @@
 * **UPDATE** JRC hydro database v4 -> v7 (#48). This entails two patches being removed:
     1. Romanian PHS data is no longer manually added from Geth et al. (2015).
     2. There are no index duplicates to drop in the JRC hydro database.
+* **UPDATE** Improve gap-filling method for national electricity load data (#3).
 * **UPDATE** dependencies (#44):
     * Python 3.7 -> 3.8
     * atlite -> 0.2.1
