@@ -12,8 +12,7 @@ def preprocess_stations(path_to_stations, path_to_basins, buffer_size, path_to_o
     stations = drop_kosovo(stations)
     stations = drop_stations_without_installed_capacity(stations)
     stations = fix_station_country_code(stations)
-    hydrobasins = gpd.read_file(path_to_basins)
-    stations = ensure_stations_in_basins(stations, hydrobasins, buffer_size)
+    stations = ensure_stations_within_basins(stations, path_to_basins, buffer_size)
     stations.to_csv(
         path_to_output,
         header=True,
@@ -22,11 +21,7 @@ def preprocess_stations(path_to_stations, path_to_basins, buffer_size, path_to_o
 
 
 def resolve_index_duplicates(stations):
-    stations = stations.copy()
-    new_index = stations.index.values
-    mask = stations.index.duplicated()
-    new_index[mask] = [idx + "_b" for idx in stations.index[mask]]
-    stations.index = new_index
+    stations.index = stations.index.where(~stations.index.duplicated(), stations.index + '_b')
     assert not stations.index.duplicated().any()
     return stations.rename_axis(index="id")
 
@@ -52,7 +47,8 @@ def station_in_any_basin(basins):
     return station_in_any_basin
 
 
-def ensure_stations_in_basins(stations, hydrobasins, buffer_size):
+def ensure_stations_within_basins(stations, path_to_basins, buffer_size):
+    hydrobasins = gpd.read_file(path_to_basins)
     is_in_basin = stations.apply(station_in_any_basin(hydrobasins), axis="columns")
     stations = stations.copy()
     ill_placed_stations = stations[~is_in_basin]
