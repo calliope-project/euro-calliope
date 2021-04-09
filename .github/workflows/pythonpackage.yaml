@@ -1,0 +1,26 @@
+name: Tests of eurocalliopelib
+
+on: [push, pull_request]
+
+jobs:
+    test:
+        name: Run tests
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                shell: bash -l {0}
+        steps:
+            - uses: actions/checkout@v2
+            - name: Setup conda environment
+              uses: conda-incubator/setup-miniconda@v2
+              with:
+                auto-update-conda: true
+                python-version: 3.8
+                add-pip-as-python-dependency: true
+            - name: Install eurocalliopelib and test requirements.
+              run: |
+                cd ./lib
+                pip install -r requirements-test.txt
+            - name: Test with pytest
+              run: |
+                pytest ./lib
