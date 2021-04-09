@@ -92,6 +92,7 @@ You can easily change the units and scale all values using the `scaling-factor` 
 * `data`: Small input data used within the model build process.
 * `docs`: Documentation of the model and the build process.
 * `envs`: Files defining the conda environment which are used to build the model.
+* `lib`: Library code in form of a Python package that is reused in many places of this repository.
 * `notebooks`: Notebooks for various data analysis or preparation steps. Not within main workflow.
 * `rules`: Snakemake workflows defining the build process.
 * `scripts`: Contains the scripts to build the model.

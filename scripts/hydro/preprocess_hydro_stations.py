@@ -1,15 +1,11 @@
-import importlib
-
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
 
+from eurocalliopelib import utils
+
+
 MAXIMUM_NUMBER_OF_DROPPED_STATIONS = 5
-# import utility module
-assert "utils" in snakemake.input.keys(), "Make sure utils.py module is in your snakemake inputs."
-spec = importlib.util.spec_from_file_location("utils", snakemake.input.utils)
-utils = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(utils)
 
 
 def preprocess_stations(path_to_stations, path_to_basins, buffer_size, path_to_output):

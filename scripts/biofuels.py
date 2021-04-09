@@ -1,16 +1,11 @@
 """Take national potentials from JRC report and allocate to regions based on proxies."""
-import importlib
 from enum import Enum
 from pathlib import Path
 
 import pandas as pd
 import geopandas as gpd
 
-# import utility module
-assert "utils" in snakemake.input.keys(), "Make sure utils.py module is in your snakemake inputs."
-spec = importlib.util.spec_from_file_location("utils", snakemake.input.utils)
-utils = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(utils)
+from eurocalliopelib import utils
 
 PJ_TO_MWH = 1 / 3600 * 1e9
 GJ_TO_MWH = 1 / 3600 * 1e3

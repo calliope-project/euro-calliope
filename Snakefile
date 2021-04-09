@@ -105,7 +105,6 @@ rule biofuels:
     message: "Determine biofuels potential on {wildcards.resolution} resolution for scenario {wildcards.scenario}."
     input:
         script = script_dir + "biofuels.py",
-        utils = script_dir + "utils.py",
         units = rules.units.output[0],
         land_cover = rules.potentials.output.land_cover,
         population = rules.potentials.output.population,

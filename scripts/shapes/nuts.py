@@ -1,5 +1,4 @@
 """Preprocessing of raw NUTS data to bring it into normalised form."""
-import importlib
 import zipfile
 
 import fiona
@@ -9,11 +8,7 @@ import geopandas as gpd
 import pandas as pd
 import pycountry
 
-# import utility module
-assert "utils" in snakemake.input.keys(), "Make sure utils.py module is in your snakemake inputs."
-spec = importlib.util.spec_from_file_location("utils", snakemake.input.utils)
-utils = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(utils)
+from eurocalliopelib import utils
 
 
 OUTPUT_DRIVER = "GPKG"

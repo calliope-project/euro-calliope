@@ -16,3 +16,6 @@ dependencies:
     - cdsapi=0.5.1
     - pycountry=18.12.8
     - atlite=0.2.1
+    - pip=21.0.1
+    - pip:
+        - eurocalliopelib==0.1.0 @ file:///../../../lib/
