@@ -18,4 +18,4 @@ dependencies:
     - atlite=0.2.1
     - pip=21.0.1
     - pip:
-        - eurocalliopelib==0.1.0 @ file:///../../../lib/
+        - -e ../../lib

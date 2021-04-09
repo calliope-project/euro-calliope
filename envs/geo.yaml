@@ -19,4 +19,4 @@ dependencies:
     - pycountry=18.12.8
     - pip=21.0.1
     - pip:
-        - eurocalliopelib==0.1.0 @ file:///../../../lib/
+        - -e ../../lib
