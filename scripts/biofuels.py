@@ -4,7 +4,8 @@ from pathlib import Path
 
 import pandas as pd
 import geopandas as gpd
-import pycountry
+
+from eurocalliopelib import utils
 
 PJ_TO_MWH = 1 / 3600 * 1e9
 GJ_TO_MWH = 1 / 3600 * 1e3
@@ -75,7 +76,7 @@ def biofuel_potential(paths_to_national_potentials, paths_to_costs, path_to_unit
     paths_to_costs = [Path(path) for path in paths_to_costs]
     national_potentials = pd.concat(
         [pd.read_csv(path, index_col=0, header=[0, 1])
-           .rename(index=eu_country_code_to_iso3)
+           .rename(index=utils.eu_country_code_to_iso3)
            .loc[:, (scenario, potential_year)]
            .rename(path.stem) * PJ_TO_MWH
          for path in paths_to_national_potentials],
@@ -83,7 +84,7 @@ def biofuel_potential(paths_to_national_potentials, paths_to_costs, path_to_unit
     )
     costs = pd.concat(
         [pd.read_csv(path, index_col=0)
-           .rename(index=eu_country_code_to_iso3)
+           .rename(index=utils.eu_country_code_to_iso3)
            .loc[:, cost_year]
            .rename(path.stem) / GJ_TO_MWH
          for path in paths_to_costs],
@@ -130,23 +131,6 @@ def allocate_potentials(national_potentials, units, population, land_cover):
         units[PROXIES[potential]] * units[potential]
         for potential in national_potentials
     ).rename(NAME)
-
-
-def eu_country_code_to_iso3(eu_country_code):
-    """Converts EU country code to ISO 3166 alpha 3.
-
-    The European Union uses its own country codes, which often but not always match ISO 3166.
-    """
-    assert len(eu_country_code) == 2, "EU country codes are of length 2, yours is '{}'.".format(eu_country_code)
-    if eu_country_code.lower() == "el":
-        iso2 = "gr"
-    elif eu_country_code.lower() == "uk":
-        iso2 = "gb"
-    elif eu_country_code.lower() == "bh": # this is just blantly wrong
-        iso2 = "ba"
-    else:
-        iso2 = eu_country_code
-    return pycountry.countries.lookup(iso2).alpha_3
 
 
 if __name__ == "__main__":

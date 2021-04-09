@@ -2,6 +2,8 @@ import io
 import yaml
 from datetime import datetime
 
+import eurocalliopelib
+
 
 def metadata(config, version, path_to_output):
     metadata = {
@@ -9,6 +11,7 @@ def metadata(config, version, path_to_output):
             "This is the metadata of the build process of "
             "the euro-calliope model in the same directory.",
         "euro-calliope-version": version,
+        "euro-calliope-lib-version": eurocalliopelib.__version__,
         "generated-utc": datetime.utcnow(),
         "config": config
     }
