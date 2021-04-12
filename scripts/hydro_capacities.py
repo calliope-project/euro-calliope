@@ -2,10 +2,10 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
 
-WGS_84 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+WGS_84 = "EPSG:4326"
 
 
-def main(path_to_plants, path_to_locations, path_to_output):
+def determine_hydro_capacities(path_to_plants, path_to_locations, path_to_output):
     locations = gpd.read_file(path_to_locations).to_crs(WGS_84).set_index("id")
     plants = pd.read_csv(path_to_plants, index_col="id")
 
@@ -36,7 +36,7 @@ def capacities_per_location(plants, locations, tech_type):
 
 
 if __name__ == "__main__":
-    main(
+    determine_hydro_capacities(
         path_to_plants=snakemake.input.plants,
         path_to_locations=snakemake.input.locations,
         path_to_output=snakemake.output[0]

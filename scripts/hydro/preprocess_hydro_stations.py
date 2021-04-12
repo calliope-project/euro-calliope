@@ -98,7 +98,7 @@ def scale_phs_acording_to_geth(stations, path_to_geth_national_capacities):
 
 def read_national_phs_storage_capacities(path_to_data):
     data = pd.read_csv(path_to_data, index_col=0)
-    data.index = [pycountry.countries.lookup(iso2).alpha_3 for iso2 in data.index]
+    data.index = data.index.map(utils.eu_country_code_to_iso3)
     return (
         data["storage-capacity-gwh"]
         .mul(1000)

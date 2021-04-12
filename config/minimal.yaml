@@ -1,51 +1,6 @@
-# A simple config to allow for quick test runs of the workflow.
-data-sources:
-    biofuel-potentials: data/biofuels/potentials/{feedstock}.csv
-    biofuel-costs: data/biofuels/costs/{feedstock}.csv
-    eez: data/World_EEZ_v10_20180221/eez_v10.shp
-    irena-generation: data/irena/hydro-generation-europe.csv
-    national-phs-storage-capacities: data/pumped-hydro/storage-capacities-gwh.csv
-    capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
-    gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
-    hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
-    hydro-stations: https://zenodo.org/record/4289229/files/energy-modelling-toolkit/hydro-power-database-v7.zip?download=1
-    load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
-    nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
-    potentials: https://zenodo.org/record/3533038/files/possibility-for-electricity-autarky.zip
-root-directory: . # point to the root directory if working directory is not root directory
-scaling-factors: # values are tuned for models with a few hours resolution and one year duration
-    power: 0.00001 # from MW(h) to 100 GW(h)
-    area: 0.0001 # from km2 to 10,000 km2
-    monetary: 0.000000001 # from EUR to 1 billion EUR
-capacity-factors:
-    min: 0.001 # consider smaller values to be 0; this helps numerics in the LP
-    max: 10 # for hydro reservoirs, leading to a numerical range of 1e5 (hourly resolution)
-    average: # average estimation used to transform annual fixed to variable costs
-        pv: 0.139 # median of average 2016 open-field factors for ~2700 points in Europe
-        onshore: 0.3021 # median of average 2016 factors for ~2700 points in Europe
-        offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
-        ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
-    trim-ninja-timeseries: True # trims renewables.ninja timeseries to the year in question
-year: 2016
-crs: "EPSG:4326"
+# A simple config to allow for quick test runs of the workflow. It builds on `./default.yaml`.
 parameters:
-    maximum-installable-power-density: # this is not the yield, but the density of installed power
-        pv-on-tilted-roofs: 160 # (MW/km^2) from [@Gagnon:2016][@Klauser:2016], i.e. 16% efficiency
-        pv-on-flat-areas: 80 # (MW/km^2) from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
-        onshore-wind: 8 # (MW/km^2) from [@EuropeanEnvironmentAgency:2009]
-        offshore-wind: 15 # (MW/km^2) from [@EuropeanEnvironmentAgency:2009]
-    roof-share: # from [@Trondle:2019]
-        E: 0.1660
-        N: 0.1817
-        S: 0.1821
-        W: 0.1681
-        flat: 0.3020
-    jrc-biofuel:
-        scenario: "medium"
-        potential-year: "2020"
-        cost-year: "2030"
-    biofuel-efficiency: 0.45
-    scale-phs-according-to-geth-et-al: True
+    scale-phs-according-to-geth-et-al: True # switched on to test the Geth scaling
 sea-connections:
     continental:
     national: # Source: https://www.entsoe.eu/data/map/
@@ -69,9 +24,5 @@ shapes: # This config must be consistent with data from https://doi.org/10.5281/
         Ireland: nuts0
         United Kingdom: nuts0
     regional:
-        # The link between NUTS and administrative units unfortunately is not obvious.
-        # It's not documented anywhere -- at least I could not find any information.
-        # Hence, I am using GADM here instead.
-        # Validation source: https://en.wikipedia.org/wiki/List_of_administrative_divisions_by_country
-        Ireland: gadm1 # match 26
-        United Kingdom: gadm1 # match 4
+        Ireland: gadm1
+        United Kingdom: gadm1
