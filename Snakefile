@@ -61,7 +61,7 @@ rule potentials:
     output:
         land_eligibility_km2 = "build/data/{resolution}/technical-potential/areas.csv",
         shared_coast = "build/data/{resolution}/shared-coast.csv",
-        industrial_demand = "build/data/{resolution}/demand.csv",
+        demand = "build/data/{resolution}/demand.csv",
         population = "build/data/{resolution}/population.csv",
         land_cover = "build/data/{resolution}/land-cover.csv"
     shell: "unzip -o {input} -d build/data"
@@ -252,7 +252,7 @@ rule electricity_load:
     input:
         script = script_dir + "load.py",
         units = rules.units.output[0],
-        industrial_demand = rules.potentials.output.industrial_demand,
+        demand_per_unit = rules.potentials.output.demand,
         national_load = rules.electricity_load_national.output[0]
     params:
         scaling_factor = config["scaling-factors"]["power"]
