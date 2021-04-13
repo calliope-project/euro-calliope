@@ -91,14 +91,12 @@ rule parameterise_template:
 rule hydro_capacities:
     message: "Determine hydro capacities on {wildcards.resolution} resolution."
     input:
-        script = script_dir + "hydro.py",
+        script = script_dir + "hydro_capacities.py",
         locations = rules.units.output[0],
-        plants = rules.preprocess_hydro_stations.output[0],
-        phs_storage_capacities = config["data-sources"]["national-phs-storage-capacities"]
-    params: scale_phs = config["parameters"]["scale-phs-according-to-geth-et-al"]
+        plants = rules.preprocess_hydro_stations.output[0]
     output: "build/data/{resolution}/hydro-capacities-mw.csv"
     conda: "envs/geo.yaml"
-    script: "scripts/hydro.py"
+    script: "scripts/hydro_capacities.py"
 
 
 rule biofuels:

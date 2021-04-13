@@ -107,6 +107,14 @@ Tests of models with continental and national resolution run automatically when 
 
 Exchanging `regional` with `national` or `continental` allows you to run tests on the respective resolution explicitly.
 
+## Run minimal test
+
+As a developer, you may want to run the entire workflow often to spot errors early. For that, you can use a minimal test configuration that takes less time to run.
+
+    snakemake --use-conda --configfile="config/minimal.yaml"
+
+Make sure to run this in a clean working directory. Do not use the working directory in which you are using your normal configuration.
+
 ## License
 
 euro-calliope has been developed and is maintained by Tim Tröndle, IASS Potsdam. The code in this repository is MIT licensed.

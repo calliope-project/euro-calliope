@@ -5,6 +5,7 @@
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
 * **ADD** automatic download of hydro basins data (#34).
+* **ADD** minimal configuration to be able to test the entire workflow more quickly (#60).
 
 * **UPDATE** IRENA hydro generation data from 2018 to 2020 (#40).
 * **UPDATE** Make scaling pumped hydro capacity according to Geth et al. (2015) optional with a boolean config parameter `scale-phs-according-to-geth-et-al` which defaults to False (no scaling) (#49).
