@@ -28,6 +28,7 @@ rule download_basins_database:
     params: url = config["data-sources"]["hydro-basins"]
     output:
         protected("data/automatic/raw-hydro-basins.zip")
+    conda: "../envs/shell.yaml"
     shell:
         "curl -sLo {output} '{params.url}'"
 
@@ -37,6 +38,7 @@ rule download_stations_database:
     params: url = config["data-sources"]["hydro-stations"]
     output:
         protected("data/automatic/raw-hydro-stations.zip")
+    conda: "../envs/shell.yaml"
     shell:
         "curl -sLo {output} '{params.url}'"
 
@@ -45,6 +47,7 @@ rule basins_database:
     message: "Unzip basins database."
     input: rules.download_basins_database.output
     output: "build/data/basins/hybas_eu_lev07_v1c.shp"
+    conda: "../envs/shell.yaml"
     shell: "unzip {input} -d ./build/data/basins/"
 
 
@@ -53,6 +56,7 @@ rule stations_database:
     input: rules.download_stations_database.output
     output: "build/data/jrc-hydro-power-plant-database.csv"
     shadow: "full"
+    conda: "../envs/shell.yaml"
     shell:
         """
         unzip -j {input} "**/jrc-hydro-power-plant-database.csv" -d build/data/
