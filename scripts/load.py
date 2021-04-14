@@ -5,18 +5,18 @@ import pandas as pd
 import geopandas as gpd
 
 
-def load(path_to_units, path_to_industrial_load, path_to_electricity_load, scaling_factor, path_to_result):
+def load(path_to_units, path_to_demand_per_unit, path_to_electricity_load, scaling_factor, path_to_result):
     """Generate load time series for every location."""
     units = gpd.read_file(path_to_units).set_index("id")
-    industrial_load = pd.read_csv(path_to_industrial_load, index_col=0)
+    demand_per_unit = pd.read_csv(path_to_demand_per_unit, index_col=0)
     national_load = pd.read_csv(path_to_electricity_load, index_col=0, parse_dates=True)
 
     if (len(units.index) == 1) and (units.index[0] == "EUR"): # special case for continental level
         national_load = pd.DataFrame(national_load.sum(axis=1).rename("EUR"))
-    # industrial_load.demand_twh_per_year is not necessarily the demand in the year
+    # demand_per_unit.demand_twh_per_year is not necessarily the demand in the year
     # used here and thus its absolute value must be ignored.
-    units["industrial_demand"] = industrial_load.demand_twh_per_year * industrial_load.industrial_demand_fraction
-    units["residential_demand"] = industrial_load.demand_twh_per_year - units.industrial_demand
+    units["industrial_demand"] = demand_per_unit.demand_twh_per_year * demand_per_unit.industrial_demand_fraction
+    units["residential_demand"] = demand_per_unit.demand_twh_per_year - units.industrial_demand
     assert not units["industrial_demand"].isna().any()
     units["fraction_of_national_industrial_load"] = units.groupby("country_code").industrial_demand.transform(
         lambda x: x / x.sum()
@@ -62,7 +62,7 @@ def unit_time_series(unit, unit_name, national_industrial_load, national_residen
 if __name__ == '__main__':
     load(
         path_to_units=snakemake.input.units,
-        path_to_industrial_load=snakemake.input.industrial_demand,
+        path_to_demand_per_unit=snakemake.input.demand_per_unit,
         path_to_electricity_load=snakemake.input.national_load,
         path_to_result=snakemake.output[0],
         scaling_factor=snakemake.params.scaling_factor
