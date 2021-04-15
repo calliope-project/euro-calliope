@@ -244,7 +244,8 @@ rule electricity_load_national:
     output: "build/data/electricity-demand-national.csv"
     params:
         year = config["year"],
-        acceptable_gap_hours = config["parameters"]["acceptable-load-data-gap-hours"]
+        acceptable_gap_hours = config["quality-control"]["load"]["acceptable-load-data-gap-hours"],
+        outlier_thresholds = config["quality-control"]["load"]["outlier-data-thresholds"]
     conda: "envs/default.yaml"
     script: "scripts/national_load.py"
 
