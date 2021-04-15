@@ -15,9 +15,6 @@ properties:
             eez:
                 type: string
                 description: Path to local geospatial Exclusive Economic Zones data.
-            hydro-basins:
-                type: string
-                description: Path to local geospatial basins data.
             irena-generation:
                 type: string
                 pattern: .*\.csv$
@@ -34,6 +31,10 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+{country_code}.*
                 description: Web address of geospatial GADM data. Must contain {country_code} placeholder.
+            hydro-basins:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of geospatial basins data.
             hydro-stations:
                 type: string
                 pattern: ^(https?|http?):\/\/.+

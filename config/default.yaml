@@ -2,11 +2,11 @@ data-sources:
     biofuel-potentials: data/biofuels/potentials/{feedstock}.csv
     biofuel-costs: data/biofuels/costs/{feedstock}.csv
     eez: data/World_EEZ_v10_20180221/eez_v10.shp
-    hydro-basins: data/hybas_eu_lev07_v1c/hybas_eu_lev07_v1c.shp
     irena-generation: data/irena/hydro-generation-europe.csv
     national-phs-storage-capacities: data/pumped-hydro/storage-capacities-gwh.csv
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
     gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
+    hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
     hydro-stations: https://zenodo.org/record/4289229/files/energy-modelling-toolkit/hydro-power-database-v7.zip?download=1
     load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
     nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip

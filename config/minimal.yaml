@@ -1,0 +1,28 @@
+# A simple config to allow for quick test runs of the workflow. It builds on `./default.yaml`.
+parameters:
+    scale-phs-according-to-geth-et-al: True # switched on to test the Geth scaling
+sea-connections:
+    continental:
+    national: # Source: https://www.entsoe.eu/data/map/
+        - [GBR, IRL]
+    regional: # Source: https://www.entsoe.eu/data/map/
+        - [GBR.4_1, IRL.17_1] # Wales and Meath
+scope:
+    countries:
+        - "Ireland"
+        - "United Kingdom"
+    bounds:
+        x_min: -10.62 # in degrees east
+        x_max: 1.8  # in degrees east
+        y_min: 49.8 # in degrees north
+        y_max: 60.9  # in degrees north
+shapes: # This config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
+    continental:
+        Ireland: nuts0
+        United Kingdom: nuts0
+    national:
+        Ireland: nuts0
+        United Kingdom: nuts0
+    regional:
+        Ireland: gadm1
+        United Kingdom: gadm1
