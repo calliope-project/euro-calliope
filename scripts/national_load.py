@@ -26,7 +26,7 @@ def read_load_profiles(path_to_raw_load):
 
 def columns_with_missing_data_in_model_year(data, model_year, acceptable_gap_hours):
     model_year_missing_data = data.where(data >= 0).loc[str(model_year)]
-    model_year_missing_data = model_year_missing_data.dropna(
+    return model_year_missing_data.dropna(
         axis=1, thresh=len(model_year_missing_data) - acceptable_gap_hours
     )
 
@@ -34,7 +34,7 @@ def columns_with_missing_data_in_model_year(data, model_year, acceptable_gap_hou
 def select_year_and_fill_gaps(load_df, model_year, acceptable_gap_hours):
     """Selects relevant year then fills in all NaNs with data from other years"""
     model_year_missing_data = columns_with_missing_data_in_model_year(
-        load_df, acceptable_gap_hours, model_year
+        load_df, model_year, acceptable_gap_hours
     )
     missing_data_countries = set(load_df.columns).difference(model_year_missing_data.columns)
 
@@ -127,7 +127,7 @@ def filter_national(load):
 def handle_outliers(all_time_series, outlier_thresholds):
     # considers all data < 0.25 * mean and > 2 * mean invalid and replaces with last valid value
     normed_load = all_time_series / all_time_series.mean()
-    all_time_series[(normed_load < outlier_thresholds["relative-to-mean-min"]) | (normed_load > outlier_thresholds["relative-to-mean-max"][2])] = np.nan
+    all_time_series[(normed_load < outlier_thresholds["relative-to-mean-min"]) | (normed_load > outlier_thresholds["relative-to-mean-max"])] = np.nan
     # check that this outlier handling won't vary any country's annual load by more than +/- 1%
     assert (abs((all_time_series.interpolate().sum() - all_time_series.sum()) / all_time_series.sum()) <= outlier_thresholds["abolute-deviation-post-cleaning-max"]).all()
     return all_time_series.interpolate()
