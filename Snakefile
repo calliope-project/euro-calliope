@@ -51,6 +51,7 @@ rule potentials_zipped:
     message: "Download potential data."
     params: url = config["data-sources"]["potentials"]
     output: protected("data/automatic/raw-potentials.zip")
+    conda: "envs/shell.yaml"
     shell: "curl -sLo {output} '{params.url}'"
 
 
@@ -64,6 +65,7 @@ rule potentials:
         demand = "build/data/{resolution}/demand.csv",
         population = "build/data/{resolution}/population.csv",
         land_cover = "build/data/{resolution}/land-cover.csv"
+    conda: "envs/shell.yaml"
     shell: "unzip -o {input} -d build/data"
 
 
@@ -171,6 +173,7 @@ rule download_capacity_factors_wind_and_solar:
     message: "Download data/automatic/capacityfactors/{wildcards.filename}."
     params: url = lambda wildcards: config["data-sources"]["capacity-factors"].format(filename=wildcards.filename)
     output: protected("data/automatic/capacityfactors/{filename}")
+    conda: "envs/shell.yaml"
     shell: "curl -sLo {output} '{params.url}'"
 
 
@@ -231,6 +234,7 @@ rule raw_load:
     message: "Download raw load."
     params: url = config["data-sources"]["load"]
     output: protected("data/automatic/raw-load-data.csv")
+    conda: "envs/shell.yaml"
     shell: "curl -sLo {output} '{params.url}'"
 
 
