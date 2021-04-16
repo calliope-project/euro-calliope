@@ -54,30 +54,32 @@ properties:
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.
-    quality-control:
+    parameters:
         type: object
         properties:
             type: object
-            parameters:
+            properties:
                 scale-phs-according-to-geth-et-al:
                     type: boolean
                     description: Whether or not to use pumped hydro capacities derived from Geth et al. (2015) to scale pumped hydro capacities givven by the JRC hydro database.
-        parameters:
+    quality-control:
+        type: object
+        properties:
             load:
                 type: object
-                parameters:
+                properties:
                     acceptable-load-data-gap-hours:
                         type: integer
                         description: When filling data gaps in electricity load data, this specifies the minimum number of missing hours from which to start gap filling.
-                outlier-data-thresholds:
-                    type: object
-                    parameters:
-                        relative-to-mean-min:
-                            type: numeric
-                            description: lower bound cut-off value for any hourly data relative to the annual mean load of a country. Any values below this lower bound will be replaced by interpolated values.
-                        relative-to-mean-max:
-                            type: numeric
-                            description: upper bound cut-off value for any hourly data relative to the annual mean load of a country. Any values above this upper bound will be replaced by interpolated values.
-                        abolute-deviation-post-cleaning-max:
-                            type: numeric
-                            description: allowable deviation in annual load for any country following removal and subsequent interpolation of outlier data.
+                    outlier-data-thresholds:
+                        type: object
+                        properties:
+                            relative-to-mean-min:
+                                type: number
+                                description: lower bound cut-off value for any hourly data relative to the annual mean load of a country. Any values below this lower bound will be replaced by interpolated values.
+                            relative-to-mean-max:
+                                type: number
+                                description: upper bound cut-off value for any hourly data relative to the annual mean load of a country. Any values above this upper bound will be replaced by interpolated values.
+                            abolute-deviation-post-cleaning-max:
+                                type: number
+                                description: allowable deviation in annual load for any country following removal and subsequent interpolation of outlier data.
