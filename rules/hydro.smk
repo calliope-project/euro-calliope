@@ -88,7 +88,7 @@ rule preprocess_hydro_stations:
     params:
         buffer_size = 1 / 60, # move stations up to 1 arcminute < 1 km
         countries = config["scope"]["countries"],
-        scale_phs = config["parameters"]["scale-phs-according-to-geth-et-al"]
+        scale_phs = config["quality-control"]["hydro"]["scale-phs-according-to-geth-et-al"]
     output: "build/data/jrc-hydro-power-plant-database-preprocessed.csv"
     conda: "../envs/hydro.yaml"
     script: "../scripts/hydro/preprocess_hydro_stations.py"

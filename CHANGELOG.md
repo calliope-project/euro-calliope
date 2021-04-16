@@ -15,6 +15,7 @@
 * **UPDATE** Make scaling pumped hydro capacity according to Geth et al. (2015) optional with a boolean config parameter `scale-phs-according-to-geth-et-al` which defaults to False (no scaling) (#49).
 * **UPDATE** JRC hydro database v4 -> v7 (#48). This entails one patch being removed:
     1. Romanian PHS data is no longer manually added from Geth et al. (2015).
+* **UPDATE** Improve gap-filling method for national electricity load data (#3).
 * **UPDATE** dependencies (#44):
     * Python 3.7 -> 3.8
     * atlite -> 0.2.1
