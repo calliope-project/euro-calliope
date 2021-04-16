@@ -54,20 +54,6 @@ properties:
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.
-    parameters:
-        type: object
-        properties:
-            entsoe-data-priority:
-                type: array
-                uniqueItems: true
-                minItems: 1
-                items:
-                    type: string
-                    enum: [actual_entsoe_power_statistics, actual_entsoe_transparency, actual_tso, actual_net_consumption_tso, actual_gross_generation_tso, forecast_entsoe_transparency, forecast_tso]
-                description: Order in which to prioritise available electricity load data from open-power-system-data.org. The first source in the list will be used to initialise the data; the remaining data sources in the list will be use to gap fill in order from first to last.
-            scale-phs-according-to-geth-et-al:
-                type: boolean
-                description: Whether or not to use pumped hydro capacities derived from Geth et al. (2015) to scale pumped hydro capacities givven by the JRC hydro database.
     quality-control:
         type: object
         properties:
@@ -86,6 +72,20 @@ properties:
                             relative-to-mean-max:
                                 type: number
                                 description: upper bound cut-off value for any hourly data relative to the annual mean load of a country. Any values above this upper bound will be replaced by interpolated values.
-                            abolute-deviation-post-cleaning-max:
+                            percentage-deviation-post-cleaning-max:
                                 type: number
                                 description: allowable deviation in annual load for any country following removal and subsequent interpolation of outlier data.
+                    entsoe-data-priority:
+                        type: array
+                        uniqueItems: true
+                        minItems: 1
+                        items:
+                            type: string
+                            enum: [actual_entsoe_power_statistics, actual_entsoe_transparency, actual_tso, actual_net_consumption_tso, actual_gross_generation_tso, forecast_entsoe_transparency, forecast_tso]
+                        description: Order in which to prioritise available electricity load data from open-power-system-data.org. The first source in the list will be used to initialise the data; the remaining data sources in the list will be use to gap fill in order from first to last.
+            hydro:
+                type: object
+                properties:
+                    scale-phs-according-to-geth-et-al:
+                        type: boolean
+                        description: Whether or not to use pumped hydro capacities derived from Geth et al. (2015) to scale pumped hydro capacities givven by the JRC hydro database.

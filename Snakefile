@@ -242,13 +242,13 @@ rule electricity_load_national:
     message: "Preprocess raw electricity load data and retrieve load time series per country."
     input:
         script = script_dir + "national_load.py",
-        load = rules.raw_load.output
+        load = rules.raw_load.output[0]
     output: "build/data/electricity-demand-national.csv"
     params:
         year = config["year"],
         acceptable_gap_hours = config["quality-control"]["load"]["acceptable-load-data-gap-hours"],
-        outlier_thresholds = config["quality-control"]["load"]["outlier-data-thresholds"]
-        entsoe_priority = config["parameters"]["entsoe-data-priority"],
+        outlier_thresholds = config["quality-control"]["load"]["outlier-data-thresholds"],
+        entsoe_priority = config["quality-control"]["load"]["entsoe-data-priority"]
     conda: "envs/default.yaml"
     script: "scripts/national_load.py"
 

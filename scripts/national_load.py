@@ -41,19 +41,15 @@ def select_year_and_fill_gaps(load_df, model_year, acceptable_gap_hours):
     missing_data_countries = set(load_df.columns).difference(model_year_missing_data.columns)
 
     for country in missing_data_countries:
-        try:
-            updated_country_series, N_missing_timesteps, fill_years = fill_missing_data_in_country(
-                load_df.loc[:, country], model_year, acceptable_gap_hours
-            )
-        except AssertionError:
-            print(f"Not enough load data for country {country}")
-        else:
-            load_df.update(updated_country_series.to_frame(country))
-            print(
-                f"Country {country} has {N_missing_timesteps} missing load value(s). "
-                f"A working dataset was constructed from year(s) {', '.join(fill_years)} "
-                f"with {updated_country_series.isnull().sum()} remaining empty data points."
-            )
+        updated_country_series, N_missing_timesteps, fill_years = fill_missing_data_in_country(
+            load_df.loc[:, country], model_year, acceptable_gap_hours
+        )
+        load_df.update(updated_country_series.to_frame(country))
+        print(
+            f"Country {country} has {N_missing_timesteps} missing load value(s). "
+            f"A working dataset was constructed from year(s) {', '.join(fill_years)} "
+            f"with {updated_country_series.isnull().sum()} remaining empty data points."
+        )
 
     return load_df.loc[str(model_year)]
 
@@ -106,7 +102,7 @@ def fill_missing_data_in_country(country_series, model_year, acceptable_gap_hour
 
     assert columns_with_missing_data_in_model_year(
         country_series.to_frame(), model_year, acceptable_gap_hours
-    ).empty
+    ).empty, f"Not enough load data for country {country_series.name}"
 
     return country_series.loc[all_missing_timesteps], len(all_missing_timesteps), fill_years
 
@@ -149,14 +145,14 @@ def handle_outliers(all_time_series, outlier_thresholds):
     # considers all data < 0.25 * mean and > 2 * mean invalid and replaces with last valid value
     normed_load = all_time_series / all_time_series.mean()
     all_time_series[(normed_load < outlier_thresholds["relative-to-mean-min"]) | (normed_load > outlier_thresholds["relative-to-mean-max"])] = np.nan
-    # check that this outlier handling won't vary any country's annual load by more than +/- 1%
-    assert (abs((all_time_series.interpolate().sum() - all_time_series.sum()) / all_time_series.sum()) <= outlier_thresholds["abolute-deviation-post-cleaning-max"]).all()
+    # check that this outlier handling won't vary any country's annual load by more than a percentage deviation
+    assert (abs((all_time_series.interpolate().sum() - all_time_series.sum()) / all_time_series.sum()) <= outlier_thresholds["percentage-deviation-post-cleaning-max"]).all()
     return all_time_series.interpolate()
 
 
 if __name__ == "__main__":
     national_load(
-        path_to_raw_load=snakemake.input.load[0],
+        path_to_raw_load=snakemake.input.load,
         entsoe_priority=snakemake.params.entsoe_priority,
         year=snakemake.params.year,
         acceptable_gap_hours=snakemake.params.acceptable_gap_hours,

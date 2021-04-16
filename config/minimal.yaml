@@ -1,6 +1,7 @@
 # A simple config to allow for quick test runs of the workflow. It builds on `./default.yaml`.
-parameters:
-    scale-phs-according-to-geth-et-al: True # switched on to test the Geth scaling
+quality-control:
+    hydro:
+        scale-phs-according-to-geth-et-al: True # switched on to test the Geth scaling
 sea-connections:
     continental:
     national: # Source: https://www.entsoe.eu/data/map/
