@@ -22,6 +22,7 @@ rule raw_gadm_administrative_borders_zipped:
     message: "Download administrative borders for {wildcards.country_code} as zip."
     params: url = lambda wildcards: config["data-sources"]["gadm"].format(country_code=wildcards.country_code)
     output: protected("data/automatic/raw-gadm/{country_code}.zip")
+    conda: "../envs/shell.yaml"
     shell: "curl -sLo {output} '{params.url}'"
 
 
@@ -29,6 +30,7 @@ rule raw_gadm_administrative_borders:
     message: "Unzip administrative borders of {wildcards.country_code} as zip."
     input: "data/automatic/raw-gadm/{country_code}.zip"
     output: temp("data/automatic/raw-gadm/gadm36_{country_code}.gpkg")
+    conda: "../envs/shell.yaml"
     shell: "unzip -o {input} -d data/automatic/raw-gadm"
 
 
@@ -57,6 +59,7 @@ rule raw_nuts_units_zipped:
     message: "Download units as zip."
     params: url = config["data-sources"]["nuts"]
     output: protected("data/automatic/raw-nuts-units.zip")
+    conda: "../envs/shell.yaml"
     shell: "curl -sLo {output} '{params.url}'"
 
 

@@ -31,6 +31,7 @@ root_dir = config["root-directory"] + "/" if config["root-directory"] not in [""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
 script_dir = f"{root_dir}scripts/"
 template_dir = f"{root_dir}templates/"
+test_dir = f"{root_dir}tests/"
 
 onstart:
     shell("mkdir -p build/logs")
@@ -50,6 +51,7 @@ rule potentials_zipped:
     message: "Download potential data."
     params: url = config["data-sources"]["potentials"]
     output: protected("data/automatic/raw-potentials.zip")
+    conda: "envs/shell.yaml"
     shell: "curl -sLo {output} '{params.url}'"
 
 
@@ -60,9 +62,10 @@ rule potentials:
     output:
         land_eligibility_km2 = "build/data/{resolution}/technical-potential/areas.csv",
         shared_coast = "build/data/{resolution}/shared-coast.csv",
-        industrial_demand = "build/data/{resolution}/demand.csv",
+        demand = "build/data/{resolution}/demand.csv",
         population = "build/data/{resolution}/population.csv",
         land_cover = "build/data/{resolution}/land-cover.csv"
+    conda: "envs/shell.yaml"
     shell: "unzip -o {input} -d build/data"
 
 
@@ -90,13 +93,12 @@ rule parameterise_template:
 rule hydro_capacities:
     message: "Determine hydro capacities on {wildcards.resolution} resolution."
     input:
-        script = script_dir + "hydro.py",
+        script = script_dir + "hydro_capacities.py",
         locations = rules.units.output[0],
-        plants = rules.preprocess_hydro_stations.output[0],
-        phs_storage_capacities = config["data-sources"]["national-phs-storage-capacities"]
+        plants = rules.preprocess_hydro_stations.output[0]
     output: "build/data/{resolution}/hydro-capacities-mw.csv"
     conda: "envs/geo.yaml"
-    script: "scripts/hydro.py"
+    script: "scripts/hydro_capacities.py"
 
 
 rule biofuels:
@@ -171,6 +173,7 @@ rule download_capacity_factors_wind_and_solar:
     message: "Download data/automatic/capacityfactors/{wildcards.filename}."
     params: url = lambda wildcards: config["data-sources"]["capacity-factors"].format(filename=wildcards.filename)
     output: protected("data/automatic/capacityfactors/{filename}")
+    conda: "envs/shell.yaml"
     shell: "curl -sLo {output} '{params.url}'"
 
 
@@ -231,6 +234,7 @@ rule raw_load:
     message: "Download raw load."
     params: url = config["data-sources"]["load"]
     output: protected("data/automatic/raw-load-data.csv")
+    conda: "envs/shell.yaml"
     shell: "curl -sLo {output} '{params.url}'"
 
 
@@ -253,7 +257,7 @@ rule electricity_load:
     input:
         script = script_dir + "load.py",
         units = rules.units.output[0],
-        industrial_demand = rules.potentials.output.industrial_demand,
+        demand_per_unit = rules.potentials.output.demand,
         national_load = rules.electricity_load_national.output[0]
     params:
         scaling_factor = config["scaling-factors"]["power"]
@@ -329,11 +333,11 @@ rule clean: # removes all generated results
 rule test:
     message: "Run tests"
     input:
-        "tests/test_runner.py",
-        "tests/test_model.py",
-        "tests/test_capacityfactors.py",
+        test_dir + "test_runner.py",
+        test_dir + "test_model.py",
+        test_dir + "test_capacityfactors.py",
         "build/logs/{resolution}/model.done",
-        model = "tests/resources/{resolution}/model.yaml",
+        model = test_dir + "resources/{resolution}/model.yaml",
         example_model = "build/model/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",

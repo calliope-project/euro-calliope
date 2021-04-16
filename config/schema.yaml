@@ -15,9 +15,6 @@ properties:
             eez:
                 type: string
                 description: Path to local geospatial Exclusive Economic Zones data.
-            hydro-basins:
-                type: string
-                description: Path to local geospatial basins data.
             irena-generation:
                 type: string
                 pattern: .*\.csv$
@@ -34,6 +31,10 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+{country_code}.*
                 description: Web address of geospatial GADM data. Must contain {country_code} placeholder.
+            hydro-basins:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of geospatial basins data.
             hydro-stations:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
@@ -64,3 +65,6 @@ properties:
                     type: string
                     enum: [actual_entsoe_power_statistics, actual_entsoe_transparency, actual_tso, actual_net_consumption_tso, actual_gross_generation_tso, forecast_entsoe_transparency, forecast_tso]
                 description: Order in which to prioritise available electricity load data from open-power-system-data.org. The first source in the list will be used to initialise the data; the remaining data sources in the list will be use to gap fill in order from first to last.
+            scale-phs-according-to-geth-et-al:
+                type: boolean
+                description: Whether or not to use pumped hydro capacities derived from Geth et al. (2015) to scale pumped hydro capacities givven by the JRC hydro database

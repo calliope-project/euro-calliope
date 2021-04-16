@@ -2,8 +2,9 @@
 
 A model of the European electricity system built using Calliope.
 
-This repository contains the workflow routines that automatically build the model from source data. Alternatively to building models yourself, you can use pre-built models that run out-of-the-box, see link below.
+This repository contains the workflow routines that automatically build models from source data. Alternatively to building models yourself, you can use [pre-built models](https://doi.org/10.5281/zenodo.3949553) that run out-of-the-box. You can find a more detailed description of the first application in a [scientific article in Joule](https://doi.org/10.1016/j.joule.2020.07.018).
 
+[![article DOI](https://img.shields.io/badge/article-10.1016/j.joule.2020.07.018-blue)](https://doi.org/10.1016/j.joule.2020.07.018)
 [![pre-built models DOI](https://img.shields.io/badge/prebuilts-10.5281%2Fzenodo.3949553-blue)](https://doi.org/10.5281/zenodo.3949553)
 
 ## At a glance
@@ -28,7 +29,6 @@ conda activate euro-calliope
 5. Further, you need all data files that cannot be retrieved automatically:
 
 * [Maritime Boundaries v10 -> World Exclusive Economic Zones v10](http://www.marineregions.org/downloads.php), to be placed in `./data/World_EEZ_v10_20180221`
-* [hydroBASINS -> Standard -> Europe and Middle East -> hybas_eu_lev07_v1c](https://www.hydrosheds.org/downloads) downloaded to `./data/hybas_eu_lev07_v1c/`
 
 ## Build the model
 
@@ -92,6 +92,8 @@ You can easily change the units and scale all values using the `scaling-factor` 
 * `data`: Small input data used within the model build process.
 * `docs`: Documentation of the model and the build process.
 * `envs`: Files defining the conda environment which are used to build the model.
+* `lib`: Library code in form of a Python package that is reused in many places of this repository.
+* `notebooks`: Notebooks for various data analysis or preparation steps. Not within main workflow.
 * `rules`: Snakemake workflows defining the build process.
 * `scripts`: Contains the scripts to build the model.
 * `templates`: Contains templates of Calliope model files.
@@ -104,6 +106,14 @@ Tests of models with continental and national resolution run automatically when 
     snakemake --use-conda build/logs/regional/test-report.html
 
 Exchanging `regional` with `national` or `continental` allows you to run tests on the respective resolution explicitly.
+
+## Run minimal test
+
+As a developer, you may want to run the entire workflow often to spot errors early. For that, you can use a minimal test configuration that takes less time to run.
+
+    snakemake --use-conda --configfile="config/minimal.yaml"
+
+Make sure to run this in a clean working directory. Do not use the working directory in which you are using your normal configuration.
 
 ## License
 
