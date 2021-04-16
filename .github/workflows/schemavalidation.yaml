@@ -17,8 +17,8 @@ jobs:
                 python -m pip install --upgrade pip
                 pip install jsonschema PyYAML
             - name: Validate default config
-              run: python ./config/validate-schema.py ./config/default.yaml ./config/schema.yaml
+              run: python ./tests/validate_schema.py ./config/schema.yaml --config ./config/default.yaml
             - name: Validate minimal config
-              run: python ./config/validate-schema.py ./config/minimal.yaml ./config/schema.yaml
+              run: python ./tests/validate_schema.py ./config/schema.yaml --config ./config/minimal.yaml
             - name: Validate schema itself
-              run: python ./config/validate-schema.py ./config/schema.yaml
+              run: python ./tests/validate_schema.py ./config/schema.yaml
