@@ -6,13 +6,14 @@ import numpy as np
 import pycountry
 
 
-def national_load(path_to_raw_load, number_rows_valid, year, path_to_output):
+def national_load(path_to_raw_load, number_rows_valid, year, entsoe_priority, path_to_output):
     """Extracts national load time series for all countries in a specified year."""
     load = read_load_profiles(
         path_to_raw_load=path_to_raw_load,
         number_rows_valid=number_rows_valid,
         start=datetime(year, 1, 1, tzinfo=timezone.utc),
-        end=datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        end=datetime(year + 1, 1, 1, tzinfo=timezone.utc),
+        entsoe_priority=entsoe_priority
     )
     if year < 2017: # data for Albania before 2017 is missing
         load["AL"] = read_albania(path_to_raw_load, number_rows_valid, other_ts=load)
@@ -25,15 +26,14 @@ def national_load(path_to_raw_load, number_rows_valid, year, path_to_output):
     )
 
 
-def read_load_profiles(path_to_raw_load, number_rows_valid, start, end):
+def read_load_profiles(path_to_raw_load, number_rows_valid, start, end, entsoe_priority):
     """Reads national load data and handles outliers."""
     data = pd.read_csv(path_to_raw_load, nrows=number_rows_valid, parse_dates=[3])
     data = data[(data["variable"] == "load")]
     data = data[(data.utc_timestamp >= start) &
                 (data.utc_timestamp < end)]
-    data = remove_entsoe_power_statistic_data_where_possible(data)
-    data.drop(["variable", "attribute"], axis=1, inplace=True)
-    return data.pivot(columns="region", index="utc_timestamp", values="data")
+    data = select_statistics_by_source_priority(data, entsoe_priority)
+    return data.unstack("region")
 
 
 def read_albania(path_to_raw_load, number_rows_valid, other_ts):
@@ -49,12 +49,30 @@ def read_albania(path_to_raw_load, number_rows_valid, other_ts):
     return albania
 
 
-def remove_entsoe_power_statistic_data_where_possible(load):
-    sorted_load = load.sort_values(
-        "attribute",
-        ascending=False
-    ) # will end with entsoe-transparency ahead of entsoe-power-statistics
-    return sorted_load.drop_duplicates(["region", "utc_timestamp"], keep="first")
+def select_statistics_by_source_priority(load, entsoe_priority):
+    """
+    Choosing `entsoe_power_statistics` as main source since OPSD states:
+        The two sources differ Values on PS (~500 TWh annaually in Germany) are
+        usually slightly higher than on the TP (~490 TWh). The reason probably
+        lies with different reporting deadlines: Values on the TP have to be
+        reported "no later than one hour after the end of the operating period".
+        For the PS, the data is published with a delay of up to 3 months,
+        which might allow for more accurate metering.
+        For a comparison of the two sources see Hirth, et al. (2018).
+    See https://nbviewer.jupyter.org/github/Open-Power-System-Data/datapackage_timeseries/blob/2020-10-06/main.ipynb for more info.
+    """
+    load_by_attribute = (
+        load
+        .set_index(["region", "utc_timestamp", "attribute"])
+        .loc[:, "data"]
+        .unstack("attribute")
+    )
+    load_top_priority = load_by_attribute[entsoe_priority[0]]
+    if len(entsoe_priority) > 1:
+        for source in entsoe_priority[1:]:
+            load_top_priority = load_top_priority.fillna(load_by_attribute[source])
+
+    return load_top_priority
 
 
 def filter_national(load):
@@ -81,6 +99,7 @@ if __name__ == "__main__":
     national_load(
         path_to_raw_load=snakemake.input.load[0],
         number_rows_valid=snakemake.params.number_rows_valid,
+        entsoe_priority=snakemake.params.entsoe_priority,
         year=snakemake.params.year,
         path_to_output=snakemake.output[0]
     )

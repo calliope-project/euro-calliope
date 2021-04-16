@@ -246,6 +246,7 @@ rule electricity_load_national:
     output: "build/data/electricity-demand-national.csv"
     params:
         number_rows_valid = 20950674, # see https://github.com/Open-Power-System-Data/time_series/issues/22
+        entsoe_priority = config["parameters"]["entsoe-data-priority"],
         year = config["year"]
     conda: "envs/default.yaml"
     script: "scripts/national_load.py"
