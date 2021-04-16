@@ -6,20 +6,22 @@ import numpy as np
 import pycountry
 
 
-def national_load(path_to_raw_load, year, acceptable_gap_hours, outlier_thresholds, path_to_output):
+def national_load(
+    path_to_raw_load, entsoe_priority, year, acceptable_gap_hours, outlier_thresholds, path_to_output
+):
     """Extracts national load time series for all countries in a specified year."""
-    load = read_load_profiles(path_to_raw_load)
+    load = read_load_profiles(path_to_raw_load, entsoe_priority)
     load = filter_national(load)
     load = select_year_and_fill_gaps(load, year, acceptable_gap_hours)
     load = handle_outliers(load, outlier_thresholds)
     load.to_csv(path_to_output, header=True)
 
 
-def read_load_profiles(path_to_raw_load):
+def read_load_profiles(path_to_raw_load, entsoe_priority):
     """Reads national load data and handles outliers."""
     data = pd.read_csv(path_to_raw_load, parse_dates=["utc_timestamp"])
     data = data[(data["variable"] == "load")]
-    data = remove_entsoe_power_statistic_data_where_possible(data)
+    data = select_statistics_by_source_priority(data, entsoe_priority)
     data.drop(["variable", "attribute"], axis=1, inplace=True)
     return data.pivot(columns="region", index="utc_timestamp", values="data")
 
@@ -108,12 +110,31 @@ def fill_missing_data_in_country(country_series, model_year, acceptable_gap_hour
 
     return country_series.loc[all_missing_timesteps], len(all_missing_timesteps), fill_years
 
-def remove_entsoe_power_statistic_data_where_possible(load):
-    sorted_load = load.sort_values(
-        "attribute",
-        ascending=False
-    ) # will end with entsoe-transparency ahead of entsoe-power-statistics
-    return sorted_load.drop_duplicates(["region", "utc_timestamp"], keep="first")
+
+def select_statistics_by_source_priority(load, entsoe_priority):
+    """
+    Choosing `entsoe_power_statistics` as main source since OPSD states:
+        The two sources differ Values on PS (~500 TWh annaually in Germany) are
+        usually slightly higher than on the TP (~490 TWh). The reason probably
+        lies with different reporting deadlines: Values on the TP have to be
+        reported "no later than one hour after the end of the operating period".
+        For the PS, the data is published with a delay of up to 3 months,
+        which might allow for more accurate metering.
+        For a comparison of the two sources see Hirth, et al. (2018).
+    See https://nbviewer.jupyter.org/github/Open-Power-System-Data/datapackage_timeseries/blob/2020-10-06/main.ipynb for more info.
+    """
+    load_by_attribute = (
+        load
+        .set_index(["region", "utc_timestamp", "attribute"])
+        .loc[:, "data"]
+        .unstack("attribute")
+    )
+    load_top_priority = load_by_attribute[entsoe_priority[0]]
+    if len(entsoe_priority) > 1:
+        for source in entsoe_priority[1:]:
+            load_top_priority = load_top_priority.fillna(load_by_attribute[source])
+
+    return load_top_priority
 
 
 def filter_national(load):
@@ -136,6 +157,7 @@ def handle_outliers(all_time_series, outlier_thresholds):
 if __name__ == "__main__":
     national_load(
         path_to_raw_load=snakemake.input.load[0],
+        entsoe_priority=snakemake.params.entsoe_priority,
         year=snakemake.params.year,
         acceptable_gap_hours=snakemake.params.acceptable_gap_hours,
         outlier_thresholds=snakemake.params.outlier_thresholds,

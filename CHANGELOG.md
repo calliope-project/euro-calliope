@@ -2,12 +2,15 @@
 
 ## 1.1 (unpublished)
 
+
+
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
 * **ADD** automatic download of hydro basins data (#34).
 * **ADD** minimal configuration to be able to test the entire workflow more quickly (#60).
 * **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59).
 
+* **UPDATE** ENTSOE national electricity load data gap filling priority order included in config (#42)
 * **UPDATE** IRENA hydro generation data from 2018 to 2020 (#40).
 * **UPDATE** Make scaling pumped hydro capacity according to Geth et al. (2015) optional with a boolean config parameter `scale-phs-according-to-geth-et-al` which defaults to False (no scaling) (#49).
 * **UPDATE** JRC hydro database v4 -> v7 (#48). This entails one patch being removed:
