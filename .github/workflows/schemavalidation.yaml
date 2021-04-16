@@ -15,7 +15,7 @@ jobs:
             - name: Install dependencies
               run: |
                 python -m pip install --upgrade pip
-                pip install jsonschema yaml
+                pip install jsonschema PyYAML
             - name: Validate default config
               run: python validate-schema.py ./config/default.yaml ./config/schema.yaml
             - name: Validate minimal config
