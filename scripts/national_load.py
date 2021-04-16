@@ -7,11 +7,12 @@ import pycountry
 
 
 def national_load(
-    path_to_raw_load, entsoe_priority, year, acceptable_gap_hours, outlier_thresholds, path_to_output
+    path_to_raw_load, entsoe_priority, year, acceptable_gap_hours,
+    outlier_thresholds, path_to_output, countries
 ):
     """Extracts national load time series for all countries in a specified year."""
     load = read_load_profiles(path_to_raw_load, entsoe_priority)
-    load = filter_national(load)
+    load = filter_national(load, countries)
     load = select_year_and_fill_gaps(load, year, acceptable_gap_hours)
     load = handle_outliers(load, outlier_thresholds)
     load.to_csv(path_to_output, header=True)
@@ -22,8 +23,7 @@ def read_load_profiles(path_to_raw_load, entsoe_priority):
     data = pd.read_csv(path_to_raw_load, parse_dates=["utc_timestamp"])
     data = data[(data["variable"] == "load")]
     data = select_statistics_by_source_priority(data, entsoe_priority)
-    data.drop(["variable", "attribute"], axis=1, inplace=True)
-    return data.pivot(columns="region", index="utc_timestamp", values="data")
+    return data.unstack("region")
 
 
 def columns_with_missing_data_in_model_year(data, model_year, acceptable_gap_hours):
@@ -133,12 +133,21 @@ def select_statistics_by_source_priority(load, entsoe_priority):
     return load_top_priority
 
 
-def filter_national(load):
+def filter_national(load, countries):
     load.rename(columns={"GB_UKM": "GB"}, inplace=True)
-    countries = [iso2 for iso2 in load.columns.unique() if iso2 in [i.alpha_2 for i in pycountry.countries]]
-    national = load.loc[:, countries].copy()
-    national.columns.name = "country_code"
-    return national.rename(columns=lambda iso2: pycountry.countries.lookup(iso2).alpha_3)
+    country_codes = {
+        pycountry.countries.lookup(country).alpha_2: pycountry.countries.lookup(country).alpha_3
+        for country in countries
+    }
+
+    national = (
+        load
+        .loc[:, country_codes.keys()]
+        .rename(columns=country_codes)
+        .rename_axis(columns="country_code")
+    )
+
+    return national
 
 
 def handle_outliers(all_time_series, outlier_thresholds):
@@ -146,7 +155,10 @@ def handle_outliers(all_time_series, outlier_thresholds):
     normed_load = all_time_series / all_time_series.mean()
     all_time_series[(normed_load < outlier_thresholds["relative-to-mean-min"]) | (normed_load > outlier_thresholds["relative-to-mean-max"])] = np.nan
     # check that this outlier handling won't vary any country's annual load by more than a percentage deviation
-    assert (abs((all_time_series.interpolate().sum() - all_time_series.sum()) / all_time_series.sum()) <= outlier_thresholds["percentage-deviation-post-cleaning-max"]).all()
+    assert (
+        abs((all_time_series.interpolate().sum() - all_time_series.sum()) / all_time_series.sum()) * 100
+        <= outlier_thresholds["percentage-deviation-post-cleaning-max"]
+    ).all()
     return all_time_series.interpolate()
 
 
@@ -157,5 +169,6 @@ if __name__ == "__main__":
         year=snakemake.params.year,
         acceptable_gap_hours=snakemake.params.acceptable_gap_hours,
         outlier_thresholds=snakemake.params.outlier_thresholds,
+        countries=snakemake.params.countries,
         path_to_output=snakemake.output[0]
     )

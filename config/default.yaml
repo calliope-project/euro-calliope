@@ -51,7 +51,7 @@ quality-control:
         outlier-data-thresholds:
             relative-to-mean-min: 0.25
             relative-to-mean-max: 2
-            percentage-deviation-post-cleaning-max: 0.01
+            percentage-deviation-post-cleaning-max: 1
         entsoe-data-priority:
             - actual_entsoe_transparency
             - actual_entsoe_power_statistics
