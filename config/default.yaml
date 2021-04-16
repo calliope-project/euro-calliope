@@ -46,6 +46,7 @@ parameters:
     biofuel-efficiency: 0.45
     entsoe-data-priority:
         - actual_entsoe_transparency
+        - actual_entsoe_power_statistics
     scale-phs-according-to-geth-et-al: false
 sea-connections:
     continental:
