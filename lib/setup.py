@@ -10,7 +10,14 @@ setup(
     maintainer_email='tim.troendle@usys.ethz.ch',
     packages=find_packages(exclude=['tests*']),
     include_package_data=True,
-    install_requires=["pycountry>=18.12.8"],
+    install_requires=[
+        "pandas",
+        "geopandas",
+        "xarray",
+        "rasterio",
+        "rasterstats",
+        "pycountry>=18.12.8"
+    ],
     classifiers=[
         'Environment :: Console',
         'Intended Audience :: Science/Research',
