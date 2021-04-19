@@ -184,9 +184,41 @@ def test_handles_nodata_correctly(single_shape, spatiotemporal_data_with_nodata)
     assert (weighted_ts.iloc[:, 0].values == expected_value).all()
 
 
-@pytest.mark.xfail(reason="The internal method does not have the required resolution.")
+@pytest.mark.parametrize('resolution', [1, 0.5, 0.25])
+def test_higher_resolution_possible(single_shape_small, any_spatiotemporal_data, resolution):
+    area_weighted_time_series(
+        shapes=single_shape_small,
+        spatiotemporal=any_spatiotemporal_data,
+        resolution=resolution
+    )
+
+
+@pytest.mark.parametrize('resolution', [0.9, 1.2, 0.13])
+def test_resolution_must_be_multiple_of_data_resolution(single_shape_small, any_spatiotemporal_data, resolution):
+    with pytest.raises(AssertionError):
+        area_weighted_time_series(
+            shapes=single_shape_small,
+            spatiotemporal=any_spatiotemporal_data,
+            resolution=resolution
+        )
+
+
+@pytest.mark.parametrize('resolution', [4, 8, 32])
+def test_data_cannot_be_downsampled(single_shape_small, any_spatiotemporal_data, resolution):
+    with pytest.raises(AssertionError):
+        area_weighted_time_series(
+            shapes=single_shape_small,
+            spatiotemporal=any_spatiotemporal_data,
+            resolution=resolution
+        )
+
+
 def test_partial_match(single_shape_small, make_spatiotemporal_data):
     spatiotemporal_data = make_spatiotemporal_data([1, 1, 2, 2])
-    weighted_ts = area_weighted_time_series(shapes=single_shape_small, spatiotemporal=spatiotemporal_data)
+    weighted_ts = area_weighted_time_series(
+        shapes=single_shape_small,
+        spatiotemporal=spatiotemporal_data,
+        resolution=1
+    )
     expected_mean = 1 * (8 / 12) + 2 * (4 / 12)
     assert weighted_ts.iloc[:, 0].values.mean() == expected_mean

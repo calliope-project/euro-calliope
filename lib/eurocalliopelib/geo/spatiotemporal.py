@@ -6,10 +6,11 @@ import geopandas as gpd
 from rasterio.transform import from_origin
 from rasterstats import zonal_stats
 from shapely.geometry import Point
+from scipy.interpolate import NearestNDInterpolator
 
 
-ID_DTYPE = np.uint16
-ID_NO_DATA_VALUE = 64001
+ID_DTYPE = np.uint16 # can hold up to 65,535 (-1) time series
+ID_NO_DATA_VALUE = 65535
 INDEX_EPSILON = 10e-3
 DEPRECATED_GRID_SIZE_IN_M = 50000 # old style capacity factors are on a grid of 50km size
 
@@ -18,19 +19,25 @@ WGS84 = f"EPSG:{WGS84_EPSG}"
 EPSG3035 = "EPSG:3035"
 
 
-def area_weighted_time_series(shapes, spatiotemporal):
+def area_weighted_time_series(shapes, spatiotemporal, resolution=None):
     """Forms area weighted time series for collections of shapes.
 
     Inputs:
         * locations: a GeoDataFrame of shapes, each will receive one time series
         * spatiotemporal: a DataArray with dimensions "x", "y", "timestep" in CRS WGS84
+        * resolution: the resolution to use for the area weighting (default: resolution of data)
     """
     assert_correct_form(shapes, spatiotemporal)
     id_map, ts = transform_to_int_indexed(spatiotemporal)
+    if resolution:
+        upsampling_factor = infer_upsampling_factor(spatiotemporal, resolution)
+        id_map = upsample(id_map, upsampling_factor)
+    else:
+        upsampling_factor = 1
     weighted_ts_ids_per_shape = zonal_stats(
         shapes.geometry,
         id_map,
-        affine=infer_transform(spatiotemporal),
+        affine=infer_transform(spatiotemporal, upsampling_factor),
         categorical=True,
         all_touched=True,
         nodata=ID_NO_DATA_VALUE
@@ -52,6 +59,13 @@ def assert_correct_form(shapes, spatiotemporal):
     assert "y" in spatiotemporal.dims, "Expect dimension 'y'"
     assert "x" in spatiotemporal.dims, "Expect dimension 'x'"
     assert "timestep" in spatiotemporal.dims, "Expect dimension 'timestep'"
+
+
+def infer_upsampling_factor(spatiotemporal, new_resolution):
+    old_resolution = infer_resolution(spatiotemporal)
+    assert new_resolution < old_resolution, "Data can only be upsampled, not downsampled."
+    assert old_resolution % new_resolution == 0, "Resolution of data must be a multiple of algorithm resolution."
+    return int(old_resolution / new_resolution)
 
 
 def shape_time_series(weighted_ts_ids, ts):
@@ -108,6 +122,23 @@ def transform_to_int_indexed(spatiotemporal):
     return raster, stacked_spatiotemporal
 
 
+def upsample(id_map, upsampling_factor):
+    n_x = id_map.shape[0]
+    n_y = id_map.shape[1]
+    n_total = n_x * n_y
+    x = np.linspace(0, 1, num=n_x)
+    y = np.linspace(0, 1, num=n_y)
+    x, y = np.meshgrid(x, y)
+    interp = NearestNDInterpolator(
+        list(zip(x.reshape(n_total,), y.reshape(n_total,))),
+        id_map.reshape(n_total,)
+    )
+    X = np.linspace(0, 1, num=n_x * upsampling_factor)
+    Y = np.linspace(0, 1, num=n_y * upsampling_factor)
+    X, Y = np.meshgrid(X, Y)
+    return interp(X, Y)
+
+
 def isclose(a, b):
     return math.isclose(a, b, abs_tol=INDEX_EPSILON, rel_tol=0)
 
@@ -123,10 +154,10 @@ def infer_resolution(spatiotemporal):
     return resolution_x
 
 
-def infer_transform(spatiotemporal):
-    resolution = infer_resolution(spatiotemporal)
-    x_min = spatiotemporal.x.min()
-    y_max = spatiotemporal.y.max()
+def infer_transform(spatiotemporal, upsampling_factor=1):
+    resolution = infer_resolution(spatiotemporal) / upsampling_factor
+    x_min = spatiotemporal.x.min().item()
+    y_max = spatiotemporal.y.max().item()
     return from_origin(
         west=x_min - resolution / 2,
         north=y_max + resolution / 2,

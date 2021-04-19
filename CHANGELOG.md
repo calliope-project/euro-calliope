@@ -9,6 +9,7 @@
 * **ADD** automatic download of hydro basins data (#34).
 * **ADD** minimal configuration to be able to test the entire workflow more quickly (#60).
 * **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59).
+* **ADD** configuration parameter `area-weighting-resolution-in-m` that controls the spatial resolution of the algorithm that transforms capacity factors from a grid to location shapes (#70).
 
 * **UPDATE** ENTSOE national electricity load data gap filling priority order included in config (#42)
 * **UPDATE** IRENA hydro generation data from 2018 to 2020 (#40).
