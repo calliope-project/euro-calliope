@@ -4,7 +4,7 @@ import pandas as pd
 import geopandas as gpd
 
 
-from eurocalliopelib import area_weighted_time_series
+from eurocalliopelib.geo import area_weighted_time_series
 
 
 WGS84 = "EPSG:4326"
