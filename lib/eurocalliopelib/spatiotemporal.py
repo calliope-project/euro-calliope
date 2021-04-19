@@ -13,6 +13,7 @@ INDEX_EPSILON = 10e-3
 
 WGS84_EPSG = 4326
 WGS84 = f"EPSG:{WGS84_EPSG}"
+EPSG_3035 = "EPSG:3035"
 
 
 def area_weighted_time_series(shapes, spatiotemporal):
@@ -20,7 +21,7 @@ def area_weighted_time_series(shapes, spatiotemporal):
 
     Inputs:
         * locations: a GeoDataFrame of shapes, each will receive one time series
-        * spatiotemporal: a DataArray with dimensions "lat", "lon", "timestep" in CRS WGS84
+        * spatiotemporal: a DataArray with dimensions "x", "y", "timestep" in CRS WGS84
     """
     assert_correct_form(shapes, spatiotemporal)
     id_map, ts = transform_to_int_indexed(spatiotemporal)
@@ -44,11 +45,10 @@ def area_weighted_time_series(shapes, spatiotemporal):
 
 def assert_correct_form(shapes, spatiotemporal):
     assert shapes.crs
-    assert shapes.crs == gpd.tools.crs.CRS.from_epsg(WGS84_EPSG)
     assert "crs" in spatiotemporal.attrs.keys()
-    assert spatiotemporal.attrs["crs"] == WGS84
-    assert "lat" in spatiotemporal.dims, "Expect dimension 'lat'"
-    assert "lon" in spatiotemporal.dims, "Expect dimension 'lon'"
+    assert shapes.crs == gpd.tools.crs.CRS(spatiotemporal.attrs["crs"])
+    assert "y" in spatiotemporal.dims, "Expect dimension 'y'"
+    assert "x" in spatiotemporal.dims, "Expect dimension 'x'"
     assert "timestep" in spatiotemporal.dims, "Expect dimension 'timestep'"
 
 
@@ -77,10 +77,10 @@ def transform_to_int_indexed(spatiotemporal):
 
     Each point on the map links to a timeseries.
     """
-    x_min = spatiotemporal.lon.min().item()
-    x_max = spatiotemporal.lon.max().item()
-    y_min = spatiotemporal.lat.min().item()
-    y_max = spatiotemporal.lat.max().item()
+    x_min = spatiotemporal.x.min().item()
+    x_max = spatiotemporal.x.max().item()
+    y_min = spatiotemporal.y.min().item()
+    y_max = spatiotemporal.y.max().item()
     resolution = infer_resolution(spatiotemporal)
     width = (x_max - x_min) / resolution + 1
     height = (y_max - y_min) / resolution + 1
@@ -89,7 +89,7 @@ def transform_to_int_indexed(spatiotemporal):
     width = round(width)
     height = round(height)
     raster = np.ones(shape=(height, width), dtype=ID_DTYPE) * ID_NO_DATA_VALUE
-    stacked_spatiotemporal = spatiotemporal.stack(z=["lon", "lat"])
+    stacked_spatiotemporal = spatiotemporal.stack(z=["x", "y"])
     for n, z in enumerate(stacked_spatiotemporal.z):
         x, y = z.item()
         index_x = (x - x_min) / resolution
@@ -111,20 +111,20 @@ def isclose(a, b):
 
 
 def infer_resolution(spatiotemporal):
-    lat_diffs = spatiotemporal.lat.diff("lat")
-    lon_diffs = spatiotemporal.lon.diff("lon")
-    resolution_x = lon_diffs[0].item()
-    assert (lon_diffs == resolution_x).all()
-    resolution_y = lat_diffs[0].item()
-    assert (lat_diffs == resolution_y).all()
+    y_diffs = spatiotemporal.y.diff("y")
+    x_diffs = spatiotemporal.x.diff("x")
+    resolution_x = x_diffs[0].item()
+    assert (x_diffs == resolution_x).all()
+    resolution_y = y_diffs[0].item()
+    assert (y_diffs == resolution_y).all()
     assert resolution_x == resolution_y
     return resolution_x
 
 
 def infer_transform(spatiotemporal):
     resolution = infer_resolution(spatiotemporal)
-    x_min = spatiotemporal.lon.min()
-    y_max = spatiotemporal.lat.max()
+    x_min = spatiotemporal.x.min()
+    y_max = spatiotemporal.y.max()
     return from_origin(
         west=x_min - resolution / 2,
         north=y_max + resolution / 2,
