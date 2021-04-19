@@ -106,6 +106,14 @@ def any_spatiotemporal_data(make_spatiotemporal_data):
     return make_spatiotemporal_data([8, 8, 8, 8])
 
 
+@pytest.fixture
+def reverted_spatiotemporal_data(any_spatiotemporal_data):
+    x = list(any_spatiotemporal_data.x)
+    x.reverse()
+    any_spatiotemporal_data["x"] = x
+    return any_spatiotemporal_data
+
+
 def test_fails_without_crs_in_shapes(single_shape, any_spatiotemporal_data):
     single_shape.crs = None
     with pytest.raises(AssertionError):
@@ -222,3 +230,11 @@ def test_partial_match(single_shape_small, make_spatiotemporal_data):
     )
     expected_mean = 1 * (8 / 12) + 2 * (4 / 12)
     assert weighted_ts.iloc[:, 0].values.mean() == expected_mean
+
+
+def test_handles_reverted_coordinates_gracefully(single_shape, reverted_spatiotemporal_data):
+    area_weighted_time_series(
+        shapes=single_shape,
+        spatiotemporal=reverted_spatiotemporal_data,
+        resolution=1
+    )

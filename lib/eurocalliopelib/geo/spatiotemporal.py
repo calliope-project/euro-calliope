@@ -144,13 +144,13 @@ def isclose(a, b):
 
 
 def infer_resolution(spatiotemporal):
-    y_diffs = spatiotemporal.y.diff("y")
-    x_diffs = spatiotemporal.x.diff("x")
+    y_diffs = abs(spatiotemporal.y.diff("y"))
+    x_diffs = abs(spatiotemporal.x.diff("x"))
     resolution_x = x_diffs[0].item()
     assert (x_diffs == resolution_x).all()
     resolution_y = y_diffs[0].item()
     assert (y_diffs == resolution_y).all()
-    assert resolution_x == resolution_y
+    assert resolution_x == resolution_y, "Resolutions in x and y must be equal."
     return resolution_x
 
 
