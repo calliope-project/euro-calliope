@@ -9,7 +9,7 @@ EPSG3035 = "EPSG:3035"
 
 
 def capacityfactors(path_to_eez, path_to_shared_coast, path_to_timeseries,
-                    threshold, area_weighting_resolution_in_m, path_to_result, year=None):
+                    threshold, path_to_result, year=None):
     """Generate offshore capacityfactor time series for each location."""
     eez = gpd.read_file(path_to_eez).set_index("id").to_crs(EPSG3035).geometry
     shared_coast = pd.read_csv(path_to_shared_coast, index_col=0)
@@ -21,8 +21,7 @@ def capacityfactors(path_to_eez, path_to_shared_coast, path_to_timeseries,
 
     capacityfactors_per_eez = area_weighted_time_series(
         shapes=eez,
-        spatiotemporal=ts,
-        resolution=area_weighting_resolution_in_m
+        spatiotemporal=ts
     )
     capacityfactors = _allocate_to_onshore_locations(capacityfactors_per_eez, shared_coast)
     capacityfactors.where(capacityfactors >= threshold, 0).to_csv(path_to_result)
@@ -50,6 +49,5 @@ if __name__ == '__main__':
         path_to_timeseries=snakemake.input.timeseries,
         threshold=float(snakemake.params.threshold),
         year=snakemake.params.year if snakemake.params.trim_ts else None,
-        area_weighting_resolution_in_m=snakemake.params.area_weighting_resolution_in_m,
         path_to_result=snakemake.output[0]
     )

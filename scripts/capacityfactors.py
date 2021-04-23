@@ -8,7 +8,7 @@ EPSG3035 = "EPSG:3035"
 
 
 def capacityfactors(path_to_locations, path_to_timeseries, path_to_timeseries_with_coordinates, threshold,
-                    path_to_result, area_weighting_resolution_in_m, year=None):
+                    path_to_result, year=None):
     """Generate capacityfactor time series for each location."""
     locations = gpd.read_file(path_to_locations).set_index("id").to_crs(EPSG3035).geometry
     locations.index = locations.index.map(lambda x: x.replace(".", "-"))
@@ -23,8 +23,7 @@ def capacityfactors(path_to_locations, path_to_timeseries, path_to_timeseries_wi
 
     capacityfactors = area_weighted_time_series(
         shapes=locations,
-        spatiotemporal=ts,
-        resolution=area_weighting_resolution_in_m
+        spatiotemporal=ts
     )
     capacityfactors.where(capacityfactors >= threshold, 0).to_csv(path_to_result)
 
@@ -36,6 +35,5 @@ if __name__ == '__main__':
         path_to_timeseries_with_coordinates=snakemake.input.coordinates,
         threshold=float(snakemake.params.threshold),
         year=snakemake.params.year if snakemake.params.trim_ts else None,
-        area_weighting_resolution_in_m=snakemake.params.area_weighting_resolution_in_m,
         path_to_result=snakemake.output[0]
     )

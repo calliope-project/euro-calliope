@@ -54,13 +54,6 @@ properties:
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.
-    capacity-factors:
-        type: object
-        properties:
-            area-weighting-resolution-in-m:
-                type: number
-                exclusiveMinimum: 0
-                description: Spatial resolution when transforming capacity factors from grid to location shapes.
     quality-control:
         type: object
         properties:
