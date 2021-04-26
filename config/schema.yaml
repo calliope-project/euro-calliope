@@ -62,16 +62,16 @@ properties:
                 description: URL of the cluster.
             send-ignore:
                 type: string
-                descirption: Path to local file defining files and folders to ignore when sending to cluster.
+                descirption: Path to local file defining files and folders to ignore when sending to cluster (relative to workdir).
             receive-ignore:
                 type: string
-                description: Path to local file defining files and folders to ignore when receiving from cluster.
+                description: Path to local file defining files and folders to ignore when receiving from cluster (relative to workdir).
             cluster-base-dir:
                 type: string
                 description: Path on cluster into which files are sent from local machine (must exist).
             local-results-dir:
                 type: string
-                description: Path to local folder into which results from cluster are downloaded.
+                description: Path to local folder into which results from cluster are downloaded (relative to workdir).
     quality-control:
         type: object
         properties:
