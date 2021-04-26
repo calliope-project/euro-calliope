@@ -62,7 +62,7 @@ properties:
                 description: URL of the cluster.
             send-ignore:
                 type: string
-                descirption: Path to local file defining files and folders to ignore when sending to cluster (relative to workdir).
+                description: Path to local file defining files and folders to ignore when sending to cluster (relative to workdir).
             receive-ignore:
                 type: string
                 description: Path to local file defining files and folders to ignore when receiving from cluster (relative to workdir).
