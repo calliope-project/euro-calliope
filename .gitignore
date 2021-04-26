@@ -17,8 +17,3 @@ __pycache__
 # Snakemake
 .snakemake/
 dag.pdf
-
-# Sync infrastructure
-.syncignore
-.syncignore-build
-rules/sync.smk
