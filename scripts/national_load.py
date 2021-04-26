@@ -58,7 +58,7 @@ def _get_index_of_missing_data(series, model_year):
     return series[(series < 0) | series.isna()][str(model_year)].index
 
 
-def _handle_feb_29th(this_year, next_avail_year, missing_timesteps):
+def _ignore_feb_29th(this_year, next_avail_year, missing_timesteps):
     """ Ignore February 29th if next available year doesn't have that data available """
     if (pd.Period(freq='Y', year=this_year).is_leap_year and
             not pd.Period(freq='Y', year=next_avail_year).is_leap_year and
@@ -78,7 +78,7 @@ def fill_missing_data_in_country(country_series, model_year, acceptable_gap_hour
     # We're OK with some gap, as defined by 'acceptable_gap_hours'
     years_with_data = country_series.dropna().index.year.drop(model_year, errors="ignore").unique()
 
-    def _get_year_order(years):
+    def _give_older_years_lower_priority(years):
         year_order = []
         for year in years:
             if year - model_year < 0:
@@ -86,23 +86,22 @@ def fill_missing_data_in_country(country_series, model_year, acceptable_gap_hour
             else:
                 year_order.append(year - model_year)
         return year_order
-    preferred_order_of_years_with_data = list(years_with_data.sort_values(key=_get_year_order, ascending=False))
+    preferred_order_of_years_with_data = list(years_with_data.sort_values(key=_give_older_years_lower_priority, ascending=False))
 
-    while country_series.loc[all_missing_timesteps].isnull().sum() > acceptable_gap_hours:
+    _missing_timesteps = all_missing_timesteps.copy()
+    while len(_missing_timesteps) > acceptable_gap_hours:
         if preferred_order_of_years_with_data == []:
             break
 
         next_avail_year = preferred_order_of_years_with_data.pop(0)
         _missing_timesteps = _get_index_of_missing_data(country_series, model_year)
-        _missing_timesteps = _handle_feb_29th(model_year, next_avail_year, _missing_timesteps)
+        _missing_timesteps = _ignore_feb_29th(model_year, next_avail_year, _missing_timesteps)
         new_data = country_series.reindex(_missing_timesteps.map(lambda dt: dt.replace(year=next_avail_year)))
         new_data.index = _missing_timesteps
         country_series.update(new_data)
         fill_years += [str(next_avail_year)]
 
-    assert columns_with_missing_data_in_model_year(
-        country_series.to_frame(), model_year, acceptable_gap_hours
-    ).empty, f"Not enough load data for country {country_series.name}"
+    assert country_series.loc[str(model_year)].isna().sum() <= acceptable_gap_hours, f"Not enough load data for country {country_series.name}"
 
     return country_series.loc[all_missing_timesteps], len(all_missing_timesteps), fill_years
 
