@@ -1,5 +1,5 @@
 """Preprocess national electricity load time series."""
-from datetime import datetime, timezone
+import calendar
 
 import pandas as pd
 import numpy as np
@@ -60,9 +60,10 @@ def _get_index_of_missing_data(series, model_year):
 
 def _ignore_feb_29th(this_year, next_avail_year, missing_timesteps):
     """ Ignore February 29th if next available year doesn't have that data available """
-    if (pd.Period(freq='Y', year=this_year).is_leap_year and
-            not pd.Period(freq='Y', year=next_avail_year).is_leap_year and
-            pd.to_datetime(f'{this_year}-02-29').date() in missing_timesteps.date):
+    if (calendar.isleap(this_year)
+        and not calendar.isleap(next_avail_year)
+        and pd.to_datetime(f'{this_year}-02-29').date() in missing_timesteps.date
+    ):
         return missing_timesteps[
             missing_timesteps.date != pd.to_datetime(f'{this_year}-02-29').date()
         ]
@@ -89,10 +90,7 @@ def fill_missing_data_in_country(country_series, model_year, acceptable_gap_hour
     preferred_order_of_years_with_data = list(years_with_data.sort_values(key=_give_older_years_lower_priority, ascending=False))
 
     _missing_timesteps = all_missing_timesteps.copy()
-    while len(_missing_timesteps) > acceptable_gap_hours:
-        if preferred_order_of_years_with_data == []:
-            break
-
+    while len(_missing_timesteps) > acceptable_gap_hours and preferred_order_of_years_with_data != []:
         next_avail_year = preferred_order_of_years_with_data.pop(0)
         _missing_timesteps = _get_index_of_missing_data(country_series, model_year)
         _missing_timesteps = _ignore_feb_29th(model_year, next_avail_year, _missing_timesteps)
