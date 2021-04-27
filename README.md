@@ -36,13 +36,23 @@ Because input data is large, the actual model including its data is not part of 
 
     snakemake --use-conda
 
-## Build the model on Euler cluster
+## Build the model on a cluster
 
-To run on Euler, use the following command:
+You may want to build the model on a cluster. While you can build euro-calliope on [any cluster that is supported by Snakemake](https://snakemake.readthedocs.io/en/stable/executing/cluster.html), our default configuration is targeted at ETH's Euler cluster. To build the model on Euler, use the following command:
 
     snakemake --use-conda --profile config/euler
 
 If you want to run on another cluster, read [snakemake's documentation on cluster execution](https://snakemake.readthedocs.io/en/stable/executable.html#cluster-execution) and take `config/euler` as a starting point.
+
+## Work local, build on remote
+
+If you are like us, you may want to work locally (to change configuration parameters, add modules etc), but execute remotely on the cluster. We support this workflow through three Snakemake rules: `send`, `receive`, and `clean_cluster_results`. It works like the following.
+
+First, start local and make sure the `cluster-sync` configuration parameters fit your environment. Next, run `snakemake --use-conda send` to send the entire repository to your cluster. On the cluster, execute the workflow with Snakemake (see above). After the workflow has finished, download results by locally running `snakemake --use-conda receive`. By default, this will download results into `build/euler`.
+
+This workflow works iteratively too. After analysing your cluster results locally, you may want to make changes locally, send these changes to the cluster (`snakemake --use-conda send`), rerun on the cluster, and download updated results (`snakemake --use-conda receive`).
+
+To remove cluster results on your local machine, run `snakemake --use-conda clean_cluster_results`.
 
 ## Example use of the model
 
@@ -117,4 +127,4 @@ Make sure to run this in a clean working directory. Do not use the working direc
 
 ## License
 
-euro-calliope has been developed and is maintained by Tim Tröndle, IASS Potsdam. The code in this repository is MIT licensed.
+euro-calliope is developed and maintained within the [Calliope project](https://www.callio.pe). The code in this repository is MIT licensed.

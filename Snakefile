@@ -20,6 +20,7 @@ BIOFUEL_FEEDSTOCKS = [
 
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
+include: "./rules/sync.smk"
 localrules: all, raw_load, model, clean, parameterise_template, potentials_zipped
 localrules: download_capacity_factors_wind_and_solar
 configfile: "config/default.yaml"
