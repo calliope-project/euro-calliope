@@ -8,9 +8,10 @@ The library code contains general-purpose functions and routines that we expect 
 
 ### Installation
 
-Best install `eurocalliopelib` in editable mode:
+Best install `eurocalliopelib` from the conda environment:
 
-    $ pip install -r requirements-test.txt
+    $ conda env create -f test-requirements.yaml
+    $ conda activate test-eurocalliopelib
 
 ### Run the test suite
 

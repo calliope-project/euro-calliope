@@ -184,8 +184,8 @@ rule capacity_factors_onshore_wind_and_solar:
     input:
         script = script_dir + "capacityfactors.py",
         locations = rules.units.output[0],
-        ids = ancient("data/automatic/capacityfactors/onshore-locations.tif"),
-        timeseries = ancient("data/automatic/capacityfactors/{technology}-timeseries.nc")
+        timeseries = ancient("data/automatic/capacityfactors/{technology}-timeseries.nc"),
+        coordinates = ancient("data/automatic/capacityfactors/wind-onshore-timeseries.nc")
     params:
         threshold = config["capacity-factors"]["min"],
         year = config["year"],
@@ -204,7 +204,6 @@ rule capacity_factors_offshore:
         script = script_dir + "capacityfactors_offshore.py",
         eez = rules.eez.output[0],
         shared_coast = rules.potentials.output.shared_coast,
-        ids = ancient("data/automatic/capacityfactors/offshore-locations.tif"),
         timeseries = ancient("data/automatic/capacityfactors/wind-offshore-timeseries.nc")
     params:
         threshold = config["capacity-factors"]["min"],
