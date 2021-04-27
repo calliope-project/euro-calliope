@@ -96,18 +96,6 @@ def infer_resolution(spatiotemporal):
     return resolution_x
 
 
-def infer_transform(spatiotemporal):
-    resolution = infer_resolution(spatiotemporal)
-    x_min = spatiotemporal.x.min().item()
-    y_max = spatiotemporal.y.max().item()
-    return from_origin(
-        west=x_min - resolution / 2,
-        north=y_max + resolution / 2,
-        xsize=resolution,
-        ysize=resolution
-    )
-
-
 def convert_old_style_capacity_factor_time_series(ts):
     """DEPRECATED: Converts published capacity factor data to new format.
 

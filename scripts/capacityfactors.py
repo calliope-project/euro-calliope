@@ -2,9 +2,7 @@
 import geopandas as gpd
 import xarray as xr
 
-from eurocalliopelib.geo import area_weighted_time_series, convert_old_style_capacity_factor_time_series
-
-EPSG3035 = "EPSG:3035"
+from eurocalliopelib.geo import area_weighted_time_series, convert_old_style_capacity_factor_time_series, EPSG3035
 
 
 def capacityfactors(path_to_locations, path_to_timeseries, path_to_timeseries_with_coordinates, threshold,
