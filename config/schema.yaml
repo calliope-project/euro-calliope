@@ -78,9 +78,9 @@ properties:
             load:
                 type: object
                 properties:
-                    acceptable-load-data-gap-hours:
+                    acceptable-year-diff-for-gap-filling:
                         type: integer
-                        description: When filling data gaps in electricity load data, this specifies the minimum number of missing hours from which to start gap filling.
+                        description: When filling data gaps in electricity load data, this specifies the absolute number of years from the current year that the model can use data for filling. A value of zero effectively removes this gap filling method.
                     outlier-data-thresholds:
                         type: object
                         properties:
@@ -101,6 +101,12 @@ properties:
                             type: string
                             enum: [actual_entsoe_power_statistics, actual_entsoe_transparency, actual_tso, actual_net_consumption_tso, actual_gross_generation_tso, forecast_entsoe_transparency, forecast_tso]
                         description: Order in which to prioritise available electricity load data from open-power-system-data.org. The first source in the list will be used to initialise the data; the remaining data sources in the list will be use to gap fill in order from first to last.
+                    interpolate-hours:
+                        type: integer
+                        description: maximum number of hours over which missing load data can be interpolated.
+                    fill-29th-feb-from-28th:
+                        type: boolean
+                        description: Whether or not to gap-fill empty 29th of February data for leap years with data from the day before.
             hydro:
                 type: object
                 properties:

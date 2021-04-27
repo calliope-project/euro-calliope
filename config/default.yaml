@@ -52,7 +52,7 @@ parameters:
     biofuel-efficiency: 0.45
 quality-control:
     load:
-        acceptable-load-data-gap-hours: 48  # some load data is patchy and we fill it with other years' data if the missing data in a given year is above this many hours.
+        acceptable-year-diff-for-gap-filling: 5
         outlier-data-thresholds:
             relative-to-mean-min: 0.25
             relative-to-mean-max: 2
@@ -60,6 +60,8 @@ quality-control:
         entsoe-data-priority:
             - actual_entsoe_transparency
             - actual_entsoe_power_statistics
+        interpolate-hours: 5
+        fill-29th-feb-from-28th: true
     hydro:
         scale-phs-according-to-geth-et-al: false
 sea-connections:
