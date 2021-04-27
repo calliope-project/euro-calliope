@@ -36,6 +36,12 @@ test_dir = f"{root_dir}tests/"
 
 onstart:
     shell("mkdir -p build/logs")
+onsuccess:
+     if "email" in config.keys():
+         shell("echo "" | mail -s 'euro-calliope succeeded' {config[email]}")
+onerror:
+     if "email" in config.keys():
+         shell("echo "" | mail -s 'euro-calliope failed' {config[email]}")
 
 
 rule all:

@@ -54,6 +54,12 @@ This workflow works iteratively too. After analysing your cluster results locall
 
 To remove cluster results on your local machine, run `snakemake --use-conda clean_cluster_results`.
 
+## Be notified of build successes or fails
+
+ As the execution of this workflow may take long, you can be notified whenever the execution terminates either successfully or unsuccessfully. Notifications are sent by email. To activate notifications, add the email address of the recipient to the configuration key `email`. For example, you may want to choose running the workflow the following way to receive notifications:
+
+     snakemake --use-conda --config email=<your-email>
+
 ## Example use of the model
 
 The build step creates all individual components of `euro-calliope`, like technologies and time series. These can be combined to eventually build a final model to run simulations with. For an example of such a model, see `./build/model/{resolution}/example-model.yaml`. It is a complete Calliope model and can be used like any other, for example like this:
