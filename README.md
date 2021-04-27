@@ -127,4 +127,4 @@ Make sure to run this in a clean working directory. Do not use the working direc
 
 ## License
 
-euro-calliope has been developed and is maintained by Tim Tröndle, IASS Potsdam. The code in this repository is MIT licensed.
+euro-calliope is developed and maintained within the [Calliope project](https://www.callio.pe). The code in this repository is MIT licensed.
