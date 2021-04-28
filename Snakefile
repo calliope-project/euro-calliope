@@ -74,7 +74,6 @@ rule parameterise_template:
     message: "Apply config parameters to file {wildcards.template} from templates."
     input:
         script = script_dir + "parameterise_templates.py",
-        filters = script_dir + "filters.py",
         template = template_dir + "{template}",
         biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
             scenario=config["parameters"]["jrc-biofuel"]["scenario"]
@@ -127,7 +126,6 @@ rule locations:
     message: "Generate locations for {wildcards.resolution} resolution."
     input:
         script = script_dir + "locations.py",
-        filters = script_dir + "filters.py",
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
         hydro_capacities = rules.hydro_capacities.output[0],
@@ -148,7 +146,6 @@ rule directional_rooftop_pv:
     message: "Generate override for directional rooftop PV in {wildcards.resolution} resolution."
     input:
         script = script_dir + "directional_rooftop.py",
-        filters = script_dir + "filters.py",
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
     params:

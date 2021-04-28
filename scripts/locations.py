@@ -3,7 +3,7 @@ import jinja2
 import pandas as pd
 import geopandas as gpd
 
-import filters
+from eurocalliopelib import filters
 
 TEMPLATE = """locations:
     {% for id, location in locations.iterrows() %}
