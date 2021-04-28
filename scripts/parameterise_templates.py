@@ -3,7 +3,7 @@ from pathlib import Path
 
 import jinja2
 
-import filters
+from eurocalliopelib import filters
 
 
 def parameterise_template(path_to_template, path_to_biofuel_costs, scaling_factors,
