@@ -13,12 +13,12 @@ SCHEMA_UNITS = {
 }
 
 configfile: "config/default.yaml"
-localrules: raw_gadm_administrative_borders_zipped, raw_gadm_administrative_borders, raw_nuts_units_zipped
+localrules: download_raw_gadm_administrative_borders, raw_gadm_administrative_borders, download_raw_nuts_units
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 script_dir = f"{root_dir}scripts/"
 
 
-rule raw_gadm_administrative_borders_zipped:
+rule download_raw_gadm_administrative_borders:
     message: "Download administrative borders for {wildcards.country_code} as zip."
     params: url = lambda wildcards: config["data-sources"]["gadm"].format(country_code=wildcards.country_code)
     output: protected("data/automatic/raw-gadm/{country_code}.zip")
@@ -28,17 +28,17 @@ rule raw_gadm_administrative_borders_zipped:
 
 rule raw_gadm_administrative_borders:
     message: "Unzip administrative borders of {wildcards.country_code} as zip."
-    input: "data/automatic/raw-gadm/{country_code}.zip"
-    output: temp("data/automatic/raw-gadm/gadm36_{country_code}.gpkg")
+    input: rules.download_raw_gadm_administrative_borders.output[0]
+    output: temp("build/data/raw-gadm/gadm36_{country_code}.gpkg")
     conda: "../envs/shell.yaml"
-    shell: "unzip -o {input} -d data/automatic/raw-gadm"
+    shell: "unzip -o {input} -d build/data/raw-gadm"
 
 
 rule administrative_borders_gadm:
     message: "Merge administrative borders of all countries up to layer {params.max_layer_depth}."
     input:
         script = script_dir + "shapes/gadm.py",
-        countries = ["data/automatic/raw-gadm/gadm36_{}.gpkg".format(country_code)
+        countries = [f"build/data/raw-gadm/gadm36_{country_code}.gpkg"
                      for country_code in [pycountry.countries.lookup(country).alpha_3
                                           for country in config['scope']['countries']]
                     ]
@@ -55,7 +55,7 @@ rule administrative_borders_gadm:
     script: "../scripts/shapes/gadm.py"
 
 
-rule raw_nuts_units_zipped:
+rule download_raw_nuts_units:
     message: "Download units as zip."
     params: url = config["data-sources"]["nuts"]
     output: protected("data/automatic/raw-nuts-units.zip")
@@ -67,7 +67,7 @@ rule administrative_borders_nuts:
     message: "Normalise NUTS administrative borders."
     input:
         script = script_dir + "shapes/nuts.py",
-        zipped = rules.raw_nuts_units_zipped.output[0]
+        zipped = rules.download_raw_nuts_units.output[0]
     params:
         crs = config["crs"],
         schema = SCHEMA_UNITS,

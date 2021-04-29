@@ -100,6 +100,7 @@ You can easily change the units and scale all values using the `scaling-factor` 
 * `build/model`: Contains the entire model after the build step, including Calliope definition files and data (does not exist initially).
 * `config`: Files with configuration parameters which influence the model build process.
 * `data`: Small input data used within the model build process.
+* `data/automatic`: Contains data automatically downloaded within the model build process (does not exist initially).
 * `docs`: Documentation of the model and the build process.
 * `envs`: Files defining the conda environment which are used to build the model.
 * `lib`: Library code in form of a Python package that is reused in many places of this repository.
