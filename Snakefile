@@ -325,7 +325,7 @@ rule clean: # removes all generated results
     shell:
         """
         rm -r build/
-        echo "Data downloaded to data/ has not been cleaned."
+        echo "Data downloaded to data/automatic/ has not been cleaned."
         """
 
 
