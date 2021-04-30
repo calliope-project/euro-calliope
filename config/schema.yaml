@@ -4,6 +4,8 @@ properties:
     email:
         type: string
         description: Email address to notify of build successes or fails.
+        format: email
+        pattern: ^\S+@\S+\.\S+$
     data-sources:
         type: object
         properties:

@@ -56,7 +56,7 @@ To remove cluster results on your local machine, run `snakemake --use-conda clea
 
 ## Be notified of build successes or fails
 
- As the execution of this workflow may take long, you can be notified whenever the execution terminates either successfully or unsuccessfully. Notifications are sent by email. To activate notifications, add the email address of the recipient to the configuration key `email`. For example, you may want to choose running the workflow the following way to receive notifications:
+ As the execution of this workflow may take a while, you can be notified whenever the execution terminates either successfully or unsuccessfully. Notifications are sent by email. To activate notifications, add the email address of the recipient to the configuration key `email`. You can add the key to your configuration file, or you can run the workflow the following way to receive notifications:
 
      snakemake --use-conda --config email=<your-email>
 
