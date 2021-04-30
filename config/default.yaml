@@ -17,7 +17,7 @@ cluster-sync:
     send-ignore: .syncignore-send
     receive-ignore: .syncignore-receive
     cluster-base-dir: ~/Develop/euro-calliope/
-    local-results-dir: build/euler
+    local-results-dir: build/cluster
 scaling-factors: # values are tuned for models with a few hours resolution and one year duration
     power: 0.00001 # from MW(h) to 100 GW(h)
     area: 0.0001 # from km2 to 10,000 km2
