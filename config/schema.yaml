@@ -1,6 +1,11 @@
 $schema: http://json-schema.org/draft-07/schema#
 description: Euro-Calliope configuration schema
 properties:
+    email:
+        type: string
+        description: Email address to notify of build successes or fails.
+        format: email
+        pattern: ^\S+@\S+\.\S+$
     data-sources:
         type: object
         properties:

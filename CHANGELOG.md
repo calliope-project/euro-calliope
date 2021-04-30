@@ -8,6 +8,7 @@
 * **ADD** minimal configuration to be able to test the entire workflow more quickly (#60).
 * **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59).
 * **ADD** sync infrastructure to easily send and receive files to and from a cluster (#74).
+* **ADD** optional email notifications whenever builds fail or succeed (#92).
 
 * **UPDATE** ENTSOE national electricity load data gap filling priority order included in config (#42)
 * **UPDATE** IRENA hydro generation data from 2018 to 2020 (#40).
