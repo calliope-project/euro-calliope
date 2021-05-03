@@ -21,7 +21,7 @@ BIOFUEL_FEEDSTOCKS = [
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
 include: "./rules/sync.smk"
-localrules: all, raw_load, model, clean, parameterise_template, potentials_zipped
+localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials
 localrules: download_capacity_factors_wind_and_solar
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
@@ -54,7 +54,7 @@ rule all:
         "build/logs/national/test-report.html",
 
 
-rule potentials_zipped:
+rule download_potentials:
     message: "Download potential data."
     params: url = config["data-sources"]["potentials"]
     output: protected("data/automatic/raw-potentials.zip")
@@ -64,7 +64,7 @@ rule potentials_zipped:
 
 rule potentials:
     message: "Unzip potentials."
-    input: rules.potentials_zipped.output[0]
+    input: rules.download_potentials.output[0]
     shadow: "minimal"
     output:
         land_eligibility_km2 = "build/data/{resolution}/technical-potential/areas.csv",
@@ -233,7 +233,7 @@ rule capacity_factors_hydro:
     script: "scripts/capacityfactors_hydro.py"
 
 
-rule raw_load:
+rule download_raw_load:
     message: "Download raw load."
     params: url = config["data-sources"]["load"]
     output: protected("data/automatic/raw-load-data.csv")
@@ -245,7 +245,7 @@ rule electricity_load_national:
     message: "Preprocess raw electricity load data and retrieve load time series per country."
     input:
         script = script_dir + "national_load.py",
-        load = rules.raw_load.output[0]
+        load = rules.download_raw_load.output[0]
     output: "build/data/electricity-demand-national.csv"
     params:
         year = config["year"],

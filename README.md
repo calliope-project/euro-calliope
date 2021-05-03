@@ -13,7 +13,7 @@ euro-calliope models the European electricity system with each location represen
 
 ## Get ready to build the model
 
-1. The workflow is developed on macOS, should run on Linux (untested), and cannot run natively on Windows.
+1. The workflow is developed on macOS, tested on macOS and Linux, but it cannot run natively on Windows.
 
 2. You need [conda](https://conda.io/docs/index.html) to build and use the model. Using conda, you can create a conda environment from within you can build the model:
 
@@ -48,7 +48,7 @@ If you want to run on another cluster, read [snakemake's documentation on cluste
 
 If you are like us, you may want to work locally (to change configuration parameters, add modules etc), but execute remotely on the cluster. We support this workflow through three Snakemake rules: `send`, `receive`, and `clean_cluster_results`. It works like the following.
 
-First, start local and make sure the `cluster-sync` configuration parameters fit your environment. Next, run `snakemake --use-conda send` to send the entire repository to your cluster. On the cluster, execute the workflow with Snakemake (see above). After the workflow has finished, download results by locally running `snakemake --use-conda receive`. By default, this will download results into `build/euler`.
+First, start local and make sure the `cluster-sync` configuration parameters fit your environment. Next, run `snakemake --use-conda send` to send the entire repository to your cluster. On the cluster, execute the workflow with Snakemake (see above). After the workflow has finished, download results by locally running `snakemake --use-conda receive`. By default, this will download results into `build/cluster`.
 
 This workflow works iteratively too. After analysing your cluster results locally, you may want to make changes locally, send these changes to the cluster (`snakemake --use-conda send`), rerun on the cluster, and download updated results (`snakemake --use-conda receive`).
 
