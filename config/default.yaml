@@ -1,7 +1,7 @@
 data-sources:
     biofuel-potentials: data/biofuels/potentials/{feedstock}.csv
     biofuel-costs: data/biofuels/costs/{feedstock}.csv
-    eez: data/World_EEZ_v10_20180221/eez_v10.shp
+    eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
     irena-generation: data/irena/hydro-generation-europe.csv
     national-phs-storage-capacities: data/pumped-hydro/storage-capacities-gwh.csv
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
