@@ -122,13 +122,11 @@ rule eez:
     params:
         bounds="{x_min},{y_min},{x_max},{y_max}".format(**config["scope"]["bounds"]),
         countries=",".join(["'{}'".format(country) for country in config["scope"]["countries"]]),
-        temp_dir = "build/data/eez"
     conda: "../envs/geo.yaml"
+    shadow: "minimal"
     shell:
         """
-        unzip -o {input} -d {params.temp_dir}
-        fio cat --bbox {params.bounds} {params.temp_dir}/eez.shp\
+        fio cat --bbox {params.bounds} "zip://{input}"\
         | fio filter "f.properties.territory1 in [{params.countries}]"\
         | fio collect > {output}
-        rm -r {params.temp_dir}
         """
