@@ -22,9 +22,14 @@ project = "euro-calliope-workflow"
 copyright = "2021, calliope-project authors"
 author = "calliope-project authors"
 
-# The full version, including alpha/beta/rc tags
-release = "1.1"
+# -- Version information -----------------------------------------------------
 
+__version__ = open("../../VERSION").read()
+
+# The short X.Y version.
+version = __version__
+# The full version, including alpha/beta/rc tags.
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 
