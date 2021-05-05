@@ -125,7 +125,7 @@ rule biofuels:
     conda: "envs/geo.yaml"
     wildcard_constraints:
         scenario = "((low)|(medium)|(high))"
-   script: "scripts/biofuels.py"
+    script: "scripts/biofuels.py"
 
 
 rule locations:
