@@ -1,3 +1,6 @@
+import os
+import glob
+
 from snakemake.utils import validate
 
 ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
@@ -334,13 +337,15 @@ rule clean: # removes all generated results
         echo "Data downloaded to data/automatic/ has not been cleaned."
         """
 
+def get_docs(dirname):
+    return glob.glob(os.path.join(dirname, "*"))
 
 rule docs:
     message: "Build workflow documentation"
-    input: "docs/source"
+    input: *glob.glob("docs/source/*")
     conda: "envs/docs.yaml"
     output: directory("docs/build/html")
-    shell: "sphinx-build -b html {input} {output}"
+    shell: "sphinx-build -b html docs/source {output}"
 
 
 rule test:
