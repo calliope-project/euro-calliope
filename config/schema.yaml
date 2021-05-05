@@ -298,8 +298,7 @@ properties:
         description: Coordinate reference system to which all geographic data will be conformed
     sea-connections:
         type: object
-        propertyNames:
-            enum: [continental, national, regional]
+        propertyNames: {"$ref": "#/properties/shapes/propertyNames"}
         additionalProperties: false
         patternProperties:
             ^.*$:
@@ -323,6 +322,7 @@ properties:
             ^.*$:
                 type: object
                 propertyNames: {"$ref": "#/properties/scope/properties/countries/items"}
+                additionalProperties: false
                 patternProperties:
                     ^.*$:
                         type: string
