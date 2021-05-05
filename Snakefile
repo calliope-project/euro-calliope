@@ -337,8 +337,6 @@ rule clean: # removes all generated results
         echo "Data downloaded to data/automatic/ has not been cleaned."
         """
 
-def get_docs(dirname):
-    return glob.glob(os.path.join(dirname, "*"))
 
 rule docs:
     message: "Build workflow documentation"
