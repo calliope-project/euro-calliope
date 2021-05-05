@@ -15,6 +15,7 @@ The workflow routines automatically build models from source data. Alternatively
 ```{toctree}
 :maxdepth: 2
 overview
+Sources <sources.md>
 ```
 
 ```{eval-rst}

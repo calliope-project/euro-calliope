@@ -335,6 +335,14 @@ rule clean: # removes all generated results
         """
 
 
+rule docs:
+    message: "Build workflow documentation"
+    input: "docs/source"
+    conda: "envs/docs.yaml"
+    output: directory("docs/build/html")
+    shell: "sphinx-build -b html {input} {output}"
+
+
 rule test:
     message: "Run tests"
     input:
