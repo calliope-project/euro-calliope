@@ -356,7 +356,7 @@ rule test:
 
 rule import_data_submodule:
     params: 
-        repo_url = config["data-sources"]["data_repository"]
+        repo_url = config["data-sources"]["data-repository"]
     output: "data/"
     shell:
         """
