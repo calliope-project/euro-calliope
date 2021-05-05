@@ -301,7 +301,7 @@ properties:
         propertyNames: {"$ref": "#/properties/shapes/propertyNames"}
         additionalProperties: false
         patternProperties:
-            ^.*$:
+            "":
                 type: array
                 description: Sea connections between regions at each resolution, based on e.g. https://www.entsoe.eu/data/map/
                 items:
@@ -319,11 +319,11 @@ properties:
             enum: [continental, national, regional]
         additionalProperties: false
         patternProperties:
-            ^.*$:
+            "":
                 type: object
                 propertyNames: {"$ref": "#/properties/scope/properties/countries/items"}
                 additionalProperties: false
                 patternProperties:
-                    ^.*$:
+                    "":
                         type: string
 
