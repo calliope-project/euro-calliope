@@ -9,5 +9,6 @@ dependencies:
     - pycountry=18.12.8
     - jinja2=2.11.3
     - pip=21.0.1
+    - xlrd=1.2.0
     - pip:
         - -e ../../lib

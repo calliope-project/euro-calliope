@@ -1,4 +1,17 @@
 data-sources:
+    eurostat:
+        base-url: https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/
+        energy-balance: nrg_bal_c
+        hh-end-use: hh_end_use
+        freight: freight
+        employees: employees
+        gva: gva
+        dwellings: dwellings
+    swiss-stat:
+        end-use: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/energieverbrauch-nach-verwendungszweck.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvOTg1NA==.html
+        energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/gesamtenergiestatistik.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvNzUxOQ==.html
+        industry-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/teilstatistiken.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODc4OA==.html
+        gva: https://www.bfs.admin.ch/bfsstatic/dam/assets/10647597/master
     biofuel-potentials: data/biofuels/potentials/{feedstock}.csv
     biofuel-costs: data/biofuels/costs/{feedstock}.csv
     eez: data/World_EEZ_v10_20180221/eez_v10.shp
