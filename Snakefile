@@ -1,4 +1,3 @@
-import os
 import glob
 
 from snakemake.utils import validate
