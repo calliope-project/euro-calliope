@@ -11,7 +11,7 @@ data-sources:
     load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
     nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
     potentials: https://zenodo.org/record/3533038/files/possibility-for-electricity-autarky.zip
-    data-repository: https://github.com/calliope-project/euro-calliope-datasets.git 
+    data-repository: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/main/{dataset}
 root-directory: . # point to the root directory if working directory is not root directory
 cluster-sync:
     url: euler.ethz.ch

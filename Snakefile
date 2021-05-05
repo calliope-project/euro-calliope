@@ -365,11 +365,11 @@ rule test:
     conda: "./envs/test.yaml"
     script: "./tests/test_runner.py"
 
+
 rule import_data_submodule:
-    params: 
-        repo_url = config["data-sources"]["data-repository"]
-    output: "data/"
-    shell:
-        """
-        git clone {params.repo_url} data/
-        """
+    message: "Downloading `{wildcards.dataset}` from Euro-Calliope dataset submodule"
+    params: url = lambda wildcards: config["data-sources"]["data-repository"].format(dataset=wildcards.dataset)
+    wildcard_constraints:
+        dataset = "(?:(?!automatic).)*$"
+    output: "data/{dataset}"
+    shell: "curl -sLo {output} {params.url}"
