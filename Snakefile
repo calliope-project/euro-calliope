@@ -125,7 +125,7 @@ rule biofuels:
     conda: "envs/geo.yaml"
     wildcard_constraints:
         scenario = "((low)|(medium)|(high))"
-    script: "scripts/biofuels.py"
+   script: "scripts/biofuels.py"
 
 
 rule locations:
@@ -353,3 +353,12 @@ rule test:
     output: "build/logs/{resolution}/test-report.html"
     conda: "./envs/test.yaml"
     script: "./tests/test_runner.py"
+
+rule import_data_submodule:
+    params: 
+        repo_url: config["data-sources"]["data_repository"]
+    output: "data/"
+    shell:
+        """
+        git clone {params.repo_url} data/
+        """
