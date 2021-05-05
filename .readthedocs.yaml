@@ -8,4 +8,4 @@ sphinx:
   configuration: docs/source/conf.py
 
 conda:
-  environment: envs/docs.yml
+  environment: envs/docs.yaml
