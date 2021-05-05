@@ -77,6 +77,148 @@ properties:
             local-results-dir:
                 type: string
                 description: Path to local folder into which results from cluster are downloaded (relative to workdir).
+    scaling-factors:
+        type: object
+        description: values are tuned for models with a few hours resolution and one year duration
+        properties:
+            power:
+                type: number
+                description: from MW(h) to 100 GW(h)
+            area:
+                type: number
+                description: from km2 to 10,000 km2
+            monetary:
+                type: number
+                description: from EUR to 1 billion EUR
+    parameters:
+        type: object
+        properties:
+            maximum-installable-power-density:
+                type: object
+                description: This is not the yield, but the density of installed power
+                properties:
+                    pv-on-tilted-roofs:
+                        type: number
+                        description: (MW/km^2)
+                    pv-on-flat-areas:
+                        type: number
+                        description: (MW/km^2)
+                    onshore-wind:
+                        type: number
+                        description: (MW/km^2)
+                    offshore-wind:
+                        type: number
+                        description: (MW/km^2)
+            roof-share:
+                type: object
+                description: Share of roofs by orientation (should add up to 1)
+                properties:
+                    E:
+                        type: number
+                        description: East-facing roofs
+                        maximum: 1
+                    N:
+                        type: number
+                        description: North-facing roofs
+                        maximum: 1
+                    S:
+                        type: number
+                        description: South-facing roofs
+                        maximum: 1
+                    W:
+                        type: number
+                        description: West-facing roofs
+                        maximum: 1
+                    flat:
+                        type: number
+                        description: Flat roofs
+                        maximum: 1
+            jrc-biofuel:
+                type: object
+                description: Bioenergy potential under different scenarios, to select specific data from [@Ruiz Catello et al:2015]
+                properties:
+                    scenario:
+                        type: string
+                        description: Scenario for biofuel potential estimate
+                        enum: [low, medium, high]
+                    potential-year:
+                        type: string
+                        description: Year for biomass potential estimate
+                        enum: ["2010", "2020", "2030", "2040", "2050"]
+                    cost-year:
+                        type: string
+                        description: Year for biomass cost estimate
+                        enum: ["2010", "2030", "2050"]
+            biofuel-efficiency:
+                type: number
+                maximum: 1
+    scope:
+        type: object
+        properties:
+            countries:
+                type: array
+                items:
+                    type: string
+                    description: countries to include in the model
+                    enum:
+                        - "Austria"
+                        - "Belgium"
+                        - "Bulgaria"
+                        - "Croatia"
+                        - "Cyprus"
+                        - "Czech Republic"
+                        - "Denmark"
+                        - "Estonia"
+                        - "Finland"
+                        - "France"
+                        - "Germany"
+                        - "Greece"
+                        - "Hungary"
+                        - "Ireland"
+                        - "Italy"
+                        - "Latvia"
+                        - "Lithuania"
+                        - "Luxembourg"
+                        - "Netherlands"
+                        - "Poland"
+                        - "Portugal"
+                        - "Romania"
+                        - "Slovakia"
+                        - "Slovenia"
+                        - "Spain"
+                        - "Sweden"
+                        - "United Kingdom"
+                        - "Albania"
+                        - "Bosnia and Herzegovina"
+                        - "Macedonia, Republic of"
+                        - "Montenegro"
+                        - "Norway"
+                        - "Serbia"
+                        - "Switzerland"
+            bounds:
+                type: object
+                description: extent of system
+                properties:
+                    x_min:
+                        type: number
+                        description: Minimum longitude, in degrees east
+                        minimum: -180
+                        maximum: 180
+                    x_max:
+                        type: number
+                        description: Maximum longitude, in degrees east
+                        minimum: -180
+                        maximum: 180
+                    y_min:
+                        type: number
+                        description: Minimum Latitude, in degrees north
+                        minimum: -90
+                        maximum: 90
+                    y_max:
+                        type: number
+                        description: Maximum Latitude, in degrees north
+                        minimum: -90
+                        maximum: 90
     quality-control:
         type: object
         properties:
@@ -104,7 +246,14 @@ properties:
                         minItems: 1
                         items:
                             type: string
-                            enum: [actual_entsoe_power_statistics, actual_entsoe_transparency, actual_tso, actual_net_consumption_tso, actual_gross_generation_tso, forecast_entsoe_transparency, forecast_tso]
+                            enum:
+                                - actual_entsoe_power_statistics
+                                - actual_entsoe_transparency
+                                - actual_tso
+                                - actual_net_consumption_tso
+                                - actual_gross_generation_tso
+                                - forecast_entsoe_transparency
+                                - forecast_tso
                         description: Order in which to prioritise available electricity load data from open-power-system-data.org. The first source in the list will be used to initialise the data; the remaining data sources in the list will be use to gap fill in order from first to last.
             hydro:
                 type: object
@@ -112,3 +261,69 @@ properties:
                     scale-phs-according-to-geth-et-al:
                         type: boolean
                         description: Whether or not to use pumped hydro capacities derived from Geth et al. (2015) to scale pumped hydro capacities givven by the JRC hydro database.
+    capacity_factors:
+        type: object
+        properties:
+            min:
+                type: number
+                description: Consider smaller values to be 0; this helps numerics in the LP
+            max:
+                type: number
+                description: For hydro reservoirs, leading to a numerical range of 1e5 (hourly resolution)
+            average:
+                type: object
+                description: Average estimation used to transform annual fixed to variable costs
+                properties:
+                    pv:
+                        type: number
+                        description: Average annual PV capacity factor
+                    onshore:
+                        type: number
+                        description: Average annual onshore wind capacity factor
+                    offshore:
+                        type: number
+                        description: Average annual offshore wind capacity factor
+                    ror:
+                        type: number
+                        description: Average annual run-of-river hydro capacity factor
+            trim-ninja-timeseries:
+                type: boolean
+                description: If true, trims renewables.ninja timeseries to the year in question
+    year:
+        type: integer
+        description: Model year, which will be used to subset data during processing
+    crs:
+        type: string
+        pattern: ^EPSG:\d+$
+        description: Coordinate reference system to which all geographic data will be conformed
+    sea-connections:
+        type: object
+        propertyNames:
+            enum: [continental, national, regional]
+        additionalProperties: false
+        patternProperties:
+            ^.*$:
+                type: array
+                description: Sea connections between regions at each resolution, based on e.g. https://www.entsoe.eu/data/map/
+                items:
+                    type: array
+                    minItems: 2
+                    maxItems: 2
+                    uniqueItems: true
+                    description: Region code either side of a sea connection
+                    items:
+                        type: string
+                        description: Region code
+    shapes:
+        type: object
+        propertyNames:
+            enum: [continental, national, regional]
+        additionalProperties: false
+        patternProperties:
+            ^.*$:
+                type: object
+                propertyNames: {"$ref": "#/properties/scope/properties/countries/items"}
+                patternProperties:
+                    ^.*$:
+                        type: string
+
