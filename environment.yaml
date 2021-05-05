@@ -6,3 +6,6 @@ dependencies:
     - python=3.8
     - pycountry=18.12.8
     - snakemake-minimal=5.8.2
+    - sphinx=3.5.4
+    - sphinx_rtd_theme
+    - myst_parser=0.14.0

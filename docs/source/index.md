@@ -16,3 +16,7 @@ overview
 ```{eval-rst}
 * :ref:`search`
 ```
+
+# License
+
+`euro-calliope` is developed and maintained within the [Calliope project](https://www.callio.pe). The code in this repository is MIT licensed.
