@@ -14,7 +14,7 @@ The workflow routines automatically build models from source data. Alternatively
 ## Contents
 ```{toctree}
 :maxdepth: 2
-overview
+Overview <readme_link>
 Sources <sources.md>
 ```
 
