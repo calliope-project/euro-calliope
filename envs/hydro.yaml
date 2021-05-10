@@ -12,11 +12,11 @@ dependencies:
     - geopandas=0.8.0
     - netcdf4=1.5.3
     - xarray=0.15.1
-    - pip
     - dask
     - bottleneck
     - cdsapi
     - pycountry=19.8.18
+    - atlite=0.2.1
+    - pip=21.0.1
     - pip:
-        - git+git://github.com/PyPSA/atlite.git@87fd114622644fd162d8f56a966026a67e05ce8b
-
+        - -e ../../lib[geo]

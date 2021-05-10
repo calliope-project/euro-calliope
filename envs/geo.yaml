@@ -16,3 +16,6 @@ dependencies:
     - jinja2
     - networkx
     - pycountry=19.8.18
+    - pip=21.0.1
+    - pip:
+        - -e ../../lib[geo]

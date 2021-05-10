@@ -1,7 +1,6 @@
 name: default
 channels:
     - conda-forge
-    - bioconda
 dependencies:
     - python=3.7
     - ipython
@@ -9,3 +8,6 @@ dependencies:
     - pandas=1.0.5
     - pycountry=19.8.18
     - jinja2
+    - pip=21.0.1
+    - pip:
+        - -e ../../lib[geo]
