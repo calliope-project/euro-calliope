@@ -53,3 +53,17 @@ def to_numeric(series):
 def gwh_to_tj(array):
     """Convert GWh to TJ"""
     return array * 3.6
+
+def pj_to_twh(array):
+    """Convert PJ to TWh"""
+    return array / 3.6
+
+def tj_to_twh(array):
+    """Convert TJ to TWh"""
+    return pj_to_twh(array) * 1e-3
+
+def read_tdf(filename):
+    """ TBA """
+    df = pd.read_csv(filename, header=0)
+    tdf = df.set_index([i for i in df.columns[:-1]]).squeeze()
+    return tdf
