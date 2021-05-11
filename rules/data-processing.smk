@@ -36,3 +36,21 @@ rule annual_energy_balances:
         countries = config["scope"]["countries"]
     conda: "../envs/default.yaml"
     script: "../scripts/annual_energy_balance.py"
+
+rule annual_heat_demand:
+    message: "Calculate national heat demand for household and commercial sectors"
+    input:
+        src = "scripts/annual_heat_demand.py",
+        hh_end_use = rules.eurostat_data_tsv.output.hh_end_use,
+        ch_end_use = rules.ch_data_xlsx.output.end_use,
+        energy_balance = rules.annual_energy_balances.output[0],
+        commercial_demand = "data/commercial/jrc_idees_processed_energy.csv",
+        carrier_names = "data/energy_balance_carrier_names.csv"
+    params:
+        countries = config["scope"]["countries"],
+        heat_tech_params = config["parameters"]["heat-end-use"]
+    conda: "../envs/default.yaml"
+    output:
+        demand=temp("build/annual_heat_demand.csv"),
+        electricity=temp("build/annual_heat_electricity_consumption.csv"),
+    script: "../scripts/annual_heat_demand.py"
