@@ -52,16 +52,16 @@ parameters:
     biofuel-efficiency: 0.45
 quality-control:
     load:
-        acceptable-year-diff-for-gap-filling: 5
         outlier-data-thresholds:
             relative-to-mean-min: 0.25
             relative-to-mean-max: 2
             percentage-deviation-post-cleaning-max: 1
-        entsoe-data-priority:
+        interpolate-hours: 5
+        acceptable-year-diff-for-gap-filling: 5
+        fill-29th-feb-from-28th: true
+        data-source-priority-order:
             - actual_entsoe_transparency
             - actual_entsoe_power_statistics
-        interpolate-hours: 5
-        fill-29th-feb-from-28th: true
     hydro:
         scale-phs-according-to-geth-et-al: false
 sea-connections:

@@ -77,23 +77,40 @@ properties:
         properties:
             load:
                 type: object
+                descriptions: >
+                    Data quality enforcing methods for open-power-system-data.org-derived national load data. These cover, in order:
+                        - remove outlier data hours, based on full dataset
+                        - select only data for year of interest
+                        - interpolate empty data when the data gap is small
+                        - fill larger data gaps with data from nearby years
+                        - If 29th of February is empty and couldn't previously be filled, use data from the 28th of February
+                        - interpolate across remaining data gaps if they are now small enough
+                        - select most complete dataset for each country from list of data sources, based on a priority order
+
+                        This process will fail if the 'most complete dataset' for any country has any remaining gaps.
                 properties:
-                    acceptable-year-diff-for-gap-filling:
-                        type: integer
-                        description: When filling data gaps in electricity load data, this specifies the absolute number of years from the current year that the model can use data for filling. A value of zero effectively removes this gap filling method.
                     outlier-data-thresholds:
                         type: object
                         properties:
                             relative-to-mean-min:
                                 type: number
-                                description: lower bound cut-off value for any hourly data relative to the annual mean load of a country. Any values below this lower bound will be replaced by interpolated values.
+                                description: Lower bound cut-off value for any hourly data relative to the annual mean load of a country. Any values below this lower bound will be replaced by interpolated values.
                             relative-to-mean-max:
                                 type: number
-                                description: upper bound cut-off value for any hourly data relative to the annual mean load of a country. Any values above this upper bound will be replaced by interpolated values.
+                                description: Upper bound cut-off value for any hourly data relative to the annual mean load of a country. Any values above this upper bound will be replaced by interpolated values.
                             percentage-deviation-post-cleaning-max:
                                 type: number
-                                description: allowable deviation in annual load for any country following removal and subsequent interpolation of outlier data.
-                    entsoe-data-priority:
+                                description: Allowable deviation in annual load for any country following removal and subsequent interpolation of outlier data.
+                    interpolate-hours:
+                        type: integer
+                        description: Maximum number of hours over which missing load data can be interpolated.
+                    acceptable-year-diff-for-gap-filling:
+                        type: integer
+                        description: When filling data gaps in electricity load data, this specifies the absolute number of years from the current year that the model can use data for filling. A value of zero effectively removes this gap filling method.
+                    fill-29th-feb-from-28th:
+                        type: boolean
+                        description: Whether or not to gap-fill empty 29th of February data for leap years with data from the day before.
+                    data-source-priority-order:
                         type: array
                         uniqueItems: true
                         minItems: 1
@@ -101,12 +118,6 @@ properties:
                             type: string
                             enum: [actual_entsoe_power_statistics, actual_entsoe_transparency, actual_tso, actual_net_consumption_tso, actual_gross_generation_tso, forecast_entsoe_transparency, forecast_tso]
                         description: Order in which to prioritise available electricity load data from open-power-system-data.org. The first source in the list will be used to initialise the data; the remaining data sources in the list will be use to gap fill in order from first to last.
-                    interpolate-hours:
-                        type: integer
-                        description: maximum number of hours over which missing load data can be interpolated.
-                    fill-29th-feb-from-28th:
-                        type: boolean
-                        description: Whether or not to gap-fill empty 29th of February data for leap years with data from the day before.
             hydro:
                 type: object
                 properties:

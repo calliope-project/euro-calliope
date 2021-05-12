@@ -4,10 +4,12 @@ Preprocess national electricity load time series.
 Data is loaded and (optionally) gap filled as follows:
 
 - select only data for countries of interest
+- remove outlier data
 - select only data for year of interest
 - interpolate empty data when the data gap is small
 - fill larger data gaps with data from nearby years
-- remove outlier data and interpolate across any newly formed small gaps
+- If 29th of February is empty and couldn't previously be filled, use data from the 28th of February
+- interpolate across remaining data gaps if they are now small enough
 - select most complete dataset for each country from list of data sources, based on a priority order
 
 This process will fail if the 'most complete dataset' for any country has any remaining gaps.
@@ -23,11 +25,14 @@ def national_load(
     path_to_raw_load, year, data_quality_config, path_to_output, countries
 ):
     """Extracts national load time series for all countries in a specified year."""
-    raw_load = read_load_profiles(path_to_raw_load, data_quality_config["entsoe-data-priority"])
-    raw_load = filter_national(raw_load, countries)
-    load = fill_gaps_per_source(raw_load.loc[str(year)], raw_load, year, data_quality_config)
+    raw_load = read_load_profiles(path_to_raw_load, data_quality_config["data-source-priority-order"])
+    filtered_load = filter_countries(raw_load, countries)
+    filtered_load = filter_outliers(filtered_load, data_quality_config)
+    gap_filled_load = fill_gaps_per_source(filtered_load, year, data_quality_config)
     load = get_source_choice_per_country(
-        raw_load.loc[str(year)], load, data_quality_config["entsoe-data-priority"]
+        filtered_load.loc[str(year)],
+        gap_filled_load,
+        data_quality_config["data-source-priority-order"]
     )
 
     load.to_csv(path_to_output, header=True)
@@ -46,7 +51,9 @@ def read_load_profiles(path_to_raw_load, entsoe_priority):
     return load_by_attribute
 
 
-def filter_national(load, countries):
+def filter_countries(load, countries):
+    # UKM == United Kingdom of Great Britain and Northern Ireland.
+    # Other subsets of the UK exist in the data, with this being the only one to cover the whole country.
     load.rename(columns={"GB_UKM": "GB"}, inplace=True)
     country_codes = {
         pycountry.countries.lookup(country).alpha_2: pycountry.countries.lookup(country).alpha_3
@@ -63,10 +70,10 @@ def filter_national(load, countries):
     return national
 
 
-def fill_gaps_per_source(model_year_load, all_load, model_year, data_quality_config):
+def fill_gaps_per_source(all_load, model_year, data_quality_config):
     """For each valid data source, fills in all NaNs by interpolation or with data from other years"""
-
-    for source in data_quality_config["entsoe-data-priority"]:
+    source_loads = []
+    for source in data_quality_config["data-source-priority-order"]:
         source_specific_load = all_load.xs(source, level="attribute")
         source_specific_load = _interpolate_gaps(source_specific_load, data_quality_config["interpolate-hours"])
         source_specific_model_year_load = source_specific_load.loc[str(model_year)]
@@ -76,12 +83,13 @@ def fill_gaps_per_source(model_year_load, all_load, model_year, data_quality_con
         if data_quality_config["fill-29th-feb-from-28th"]:
             source_specific_model_year_load = _fill_29th_feb(source_specific_model_year_load, model_year)
 
-        source_specific_model_year_load = _handle_outliers(source_specific_model_year_load, data_quality_config)
-        source_specific_model_year_load = source_specific_model_year_load.assign(attribute=source).set_index("attribute", append=True)
+        source_loads.append(
+            _interpolate_gaps(source_specific_model_year_load, data_quality_config["interpolate-hours"])
+            .assign(attribute=source)
+            .set_index("attribute", append=True)
+        )
 
-        model_year_load.loc[pd.IndexSlice[:, source], :] = source_specific_model_year_load
-
-    return model_year_load
+    return pd.concat(source_loads)
 
 
 def _fill_gaps_from_other_years(model_year_load, all_load, data_quality_config, source, model_year):
@@ -110,18 +118,16 @@ def _fill_missing_data_in_country(country_series, model_year, acceptable_year_di
         (years_with_data <= model_year + acceptable_year_diff_for_gap_filling)
     ]
     def __give_older_years_lower_priority(years):
-        year_order = []
-        for year in years:
-            if year - model_year < 0:
-                year_order.append(abs(year - model_year) + 0.1)
-            else:
-                year_order.append(year - model_year)
-        return year_order
-    preferred_order_of_years_with_data = list(allowed_years_with_data.sort_values(key=__give_older_years_lower_priority, ascending=False))
+        order = (years.values - model_year).astype(float)
+        order[order < 0] -= 0.1 # negative years = older
+        return abs(order)
+
+    preferred_order_of_years_with_data = list(allowed_years_with_data.sort_values(key=__give_older_years_lower_priority))
 
     _missing_timesteps = all_missing_timesteps.copy()
-    while len(_missing_timesteps) > 0 and preferred_order_of_years_with_data != []:
-        next_avail_year = preferred_order_of_years_with_data.pop(0)
+    for next_avail_year in preferred_order_of_years_with_data:
+        if len(_missing_timesteps) == 0:
+            break
         _missing_timesteps = _get_index_of_missing_data(country_series, model_year)
         _missing_timesteps = _ignore_feb_29th(model_year, next_avail_year, _missing_timesteps)
         new_data = country_series.reindex(_missing_timesteps.map(lambda dt: dt.replace(year=next_avail_year)))
@@ -138,7 +144,7 @@ def _get_index_of_missing_data(series, model_year):
 
 
 def _ignore_feb_29th(this_year, next_avail_year, missing_timesteps):
-    """ Ignore February 29th if next available year doesn't have that data available """
+    """ Ignore February 29th if next available year doesn't have that data available."""
     if (calendar.isleap(this_year)
         and not calendar.isleap(next_avail_year)
         and pd.to_datetime(f'{this_year}-02-29').date() in missing_timesteps.date
@@ -168,13 +174,13 @@ def _countries_with_missing_data_in_model_year(data):
     return model_year_missing_data[model_year_missing_data].index
 
 
-def _handle_outliers(load, data_quality_config):
+def filter_outliers(load, data_quality_config):
     normed_load = load / load.mean()
     cleaned_load = load.where(
         (normed_load >= data_quality_config["outlier-data-thresholds"]["relative-to-mean-min"]) &
         (normed_load <= data_quality_config["outlier-data-thresholds"]["relative-to-mean-max"])
     )
-    return _interpolate_gaps(cleaned_load, data_quality_config["interpolate-hours"])
+    return cleaned_load
 
 
 def get_source_choice_per_country(raw_load, gap_filled_load, entsoe_priority):
