@@ -18,4 +18,4 @@ dependencies:
     - atlite=0.2.1
     - pip=21.0.1
     - pip:
-        - -e ../../lib
+        - -e ../../lib[geo]

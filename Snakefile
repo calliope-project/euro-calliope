@@ -1,3 +1,5 @@
+import glob
+
 from snakemake.utils import validate
 
 ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
@@ -21,7 +23,7 @@ BIOFUEL_FEEDSTOCKS = [
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
 include: "./rules/sync.smk"
-localrules: all, raw_load, model, clean, parameterise_template, potentials_zipped
+localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials
 localrules: download_capacity_factors_wind_and_solar
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
@@ -36,6 +38,12 @@ test_dir = f"{root_dir}tests/"
 
 onstart:
     shell("mkdir -p build/logs")
+onsuccess:
+     if "email" in config.keys():
+         shell("echo "" | mail -s 'euro-calliope succeeded' {config[email]}")
+onerror:
+     if "email" in config.keys():
+         shell("echo "" | mail -s 'euro-calliope failed' {config[email]}")
 
 
 rule all:
@@ -48,7 +56,7 @@ rule all:
         "build/logs/national/test-report.html",
 
 
-rule potentials_zipped:
+rule download_potentials:
     message: "Download potential data."
     params: url = config["data-sources"]["potentials"]
     output: protected("data/automatic/raw-potentials.zip")
@@ -58,7 +66,7 @@ rule potentials_zipped:
 
 rule potentials:
     message: "Unzip potentials."
-    input: rules.potentials_zipped.output[0]
+    input: rules.download_potentials.output[0]
     shadow: "minimal"
     output:
         land_eligibility_km2 = "build/data/{resolution}/technical-potential/areas.csv",
@@ -74,7 +82,6 @@ rule parameterise_template:
     message: "Apply config parameters to file {wildcards.template} from templates."
     input:
         script = script_dir + "parameterise_templates.py",
-        filters = script_dir + "filters.py",
         template = template_dir + "{template}",
         biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
             scenario=config["parameters"]["jrc-biofuel"]["scenario"]
@@ -127,7 +134,6 @@ rule locations:
     message: "Generate locations for {wildcards.resolution} resolution."
     input:
         script = script_dir + "locations.py",
-        filters = script_dir + "filters.py",
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
         hydro_capacities = rules.hydro_capacities.output[0],
@@ -148,7 +154,6 @@ rule directional_rooftop_pv:
     message: "Generate override for directional rooftop PV in {wildcards.resolution} resolution."
     input:
         script = script_dir + "directional_rooftop.py",
-        filters = script_dir + "filters.py",
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
     params:
@@ -184,8 +189,8 @@ rule capacity_factors_onshore_wind_and_solar:
     input:
         script = script_dir + "capacityfactors.py",
         locations = rules.units.output[0],
-        ids = ancient("data/automatic/capacityfactors/onshore-locations.tif"),
-        timeseries = ancient("data/automatic/capacityfactors/{technology}-timeseries.nc")
+        timeseries = ancient("data/automatic/capacityfactors/{technology}-timeseries.nc"),
+        coordinates = ancient("data/automatic/capacityfactors/wind-onshore-timeseries.nc")
     params:
         threshold = config["capacity-factors"]["min"],
         year = config["year"],
@@ -204,7 +209,6 @@ rule capacity_factors_offshore:
         script = script_dir + "capacityfactors_offshore.py",
         eez = rules.eez.output[0],
         shared_coast = rules.potentials.output.shared_coast,
-        ids = ancient("data/automatic/capacityfactors/offshore-locations.tif"),
         timeseries = ancient("data/automatic/capacityfactors/wind-offshore-timeseries.nc")
     params:
         threshold = config["capacity-factors"]["min"],
@@ -231,7 +235,7 @@ rule capacity_factors_hydro:
     script: "scripts/capacityfactors_hydro.py"
 
 
-rule raw_load:
+rule download_raw_load:
     message: "Download raw load."
     params: url = config["data-sources"]["load"]
     output: protected("data/automatic/raw-load-data.csv")
@@ -243,7 +247,7 @@ rule electricity_load_national:
     message: "Preprocess raw electricity load data and retrieve load time series per country."
     input:
         script = script_dir + "national_load.py",
-        load = rules.raw_load.output[0]
+        load = rules.download_raw_load.output[0]
     output: "build/data/electricity-demand-national.csv"
     params:
         year = config["year"],
@@ -327,8 +331,16 @@ rule clean: # removes all generated results
     shell:
         """
         rm -r build/
-        echo "Data downloaded to data/ has not been cleaned."
+        echo "Data downloaded to data/automatic/ has not been cleaned."
         """
+
+
+rule docs:
+    message: "Build workflow documentation"
+    input: *glob.glob("docs/source/*")
+    conda: "envs/docs.yaml"
+    output: directory("docs/build/html")
+    shell: "sphinx-build -b html docs/source {output}"
 
 
 rule test:

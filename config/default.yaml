@@ -11,21 +11,21 @@ data-sources:
     load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
     nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
     potentials: https://zenodo.org/record/3533038/files/possibility-for-electricity-autarky.zip
-root-directory: . # point to the root directory if working directory is not root directory
+root-directory: .
 cluster-sync:
     url: euler.ethz.ch
     send-ignore: .syncignore-send
     receive-ignore: .syncignore-receive
     cluster-base-dir: ~/Develop/euro-calliope/
-    local-results-dir: build/euler
-scaling-factors: # values are tuned for models with a few hours resolution and one year duration
-    power: 0.00001 # from MW(h) to 100 GW(h)
-    area: 0.0001 # from km2 to 10,000 km2
-    monetary: 0.000000001 # from EUR to 1 billion EUR
+    local-results-dir: build/cluster
+scaling-factors:
+    power: 0.00001
+    area: 0.0001
+    monetary: 0.000000001
 capacity-factors:
-    min: 0.001 # consider smaller values to be 0; this helps numerics in the LP
-    max: 10 # for hydro reservoirs, leading to a numerical range of 1e5 (hourly resolution)
-    average: # average estimation used to transform annual fixed to variable costs
+    min: 0.001
+    max: 10
+    average:
         pv: 0.139 # median of average 2016 open-field factors for ~2700 points in Europe
         onshore: 0.3021 # median of average 2016 factors for ~2700 points in Europe
         offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
@@ -34,18 +34,18 @@ capacity-factors:
 year: 2016
 crs: "EPSG:4326"
 parameters:
-    maximum-installable-power-density: # this is not the yield, but the density of installed power
-        pv-on-tilted-roofs: 160 # (MW/km^2) from [@Gagnon:2016][@Klauser:2016], i.e. 16% efficiency
-        pv-on-flat-areas: 80 # (MW/km^2) from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
-        onshore-wind: 8 # (MW/km^2) from [@EuropeanEnvironmentAgency:2009]
-        offshore-wind: 15 # (MW/km^2) from [@EuropeanEnvironmentAgency:2009]
+    maximum-installable-power-density:
+        pv-on-tilted-roofs: 160 # from [@Gagnon:2016][@Klauser:2016], i.e. 16% efficiency
+        pv-on-flat-areas: 80 # from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
+        onshore-wind: 8 # from [@EuropeanEnvironmentAgency:2009]
+        offshore-wind: 15 # from [@EuropeanEnvironmentAgency:2009]
     roof-share: # from [@Trondle:2019]
         E: 0.1660
         N: 0.1817
         S: 0.1821
         W: 0.1681
         flat: 0.3020
-    jrc-biofuel:
+    jrc-biofuel: #from [#Ruiz Castello et al:2015]
         scenario: "medium"
         potential-year: "2020"
         cost-year: "2030"
@@ -65,7 +65,7 @@ quality-control:
     hydro:
         scale-phs-according-to-geth-et-al: false
 sea-connections:
-    continental:
+    continental: []
     national: # Source: https://www.entsoe.eu/data/map/
         - [ITA, GRC]
         - [EST, FIN]
@@ -122,7 +122,7 @@ sea-connections:
         - [CYP.1_1, CYP.2_1] # Famagusta and Larnaca
         - [EST.7_1, EST.2_1] # Lääne and Hiiu
         - [EST.7_1, EST.12_1] # Lääne and Saare
-scope:
+scope: #Febin done
     countries:
         - "Austria"
         - "Belgium"
@@ -159,10 +159,10 @@ scope:
         - "Serbia"
         - "Switzerland"
     bounds:
-        x_min: -15.8 # in degrees east
-        x_max: 37  # in degrees east
-        y_min: 30  # in degrees north
-        y_max: 75  # in degrees north
+        x_min: -15.8
+        x_max: 37
+        y_min: 30
+        y_max: 75
 shapes: # This config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
     continental:
         Austria: nuts0
