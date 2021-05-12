@@ -1,4 +1,4 @@
-name: Tests of eurocalliopelib
+name: Tests of eurocalliopelib and scripts
 
 on: [push, pull_request]
 
@@ -16,8 +16,8 @@ jobs:
               with:
                 auto-update-conda: true
                 python-version: 3.8
-                activate-environment: test-eurocalliopelib
-                environment-file: lib/test-requirements.yaml
+                activate-environment: test-eurocalliope
+                environment-file: test-requirements.yaml
             - name: Test with pytest
               run: |
-                pytest ./lib
+                pytest

@@ -133,6 +133,17 @@ As a developer, you may want to run the entire workflow often to spot errors ear
 
 Make sure to run this in a clean working directory. Do not use the working directory in which you are using your normal configuration.
 
+## Run tests of library code and scripts
+
+1. Create a test environment using conda:
+
+    $ conda env create -f test-requirements.yaml
+    $ conda activate test-eurocalliope
+
+2. Run the test suite with py.test:
+
+    $ py.test
+
 ## License
 
 euro-calliope is developed and maintained within the [Calliope project](https://www.callio.pe). The code in this repository is MIT licensed.
