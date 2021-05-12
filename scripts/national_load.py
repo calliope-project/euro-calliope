@@ -70,6 +70,15 @@ def filter_countries(load, countries):
     return national
 
 
+def filter_outliers(load, data_quality_config):
+    normed_load = load / load.mean()
+    cleaned_load = load.where(
+        (normed_load >= data_quality_config["outlier-data-thresholds"]["relative-to-mean-min"]) &
+        (normed_load <= data_quality_config["outlier-data-thresholds"]["relative-to-mean-max"])
+    )
+    return cleaned_load
+
+
 def fill_gaps_per_source(all_load, model_year, data_quality_config):
     """For each valid data source, fills in all NaNs by interpolation or with data from other years"""
     source_loads = []
@@ -117,12 +126,10 @@ def _fill_missing_data_in_country(country_series, model_year, acceptable_year_di
         (years_with_data >= model_year - acceptable_year_diff_for_gap_filling) &
         (years_with_data <= model_year + acceptable_year_diff_for_gap_filling)
     ]
-    def __give_older_years_lower_priority(years):
-        order = (years.values - model_year).astype(float)
-        order[order < 0] -= 0.1 # negative years = older
-        return abs(order)
+    order = (allowed_years_with_data.values - model_year).astype(float)
+    order[order < 0] -= 0.1 # negative years = older
 
-    preferred_order_of_years_with_data = list(allowed_years_with_data.sort_values(key=__give_older_years_lower_priority))
+    preferred_order_of_years_with_data = allowed_years_with_data.sort_values(key=lambda x: abs(order))
 
     _missing_timesteps = all_missing_timesteps.copy()
     for next_avail_year in preferred_order_of_years_with_data:
@@ -133,7 +140,7 @@ def _fill_missing_data_in_country(country_series, model_year, acceptable_year_di
         new_data = country_series.reindex(_missing_timesteps.map(lambda dt: dt.replace(year=next_avail_year)))
         new_data.index = _missing_timesteps
         country_series.update(new_data)
-        fill_years += [str(next_avail_year)]
+        fill_years.append(str(next_avail_year))
 
     return country_series.loc[str(model_year)], len(all_missing_timesteps), fill_years
 
@@ -174,15 +181,6 @@ def _countries_with_missing_data_in_model_year(data):
     return model_year_missing_data[model_year_missing_data].index
 
 
-def filter_outliers(load, data_quality_config):
-    normed_load = load / load.mean()
-    cleaned_load = load.where(
-        (normed_load >= data_quality_config["outlier-data-thresholds"]["relative-to-mean-min"]) &
-        (normed_load <= data_quality_config["outlier-data-thresholds"]["relative-to-mean-max"])
-    )
-    return cleaned_load
-
-
 def get_source_choice_per_country(raw_load, gap_filled_load, entsoe_priority):
     """
     OPSD collects load data from different data sources.
@@ -221,13 +219,15 @@ def get_source_choice_per_country(raw_load, gap_filled_load, entsoe_priority):
 
 
 def _select_load_by_source_priority(load, source_priority):
-    return (
+    load_filtered_by_priority_source = (
         load
-        .stack()
-        .align(source_priority)[0]
-        .unstack('country_code')
-        .droplevel("attribute")
+        .unstack("attribute")
+        .loc[:, source_priority.index]
+        .droplevel("attribute", axis="columns")
     )
+    assert load_filtered_by_priority_source.columns.duplicated().sum() == 0
+
+    return load_filtered_by_priority_source
 
 
 if __name__ == "__main__":
