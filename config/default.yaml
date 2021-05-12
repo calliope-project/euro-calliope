@@ -63,7 +63,7 @@ parameters:
         potential-year: "2020"
         cost-year: "2030"
     biofuel-efficiency: 0.45
-    eat-end-use:
+    heat-end-use:
         carriers: heat  # also could be [space-heat, water-heat]
         space_heat_techs:
             carnot_performance: 0.36  # [Nouvel_2015]
