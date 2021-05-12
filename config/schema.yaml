@@ -224,7 +224,7 @@ properties:
         properties:
             load:
                 type: object
-                descriptions: >
+                description: >
                     Data quality enforcing methods for open-power-system-data.org-derived national load data. These cover, in order:
                         - remove outlier data hours, based on full dataset
                         - select only data for year of interest
