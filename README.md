@@ -106,16 +106,18 @@ You can easily change the units and scale all values using the `scaling-factor` 
 
 * `build/model`: Contains the entire model after the build step, including Calliope definition files and data (does not exist initially).
 * `config`: Files with configuration parameters which influence the model build process.
-* `data`: Small input data used within the model build process.
-* `data/automatic`: Contains data automatically downloaded within the model build process (does not exist initially).
+* `data`: Contains data automatically downloaded within the model build process (does not exist initially).
 * `docs`: Documentation of the model and the build process.
 * `envs`: Files defining the conda environment which are used to build the model.
 * `lib`: Library code in form of a Python package that is reused in many places of this repository.
-* `notebooks`: Notebooks for various data analysis or preparation steps. Not within main workflow.
 * `rules`: Snakemake workflows defining the build process.
 * `scripts`: Contains the scripts to build the model.
 * `templates`: Contains templates of Calliope model files.
 * `tests`: Contains a test usage of the model.
+
+## Associated repositories
+
+Small datasets that are not available for direct download are stored in the [Euro-Calliope datasets repository](https://github.com/calliope-project/euro-calliope-datasets).
 
 ## Run the tests
 
