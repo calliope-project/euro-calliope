@@ -63,6 +63,7 @@ parameters:
         potential-year: "2020"
         cost-year: "2030"
     biofuel-efficiency: 0.45
+    road-vehicle-efficiency: 0.25
 quality-control:
     load:
         acceptable-load-data-gap-hours: 48  # some load data is patchy and we fill it with other years' data if the missing data in a given year is above this many hours.
