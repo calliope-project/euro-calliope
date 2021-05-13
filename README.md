@@ -6,6 +6,7 @@ This repository contains the workflow routines that automatically build models f
 
 [![article DOI](https://img.shields.io/badge/article-10.1016/j.joule.2020.07.018-blue)](https://doi.org/10.1016/j.joule.2020.07.018)
 [![pre-built models DOI](https://img.shields.io/badge/prebuilts-10.5281%2Fzenodo.3949553-blue)](https://doi.org/10.5281/zenodo.3949553)
+[![Documentation Status](https://readthedocs.org/projects/euro-calliope/badge/?version=latest)](https://euro-calliope.readthedocs.io/en/latest/?badge=latest)
 
 ## At a glance
 
