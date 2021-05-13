@@ -2,12 +2,12 @@ name: default
 channels:
     - conda-forge
 dependencies:
-    - python=3.7
-    - ipython
-    - numpy=1.18.5
-    - pandas=1.0.5
+    - python=3.8
+    - ipython=7.21.0
+    - numpy=1.20.2
+    - pandas=1.2.3
     - pycountry=19.8.18
-    - jinja2
+    - jinja2=2.11.3
     - pip=21.0.1
     - pip:
-        - -e ../../lib[geo]
+        - -e ../../lib

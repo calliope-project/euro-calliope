@@ -121,7 +121,7 @@ sea-connections:
         - [CYP.1_1, CYP.2_1] # Famagusta and Larnaca
         - [EST.7_1, EST.2_1] # Lääne and Hiiu
         - [EST.7_1, EST.12_1] # Lääne and Saare
-scope:
+scope: #Febin done
     countries:
         - "Austria"
         - "Belgium"
