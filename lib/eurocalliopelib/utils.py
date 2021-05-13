@@ -63,7 +63,10 @@ def tj_to_twh(array):
     return pj_to_twh(array) * 1e-3
 
 def read_tdf(filename):
-    """ TBA """
+    """ 
+    Read a tidy dataframe from CSV. 
+    This assumes that all except the final column is an index level,  so returns a MultiIndexed Pandas Series. 
+    """
     df = pd.read_csv(filename, header=0)
     tdf = df.set_index([i for i in df.columns[:-1]]).squeeze()
     return tdf
