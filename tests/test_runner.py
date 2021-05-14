@@ -7,7 +7,7 @@ import calliope
 import pandas as pd
 
 
-def run_test(path_to_output, path_to_model, path_to_example_model, paths_to_cf_timeseries, config):
+def run_test(path_to_output, path_to_model, path_to_example_model, paths_to_cf_timeseries, path_to_annual_energy_balances, config):
     exit_code = pytest.main(
         [
             f"--html={path_to_output}",
@@ -18,6 +18,7 @@ def run_test(path_to_output, path_to_model, path_to_example_model, paths_to_cf_t
                 path_to_model=path_to_model,
                 path_to_example_model=path_to_example_model,
                 paths_to_cf_timeseries=paths_to_cf_timeseries,
+                path_to_annual_energy_balances=path_to_annual_energy_balances,
                 config=config
             )
         ]
@@ -25,7 +26,7 @@ def run_test(path_to_output, path_to_model, path_to_example_model, paths_to_cf_t
     sys.exit(exit_code)
 
 
-def _create_config_plugin(path_to_model, path_to_example_model, paths_to_cf_timeseries, config):
+def _create_config_plugin(path_to_model, path_to_example_model, paths_to_cf_timeseries, path_to_annual_energy_balances, config):
     """Creates fixtures from Snakemake configuration."""
 
     class SnakemakeConfigPlugin():
@@ -70,6 +71,10 @@ def _create_config_plugin(path_to_model, path_to_example_model, paths_to_cf_time
             assert len(selected) == 1
             return selected[0]
 
+        @pytest.fixture(scope="module", params=path_to_annual_energy_balances)
+        def annual_energy_balances(self, request):
+            return pd.read_csv(request.param, index_col=0, parse_dates=True)
+
     return SnakemakeConfigPlugin()
 
 
@@ -88,6 +93,7 @@ if __name__ == "__main__":
         path_to_model=snakemake.input.model,
         path_to_example_model=snakemake.input.example_model,
         paths_to_cf_timeseries=snakemake.input.capacity_factor_timeseries,
+        path_to_annual_energy_balances=snakemake.input.annual_energy_balances,
         config=snakemake.params.config,
         path_to_output=snakemake.output[0]
     )

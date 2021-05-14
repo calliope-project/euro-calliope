@@ -21,12 +21,13 @@ BIOFUEL_FEEDSTOCKS = [
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
 include: "./rules/sync.smk"
+include: "./rules/data-processing.smk"
 localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials
 localrules: download_capacity_factors_wind_and_solar
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
 wildcard_constraints:
-        resolution = "((continental)|(national)|(regional))"
+    resolution = "((continental)|(national)|(regional))"
 
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
@@ -37,11 +38,11 @@ test_dir = f"{root_dir}tests/"
 onstart:
     shell("mkdir -p build/logs")
 onsuccess:
-     if "email" in config.keys():
-         shell("echo "" | mail -s 'euro-calliope succeeded' {config[email]}")
+    if "email" in config.keys():
+        shell("echo "" | mail -s 'euro-calliope succeeded' {config[email]}")
 onerror:
-     if "email" in config.keys():
-         shell("echo "" | mail -s 'euro-calliope failed' {config[email]}")
+    if "email" in config.keys():
+        shell("echo "" | mail -s 'euro-calliope failed' {config[email]}")
 
 
 rule all:
@@ -135,7 +136,8 @@ rule locations:
         shapes = rules.units.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
         hydro_capacities = rules.hydro_capacities.output[0],
-        biofuel = "build/data/{{resolution}}/biofuel/{scenario}/potential-mwh-per-year.csv".format(scenario=config["parameters"]["jrc-biofuel"]["scenario"])
+        biofuel = "build/data/{{resolution}}/biofuel/{scenario}/potential-mwh-per-year.csv".format(
+            scenario=config["parameters"]["jrc-biofuel"]["scenario"])
     params:
         flat_roof_share = config["parameters"]["roof-share"]["flat"],
         maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],
@@ -183,7 +185,7 @@ rule download_capacity_factors_wind_and_solar:
 
 rule capacity_factors_onshore_wind_and_solar:
     message: "Generate capacityfactor time series disaggregated by location on "
-             "{wildcards.resolution} resolution for {wildcards.technology}."
+    "{wildcards.resolution} resolution for {wildcards.technology}."
     input:
         script = script_dir + "capacityfactors.py",
         locations = rules.units.output[0],
@@ -202,7 +204,7 @@ rule capacity_factors_onshore_wind_and_solar:
 
 rule capacity_factors_offshore:
     message: "Generate capacityfactor time series disaggregated by location on "
-             "{wildcards.resolution} resolution for wind-offshore."
+    "{wildcards.resolution} resolution for wind-offshore."
     input:
         script = script_dir + "capacityfactors_offshore.py",
         eez = rules.eez.output[0],
@@ -341,13 +343,15 @@ rule test:
         test_dir + "test_runner.py",
         test_dir + "test_model.py",
         test_dir + "test_capacityfactors.py",
+        test_dir + "test_dataprocessing.py",
         "build/logs/{resolution}/model.done",
         model = test_dir + "resources/{resolution}/model.yaml",
         example_model = "build/model/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES + ["hydro-ror", "hydro-reservoir-inflow"]
-        )
+        ),
+        annual_energy_balances = "build/data/annual-energy-balances.csv"
     params:
         config = config
     output: "build/logs/{resolution}/test-report.html"
