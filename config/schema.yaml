@@ -79,23 +79,23 @@ properties:
                 description: Path to local folder into which results from cluster are downloaded (relative to workdir).
     scaling-factors:
         type: object
-        description: values are tuned for models with a few hours resolution and one year duration
+        description: Factors to scale the optimisation problem to decrease its numerical range.
         properties:
             power:
                 type: number
-                description: from MW(h) to 100 GW(h)
+                description: "Applied to all quantities of energy and power (base: MW(h))."
             area:
                 type: number
-                description: from km2 to 10,000 km2
+                description: "Applied to all quantities of area (base: km2)."
             monetary:
                 type: number
-                description: from EUR to 1 billion EUR
+                description: "Applied to all quantities of monetary cost (base: EUR)."
     parameters:
         type: object
         properties:
             maximum-installable-power-density:
                 type: object
-                description: This is not the yield, but the density of installed power
+                description: Installable capacity density in MW/km^2 (not annual energy yield).
                 properties:
                     pv-on-tilted-roofs:
                         type: number
@@ -266,10 +266,10 @@ properties:
         properties:
             min:
                 type: number
-                description: Consider smaller values to be 0; this helps numerics in the LP
+                description: Set smaller values to 0; this helps numerics in the LP.
             max:
                 type: number
-                description: For hydro reservoirs, leading to a numerical range of 1e5 (hourly resolution)
+                description: Cap larger values; this helps numerics in the LP (hydro reservoir can have > 1).
             average:
                 type: object
                 description: Average estimation used to transform annual fixed to variable costs
