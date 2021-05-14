@@ -27,7 +27,7 @@ def generate_annual_energy_balance_nc(
     # Names for each consumption category/sub-category and carriers have been prepared by hand
     cat_names = pd.read_csv(path_to_cat_names, header=0, index_col=0)
     carrier_names = pd.read_csv(path_to_carrier_names, header=0, index_col=0)
-    country_codes = [utils.get_alpha2(i, eurostat=True) for i in countries]
+    country_codes = [utils.convert_country_code(i, output="alpha2_eurostat") for i in countries]
 
     df = pd.read_csv(path_to_input, delimiter="\t", index_col=0)
     df.index = df.index.str.split(",", expand=True).rename(
@@ -267,7 +267,7 @@ def get_ch_industry_energy_balance(path_to_excel):
 
 if __name__ == "__main__":
     generate_annual_energy_balance_nc(
-        path_to_input=snakemake.input.energy_balance,
+        path_to_input=snakemake.input.eurostat_energy_balance,
         path_to_ch_excel=snakemake.input.ch_energy_balance,
         path_to_ch_industry_excel=snakemake.input.ch_industry_energy_balance,
         path_to_cat_names=snakemake.input.cat_names,

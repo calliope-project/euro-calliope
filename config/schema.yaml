@@ -9,30 +9,9 @@ properties:
     data-sources:
         type: object
         properties:
-            eurostat:
-                type: object
-                properties:
-                    base-url:
-                        type: string
-                        description: Base UR for Eurostat data
-                    energy-balance:
-                        type: string
-                        description: Eurostat table name for energy balances
-                    hh-end-use:
-                        type: string
-                        description: Eurostat table name for end uses
-                    freight:
-                        type: string
-                        description: Eurostat table name for freight
-                    employees:
-                        type: string
-                        description: Eurostat table name for employees
-                    gva:
-                        type: string
-                        description: Eurostat table name for gva
-                    dwellings:
-                        type: string
-                        description: Eurostat table name for dwellings
+            eurostat-base-url:
+                type: string
+                description: Base URL for Eurostat data
             swiss-stat:
                 type: object
                 properties:
