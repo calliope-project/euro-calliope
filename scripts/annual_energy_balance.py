@@ -48,6 +48,9 @@ def generate_annual_energy_balance_nc(
 
 
 def add_ch_energy_balance(path_to_ch_excel, path_to_ch_industry_excel, index_levels):
+    """
+    Process Swiss data into a tidy dataframe that matches the structure of the annual energy balances.
+    """
     ch_hh_energy_use = get_ch_energy_balance_sheet(
         path_to_ch_excel, "T17a", skipfooter=9, cat_code="FC_OTH_HH_E"
     )
@@ -83,6 +86,16 @@ def add_ch_energy_balance(path_to_ch_excel, path_to_ch_industry_excel, index_lev
 
 
 def get_ch_energy_balance_sheet(path_to_excel, sheet, skipfooter, cat_code):
+    """
+    Get energy balance data per sector, which requires translating energy carrier
+    names and removing footnotes that are in the spreadsheet
+
+    Parameters
+    ----------
+    sheet : sheet name in the excel
+    skipfooter : number of footer rows to ignore which correspond to footnotes in the sheet
+    cat_code : sector (category) for which the sheet has data, corresponding to eurostat sectors.
+    """
     ch_energy_carriers = {
         "Erdölprodukte": "O4000XBIO",
         "Elektrizität": "E7000",
@@ -152,6 +165,12 @@ def get_ch_waste_consumption(path_to_excel):
 
 
 def get_ch_transport_energy_balance(path_to_excel):
+    """
+    Swiss transport sector energy balance sheet is structured differently to the other sectors, requiring inference of what end uses the fuels are for (road, rail, and aviation).
+    ASSUME: petrol, diesel, and gas for road transport.
+    ASSUME: electricity for rail.
+    ASSUME: kerosene for aviation.
+    """
     carriers = {
         "Elektrizität": "E7000",
         "Gas übriger Vekehr": "G3000",
@@ -198,6 +217,11 @@ def get_ch_transport_energy_balance(path_to_excel):
 
 
 def get_ch_industry_energy_balance(path_to_excel):
+    """
+    Industry subsector energy balances are in a completely different spreadsheet,
+    which are processed here.
+    ASSUME: some translations are not perfect matches to eurostat energy carriers.
+    """
     ch_subsectors = {
         1: "FC_IND_FBT_E",  # 'Food, beverages & tobacco',
         2: "FC_IND_TL_E",  # 'Textile & leather',
@@ -209,7 +233,8 @@ def get_ch_industry_energy_balance(path_to_excel):
         8: "FC_IND_NFM_E",  # 'Non-ferrous metals',
         9: "FC_IND_MAC_E",  # 'Machinery',
         10: "FC_IND_MAC_E",  # 'Machinery',
-        11: "FC_IND_NSP_E",  # 'Not elsewhere specified (industry)', 'Wood & wood products, Mining & quarrying, Transport equipment
+        # 'Not elsewhere specified (industry)', 'Wood & wood products, Mining & quarrying, Transport equipment
+        11: "FC_IND_NSP_E",
         12: "FC_IND_CON_E",  # 'Construction'
     }
 
