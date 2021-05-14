@@ -10,8 +10,8 @@ from eurocalliopelib.utils import convert_country_code
         ("el", "GRC", "alpha3"),
         ("de", "DEU", "alpha3"),
         ("Germany", "DE", "alpha2"),
-        ("Great Britain", "GB", "alpha2"),
-        ("Great Britain", "UK", "alpha2_eurostat"),
+        ("United Kingdom", "GB", "alpha2"),
+        ("United Kingdom", "UK", "alpha2_eurostat"),
         ("Greece", "GR", "alpha2"),
         ("Greece", "EL", "alpha2_eurostat"),
         ("bh", "BA", "alpha2"),
@@ -28,7 +28,7 @@ def test_country_code_conversion(input_country, iso3166, output):
         ("el", "GRC"),
         ("de", "DEU"),
         ("Germany", "DEU"),
-        ("Great Britain", "GBR"),
+        ("United Kingdom", "GBR"),
     ],
 )
 def test_country_code_conversion_no_output_specified(input_country, iso3166):
