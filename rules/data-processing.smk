@@ -31,7 +31,7 @@ rule annual_energy_balances:
         ch_industry_energy_balance = "data/automatic/ch-industry-energy-balance.xlsx",
         cat_names = config["data-sources"]["energy-balance-category-names"],
         carrier_names = config["data-sources"]["energy-balance-carrier-names"]
-    output: "build/annual_energy_balances.csv"
+    output: "build/data/annual-energy-balances.csv"
     params:
         countries = config["scope"]["countries"]
     conda: "../envs/default.yaml"

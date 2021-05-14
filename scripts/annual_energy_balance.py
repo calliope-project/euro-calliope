@@ -29,13 +29,9 @@ def generate_annual_energy_balance_nc(
     carrier_names = pd.read_csv(path_to_carrier_names, header=0, index_col=0)
     country_codes = [utils.convert_country_code(i, output="alpha2_eurostat") for i in countries]
 
-    df = pd.read_csv(path_to_input, delimiter="\t", index_col=0)
-    df.index = df.index.str.split(",", expand=True).rename(
-        ["cat_code", "carrier_code", "unit", "country"]
-    )  # comes as 'nrg_bal,siec,unit,geo\\time'
-    df.columns = df.columns.astype(int).rename("year")
-    df = df.transform(utils.to_numeric)
-    df = df.reorder_levels(["cat_code", "carrier_code", "unit", "country"])
+    index_names = ["cat_code", "carrier_code", "unit", "country"]
+    df = utils.read_eurostat_tsv(path_to_input, index_names)
+    df = df.reorder_levels(index_names)
     df = df.loc[
         idx[cat_names.index, carrier_names.index, "TJ", country_codes], :
     ].dropna(how="all")
@@ -70,9 +66,7 @@ def add_ch_energy_balance(path_to_ch_excel, path_to_ch_industry_excel, index_lev
 
     ch_energy_use_tdf = pd.concat(
         [
-            i.reset_index("year")
-            .assign(country="CH", unit="TJ")
-            .set_index(["year", "country", "unit"], append=True)
+            utils.add_idx_level(i, country="CH", unit="TJ")
             .reorder_levels(index_levels)
             for i in [
                 ch_hh_energy_use,
@@ -101,7 +95,6 @@ def get_ch_energy_balance_sheet(path_to_excel, sheet, skipfooter, cat_code):
         "Total\n= %": "TOTAL",
     }
     # Footnote labels lead to some strings randomly ending in numbers; we remove them here
-    remove_digits = str.maketrans("", "", digits)
     _df = (
         pd.read_excel(
             path_to_excel,
@@ -118,17 +111,16 @@ def get_ch_energy_balance_sheet(path_to_excel, sheet, skipfooter, cat_code):
     )
     _df.columns = (
         _df.columns.get_level_values(0)
-        .str.translate(remove_digits)
+        .str.translate(utils.remove_digits())
         .map(ch_energy_carriers)
         .rename("carrier_code")
     )
     _df.index.rename("year", inplace=True)
 
     _df = (
-        _df.apply(utils.to_numeric)
+        utils.add_idx_level(_df, cat_code=cat_code)
+        .apply(utils.to_numeric)
         .astype(float)
-        .assign(cat_code=cat_code)
-        .set_index("cat_code", append=True)
         .stack()
     )
 
@@ -149,13 +141,12 @@ def get_ch_waste_consumption(path_to_excel):
         header=[0, 1],
         skipfooter=8,
     )[("Consommation d'énergie (GWh)", "Ordures")]
-    waste_stream_tj = waste_stream_gwh.apply(utils.gwh_to_tj)
     waste_stream_tdf = (
-        waste_stream_tj.to_frame("W6100_6220")  # carrier code
-        .rename_axis(index="year", columns="carrier_code")
-        .assign(cat_code="TI_EHG_E")  # cat code
-        .set_index("cat_code", append=True)
-        .stack()
+        utils.add_idx_level(
+            waste_stream_gwh.rename_axis(index="year"),
+            carrier_code="W6100_6220", cat_code="TI_EHG_E"
+        )
+        .apply(utils.gwh_to_tj)
     )
     return waste_stream_tdf
 
@@ -186,12 +177,11 @@ def get_ch_transport_energy_balance(path_to_excel):
         header=[0, 1, 2, 3, 4],
     ).xs("TJ", level=-1, axis=1)
     # Footnote labels lead to some strings randomly ending in numbers; we remove them here
-    remove_digits = str.maketrans("", "", digits)
     # carrier names span across two column levels, which we merge with fillna
     carrier_name_func = (
         lambda x: _df.columns.to_frame()
         .iloc[:, x]
-        .str.translate(remove_digits)
+        .str.translate(utils.remove_digits())
         .map(carriers)
     )
     _df.columns = carrier_name_func(0).fillna(carrier_name_func(1)).values
@@ -202,11 +192,7 @@ def get_ch_transport_energy_balance(path_to_excel):
         .apply(utils.to_numeric)
         .rename_axis(index="year", columns="carrier_code")
     )
-    _df = (
-        _df.T.assign(cat_code=_df.columns.map(categories))
-        .set_index("cat_code", append=True)
-        .stack()
-    )
+    _df = utils.add_idx_level(_df.T, cat_code=_df.columns.map(categories)).stack()
 
     return _df
 
@@ -260,7 +246,7 @@ def get_ch_industry_energy_balance(path_to_excel):
         .map(ch_subsectors)
     )
     # combine any data that now has the same cat_code or carrier_code by using groupby
-    df = df.groupby(axis=1, level=0).sum().groupby(level=[0, 1]).sum()
+    df = df.groupby(axis=1, level="cat_code").sum().groupby(level=["carrier_code", "year"]).sum()
 
     return df.stack()
 
