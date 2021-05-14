@@ -1,0 +1,20 @@
+techs:
+    electric_hob:
+        essentials:
+            name: Electric cooking element
+            parent: conversion
+            carrier_in: electricity
+            carrier_out: cooking
+        constraints:
+            energy_eff: {{ heat.cooking_techs.electricity_eff }}
+            lifetime: 20
+
+    gas_hob:
+        essentials:
+            name: Electric cooking element
+            parent: conversion
+            carrier_in: methane
+            carrier_out: cooking
+        constraints:
+            energy_eff: {{ heat.cooking_techs.gas_eff }}
+            lifetime: 20
