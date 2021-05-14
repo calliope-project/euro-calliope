@@ -98,7 +98,7 @@ def scale_phs_acording_to_geth(stations, path_to_geth_national_capacities):
 
 def read_national_phs_storage_capacities(path_to_data):
     data = pd.read_csv(path_to_data, index_col=0)
-    data.index = data.index.map(utils.convert_country_code
+    data.index = data.index.map(utils.convert_country_code)
     return (
         data["storage-capacity-gwh"]
         .mul(1000)
@@ -112,7 +112,7 @@ def drop_stations_without_installed_capacity(stations):
 
 
 def fix_station_country_code(stations):
-    stationsconvert_country_code["country_code"] = stations.country_code.apply(utils.eu_country_code_to_iso3)
+    stations["country_code"] = stations.country_code.apply(utils.convert_country_code)
     return stations
 
 
