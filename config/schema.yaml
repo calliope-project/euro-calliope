@@ -9,45 +9,30 @@ properties:
     data-sources:
         type: object
         properties:
-            eurostat:
-                type: object
-                properties:
-                    base-url:
-                        type: string
-                        description: Base UR for Eurostat data
-                    energy-balance:
-                        type: string
-                        description: Eurostat table name for energy balances
-                    hh-end-use:
-                        type: string
-                        description: Eurostat table name for end uses
-                    freight:
-                        type: string
-                        description: Eurostat table name for freight
-                    employees:
-                        type: string
-                        description: Eurostat table name for employees
-                    gva:
-                        type: string
-                        description: Eurostat table name for gva
-                    dwellings:
-                        type: string
-                        description: Eurostat table name for dwellings
+            eurostat-base-url:
+                type: string
+                pattern: ^(https?|http?):\/\/.+{dataset}.tsv.gz$
+                description: Base URL for Eurostat data
             swiss-stat:
+                description: Set of data sources for Swiss-specific data 
                 type: object
                 properties:
                     end-use:
                         type: string
-                        description: Swiss-stat table name for end uses
+                        pattern: ^(https?|http?):\/\/.+
+                        description: Source of Swiss annual end use energy consumption
                     energy-balance:
                         type: string
-                        description: Swiss-stat table name for energy balances
+                        pattern: ^(https?|http?):\/\/.+
+                        description: Source of Swiss annual energy balances, broadly equivalent to Eurostat energy balances
                     industry-energy-balance:
                         type: string
-                        description: Swiss-stat table name for industrial energy balances
+                        pattern: ^(https?|http?):\/\/.+
+                        description: Source of Swiss annual industry sub-sector energy balances
                     gva:
                         type: string
-                        description: Swiss-stat table name for gva
+                        pattern: ^(https?|http?):\/\/.+
+                        description: Source of Swiss Gross Added Value per canton (NUTS3 administrative level)
             biofuel-potentials:
                 type: string
                 pattern: .*{feedstock}.*\.csv$

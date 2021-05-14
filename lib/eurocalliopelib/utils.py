@@ -3,36 +3,39 @@ import pycountry
 import pandas as pd
 
 
-def eu_country_code_to_iso3(eu_country_code):
-    """Converts EU country code to ISO 3166 alpha 3.
-    The European Union uses its own country codes, which often but not always match ISO 3166.
+def convert_country_code(input_country, output="alpha3"):
     """
-    assert (
-        len(eu_country_code) == 2
-    ), "EU country codes are of length 2, yours is '{}'.".format(eu_country_code)
-    if eu_country_code.lower() == "el":
-        iso2 = "gr"
-    elif eu_country_code.lower() == "uk":
-        iso2 = "gb"
+    Converts input country code or name into either either a 2- or 3-letter code.
+
+    ISO alpha2: alpha2
+    ISO alpha2 with Eurostat codes: alpha2_eurostat
+    ISO alpha3: alpha3
+
+    """
+
+    if input_country.lower() == "el":
+        input_country = "gr"
+    elif input_country.lower() == "uk":
+        input_country = "gb"
     elif (
-        eu_country_code.lower() == "bh"
+        input_country.lower() == "bh"
     ):  # this is a weird country code used in the biofuels dataset
-        iso2 = "ba"
-    else:
-        iso2 = eu_country_code
-    return pycountry.countries.lookup(iso2).alpha_3
+        input_country = "ba"
 
+    if output == "alpha2":
+        return pycountry.countries.lookup(input_country).alpha_2
 
-def get_alpha2(country, eurostat=True):
-    """
-    Returns the alpha-2 ISO country code for the given country.
-    """
-    if country in ["United Kingdom", "GB", "GBR"] and eurostat is True:
-        return "UK"
-    elif country in ["Greece", "GR", "GRC"] and eurostat is True:
-        return "EL"
-    else:
-        return pycountry.countries.lookup(country).alpha_2
+    if output == "alpha2_eurostat":
+        result = pycountry.countries.lookup(input_country).alpha_2
+        if result == "GB":
+            return "UK"
+        elif result == "GR":
+            return "EL"
+        else:
+            return result
+
+    if output == "alpha3":
+        return pycountry.countries.lookup(input_country).alpha_3
 
 
 def to_numeric(series):

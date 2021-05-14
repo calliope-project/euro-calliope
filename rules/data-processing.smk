@@ -7,55 +7,34 @@ script_dir = f"{root_dir}scripts/"
 
 
 rule eurostat_data_tsv:
-    message: "Get various datasets from Eurostat"
-    output:
-        energy_balance = protected("data/automatic/annual_energy_balances.tsv.gz"),
-        hh_end_use = protected("data/automatic/hh_end_use.tsv.gz"),
-        freight = protected("data/automatic/freight.tsv.gz"),
-        employees = protected("data/automatic/employees.tsv.gz"),
-        gva = protected("data/automatic/gva.tsv.gz"),
-        dwellings = protected("data/automatic/dwellings.tsv.gz"),
-    shell:
-        """
-        curl -sLo {output.energy_balance} '{config[data-sources][eurostat][base-url]}{config[data-sources][eurostat][energy-balance]}.tsv.gz'
-        curl -sLo {output.hh_end_use} '{config[data-sources][eurostat][base-url]}{config[data-sources][eurostat][hh-end-use]}.tsv.gz'
-        curl -sLo {output.freight} '{config[data-sources][eurostat][base-url]}{config[data-sources][eurostat][freight]}.tsv.gz'
-        curl -sLo {output.employees} '{config[data-sources][eurostat][base-url]}{config[data-sources][eurostat][employees]}.tsv.gz'
-        curl -sLo {output.gva} '{config[data-sources][eurostat][base-url]}{config[data-sources][eurostat][gva]}.tsv.gz'
-        curl -sLo {output.dwellings} '{config[data-sources][eurostat][base-url]}{config[data-sources][eurostat][dwellings]}.tsv.gz'
-        """
+    message: "Get {wildcards.dataset} from Eurostat"
+    params:
+        url = lambda wildcards: config["data-sources"]["eurostat-base-url"].format(dataset=wildcards.dataset)
+    output: protected("data/automatic/eurostat-{dataset}.tsv.gz")
+    shell: "curl -sLo {output} {params.url}"
 
 
 rule ch_data_xlsx:
-    message: "Get Swiss annual energy balances and household end uses"
-    output:
-        energy_balance = protected("data/automatic/ch_annual_energy_balances.xlsx"),
-        industry_energy_balance = protected("data/automatic/ch_annual_industry_energy_balances.xlsx"),
-        end_use = protected("data/automatic/ch_hh_end_use.xlsx"),
-        gva = protected("data/automatic/ch_gva.xlsx")
-    shell:
-        """
-        curl -sLo {output.energy_balance} '{config[data-sources][swiss-stat][energy-balance]}'
-        curl -sLo {output.industry_energy_balance} '{config[data-sources][swiss-stat][industry-energy-balance]}'
-        curl -sLo {output.end_use} '{config[data-sources][swiss-stat][end-use]}'
-        curl -sLo {output.gva} '{config[data-sources][swiss-stat][gva]}'
-        """
+    message: "Get {wildcards.dataset} from Swiss statistics"
+    params:
+        url = lambda wildcards: config["data-sources"]["swiss-stat"][wildcards.dataset]
+    output: protected("data/automatic/ch-{dataset}.xlsx")
+    shell: "curl -sLo {output} {params.url}"
 
 
 rule annual_energy_balances:
     message: "Process annual energy balances from Eurostat and Switzerland-specific data"
     input:
         src = script_dir + "annual_energy_balance.py",
-        energy_balance = rules.eurostat_data_tsv.output.energy_balance,
-        ch_energy_balance = rules.ch_data_xlsx.output.energy_balance,
-        ch_industry_energy_balance = rules.ch_data_xlsx.output.industry_energy_balance,
-        cat_names = "data/energy_balance_category_names.csv",
-        carrier_names = "data/energy_balance_carrier_names.csv"
+        eurostat_energy_balance = "data/automatic/eurostat-nrg_bal_c.tsv.gz",
+        ch_energy_balance = "data/automatic/ch-energy-balance.xlsx",
+        ch_industry_energy_balance = "data/automatic/ch-industry-energy-balance.xlsx",
+        cat_names = config["data-sources"]["energy-balance-category-names"],
+        carrier_names = config["data-sources"]["energy-balance-carrier-names"]
     output: "build/annual_energy_balances.csv"
     params:
         countries = config["scope"]["countries"]
     conda: "../envs/default.yaml"
-    shadow: "minimal"
     script: "../scripts/annual_energy_balance.py"
 
 
