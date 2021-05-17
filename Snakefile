@@ -169,20 +169,19 @@ rule nuclear_regional_capacity:
     message: "Calculate proportion of future planned nuclear capacity will be installed in each"
              " {wildcards.resolution} region, based on location of existing capacity"
     input:
-        src = "src/nuclear_capacity.py",
+        script = script_dir + "nuclear_capacity.py",
         power_plant_database = rules.jrc_power_plant_database.output[0],
         nuclear_capacity = "data/nuclear_capacity_2050.csv",
         shapes = landeligibility("build/{resolution}/units.geojson")
     conda: "envs/geo.yaml"
     output: "build/data/{resolution}/nuclear_capacity_2050.csv"
-    script: "src/nuclear_capacity.py"
+    script: "../scripts/nuclear_capacity.py"
 
 
 rule locations:
     message: "Generate locations for {wildcards.resolution} resolution."
     input:
         script = script_dir + "locations.py",
-        filters = "src/filters.py",
         shapes = landeligibility("build/{resolution}/units.geojson"),
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
         hydro_capacities = rules.hydro_capacities.output[0],
@@ -204,7 +203,6 @@ rule directional_rooftop_pv:
     message: "Generate override for directional rooftop PV in {wildcards.resolution} resolution."
     input:
         script = script_dir + "directional_rooftop.py",
-        filters = "src/filters.py",
         shapes = landeligibility("build/{resolution}/units.geojson"),
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
     params:
