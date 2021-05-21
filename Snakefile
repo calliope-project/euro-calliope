@@ -175,7 +175,7 @@ rule nuclear_regional_capacity:
         shapes = landeligibility("build/{resolution}/units.geojson")
     conda: "envs/geo.yaml"
     output: "build/data/{resolution}/nuclear_capacity_2050.csv"
-    script: "../scripts/nuclear_capacity.py"
+    script: "scripts/nuclear_capacity.py"
 
 
 rule locations:
