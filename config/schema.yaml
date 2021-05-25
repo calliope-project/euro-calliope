@@ -318,7 +318,7 @@ properties:
     shapes:
         type: object
         propertyNames:
-            enum: [continental, national, regional]
+            enum: [continental, national, regional, eurospores]
         additionalProperties: false
         patternProperties:
             ^[a-zA-Z]+.*$:
