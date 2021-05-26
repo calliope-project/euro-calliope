@@ -17,11 +17,11 @@ techs:
                 #carrier_out_4.naphtha: 0.163  # MWh_naphtha/MWh_in
             lifetime: 25
         costs:
-            monetary:
+            monetary:  # including 50% Naptha into 'diesel' output leads to ~0.195 MWh_diesel / MWh_biofuel
                 # TODO: sense check energy_cap vs om_annual costs (does the difference make sense?)
-                energy_cap: {{ 3.46e6 * 0.1 / (0.017 + 0.163 + 0.118) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }} | 3.46MEur/MW_liquids/year * 0.1 MW_diesel/MW_in / 0.253 MW_liquids/MW_in
-                om_annual: {{ 104e3 * 0.1 / (0.017 + 0.163 + 0.118) * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel/year") }} | 104kEur/MW_liquids/year * 0.1 MW_diesel/MW_in / 0.253 MW_liquids/MW_in
-                om_prod: {{ 1.063 * 0.1 / (0.017 + 0.163 + 0.118) * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }} | 1.063Eur/MWh_liquids * 0.1 MWh_diesel/MWh_in / 0.253 MWh_liquids/MWh_in
+                energy_cap: {{ 3.46e6 / (0.118 + 0.163 / 2) * (0.017 + 0.163 + 0.118) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }} | 3.46MEur/MW_liquids/year / 0.195 MW_diesel/MW_in * 0.299 MW_liquids/MW_in
+                om_annual: {{ 104e3 / (0.118 + 0.163 / 2) * (0.017 + 0.163 + 0.118) * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel/year") }} | 104kEur/MW_liquids/year / 0.195 MW_diesel/MW_in * 0.299 MW_liquids/MW_in
+                om_prod: {{ 1.063 / (0.118 + 0.163 / 2) * (0.017 + 0.163 + 0.118) * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }} | 1.063Eur/MWh_liquids / 0.195 MWh_diesel/MWh_in * 0.299 MWh_liquids/MWh_in
 
     hydrogen_to_liquids: # [Danish energy agency, renewable fuels, 102 Hydrogen to Jet, 2050]
         essentials:
@@ -50,28 +50,26 @@ techs:
                 om_annual: {{ 7.4 * 8000 / 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_kerosene/year") }} | 7.4Eur/MWh_liquids * 8000h_operation/year / 0.6MW_kerosene/MW_liquids
                 om_prod: {{ 2.1 / 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_kerosene") }} | 2.1Eur/MWh_liquids / MWh_kerosene/MWh_liquids
 
-    biofuel_to_diesel: # [Danish energy agency, renewable fuels, 101 Catalytic Hydropyrolysis 2 + 100 Hydrothermal liquifaction, 2050]
+    # ASSUME: ignore electricity input, as it is 1% of the input energy requirements.
+    biofuel_to_diesel: # [Danish energy agency, renewable fuels, 101 Catalytic Hydropyrolysis 2, 2050]
         essentials:
             name: Biofuel to vehicle fuel (we only consider diesel) converter
-            parent: conversion_plus
+            parent: conversion
             carrier_in: biofuel
-            carrier_in_2: electricity
-            primary_carrier_in: biofuel
             carrier_out: diesel
         constraints:
-            carrier_ratios:  # MWh_diesel == (MWh_diesel + MWh_gasoline)
-                carrier_in.biofuel: {{ (0.95 / 0.82) * (0.99 / 0.6) }}  # {{ 1 | unit("MWh_biofuel/MWh_diesel") }} | (0.95MWh_biomass/MWh_in100 / 0.82MWh_bio-oil/MWh_in100) + (0.99MWh_bio-oil/MWh_in101 / 0.6 MWh_diesel/MWh_in101)
-                carrier_in_2.electricity: {{ (0.01 / 0.82) * (0.99 / 0.6) + (0.05 / 0.6) }}  # {{ 1 | unit("MWhe/MWh_diesel") }} | (0.01MWhe/MWh_in100 / 0.82MWh_bio-oil/MWh_in100) + (0.99MWh_bio-oil/MWh_in101 / 0.6 MWh_diesel/MWh_in101)) + 0.05MWhe/MWh_diesel
-                # carrier_out.diesel: 1  # will be set as 1 automatically
+            energy_eff: 0.6  # {{ 1 | unit("MWh_diesel/MWh_biofuel") }}
             lifetime: 20
         costs:
             monetary:
-                energy_cap: {{ (1.1 + 0.93) * 1e6 / 0.6 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }} | (1.1 bio oil plant + 0.93 hydropyrolysis plant) / 0.6MWh_diesel/MWh_biooil
-                om_annual: {{ (0.063 + 0.027) * 1e6 / 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel/year") }} | (0.063 bio oil plant + 0.027 hydropyrolysis plant) / 0.6MWh_diesel/MWh_biooil
+                energy_cap: {{ 0.93 * 1e6 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }}
+                om_annual: {{ 0.027 * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel/year") }}
                 # TODO: triple check this: the number seems too high...
-                om_prod: {{ (14.013 + 1.31) / 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_diesel") }} | (14.013Eur/MWh_biooil liquifaction + 1.31Eur/MWh_biooil hydropyrolysis plant) / 0.6MWh_diesel/MWh_biooil
+                om_prod: {{ 1.31 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_diesel") }}
 
+    # ASSUME: we now ignore this technology, as its liquid outputs would require additional refinement for use as input hydrocarbons. See https://ens.dk/sites/ens.dk/files/Analyser/technology_data_for_renewable_fuels.pdf p.237
     biofuel_to_gas_and_liquids: # [Danish energy agency, renewable fuels, 101 Catalytic Hydropyrolysis 1, 2050]
+        exists: false
         essentials:
             name: Biofuel to liquid and gas fuels converter
             parent: conversion_plus
