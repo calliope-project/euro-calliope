@@ -1,4 +1,5 @@
 techs:
+    # ASSUME: Naptha production can be diverted to kerosene and diesel production, in equal measure.
     biofuel_to_liquids: # [Danish energy agency, renewable fuels, 85 Gasif. Ent. Flow FT, liq fu, 2050]
         essentials:
             name: Biofuel to liquid fuels converter
