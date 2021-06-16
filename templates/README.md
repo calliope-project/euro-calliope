@@ -24,7 +24,7 @@ conda activate euro-calliope
 There are three models in this directory -- one for each of the three spatial resolutions continental, national, and regional. You can run all three models out-of-the-box, but you may want to modify the model. By default, the model runs for the first day of January only. To run the example model on the continental resolution type:
 
 ```Bash
-$ calliope run ./continental/example-model.yaml
+$ calliope run ./continental/example-model.yaml --scenario=etri-renewable-cost,etri-hydro-cost
 ```
 
 For more information on how to use and modify Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io).

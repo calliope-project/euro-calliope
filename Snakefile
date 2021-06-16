@@ -93,7 +93,7 @@ rule parameterise_template:
         biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
     output: "build/model/{template}"
     wildcard_constraints:
-        template = "((link-techs.yaml)|(storage-techs.yaml)|(demand-techs.yaml)|(renewable-techs.yaml)|(README.md)|(environment.yaml)|(interest-rate.yaml))"
+        template = "((link-techs.yaml)|(storage-techs.yaml)|(demand-techs.yaml)|(renewable-techs.yaml)|(README.md)|(environment.yaml)|(interest-rate.yaml)|(cost-overrides.yaml))"
     conda: "envs/default.yaml"
     script: "scripts/parameterise_templates.py"
 
