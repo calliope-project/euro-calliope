@@ -90,7 +90,7 @@ After a successful full build (see "Build the model"), the following files will 
 ├── interest-rate.yaml                     <- Interest rate of all capacities.
 ├── link-techs.yaml                        <- Definition of link technologies.
 ├── README.md                              <- Documentation.
-├── cost-overrides .yaml                   <- Cost data from different sources.
+├── tech-costs.yaml                        <- Definition of cost data.
 ├── renewable-techs.yaml                   <- Definition of supply technologies.
 └── storage-techs.yaml                     <- Definition of storage technologies.
 ```

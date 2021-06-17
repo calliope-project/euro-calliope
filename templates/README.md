@@ -34,10 +34,20 @@ For more information on how to use and modify Calliope models, see [Calliope's d
 Calliope [overrides](https://calliope.readthedocs.io/en/stable/user/building.html#scenarios-and-overrides) allow to easily manipulate models. An override named `freeze-hydro-capacities` can be used for example in this way:
 
 ```bash
-calliope run build/model/continental/example-model.yaml --scenario=freeze-hydro-capacities
+calliope run build/model/continental/example-model.yaml --scenario=etri-renewable-cost,etri-hydro-cost
 ```
 
 You can define your own overrides to manipulate any model component. The following overrides are built into euro-calliope:
+
+> cost assumptions
+
+By default, no cost or lifetime is specified for renewable technologies in euro-calliope. 
+
+Either `etri-renewable-cost` or  `dea-renewable-cost` have to be chosen as an override to specify the cost for solar PV, wind power and biomass using data from either the JRC or from the Danish Energy Agency.
+
+To assign costs to hydro reservoirs and run-of-river hydro, one of `no-hydro-cost`, `etri-hydro-cost` or `schroeder-hydro-cost` has to be chosen. The first of those allows to only consider variable and O&M costs since hydropower capacities by default are constrained to current capacities. 
+
+Unmet demand can also be assigned a cost using the override `load-shedding`.
 
 > directional-rooftop-pv
 
@@ -48,6 +58,10 @@ When using the `directional-rooftop-pv` override, there are three instead of jus
 > freeze-hydro-capacities
 
 By default, euro-calliope allows capacities of run-of-river hydro, reservoir hydro, and pumped storage hydro capacities up to today's levels. Alternatively, it's possible to freeze these capacities to today's levels using the `freeze-hydro-capacities` override.
+
+> stylised storage
+
+`stylised-storage` allows to constrain the energy-to-power ratios of battery and hydrogen.
 
 ## Model components
 
@@ -68,7 +82,7 @@ The models contain the following files. All files in the root directory are inde
 ├── interest-rate.yaml                     <- Interest rates of all capacities.
 ├── link-techs.yaml                        <- Definition of link technologies.
 ├── README.md                              <- The file you are currently looking at.
-├── cost-overrides.yaml                    <- Cost data from different sources.
+├── tech-costs.yaml                        <- Definition of cost data.
 ├── renewable-techs.yaml                   <- Definition of supply technologies.
 └── storage-techs.yaml                     <- Definition of storage technologies.
 ```
