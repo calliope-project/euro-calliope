@@ -302,6 +302,7 @@ rule model:
     input:
         "build/model/interest-rate.yaml",
         "build/model/link-techs.yaml",
+        "build/model/cost-overrides.yaml",
         "build/model/renewable-techs.yaml",
         "build/model/storage-techs.yaml",
         "build/model/demand-techs.yaml",

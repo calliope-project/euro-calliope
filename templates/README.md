@@ -68,6 +68,7 @@ The models contain the following files. All files in the root directory are inde
 ├── interest-rate.yaml                     <- Interest rates of all capacities.
 ├── link-techs.yaml                        <- Definition of link technologies.
 ├── README.md                              <- The file you are currently looking at.
+├── cost-overrides.yaml                    <- Cost data from different sources.
 ├── renewable-techs.yaml                   <- Definition of supply technologies.
 └── storage-techs.yaml                     <- Definition of storage technologies.
 ```

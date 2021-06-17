@@ -1,5 +1,6 @@
 import:
     - '../../../build/model/interest-rate.yaml'
+    - '../../../build/model/cost-overrides.yaml'
     - '../../../build/model/renewable-techs.yaml'
     - '../../../build/model/storage-techs.yaml'
     - '../../../build/model/link-techs.yaml'
