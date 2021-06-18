@@ -24,30 +24,24 @@ conda activate euro-calliope
 There are three models in this directory -- one for each of the three spatial resolutions continental, national, and regional. You can run all three models out-of-the-box, but you may want to modify the model. By default, the model runs for the first day of January only. To run the example model on the continental resolution type:
 
 ```Bash
-$ calliope run ./continental/example-model.yaml --scenario=etri-renewable-cost,etri-hydro-cost
+$ calliope run ./continental/example-model.yaml
 ```
 
 For more information on how to use and modify Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io).
 
 ## Manipulating the model using overrides
 
-Calliope [overrides](https://calliope.readthedocs.io/en/stable/user/building.html#scenarios-and-overrides) allow to easily manipulate models. An override named `freeze-hydro-capacities` can be used for example in this way:
+Calliope [overrides](https://calliope.readthedocs.io/en/stable/user/building.html#scenarios-and-overrides) allow to easily manipulate models. An override named `dea-renewable-cost` can be used for example in this way:
 
 ```bash
-calliope run build/model/continental/example-model.yaml --scenario=etri-renewable-cost,etri-hydro-cost
+calliope run build/model/continental/example-model.yaml --scenario=dea-renewable-cost
 ```
 
 You can define your own overrides to manipulate any model component. The following overrides are built into euro-calliope:
 
 > cost assumptions
 
-By default, no cost or lifetime is specified for renewable technologies in euro-calliope. 
-
-Either `etri-renewable-cost` or  `dea-renewable-cost` have to be chosen as an override to specify the cost for solar PV, wind power and biomass using data from either the JRC or from the Danish Energy Agency.
-
-To assign costs to hydro reservoirs and run-of-river hydro, one of `no-hydro-cost`, `etri-hydro-cost` or `schroeder-hydro-cost` has to be chosen. The first of those allows to only consider variable and O&M costs since hydropower capacities by default are constrained to current capacities. 
-
-Unmet demand can also be assigned a cost using the override `load-shedding`.
+By default, euro-calliope uses cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014. The `dea-renewable-cost` override allows to use the projections from the Danish Energy Agency instead for solar PV, wind power and biomass and `schroeder-hydro-cost` provides another source for the hydropower assumptions. Using the override `no-hydro-fixed-cost` allows to only consider variable and O&M costs for hydropower since the capacities are constrained to current levels by default. 
 
 > directional-rooftop-pv
 
@@ -58,10 +52,6 @@ When using the `directional-rooftop-pv` override, there are three instead of jus
 > freeze-hydro-capacities
 
 By default, euro-calliope allows capacities of run-of-river hydro, reservoir hydro, and pumped storage hydro capacities up to today's levels. Alternatively, it's possible to freeze these capacities to today's levels using the `freeze-hydro-capacities` override.
-
-> stylised storage
-
-`stylised-storage` allows to constrain the energy-to-power ratios of battery and hydrogen.
 
 ## Model components
 

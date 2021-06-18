@@ -1,4 +1,50 @@
+tech_groups: # Generation from [@JRC:2014]
+    pv_on_roof:  # Table 9
+        constraints.lifetime: 25
+        costs.monetary:
+            energy_cap: {{ 880000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+            om_annual: {{ (880000 * 0.02 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2% of CAPEX
+            om_prod: {{1 * scaling_factors.specific_costs}} # stolen from om_annual for technical reasons
+    wind_onshore: # Table 4
+        constraints.lifetime: 25
+        costs.monetary:
+            energy_cap: {{ 1100000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+            om_annual: {{ (1100000 * 0.017 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% of CAPEX
+            om_prod: {{1 * scaling_factors.specific_costs}} # stolen from om_annual for technical reasons
 techs:
+    # Generation from [@JRC:2014]
+    open_field_pv: # Table 7
+        constraints.lifetime: 25
+        costs.monetary:
+            energy_cap: {{ 520000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+            om_annual: {{ (520000 * 0.017 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% of CAPEX
+            om_prod: {{1 * scaling_factors.specific_costs}} # stolen from om_annual for technical reasons
+    wind_offshore: # Table 5
+        constraints.lifetime: 30
+        costs.monetary:
+            energy_cap: {{ 2280000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+            om_annual: {{ (2280000 * 0.023 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2.3% of CAPEX
+            om_prod: {{1 * scaling_factors.specific_costs}} # stolen from om_annual for technical reasons
+    biofuel: # Table 48 Anaerobic digestion
+        constraints.lifetime: 20
+        costs.monetary:
+            energy_cap: {{2300000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+            om_annual: {{2300000 * 0.041 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 4.1% of CAPEX
+            om_con: {{ (biofuel_fuel_cost / biofuel_efficiency + 3.1) * scaling_factors.specific_costs }} # unit("EUR2013/MWh")
+            om_prod: 0 # 3.1 (EUR2013/MWh) added to om_con because value is very small and causing poor numerical range
+    hydro_run_of_river: # Table 14
+        constraints.lifetime: 60
+        costs.monetary:
+            energy_cap: {{5620000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+            om_annual: {{5620000 * 0.03 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 3% of CAPEX
+            om_prod: {{5 * scaling_factors.specific_costs}} # unit("EUR2013/MWh)") 
+    hydro_reservoir: # Table 12
+        constraints.lifetime: 60
+        costs.monetary:
+            energy_cap: {{3370000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+            om_annual: {{3370000 * 0.03 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 3% of CAPEX
+            om_prod: {{5 * scaling_factors.specific_costs}} #  unit("EUR2013/MWh)") 
+    load_shedding.costs.monetary.om_prod: {{ 8000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR/MWh") }}
     # Storage from [@schmidt:2019] Table S4
     battery.costs.monetary:
         storage_cap: {{ 723130 * 0.14 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 802 $2015
@@ -65,49 +111,6 @@ overrides:
                 om_annual: {{ 37800 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
                 om_prod: 0 # 1.3 (EUR2015/MWh) added to om_con because value is very small and causing poor numerical range
                 om_con: {{ (biofuel_fuel_cost / biofuel_efficiency + 1.3) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}
-    etri-renewable-cost: # from [@JRC:2014]
-        tech_groups.pv_on_roof:  # Table 9
-            constraints.lifetime: 25
-            costs.monetary:
-                energy_cap: {{ 880000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-                om_annual: {{ (880000 * 0.02 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2% of CAPEX
-                om_prod: {{1 * scaling_factors.specific_costs}} # stolen from om_annual for technical reasons
-        techs.open_field_pv: # Table 7
-            constraints.lifetime: 25
-            costs.monetary:
-                energy_cap: {{ 520000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-                om_annual: {{ (520000 * 0.017 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% of CAPEX
-                om_prod: {{1 * scaling_factors.specific_costs}} # stolen from om_annual for technical reasons
-        tech_groups.wind_onshore: # Table 4
-            constraints.lifetime: 25
-            costs.monetary:
-                energy_cap: {{ 1100000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-                om_annual: {{ (1100000 * 0.017 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% of CAPEX
-                om_prod: {{1 * scaling_factors.specific_costs}} # stolen from om_annual for technical reasons
-        techs.wind_offshore: # Table 5
-            constraints.lifetime: 30
-            costs.monetary:
-                energy_cap: {{ 2280000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-                om_annual: {{ (2280000 * 0.023 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2.3% of CAPEX
-                om_prod: {{1 * scaling_factors.specific_costs}} # stolen from om_annual for technical reasons
-        techs.biofuel: # Table 48 Anaerobic digestion
-            constraints.lifetime: 20
-            costs.monetary:
-                energy_cap: {{2300000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-                om_annual: {{2300000 * 0.041 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 4.1% of CAPEX
-                om_con: {{ (biofuel_fuel_cost / biofuel_efficiency + 3.1) * scaling_factors.specific_costs }} # unit("EUR2013/MWh")
-                om_prod: 0 # 3.1 (EUR2013/MWh) added to om_con because value is very small and causing poor numerical range
-    etri-hydro-cost: # from [@JRC:2014]
-        techs.hydro_run_of_river.costs.monetary: # Table 14
-            energy_cap: {{5620000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-            om_annual: {{5620000 * 0.03 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 3% of CAPEX
-            om_prod: {{5 * scaling_factors.specific_costs}} # unit("EUR2013/MWh)") 
-        techs.hydro_run_of_river.constraints.lifetime: 60
-        techs.hydro_reservoir.costs.monetary: # Table 12
-            energy_cap: {{3370000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-            om_annual: {{3370000 * 0.03 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 3% of CAPEX
-            om_prod: {{5 * scaling_factors.specific_costs}} #  unit("EUR2013/MWh)") 
-        techs.hydro_reservoir.constraints.lifetime: 60
     schroeder-hydro-cost: # from [@schroeder:2013]
         techs.hydro_run_of_river.costs.monetary:
             energy_cap: {{3000000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} Table 33
@@ -119,54 +122,16 @@ overrides:
             om_annual: {{ 20000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} Table 34
             om_prod: 0 # Table 34
         techs.hydro_reservoir.constraints.lifetime: 60
-    no-hydro-cost: 
-        # Only assign costs to O&M and variable costs (from [#JRC:2014])
+    no-hydro-fixed-cost: 
+        # Only assign costs to O&M and variable costs
         # since hydro is constrained to current capacities
-        techs.pumped_hydro.costs.monetary.storage_cap: 0
-        techs.pumped_hydro.costs.monetary.energy_cap: 0
-        techs.hydro_run_of_river.costs.monetary: # Table 14
+        techs.pumped_hydro.costs.monetary:
+            storage_cap: 0
             energy_cap: 0
-            om_annual: {{5620000 * 0.03 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 3% of CAPEX
-            om_prod: {{5 * scaling_factors.specific_costs}} # unit("EUR2013/MWh)") 
+        techs.hydro_run_of_river.costs.monetary:
+            energy_cap: 0
             om_con: 0
-        techs.hydro_run_of_river.constraints.lifetime: 60
-        techs.hydro_reservoir.costs.monetary: # Table 12
+        techs.hydro_reservoir.costs.monetary:
             energy_cap: 0
             storage_cap: 0
-            om_annual: {{3370000 * 0.03 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 3% of CAPEX
-            om_prod: {{5 * scaling_factors.specific_costs}} #  unit("EUR2013/MWh)") 
             om_con: 0
-        techs.hydro_reservoir.constraints.lifetime: 60
-    load-shedding: # allowing for an option for load shedding
-        techs.load_shedding:
-            essentials:
-                name: Load shedding as last resort
-                parent: supply
-                carrier: electricity
-            constraints:
-                energy_cap_max: inf
-            costs:
-                monetary:
-                    om_prod: {{ 8000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR/MWh") }}
-    schmidt-storage-cost:
-        techs.battery.costs.monetary:
-            storage_cap: {{723130 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}
-            energy_cap: {{611324 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
-            om_annual: {{9016 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
-            om_prod: {{2.7 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}
-        techs.pumped_hydro.costs.monetary:
-            storage_cap: {{72133 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}
-            energy_cap: {{1017973 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
-            om_annual: {{7213 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
-            om_prod: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}
-        techs.hydrogen.costs.monetary:
-            storage_cap: {{27951 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}
-            energy_cap: {{4884287 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
-            om_annual: {{41476 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
-            om_prod: 0 
-    stylised-storage:
-        # Transform battery and hydrogen to stylised short-term 
-        # and long-term storage solutions
-        techs.battery.constraints.energy_cap_per_storage_cap_min: 0.25 #max 4h full-power discharge
-        techs.battery.costs.monetary.om_prod: 0 # Assume 0 instead of 0.000378 EUR/k"h as tiny value causes numerical issues
-        techs.hydrogen.constraints.energy_cap_per_storage_cap_max: 0.25 #min 4h full-power discharge

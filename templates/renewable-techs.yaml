@@ -63,6 +63,13 @@ techs:
         constraints:
             resource: file=capacityfactors-wind-offshore.csv
             resource_unit: energy_per_cap
+    load_shedding:
+        essentials:
+            name: Load shedding as last resort
+            parent: supply
+            carrier: electricity
+        constraints:
+            energy_cap_max: inf
     hydro_run_of_river:
         essentials:
             name: Run of river hydro electricity

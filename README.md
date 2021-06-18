@@ -66,7 +66,7 @@ To remove cluster results on your local machine, run `snakemake --use-conda clea
 The build step creates all individual components of `euro-calliope`, like technologies and time series. These can be combined to eventually build a final model to run simulations with. For an example of such a model, see `./build/model/{resolution}/example-model.yaml`. It is a complete Calliope model and can be used like any other, for example like this:
 
 ```Bash
-$ calliope run ./build/model/national/example-model.yaml --scenario=etri-renewable-cost,etri-hydro-cost
+$ calliope run ./build/model/national/example-model.yaml
 ```
 
 For more information on how to use and modify Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io).
