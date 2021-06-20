@@ -1,5 +1,5 @@
 techs:
-    battery: # based on [@Schmidt:2019]
+    battery:
         essentials:
             name: 'Battery storage'
             parent: storage
@@ -7,7 +7,7 @@ techs:
         constraints:
             energy_cap_max: inf
             storage_cap_max: inf
-    pumped_hydro: # based on [@Schmidt:2019]
+    pumped_hydro:
         essentials:
             name: 'Pumped hydro power storage'
             parent: storage
@@ -15,7 +15,7 @@ techs:
         constraints:
             energy_cap_max: inf
             storage_cap_max: inf
-    hydrogen: # based on [@Schmidt:2019]
+    hydrogen:
         essentials:
             name: Hydrogen power storage
             parent: storage

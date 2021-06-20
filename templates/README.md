@@ -41,7 +41,7 @@ You can define your own overrides to manipulate any model component. The followi
 
 > cost assumptions
 
-By default, euro-calliope uses cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014. The `dea-renewable-cost` override allows to use the projections from the Danish Energy Agency instead for solar PV, wind power and biomass and `schroeder-hydro-cost` provides another source for the hydropower assumptions. Using the override `no-hydro-fixed-cost` allows to only consider variable and O&M costs for hydropower since the capacities are constrained to current levels by default. 
+By default, euro-calliope uses cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014. The `dea-renewable-cost` override allows to use the projections from the Danish Energy Agency instead for solar PV, wind power and biomass and `schroeder-hydro-cost` provides another source for the hydropower assumptions. Using the override `no-hydro-fixed-cost` allows to only consider variable and O&M costs for hydropower. This may make sense especially in combination with the `freeze-hydro-capacities` override (see below).
 
 > directional-rooftop-pv
 
