@@ -40,4 +40,4 @@ Ruiz Castello, P., Sgobbi, A., Nijs, W., Thiel, C., Dalla Longa, F., Kober, T., 
 
 > [@DEA:2020]
 
-Danish Energy Agency (2020). <i>Technology Data for Generation of Electricity and District Heating.<.i> https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and 
+Danish Energy Agency. (2020). <i>Technology Data for Generation of Electricity and District Heating.</i> https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and 
