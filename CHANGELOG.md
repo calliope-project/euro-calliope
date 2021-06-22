@@ -1,7 +1,7 @@
 # Changelog
 
 ## 1.1 (unpublished)
-
+* **ADD** Aggregate cost data in `tech-costs.yaml` and add overrides to that file (#18, #129)
 * **ADD** Add basic documentation to ReadTheDocs (#114).
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
