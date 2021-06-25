@@ -38,6 +38,14 @@ European Environment Agency. (2009). <i>Europe’s onshore and offshore wind ene
 
 Ruiz Castello, P., Sgobbi, A., Nijs, W., Thiel, C., Dalla Longa, F., Kober, T., Elbersen, B., &#38; Hengeveld, G. (2015). <i>The JRC-EU-TIMES model. Bioenergy potentials for EU and neighbouring countries.</i> https://ec.europa.eu/jrc/en/publication/eur-scientific-and-technical-research-reports/jrc-eu-times-model-bioenergy-potentials-eu-and-neighbouring-countries
 
+> [@schroeder:2013]
+
+Schröder, A., Kunz, F., Meiss, J., Mendelevitch, R., &#38; Von Hirschhausen, C. (2013). <i>Current and prospective costs of electricity generation until 2050.</i> https://www.econstor.eu/bitstream/10419/80348/1/757528015.pdf 
+
 > [@DEA:2020]
 
 Danish Energy Agency. (2020). <i>Technology Data for Generation of Electricity and District Heating.</i> https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and 
+
+> [@DEA:2017]
+
+Danish Energy Agency. (2017). <i>Technology Data for Renewable Fuels.</i> https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-renewable-fuels  
