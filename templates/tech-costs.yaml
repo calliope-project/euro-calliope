@@ -108,13 +108,6 @@ overrides:
                 energy_cap: {{ 1777000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
                 om_annual: {{ (32448 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
                 om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
-        techs.biofuel:  # Sheet 06 Gas engines, biogas (last updated 2018) and [@DEA:2017] Sheet 81 Biogas Plant, Basic conf. (last updated 2017)
-            constraints.lifetime: 25
-            costs.monetary: 
-                energy_cap: {{ (850000 + 1386000) * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
-                om_annual: {{ (8500 + 178500) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
-                om_prod: 0 # 6 (EUR2015/MWh) added to om_con because value is very small and causing poor numerical range
-                om_con: {{ (biofuel_fuel_cost / biofuel_efficiency + 6) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}
     schroeder-hydro-cost: # from [@schroeder:2013]
         techs.hydro_run_of_river:
             constraints.lifetime: 60

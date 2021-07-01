@@ -45,7 +45,3 @@ Schröder, A., Kunz, F., Meiss, J., Mendelevitch, R., &#38; Von Hirschhausen, C.
 > [@DEA:2020]
 
 Danish Energy Agency. (2020). <i>Technology Data for Generation of Electricity and District Heating.</i> https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and 
-
-> [@DEA:2017]
-
-Danish Energy Agency. (2017). <i>Technology Data for Renewable Fuels.</i> https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-renewable-fuels  
