@@ -26,7 +26,7 @@ idx = pd.IndexSlice
 
 def get_road_transport_demand(
     energy_balances_path, jrc_road_energy_path, jrc_road_distance_path, jrc_road_vehicles_path,
-    road_distance_out_path, road_vehicles_out_path, road_efficiency_out_path, 
+    road_distance_out_path, road_vehicles_out_path, road_efficiency_out_path,
     road_bau_electricity_out_path, efficiency_quantile
 ):
     energy_balances = utils.read_tdf(energy_balances_path)
@@ -47,10 +47,8 @@ def get_road_transport_demand(
         .loc[idx[['FC_OTH_AF_E', 'FC_OTH_NSP_E'], 'O4000XBIO', :, :, :]]
         .sum(level=['country', 'year'])
         .sub(other_transport_aviation, fill_value=0)  # remove fuel use assumed for aviation
-        .to_frame('diesel')
-        .rename_axis(columns='carrier')
-        .stack()
     )
+    other_transport_road = utils.add_idx_level(other_transport_road, carrier="diesel")
 
     total_road_distance, road_efficiency, road_bau_consumption = get_all_distance_efficiency(
         energy_balances, 'FC_TRA_ROAD_E', road_energy_df,
@@ -61,21 +59,20 @@ def get_road_transport_demand(
     )
     # Some cleanup that's specific to road data
     road_efficiency = (
-        # 25th percentile of 2015 efficiency in TWh/mio km
         (1 / road_efficiency.xs(2015, level='year'))
         .unstack(['vehicle_type', 'vehicle_subtype'])
-        .quantile(efficiency_quantile)
+        .quantile(efficiency_quantile) # take future road efficiency to be based on a percentile of 2015 efficiency
         .unstack(0)
         .groupby(CARRIERS_BIS).mean()
-        .assign(unit='twh_per_mio_km').set_index('unit', append=True)
-        .stack()
     )
+    road_efficiency = utils.add_idx_level(road_efficiency, unit="twh_per_mio_km")
+
     road_electricity_bau = (
         road_bau_consumption
         .sum(level=['carrier', 'vehicle_type', 'country_code', 'year', 'unit'])
         .xs('electricity')
     )
-    
+
     total_road_distance.to_csv(road_distance_out_path)
     total_road_vehicles.to_csv(road_vehicles_out_path)
     road_efficiency.to_csv(road_efficiency_out_path)
@@ -83,7 +80,8 @@ def get_road_transport_demand(
 
 
 def get_all_distance_efficiency(
-    energy_balances, cat_name, energy_df, distance_df, unique_dim, other_transport_road=0
+    energy_balances, cat_name, energy_df, distance_df, unique_dim,
+    other_transport_energy_consumption=0
 ):
 
     transport_energy_balance = (
@@ -94,7 +92,7 @@ def get_all_distance_efficiency(
         .rename_axis(columns='carrier')
         .droplevel('unit')
         .stack()
-        .add(other_transport_road, fill_value=0)
+        .add(other_transport_energy_consumption, fill_value=0)
         .apply(utils.tj_to_twh)
         .rename_axis(index=['country_code', 'year', 'carrier'])
     )
@@ -169,6 +167,12 @@ def get_all_vehicles(jrc_road_distance, jrc_road_vehicles, total_road_distance):
 
 
 def fill_missing_countries_and_years(jrc_data):
+    """
+    ASSUME:
+    1. For the countries not covered by JRC-IDEES, use average of all
+    neighbouring / nearby countries.
+    2. For all years 2016-2018, use 2015 data (the most recent in JRC-IDEES)
+    """
     jrc_data = jrc_data.unstack('country_code')
     balkan_countries = jrc_data[['BG', 'HR', 'HU', 'RO', 'EL']].mean(axis=1)
     nordic_countries = jrc_data[['SE', 'DK']].mean(axis=1)
@@ -183,6 +187,7 @@ def fill_missing_countries_and_years(jrc_data):
         IS=nordic_countries,
         CH=ch_neighbours,
     ).stack().unstack('year')
+    # Cannot 'assign' with a numeric key, so have to stringify and then convert back to integer
     jrc_data = jrc_data.assign(
         **{str(i): jrc_data[2015] for i in range(2016, 2019)}
     )
