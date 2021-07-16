@@ -7,9 +7,11 @@ import calliope
 import pandas as pd
 
 
-def run_test(path_to_output, path_to_model, path_to_example_model, paths_to_cf_timeseries, path_to_annual_energy_balances, config):
+def run_test(path_to_test_dir, path_to_output, path_to_model, path_to_example_model, paths_to_cf_timeseries,
+             path_to_annual_energy_balances, config):
     exit_code = pytest.main(
         [
+            path_to_test_dir,
             f"--html={path_to_output}",
             f"--self-contained-html",
         ],
@@ -90,6 +92,7 @@ def _read_locs(path_to_cf_timeseries):
 
 if __name__ == "__main__":
     run_test(
+        path_to_test_dir=snakemake.input.test_dir,
         path_to_model=snakemake.input.model,
         path_to_example_model=snakemake.input.example_model,
         paths_to_cf_timeseries=snakemake.input.capacity_factor_timeseries,
