@@ -1,4 +1,5 @@
 import glob
+from pathlib import Path
 
 from snakemake.utils import validate
 
@@ -35,6 +36,7 @@ __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
 script_dir = f"{root_dir}scripts/"
 template_dir = f"{root_dir}templates/"
 test_dir = f"{root_dir}tests/"
+model_test_dir = f"{test_dir}model"
 
 onstart:
     shell("mkdir -p build/logs")
@@ -349,10 +351,9 @@ rule docs:
 rule test:
     message: "Run tests"
     input:
-        test_dir + "test_runner.py",
-        test_dir + "test_model.py",
-        test_dir + "test_capacityfactors.py",
         "build/logs/{resolution}/model.done",
+        test_dir = model_test_dir,
+        tests = lambda wildcards: Path(model_test_dir).glob("**/test_*.py"),
         model = test_dir + "resources/{resolution}/model.yaml",
         example_model = "build/model/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
@@ -363,4 +364,4 @@ rule test:
         config = config
     output: "build/logs/{resolution}/test-report.html"
     conda: "./envs/test.yaml"
-    script: "./tests/test_runner.py"
+    script: "./tests/model/test_runner.py"
