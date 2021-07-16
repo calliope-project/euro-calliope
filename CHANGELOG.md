@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0 (unpublished)
+
+* **ADD** pipeline to download and process JRC-IDEES datasets for use in industry/tertiary/transport sector rules
 ## 1.1 (unpublished)
 
 * **ADD** ability to move working directory (#45).

@@ -1,9 +1,15 @@
 """Rules to process input data."""
 
 configfile: "./config/default.yaml"
-localrules: eurostat_data_tsv, ch_data_xlsx
+localrules: eurostat_data_tsv, ch_data_xlsx, jrc_idees_zipped
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 script_dir = f"{root_dir}scripts/"
+
+EU28 = [
+    "AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR",
+    "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO",
+    "SE", "SI", "SK", "UK"
+]
 
 
 rule eurostat_data_tsv:
@@ -36,3 +42,37 @@ rule annual_energy_balances:
         countries = config["scope"]["countries"]
     conda: "../envs/default.yaml"
     script: "../scripts/annual_energy_balance.py"
+
+
+rule jrc_idees_zipped:
+    message: "Download JRC IDEES zip file for {wildcards.country_code}"
+    params: url = config["data-sources"]["jrc-idees"]
+    output: protected("data/automatic/jrc-idees/{country_code}.zip")
+    conda: "../envs/shell.yaml"
+    shell: "curl -sLo {output} '{params.url}'"
+
+
+rule jrc_idees_unzipped:
+    message: "Unzip all JRC-IDEES {wildcards.sector} sector country data"
+    input:
+        countries = [
+            f"data/automatic/jrc-idees/{country_code}.zip"
+            for country_code in [
+                pycountry.countries.lookup(country).alpha_2 for country in config['scope']['countries']
+            ]
+            if country_code in EU28
+        ]
+    params: sector_search = lambda wildcards: wildcards.sector.title()
+    output: temp(directory("build/data/jrc-idees/{sector}/unprocessed"))
+    conda: "../envs/shell.yaml"
+    shell: "unzip 'data/automatic/jrc-idees/*.zip' '*{params.sector_search}*' -d {output}"
+
+
+rule jrc_idees_processed:
+    message: "Process {wildcards.dataset} {wildcards.sector} data from JRC-IDEES to be used in understanding current and future {wildcards.sector} demand"
+    input:
+        script = script_dir + "jrc-idees/{sector}.py",
+        unprocessed_data = "build/data/jrc-idees/{sector}/unprocessed"
+    output: "build/data/jrc-idees/{sector}/processed-{dataset}.csv"
+    conda: "../envs/default.yaml"
+    script: "../scripts/jrc-idees/{wildcards.sector}.py"
