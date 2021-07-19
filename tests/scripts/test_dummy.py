@@ -3,4 +3,4 @@ from scripts.biofuels import utils # This proofs script imports are possible.
 
 
 def test_country_code_conversion():
-    assert utils.eu_country_code_to_iso3("uk") == "GBR"
+    assert utils.convert_country_code("uk", output="alpha3") == "GBR"
