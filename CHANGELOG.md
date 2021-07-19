@@ -3,6 +3,8 @@
 ## 2.0 (unpublished)
 
 * **ADD** pipeline to download and process JRC-IDEES datasets for use in industry/tertiary/transport sector rules
+* **ADD** download and preliminary pre-processing of Eurostat and equivalent Swiss data, for use in most downstream sector-coupling processing (#113)
+
 ## 1.1 (unpublished)
 
 * **ADD** ability to move working directory (#45).
