@@ -1,5 +1,6 @@
 import:
     - '../../../build/model/interest-rate.yaml'
+    - '../../../build/model/tech-costs.yaml'
     - '../../../build/model/renewable-techs.yaml'
     - '../../../build/model/storage-techs.yaml'
     - '../../../build/model/link-techs.yaml'
@@ -14,7 +15,8 @@ model:
 scenarios:
     default: []
     directional-pv: ["directional-rooftop-pv"]
-    frozen-hydro: ["freeze-hydro-capacities"]
+    frozen-hydro: ["freeze-hydro-capacities", "no-hydro-fixed-cost"]
+    alternative-cost: ["dea-renewable-cost", "schroeder-hydro-cost"]
 run:
     solver: gurobi
     solver_io: python

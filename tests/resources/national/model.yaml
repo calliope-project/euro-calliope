@@ -1,5 +1,6 @@
 import:
     - '../../../build/model/interest-rate.yaml'
+    - '../../../build/model/tech-costs.yaml'
     - '../../../build/model/renewable-techs.yaml'
     - '../../../build/model/storage-techs.yaml'
     - '../../../build/model/link-techs.yaml'
@@ -15,7 +16,8 @@ scenarios:
     default: []
     connected: ["connect"]
     directional-pv: ["directional-rooftop-pv"]
-    frozen-hydro: ["freeze-hydro-capacities"]
+    frozen-hydro: ["freeze-hydro-capacities", "no-hydro-fixed-cost"]
+    alternative-cost: ["dea-renewable-cost", "schroeder-hydro-cost"]
 overrides:
     connect:
         import:
