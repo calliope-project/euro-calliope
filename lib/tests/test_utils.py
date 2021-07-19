@@ -129,7 +129,7 @@ class TestToNumeric:
         new_series = to_numeric(pd.Series([
             "-", numeric_values[0], f"{numeric_values[1]}a", f"{numeric_values[2]}-"
         ]))
-        assert new_series.iloc[1:] == numeric_values
+        assert np.allclose(new_series.iloc[1:], numeric_values)
         assert is_numeric_dtype(new_series)
 
     def test_no_change_to_numeric_characters(self):
