@@ -1,5 +1,4 @@
-import glob
-import os
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -34,37 +33,31 @@ CARRIER_NAMES = {
 
 
 def process_jrc_tertiary_data(data_dir, out_path):
-    data_filepaths = glob.glob(os.path.join(data_dir, "*.xlsx"))
-    processed_data = get_tertiary_sector_data(data_filepaths)
+    data_filepaths = Path(data_dir).glob("*.xlsx")
+    processed_data = pd.concat([get_tertiary_sector_data(file) for file in data_filepaths])
     processed_data = processed_data.apply(utils.ktoe_to_twh)
     processed_data.index = processed_data.index.set_levels(['twh'], level='unit')
     processed_data.stack('year').to_csv(out_path)
 
 
-def get_tertiary_sector_data(files):
-    dfs = []
+def get_tertiary_sector_data(file):
+    df_consumption = pd.read_excel(file, sheet_name='SER_hh_fec', index_col=0)
+    df_demand = pd.read_excel(file, sheet_name='SER_hh_tes', index_col=0)
+    df_summary = pd.read_excel(file, sheet_name='SER_summary', index_col=0)
 
-    for file in files:
-        df_consumption = pd.read_excel(file, sheet_name='SER_hh_fec', index_col=0)
-        df_demand = pd.read_excel(file, sheet_name='SER_hh_tes', index_col=0)
-        df_summary = pd.read_excel(file, sheet_name='SER_summary', index_col=0)
+    df_consumption = clean_df(df_consumption, 'consumption')
+    df_demand = clean_df(df_demand, 'demand')
 
-        df_consumption = clean_df(df_consumption, 'consumption')
-        df_demand = clean_df(df_demand, 'demand')
+    df = pd.concat([df_consumption, df_demand])
 
-        df = pd.concat([df_consumption, df_demand])
+    df = add_electricity_use(df, df_summary)
 
-        df_elec = (
-            df_summary
-            .loc['Energy consumption by end-uses (ktoe)':'Shares of energy consumption in end-uses (in %)']
-            .loc['Specific electricity uses']
-            .rename_axis(index='year')
-        )
-        df.loc[('electricity', 'end_use_electricity'), :].update(df.loc[('electricity', 'end_use_electricity'), :].add(df_elec, axis=1))
-        assert np.allclose(df.xs('consumption', level='energy').sum(), df_summary.loc['Energy consumption by fuel - Eurostat structure (ktoe)'].astype(float))
+    assert np.allclose(
+        df.xs('consumption', level='energy').sum(),
+        df_summary.loc['Energy consumption by fuel - Eurostat structure (ktoe)'].astype(float)
+    )
 
-        dfs.append(df)
-    return pd.concat(dfs).stack()
+    return df.stack()
 
 
 def clean_df(df, energy_type):
@@ -79,11 +72,25 @@ def clean_df(df, energy_type):
         .set_index('end_use', append=True)
         .drop(END_USES.keys(), level=0)
         .groupby([CARRIER_NAMES, END_USES], level=[0, 1]).sum()
-        .assign(country_code=country_code, unit='ktoe', energy=energy_type)
+        .assign(
+            country_code=country_code,
+            unit='ktoe',
+            energy=energy_type
+        )
         .set_index(['country_code', 'unit', 'energy'], append=True)
         .rename_axis(columns='year', index=['carrier_name', 'end_use', 'country_code', 'unit', 'energy'])
     )
     return df
+
+def add_electricity_use(df, df_summary):
+    """End-use electricity consumption is added equally to both 'demand' and 'consumption'"""
+    df_elec = (
+        df_summary
+        .loc['Energy consumption by end-uses (ktoe)':'Shares of energy consumption in end-uses (in %)']
+        .loc['Specific electricity uses']
+        .rename_axis(index='year')
+    )
+    df.loc[('electricity', 'end_use_electricity'), :] += df_elec
 
 
 if __name__ == "__main__":

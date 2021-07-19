@@ -62,17 +62,45 @@ rule jrc_idees_unzipped:
             ]
             if country_code in EU28
         ]
-    params: sector_search = lambda wildcards: wildcards.sector.title()
+    params: sector_title_case = lambda wildcards: wildcards.sector.title()
+    wildcard_constraints:
+        sector = "((industry)|(transport)|(tertiary))"
     output: temp(directory("build/data/jrc-idees/{sector}/unprocessed"))
     conda: "../envs/shell.yaml"
-    shell: "unzip 'data/automatic/jrc-idees/*.zip' '*{params.sector_search}*' -d {output}"
+    shell: "unzip 'data/automatic/jrc-idees/*.zip' '*{params.sector_title_case}*' -d {output}"
 
 
-rule jrc_idees_processed:
-    message: "Process {wildcards.dataset} {wildcards.sector} data from JRC-IDEES to be used in understanding current and future {wildcards.sector} demand"
+rule jrc_idees_transport_processed:
+    message: "Process {wildcards.dataset} transport data from JRC-IDEES to be used in understanding current and future transport demand"
     input:
-        script = script_dir + "jrc-idees/{sector}.py",
-        unprocessed_data = "build/data/jrc-idees/{sector}/unprocessed"
-    output: "build/data/jrc-idees/{sector}/processed-{dataset}.csv"
+        script = script_dir + "jrc-idees/transport.py",
+        unprocessed_data = "build/data/jrc-idees/transport/unprocessed"
+    output: "build/data/jrc-idees/transport/processed-{dataset}.csv"
+    wildcard_constraints:
+        dataset = "((road-energy)|(road-distance)|(road-vehicles)|(rail-energy)|(rail-distance))"
     conda: "../envs/default.yaml"
-    script: "../scripts/jrc-idees/{wildcards.sector}.py"
+    script: "../scripts/jrc-idees/transport.py"
+
+
+rule jrc_idees_industry_processed:
+    message: "Process {wildcards.dataset} industry data from JRC-IDEES to be used in understanding current and future industry demand"
+    input:
+        script = script_dir + "jrc-idees/industry.py",
+        unprocessed_data = "build/data/jrc-idees/industry/unprocessed"
+    output: "build/data/jrc-idees/industry/processed-{dataset}.csv"
+    wildcard_constraints:
+        dataset = "((energy)|(production))"
+    conda: "../envs/default.yaml"
+    script: "../scripts/jrc-idees/industry.py"
+
+
+rule jrc_idees_tertiary_processed:
+    message: "Process {wildcards.dataset} tertiary sector data from JRC-IDEES to be used in understanding current and future tertiary sector demand"
+    input:
+        script = script_dir + "jrc-idees/tertiary.py",
+        unprocessed_data = "build/data/jrc-idees/tertiary/unprocessed"
+    output: "build/data/jrc-idees/tertiary/processed-{dataset}.csv"
+    wildcard_constraints:
+        dataset = "((energy)|(production))"
+    conda: "../envs/default.yaml"
+    script: "../scripts/jrc-idees/tertiary.py"

@@ -1,5 +1,4 @@
-import glob
-import os
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -42,12 +41,28 @@ DATSET_PARAMS = {
     },
 }
 
+ROAD_CARRIERS = {
+    'Gasoline engine': 'petrol',
+    'Diesel oil engine': 'diesel',
+    'Natural gas engine': 'natural_gas',
+    'LPG engine': 'lpg',
+    'Battery electric vehicles': 'electricity',
+    'Plug-in hybrid electric': 'petrol'
+}
+
+RAIL_CARRIERS = {
+    'Diesel oil (incl. biofuels)': 'diesel',
+    'Electric': 'electricity',
+    'Diesel oil': 'diesel'
+}
+
 
 def process_jrc_transport_data(data_dir, dataset, out_path):
-    data_filepaths = glob.glob(os.path.join(data_dir, "*.xlsx"))
-    processed_data = read_transport_excel(
-        data_filepaths, **DATSET_PARAMS[dataset]
-    )
+    data_filepaths = Path(data_dir).glob("*.xlsx")
+    processed_data = pd.concat([
+        read_transport_excel(file, **DATSET_PARAMS[dataset])
+        for file in data_filepaths
+    ])
     if DATSET_PARAMS[dataset]["unit"] == "ktoe":
         processed_data = processed_data.apply(utils.ktoe_to_twh)
         processed_data.index = processed_data.index.set_levels(['twh'], level='unit')
@@ -55,94 +70,99 @@ def process_jrc_transport_data(data_dir, dataset, out_path):
     processed_data.stack('year').to_csv(out_path)
 
 
-def read_transport_excel(files, sheet_name, idx_start_str, idx_end_str, unit):
-    dfs = []
-    for file in files:
-        style_df = StyleFrame.read_excel(file, read_style=True, sheet_name=sheet_name)
-        df = pd.read_excel(file, sheet_name=sheet_name)
-        col = str(style_df.data_df.columns[0])
-        idx_start = [int(i) for i in style_df.index if idx_start_str in str(style_df.loc[i, col])][0]
-        idx_end = [int(i) for i in style_df.index if idx_end_str in str(style_df.loc[i, col])][0]
-        df.loc[idx_start:idx_end, 'indent'] = [int(i) for i in style_df[col].style.indent.loc[idx_start:idx_end]]
+def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, unit):
+    style_df = StyleFrame.read_excel(file, read_style=True, sheet_name=sheet_name)
+    df = pd.read_excel(file, sheet_name=sheet_name)
+    column_names = str(style_df.data_df.columns[0])
+    idx_start = int(style_df[style_df[column_names].str.find(idx_start_str) > -1].item())
+    idx_end = int(style_df[style_df[column_names].str.find(idx_end_str) > -1].item())
+    df = df.assign(indent=style_df[column_names].style.indent.astype(int)).loc[idx_start:idx_end]
 
-        df = df.dropna(subset=['indent'])
-        tot = df.iloc[0]
-        df['section'] = df.where(df.indent == 1).iloc[:, 0].ffill()
-        df['vehicle_type'] = df.where(df.indent == 2).iloc[:, 0].ffill()
+    total_to_check = df.iloc[0]
+    df['section'] = df.where(df.indent == 1).iloc[:, 0].ffill()
+    df['vehicle_type'] = df.where(df.indent == 2).iloc[:, 0].ffill()
 
-        if sheet_name == 'TrRoad_act':
-            df['vehicle_subtype'] = df.where(df.indent == 3).iloc[:, 0]
-            df = df.where(
-                (df.indent == 3) | (df.vehicle_type == 'Powered 2-wheelers')
-            ).dropna(how='all')
-            df.loc[df.vehicle_type == 'Powered 2-wheelers', 'vehicle_subtype'] = 'Gasoline engine'
-            df = (
-                df
-                .set_index(['section', 'vehicle_type', 'vehicle_subtype'])
-                .drop([col, 'indent'], axis=1)
-            )
-        elif sheet_name == 'TrRoad_ene':
-            df['vehicle_subtype'] = df.where(df.indent == 3).iloc[:, 0].ffill()
-            # Deal with the annoying nature of the spreadsheets
-            df['vehicle_type'] = df['vehicle_type'].str.split('(', expand=True)[0].str.strip()
-            df['vehicle_subtype'] = df['vehicle_subtype'].str.split('(', expand=True)[0].str.strip()
-            df.loc[df.vehicle_type == 'Powered 2-wheelers', 'vehicle_subtype'] = 'Gasoline engine'
-            df['carrier'] = df.where(df.indent == 4).iloc[:, 0]
-            df['carrier'] = df['carrier'].str.replace('of which ', '')
-            df.loc[(df.vehicle_type == 'Powered 2-wheelers') & (df.indent == 2), 'carrier'] = 'petrol'
-            df.loc[(df.vehicle_type == 'Powered 2-wheelers') & (df.indent == 3), 'carrier'] = 'biofuels'
-            df.loc[(df.vehicle_subtype == 'Domestic') & (df.indent == 3), 'carrier'] = 'diesel'
-            df.loc[(df.vehicle_subtype == 'International') & (df.indent == 3), 'carrier'] = 'diesel'
-            df['carrier'] = df['carrier'].fillna(df.vehicle_subtype.replace({
-                'Gasoline engine': 'petrol', 'Diesel oil engine': 'diesel',
-                'Natural gas engine': 'natural_gas', 'LPG engine': 'lpg',
-                'Battery electric vehicles': 'electricity', 'Plug-in hybrid electric': 'petrol'
-            }))
-            df = (
-                df
-                .where((df.indent > 2) | (df.vehicle_type == 'Powered 2-wheelers'))
-                .dropna()
-                .set_index(['section', 'vehicle_type', 'vehicle_subtype', 'carrier'])
-                .drop([col, 'indent'], axis=1)
-            )
+    if sheet_name == 'TrRoad_act':
+        df = process_road_vehicles(df, column_names)
+    elif sheet_name == 'TrRoad_ene':
+        df = process_road_energy(df, column_names)
+    elif sheet_name == 'TrRail_ene' or sheet_name == 'TrRail_act':
+        df = process_rail(df, column_names)
 
-            df = remove_of_which(df, 'diesel', 'biofuels')
-            df = remove_of_which(df, 'petrol', 'biofuels')
-            df = remove_of_which(df, 'petrol', 'electricity')
-            df = remove_of_which(df, 'natural_gas', 'biogas')
+    df = (
+        df
+        .assign(country_code=column_names.split(' - ')[0], unit=unit)
+        .set_index(['country_code', 'unit'], append=True)
+    )
+    df.columns = df.columns.astype(int).rename('year')
 
-        elif sheet_name == 'TrRail_ene' or sheet_name == 'TrRail_act':
-            df['carrier'] = df.where(df.indent == 3).iloc[:, 0]
-            df.loc[df.vehicle_type == 'Metro and tram, urban light rail', 'carrier'] = 'electricity'
-            df.loc[df.vehicle_type == 'High speed passenger trains', 'carrier'] = 'electricity'
-            carriers = {
-                'Diesel oil (incl. biofuels)': 'diesel',
-                'Electric': 'electricity',
-                'Diesel oil': 'diesel'
-            }
-            df['carrier'] = df['carrier'].replace(carriers).fillna(df.vehicle_type.replace(carriers))
-            df.loc[df.section == 'Freight transport', 'vehicle_type'] = 'Freight'
+    # After all this hardcoded cleanup, make sure numbers match up
+    assert np.allclose(
+        df.sum(),
+        total_to_check.loc[df.columns].astype(float)
+    )
 
-            df = (
-                df
-                .where((df.indent > 1) & (df.carrier.str.find('Conventional') == -1))
-                .dropna()
-                .set_index(['section', 'vehicle_type', 'carrier'])
-                .drop([col, 'indent'], axis=1)
-            )
+    return df
 
-        df = (
-            df
-            .assign(country_code=col.split(' - ')[0], unit=unit)
-            .set_index(['country_code', 'unit'], append=True)
-        )
-        df.columns = df.columns.astype(int).rename('year')
 
-        # After all this hardcoded cleanup, make sure numbers match up
-        assert np.allclose(df.sum(), tot.loc[df.columns].astype(float))
+def process_rail(df, column_names):
+    df['carrier'] = df.where(df.indent == 3).iloc[:, 0]
+    # ASSUME: All metro/tram/high speed rail is electrically powered
+    df.loc[df.vehicle_type == 'Metro and tram, urban light rail', 'carrier'] = 'electricity'
+    df.loc[df.vehicle_type == 'High speed passenger trains', 'carrier'] = 'electricity'
 
-        dfs.append(df)
-    return pd.concat(dfs)
+    df['carrier'] = df['carrier'].replace(RAIL_CARRIERS).fillna(df.vehicle_type.replace(RAIL_CARRIERS))
+    df.loc[df.section == 'Freight transport', 'vehicle_type'] = 'Freight'
+
+    return (
+        df
+        .where((df.indent > 1) & (df.carrier.str.find('Conventional') == -1))
+        .dropna()
+        .set_index(['section', 'vehicle_type', 'carrier'])
+        .drop([column_names, 'indent'], axis=1)
+    )
+
+
+def process_road_vehicles(df, column_names):
+    df['vehicle_subtype'] = df.where(df.indent == 3).iloc[:, 0]
+    # ASSUME: 2-wheelers are powered by fuel oil
+    df = df.where(
+        (df.indent == 3) | (df.vehicle_type == 'Powered 2-wheelers')
+    ).dropna(how='all')
+    df.loc[df.vehicle_type == 'Powered 2-wheelers', 'vehicle_subtype'] = 'Gasoline engine'
+    return (
+        df
+        .set_index(['section', 'vehicle_type', 'vehicle_subtype'])
+        .drop([column_names, 'indent'], axis=1)
+    )
+
+
+def process_road_energy(df, column_names):
+    df['vehicle_subtype'] = df.where(df.indent == 3).iloc[:, 0].ffill()
+    df['vehicle_type'] = df['vehicle_type'].str.split('(', expand=True)[0].str.strip()
+    df['vehicle_subtype'] = df['vehicle_subtype'].str.split('(', expand=True)[0].str.strip()
+    df.loc[df.vehicle_type == 'Powered 2-wheelers', 'vehicle_subtype'] = 'Gasoline engine'
+    df['carrier'] = df.where(df.indent == 4).iloc[:, 0]
+    df['carrier'] = df['carrier'].str.replace('of which ', '')
+    df.loc[(df.vehicle_type == 'Powered 2-wheelers') & (df.indent == 2), 'carrier'] = 'petrol'
+    df.loc[(df.vehicle_type == 'Powered 2-wheelers') & (df.indent == 3), 'carrier'] = 'biofuels'
+    df.loc[(df.vehicle_subtype == 'Domestic') & (df.indent == 3), 'carrier'] = 'diesel'
+    df.loc[(df.vehicle_subtype == 'International') & (df.indent == 3), 'carrier'] = 'diesel'
+    df['carrier'] = df['carrier'].fillna(df.vehicle_subtype.replace(ROAD_CARRIERS))
+    df = (
+        df
+        .where((df.indent > 2) | (df.vehicle_type == 'Powered 2-wheelers'))
+        .dropna()
+        .set_index(['section', 'vehicle_type', 'vehicle_subtype', 'carrier'])
+        .drop([column_names, 'indent'], axis=1)
+    )
+
+    df = remove_of_which(df, 'diesel', 'biofuels')
+    df = remove_of_which(df, 'petrol', 'biofuels')
+    df = remove_of_which(df, 'petrol', 'electricity')
+    df = remove_of_which(df, 'natural_gas', 'biogas')
+
+    return df
 
 
 def remove_of_which(df, main_carrier, of_which_carrier):
