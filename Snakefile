@@ -369,4 +369,4 @@ rule download_eurocalliope_dataset:
     message: "Downloading `{wildcards.dataset}` from Euro-Calliope dataset submodule"
     params: url = lambda wildcards: config["data-sources"]["data-repository"].format(dataset=wildcards.dataset)
     output: "data/euro-calliope-datasets/{dataset}"
-    shell: "curl -sLo {output} {params.url}"
+    shell: "curl -sLfo {output} {params.url}"

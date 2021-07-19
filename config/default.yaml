@@ -1,7 +1,7 @@
 data-sources:
     biofuel-potentials: data/euro-calliope-datasets/biofuels/potentials/{feedstock}.csv
     biofuel-costs: data/euro-calliope-datasets/biofuels/costs/{feedstock}.csv
-    eez: data/euro-calliope-datasets/World_EEZ_v10_20180221/eez_v10.shp
+    eez: data/World_EEZ_v10_20180221/eez_v10.shp
     irena-generation: data/euro-calliope-datasets/irena/hydro-generation-europe.csv
     national-phs-storage-capacities: data/euro-calliope-datasets/pumped-hydro/storage-capacities-gwh.csv
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
