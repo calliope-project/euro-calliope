@@ -37,7 +37,7 @@ def process_jrc_tertiary_data(data_dir, out_path):
     processed_data = pd.concat([get_tertiary_sector_data(file) for file in data_filepaths])
     processed_data = processed_data.apply(utils.ktoe_to_twh)
     processed_data.index = processed_data.index.set_levels(['twh'], level='unit')
-    processed_data.stack('year').to_csv(out_path)
+    processed_data.to_csv(out_path)
 
 
 def get_tertiary_sector_data(file):
@@ -48,10 +48,9 @@ def get_tertiary_sector_data(file):
     df_consumption = clean_df(df_consumption, 'consumption')
     df_demand = clean_df(df_demand, 'demand')
 
-    df = pd.concat([df_consumption, df_demand])
+    df = pd.concat([df_consumption, df_demand]).sort_index()
 
     df = add_electricity_use(df, df_summary)
-
     assert np.allclose(
         df.xs('consumption', level='energy').sum(),
         df_summary.loc['Energy consumption by fuel - Eurostat structure (ktoe)'].astype(float)
@@ -82,6 +81,7 @@ def clean_df(df, energy_type):
     )
     return df
 
+
 def add_electricity_use(df, df_summary):
     """End-use electricity consumption is added equally to both 'demand' and 'consumption'"""
     df_elec = (
@@ -90,7 +90,8 @@ def add_electricity_use(df, df_summary):
         .loc['Specific electricity uses']
         .rename_axis(index='year')
     )
-    df.loc[('electricity', 'end_use_electricity'), :] += df_elec
+    df.loc[('electricity', 'end_use_electricity')].update(df.loc[('electricity', 'end_use_electricity'), :].add(df_elec, axis=1))
+    return df
 
 
 if __name__ == "__main__":

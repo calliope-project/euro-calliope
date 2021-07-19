@@ -95,12 +95,10 @@ rule jrc_idees_industry_processed:
 
 
 rule jrc_idees_tertiary_processed:
-    message: "Process {wildcards.dataset} tertiary sector data from JRC-IDEES to be used in understanding current and future tertiary sector demand"
+    message: "Process tertiary sector energy data from JRC-IDEES to be used in understanding current and future tertiary sector demand"
     input:
         script = script_dir + "jrc-idees/tertiary.py",
         unprocessed_data = "build/data/jrc-idees/tertiary/unprocessed"
-    output: "build/data/jrc-idees/tertiary/processed-{dataset}.csv"
-    wildcard_constraints:
-        dataset = "((energy)|(production))"
+    output: "build/data/jrc-idees/tertiary/processed-energy.csv"
     conda: "../envs/default.yaml"
     script: "../scripts/jrc-idees/tertiary.py"
