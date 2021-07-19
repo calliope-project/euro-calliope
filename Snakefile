@@ -23,7 +23,7 @@ BIOFUEL_FEEDSTOCKS = [
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
 include: "./rules/sync.smk"
-localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials
+localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials, download_eurocalliope_dataset
 localrules: download_capacity_factors_wind_and_solar
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
@@ -333,7 +333,7 @@ rule clean: # removes all generated results
     shell:
         """
         rm -r build/
-        echo "Data downloaded to data/automatic/ has not been cleaned."
+        echo "Data downloaded to data/automatic/ and data/euro-calliope-datasets has not been cleaned."
         """
 
 
@@ -365,10 +365,8 @@ rule test:
     script: "./tests/test_runner.py"
 
 
-rule import_data_submodule:
+rule download_eurocalliope_dataset:
     message: "Downloading `{wildcards.dataset}` from Euro-Calliope dataset submodule"
     params: url = lambda wildcards: config["data-sources"]["data-repository"].format(dataset=wildcards.dataset)
-    wildcard_constraints:
-        dataset = "(?:(?!automatic).)*$"
-    output: "data/{dataset}"
+    output: "data/euro-calliope-datasets/{dataset}"
     shell: "curl -sLo {output} {params.url}"

@@ -1,9 +1,9 @@
 data-sources:
-    biofuel-potentials: data/biofuels/potentials/{feedstock}.csv
-    biofuel-costs: data/biofuels/costs/{feedstock}.csv
-    eez: data/World_EEZ_v10_20180221/eez_v10.shp
-    irena-generation: data/irena/hydro-generation-europe.csv
-    national-phs-storage-capacities: data/pumped-hydro/storage-capacities-gwh.csv
+    biofuel-potentials: data/euro-calliope-datasets/biofuels/potentials/{feedstock}.csv
+    biofuel-costs: data/euro-calliope-datasets/biofuels/costs/{feedstock}.csv
+    eez: data/euro-calliope-datasets/World_EEZ_v10_20180221/eez_v10.shp
+    irena-generation: data/euro-calliope-datasets/irena/hydro-generation-europe.csv
+    national-phs-storage-capacities: data/euro-calliope-datasets/pumped-hydro/storage-capacities-gwh.csv
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
     gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
     hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1

@@ -106,7 +106,8 @@ You can easily change the units and scale all values using the `scaling-factor` 
 
 * `build/model`: Contains the entire model after the build step, including Calliope definition files and data (does not exist initially).
 * `config`: Files with configuration parameters which influence the model build process.
-* `data`: Contains data automatically downloaded within the model build process (does not exist initially).
+* `data/automatic`: Contains data automatically downloaded from third-party sources within the model build process (does not exist initially).
+* `data/euro-calliope-dataset`: Contains data automatically downloaded from the [Euro-Calliope datasets repository](https://github.com/calliope-project/euro-calliope-datasets) within the model build process (does not exist initially).
 * `docs`: Documentation of the model and the build process.
 * `envs`: Files defining the conda environment which are used to build the model.
 * `lib`: Library code in form of a Python package that is reused in many places of this repository.
@@ -117,7 +118,7 @@ You can easily change the units and scale all values using the `scaling-factor` 
 
 ## Associated repositories
 
-Small datasets that are not available for direct download are stored in the [Euro-Calliope datasets repository](https://github.com/calliope-project/euro-calliope-datasets).
+Small datasets that are not available for direct download are stored in the [Euro-Calliope datasets repository](https://github.com/calliope-project/euro-calliope-datasets). These datasets are either from proprietary sources or have required manual data processing from non-standard formats (e.g. PDFs). The processing pipeline for these datasets is described in associated README files found in each subdirectory.
 
 ## Run the tests
 
