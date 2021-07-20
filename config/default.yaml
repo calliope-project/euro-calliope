@@ -1,10 +1,10 @@
 # For descriptions of the configuration values, see `./schema.yaml`.
 data-sources:
-    biofuel-potentials: data/biofuels/potentials/{feedstock}.csv
-    biofuel-costs: data/biofuels/costs/{feedstock}.csv
+    biofuel-potentials: data/euro-calliope-datasets/biofuels/potentials/{feedstock}.csv
+    biofuel-costs: data/euro-calliope-datasets/biofuels/costs/{feedstock}.csv
     eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
-    irena-generation: data/irena/hydro-generation-europe.csv
-    national-phs-storage-capacities: data/pumped-hydro/storage-capacities-gwh.csv
+    irena-generation: data/euro-calliope-datasets/irena/hydro-generation-europe.csv
+    national-phs-storage-capacities: data/euro-calliope-datasets/pumped-hydro/storage-capacities-gwh.csv
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
     gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
     hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
@@ -12,6 +12,7 @@ data-sources:
     load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
     nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
     potentials: https://zenodo.org/record/5112963/files/possibility-for-electricity-autarky.zip
+    data-repository: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/develop/{dataset}
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch
