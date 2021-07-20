@@ -60,19 +60,20 @@ def get_tertiary_sector_data(file):
 
 
 def clean_df(df, energy_type):
-    country_code = df.index.names[0].split(' - ')[0]
-    df = df.assign(end_use=np.nan)
+    # The index is a flattened multi-level index, where the end-use is the highest aggregation level
+    # in the hierarchy. We identify this point in the hierarchy and use ffill to match lower aggregation levels
+    # with the top-level end-use.
     df.loc[df.index.isin(END_USES.keys()), 'end_use'] = list(END_USES.keys())
-    df.end_use = df.end_use.fillna(df.end_use.ffill())
+    df.end_use = df.end_use.ffill()
 
     df = (
         df
         .dropna()
         .set_index('end_use', append=True)
-        .drop(END_USES.keys(), level=0)
+        .drop(END_USES.keys(), level=0)  # we remove the top-level end-use aggregation level
         .groupby([CARRIER_NAMES, END_USES], level=[0, 1]).sum()
         .assign(
-            country_code=country_code,
+            country_code=df.index.names[0].split(' - ')[0],
             unit='ktoe',
             energy=energy_type
         )

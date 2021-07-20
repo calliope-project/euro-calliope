@@ -124,12 +124,16 @@ class TestToNumeric:
         assert new_series.isna().sum() == 2
         assert is_numeric_dtype(new_series)
 
-    @pytest.mark.parametrize("numeric_values", ([1, 1, 2], [10, 100, 1000], [1.0, 1.1, 1.2], [1, -1, 2.0]))
-    def test_remove_non_numeric_characters(self, numeric_values):
-        new_series = to_numeric(pd.Series([
-            "-", numeric_values[0], f"{numeric_values[1]}a", f"{numeric_values[2]}-"
-        ]))
-        assert np.allclose(new_series.iloc[1:], numeric_values)
+    @pytest.mark.parametrize(
+        ("raw", "expected"), [
+            ([1, "1a", "2-"], [1, 1, 2]),
+            ([10, "100a", "1000-"], [10, 100, 1000]),
+            ([1.0, "1.0a", "-1-"], [1.0, 1.0, -1])
+        ]
+    )
+    def test_remove_non_numeric_characters(self, raw, expected):
+        new_series = to_numeric(pd.Series(raw))
+        assert np.allclose(new_series, expected)
         assert is_numeric_dtype(new_series)
 
     def test_no_change_to_numeric_characters(self):

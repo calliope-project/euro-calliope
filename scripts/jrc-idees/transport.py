@@ -8,7 +8,7 @@ from eurocalliopelib import utils
 
 idx = pd.IndexSlice
 
-DATSET_PARAMS = {
+DATASET_PARAMS = {
     "road-energy": {
         "sheet_name": "TrRoad_ene",
         "idx_start_str": "Total energy consumption",
@@ -60,10 +60,10 @@ RAIL_CARRIERS = {
 def process_jrc_transport_data(data_dir, dataset, out_path):
     data_filepaths = Path(data_dir).glob("*.xlsx")
     processed_data = pd.concat([
-        read_transport_excel(file, **DATSET_PARAMS[dataset])
+        read_transport_excel(file, **DATASET_PARAMS[dataset])
         for file in data_filepaths
     ])
-    if DATSET_PARAMS[dataset]["unit"] == "ktoe":
+    if DATASET_PARAMS[dataset]["unit"] == "ktoe":
         processed_data = processed_data.apply(utils.ktoe_to_twh)
         processed_data.index = processed_data.index.set_levels(['twh'], level='unit')
 
