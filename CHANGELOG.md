@@ -7,6 +7,9 @@
 
 ## 1.1 (unpublished)
 
+* **ADD** automatic download of EEZ (#99).
+* **ADD** Danish Energy Agency and Schroeder et al (2013) cost data as well as no hydro fixed costs as optional overrides (#18, #129).
+* **ADD** Add basic documentation to ReadTheDocs (#114).
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
 * **ADD** automatic download of hydro basins data (#34).
@@ -15,7 +18,8 @@
 * **ADD** sync infrastructure to easily send and receive files to and from a cluster (#74).
 * **ADD** optional email notifications whenever builds fail or succeed (#92).
 
-* **UPDATE** ENTSOE national electricity load data gap filling priority order included in config (#42)
+* **UPDATE** EEZ updated from v10 to v11 (difference in offshore area is < 1% for all relevant countries) (#99).
+* **UPDATE** ENTSOE national electricity load data gap filling priority order included in config (#42).
 * **UPDATE** IRENA hydro generation data from 2018 to 2020 (#40).
 * **UPDATE** Make scaling pumped hydro capacity according to Geth et al. (2015) optional with a boolean config parameter `scale-phs-according-to-geth-et-al` which defaults to False (no scaling) (#49).
 * **UPDATE** JRC hydro database v4 -> v7 (#48). This entails one patch being removed:
