@@ -90,6 +90,7 @@ After a successful full build (see "Build the model"), the following files will 
 ├── interest-rate.yaml                     <- Interest rate of all capacities.
 ├── link-techs.yaml                        <- Definition of link technologies.
 ├── README.md                              <- Documentation.
+├── tech-costs.yaml                        <- Definition of cost data.
 ├── renewable-techs.yaml                   <- Definition of supply technologies.
 └── storage-techs.yaml                     <- Definition of storage technologies.
 ```
@@ -135,6 +136,17 @@ As a developer, you may want to run the entire workflow often to spot errors ear
     snakemake --use-conda --configfile="config/minimal.yaml"
 
 Make sure to run this in a clean working directory. Do not use the working directory in which you are using your normal configuration.
+
+## Run tests of library code and scripts
+
+1. Create a test environment using conda:
+
+    $ conda env create -f test-requirements.yaml
+    $ conda activate test-eurocalliope
+
+2. Run the test suite with py.test:
+
+    $ py.test
 
 ## License
 

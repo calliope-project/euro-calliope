@@ -1,3 +1,4 @@
+# For descriptions of the configuration values, see `./schema.yaml`.
 data-sources:
     biofuel-potentials: data/euro-calliope-datasets/biofuels/potentials/{feedstock}.csv
     biofuel-costs: data/euro-calliope-datasets/biofuels/costs/{feedstock}.csv
@@ -19,19 +20,19 @@ cluster-sync:
     receive-ignore: .syncignore-receive
     cluster-base-dir: ~/Develop/euro-calliope/
     local-results-dir: build/cluster
-scaling-factors:
-    power: 0.00001
-    area: 0.0001
-    monetary: 0.000000001
+scaling-factors: # values are tuned for models with a few hours resolution and one year duration
+    power: 0.00001 # from MW(h) to 100 GW(h)
+    area: 0.0001 # from km2 to 10,000 km2
+    monetary: 0.000000001 # from EUR to 1 billion EUR
 capacity-factors:
     min: 0.001
-    max: 10
+    max: 10 # 0.001 -> 10 leads to a numerical range of 1e5 (hourly resolution)
     average:
         pv: 0.139 # median of average 2016 open-field factors for ~2700 points in Europe
         onshore: 0.3021 # median of average 2016 factors for ~2700 points in Europe
         offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
         ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
-    trim-ninja-timeseries: True # trims renewables.ninja timeseries to the year in question
+    trim-ninja-timeseries: True
 year: 2016
 crs: "EPSG:4326"
 parameters:
@@ -46,7 +47,7 @@ parameters:
         S: 0.1821
         W: 0.1681
         flat: 0.3020
-    jrc-biofuel: #from [#Ruiz Castello et al:2015]
+    jrc-biofuel: # from [@Ruiz Castello et al:2015]
         scenario: "medium"
         potential-year: "2020"
         cost-year: "2030"
