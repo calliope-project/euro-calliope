@@ -2,7 +2,7 @@
 data-sources:
     biofuel-potentials: data/biofuels/potentials/{feedstock}.csv
     biofuel-costs: data/biofuels/costs/{feedstock}.csv
-    eez: data/World_EEZ_v10_20180221/eez_v10.shp
+    eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
     irena-generation: data/irena/hydro-generation-europe.csv
     national-phs-storage-capacities: data/pumped-hydro/storage-capacities-gwh.csv
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
@@ -11,7 +11,7 @@ data-sources:
     hydro-stations: https://zenodo.org/record/4289229/files/energy-modelling-toolkit/hydro-power-database-v7.zip?download=1
     load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
     nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
-    potentials: https://zenodo.org/record/3533038/files/possibility-for-electricity-autarky.zip
+    potentials: https://zenodo.org/record/5112963/files/possibility-for-electricity-autarky.zip
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch
