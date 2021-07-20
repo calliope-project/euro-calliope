@@ -80,6 +80,10 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of potentials of solar and wind.
+            data-repository:
+                type: string
+                pattern: ^(https?|http?):\/\/.+{dataset}.*
+                description: Web address of proprietry datasets that have been pre-processed for specific use in Euro-Calliope.
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.

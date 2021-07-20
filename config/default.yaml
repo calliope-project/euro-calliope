@@ -1,25 +1,26 @@
 # For descriptions of the configuration values, see `./schema.yaml`.
 data-sources:
+    biofuel-potentials: data/euro-calliope-datasets/biofuels/potentials/{feedstock}.csv
+    biofuel-costs: data/euro-calliope-datasets/biofuels/costs/{feedstock}.csv
+    capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
+    data-repository: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/develop/{dataset}
+    energy-balance-category-names: data/energy_balance_category_names.csv
+    energy-balance-carrier-names: data/energy_balance_carrier_names.csv
+    eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
     eurostat-base-url: https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/{dataset}.tsv.gz
+    gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
+    hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
+    hydro-stations: https://zenodo.org/record/4289229/files/energy-modelling-toolkit/hydro-power-database-v7.zip?download=1
+    irena-generation: data/euro-calliope-datasets/irena/hydro-generation-europe.csv
+    load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
+    national-phs-storage-capacities: data/euro-calliope-datasets/pumped-hydro/storage-capacities-gwh.csv
+    nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
+    potentials: https://zenodo.org/record/5112963/files/possibility-for-electricity-autarky.zip
     swiss-stat:
         end-use: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/energieverbrauch-nach-verwendungszweck.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvOTg1NA==.html
         energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/gesamtenergiestatistik.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvNzUxOQ==.html
         industry-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/teilstatistiken.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODc4OA==.html
         gva: https://www.bfs.admin.ch/bfsstatic/dam/assets/10647597/master
-    biofuel-potentials: data/biofuels/potentials/{feedstock}.csv
-    biofuel-costs: data/biofuels/costs/{feedstock}.csv
-    eez: data/World_EEZ_v10_20180221/eez_v10.shp
-    energy-balance-category-names: data/energy_balance_category_names.csv
-    energy-balance-carrier-names: data/energy_balance_carrier_names.csv
-    irena-generation: data/irena/hydro-generation-europe.csv
-    national-phs-storage-capacities: data/pumped-hydro/storage-capacities-gwh.csv
-    capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
-    gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
-    hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
-    hydro-stations: https://zenodo.org/record/4289229/files/energy-modelling-toolkit/hydro-power-database-v7.zip?download=1
-    load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
-    nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
-    potentials: https://zenodo.org/record/3533038/files/possibility-for-electricity-autarky.zip
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch
