@@ -27,10 +27,6 @@ conda activate euro-calliope
 
 4. You need an account at the Copernicus Climate Data Service and you need to create a `$HOME/.cdsapirc` file with your credentials, see their [How To](https://cds.climate.copernicus.eu/api-how-to) (you do not need to manually install the client).
 
-5. Further, you need all data files that cannot be retrieved automatically:
-
-* [Maritime Boundaries v10 -> World Exclusive Economic Zones v10](http://www.marineregions.org/downloads.php), to be placed in `./data/World_EEZ_v10_20180221`
-
 ## Build the model
 
 Because input data is large, the actual model including its data is not part of this repository. To use the model, you first need to build it from input data and scripts. Running the build step will build the model in the `./model` folder.
@@ -107,16 +103,19 @@ You can easily change the units and scale all values using the `scaling-factor` 
 
 * `build/model`: Contains the entire model after the build step, including Calliope definition files and data (does not exist initially).
 * `config`: Files with configuration parameters which influence the model build process.
-* `data`: Small input data used within the model build process.
-* `data/automatic`: Contains data automatically downloaded within the model build process (does not exist initially).
+* `data/automatic`: Contains data automatically downloaded from third-party sources within the model build process (does not exist initially).
+* `data/euro-calliope-dataset`: Contains data automatically downloaded from the [Euro-Calliope datasets repository](https://github.com/calliope-project/euro-calliope-datasets) within the model build process (does not exist initially).
 * `docs`: Documentation of the model and the build process.
 * `envs`: Files defining the conda environment which are used to build the model.
 * `lib`: Library code in form of a Python package that is reused in many places of this repository.
-* `notebooks`: Notebooks for various data analysis or preparation steps. Not within main workflow.
 * `rules`: Snakemake workflows defining the build process.
 * `scripts`: Contains the scripts to build the model.
 * `templates`: Contains templates of Calliope model files.
 * `tests`: Contains a test usage of the model.
+
+## Associated repositories
+
+Small datasets that are not available for direct download are stored in the [Euro-Calliope datasets repository](https://github.com/calliope-project/euro-calliope-datasets). These datasets are either from proprietary sources or have required manual data processing from non-standard formats (e.g. PDFs). The processing pipeline for these datasets is described in associated README files found in each subdirectory.
 
 ## Run the tests
 
