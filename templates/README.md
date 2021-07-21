@@ -49,6 +49,11 @@ By default, euro-calliope contains a single technology for rooftop PV. This tech
 
 When using the `directional-rooftop-pv` override, there are three instead of just one technologies for rooftop PV. The three technologies comprise (1) south-facing and flat rooftops, (2) east- and west-facing rooftops, and (3) north-facing rooftops. This leads to higher capacity factors of rooftop PV as long as the potential of rooftop PV is not fully exploited. However, this also increases the complexity of the model.
 
+> exclusive-e-to-p-ratios
+
+Constrains the energy to power ratios of battery and hydrogen storage in a way that they do not overlap. Battery storage is constrained to a ratio of ≤4h while hydrogen is constrained to a ratio of ≥4h. The ratio is derived from typical values of commercial lithium-ion batteries available today (2021). Constraining hydrogen storage as well ensures  it does not directly compete with battery storage but is used for longer durations of fours hours and longer.
+
+
 > freeze-hydro-capacities
 
 By default, euro-calliope allows capacities of run-of-river hydro, reservoir hydro, and pumped storage hydro capacities up to today's levels. Alternatively, it's possible to freeze these capacities to today's levels using the `freeze-hydro-capacities` override.
