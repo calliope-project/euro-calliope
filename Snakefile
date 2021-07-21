@@ -316,6 +316,7 @@ rule model:
         rules.capacity_factors_hydro.output,
         rules.hydro_capacities.output,
         rules.directional_rooftop_pv.output,
+        rules.load_shedding.output,
         expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES

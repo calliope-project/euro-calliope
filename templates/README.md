@@ -53,6 +53,10 @@ When using the `directional-rooftop-pv` override, there are three instead of jus
 
 By default, euro-calliope allows capacities of run-of-river hydro, reservoir hydro, and pumped storage hydro capacities up to today's levels. Alternatively, it's possible to freeze these capacities to today's levels using the `freeze-hydro-capacities` override.
 
+> load-shedding
+
+Adds an option to shed load to each location. Shedding load comes with high a variable cost (see `tech-cost.yaml` parameter file) and will only be used when no other, less costly, option is available. Load shedding is not restricted in its total power or energy and has no fixed cost. If no load must be shed in your model (in cost-minimisation terms: if load shedding is economically unattractive), using this override will not change your results.
+
 ## Model components
 
 The models contain the following files. All files in the root directory are independent of the spatial resolution. All files that depend on the spatial resolution are within subfolders named by the resolution.
@@ -64,6 +68,7 @@ The models contain the following files. All files in the root directory are inde
 │   ├── electricity-demand.csv             <- Timeseries of electricity demand on each node.
 │   ├── example-model.yaml                 <- Calliope model definition.
 │   ├── link-all-neighbours.yaml           <- Connects neighbouring locations with transmission.
+│   ├── load-shedding.yaml                 <- Override adding option to shed load.
 │   ├── locations.csv                      <- Map from Calliope location id to name of location.
 │   └── locations.yaml                     <- Defines all locations and their max capacities.
 ├── build-metadata.yaml                    <- Metadata of the build process.

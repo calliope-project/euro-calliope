@@ -12,6 +12,7 @@
 * **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59).
 * **ADD** sync infrastructure to easily send and receive files to and from a cluster (#74).
 * **ADD** optional email notifications whenever builds fail or succeed (#92).
+* **ADD** option to shed load at all locations (#131).
 
 * **UPDATE** EEZ updated from v10 to v11 (difference in offshore area is < 1% for all relevant countries) (#99).
 * **UPDATE** ENTSOE national electricity load data gap filling priority order included in config (#42).

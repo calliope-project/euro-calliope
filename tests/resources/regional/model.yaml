@@ -6,6 +6,7 @@ import:
     - '../../../build/model/link-techs.yaml'
     - '../../../build/model/demand-techs.yaml'
     - '../../../build/model/regional/locations.yaml'
+    - '../../../build/model/regional/load-shedding.yaml'
     - '../../../build/model/regional/directional-rooftop.yaml'
 model:
     name: 'Test model with regional spatial resolution'
@@ -18,6 +19,7 @@ scenarios:
     directional-pv: ["directional-rooftop-pv"]
     frozen-hydro: ["freeze-hydro-capacities", "no-hydro-fixed-cost"]
     alternative-cost: ["dea-renewable-cost", "schroeder-hydro-cost"]
+    shed-load: ["load-shedding"]
 overrides:
     connect:
         import:
