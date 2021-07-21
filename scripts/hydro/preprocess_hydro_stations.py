@@ -4,12 +4,13 @@ from shapely.geometry import Point
 import pycountry
 
 from eurocalliopelib import utils
+from eurocalliopelib.geo import WGS84, EPSG3035
 
 
 MAXIMUM_NUMBER_OF_DROPPED_STATIONS = 5
 
 
-def preprocess_stations(path_to_stations, country_codes, path_to_basins, buffer_size,
+def preprocess_stations(path_to_stations, country_codes, path_to_basins, buffer_size_m,
                         path_to_phs_storage_capacities, scale_phs, path_to_output):
     stations = pd.read_csv(path_to_stations, index_col=0)
     stations = drop_kosovo(stations)
@@ -20,7 +21,7 @@ def preprocess_stations(path_to_stations, country_codes, path_to_basins, buffer_
     if scale_phs:
         stations = scale_phs_acording_to_geth(stations, path_to_phs_storage_capacities)
     stations = drop_out_of_scope(stations, country_codes)
-    stations = ensure_stations_within_basins(stations, path_to_basins, buffer_size)
+    stations = ensure_stations_within_basins(stations, path_to_basins, buffer_size_m)
     stations.to_csv(
         path_to_output,
         header=True,
@@ -118,28 +119,32 @@ def fix_station_country_code(stations):
 
 def station_in_any_basin(basins):
     def station_in_any_basin(station):
-        point = Point(station.lon, station.lat)
-        return basins.geometry.intersects(point).sum() > 0
+        return basins.geometry.intersects(station.geometry).sum() > 0
     return station_in_any_basin
 
 
-def ensure_stations_within_basins(stations, path_to_basins, buffer_size):
-    hydrobasins = gpd.read_file(path_to_basins)
-    is_in_basin = stations.apply(station_in_any_basin(hydrobasins), axis="columns")
-    ill_placed_stations = stations[~is_in_basin]
+def ensure_stations_within_basins(stations, path_to_basins, buffer_size_m):
+    geo_stations = gpd.GeoDataFrame(
+        stations.copy(),
+        geometry=[Point(station["lon"], station["lat"]) for _, station in stations.iterrows()],
+        crs=WGS84
+    ).to_crs(EPSG3035)
+    hydrobasins = gpd.read_file(path_to_basins).to_crs(EPSG3035)
+    is_in_basin = geo_stations.apply(station_in_any_basin(hydrobasins), axis="columns")
+    ill_placed_stations = geo_stations[~is_in_basin]
     for station_id, station in ill_placed_stations.iterrows():
-        new_point = new_coords(station, buffer_size, hydrobasins)
-        stations.loc[station_id, "lon"] = new_point.coords[0][0]
-        stations.loc[station_id, "lat"] = new_point.coords[0][1]
-    assert stations.apply(station_in_any_basin(hydrobasins), axis="columns").all()
+        geo_stations.loc[station_id, "geometry"] = new_coords(station, buffer_size_m, hydrobasins)
+    assert geo_stations.apply(station_in_any_basin(hydrobasins), axis="columns").all()
+    stations["lon"] = geo_stations.to_crs(WGS84).geometry.apply(lambda point: point.coords[0][0])
+    stations["lat"] = geo_stations.to_crs(WGS84).geometry.apply(lambda point: point.coords[0][1])
     return stations
 
 
-def new_coords(station, buffer_size, hydrobasins):
-    point = Point(station.lon, station.lat)
+def new_coords(station, buffer_size_m, hydrobasins):
+    point = station.geometry
     basin_id = hydrobasins.distance(point).idxmin()
     closest_basin = hydrobasins.loc[basin_id]
-    return point.buffer(buffer_size).intersection(closest_basin.geometry).representative_point()
+    return point.buffer(buffer_size_m).intersection(closest_basin.geometry).representative_point()
 
 
 if __name__ == "__main__":
@@ -150,6 +155,6 @@ if __name__ == "__main__":
         path_to_phs_storage_capacities=snakemake.input.phs_storage_capacities,
         scale_phs=snakemake.params.scale_phs,
         path_to_basins=snakemake.input.basins,
-        buffer_size=snakemake.params.buffer_size,
+        buffer_size_m=snakemake.params.buffer_size_m,
         path_to_output=snakemake.output[0]
     )

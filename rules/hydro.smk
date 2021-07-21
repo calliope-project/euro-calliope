@@ -86,7 +86,7 @@ rule preprocess_hydro_stations:
         basins = rules.preprocess_basins.output[0],
         phs_storage_capacities = config["data-sources"]["national-phs-storage-capacities"]
     params:
-        buffer_size = 1 / 60, # move stations up to 1 arcminute < 1 km
+        buffer_size_m = config["quality-control"]["hydro"]["stations-buffer-size-km"] * 1000,
         countries = config["scope"]["countries"],
         scale_phs = config["quality-control"]["hydro"]["scale-phs-according-to-geth-et-al"]
     output: "build/data/jrc-hydro-power-plant-database-preprocessed.csv"

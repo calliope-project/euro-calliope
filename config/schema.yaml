@@ -265,6 +265,9 @@ properties:
                     scale-phs-according-to-geth-et-al:
                         type: boolean
                         description: Whether or not to use pumped hydro capacities derived from Geth et al. (2015) to scale pumped hydro capacities givven by the JRC hydro database.
+                    stations-buffer-size-km:
+                        type: number
+                        description: Move stations outside of hydrobasins into closest basin by max this amount (fails otherwise).
     capacity_factors:
         type: object
         properties:
