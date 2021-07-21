@@ -11,9 +11,11 @@ EPSG3035 = "EPSG:3035"
 def capacityfactors(path_to_eez, path_to_shared_coast, path_to_timeseries,
                     threshold, path_to_result, year=None):
     """Generate offshore capacityfactor time series for each location."""
-    eez = gpd.read_file(path_to_eez).set_index("id").to_crs(EPSG3035).geometry
+    eez = gpd.read_file(path_to_eez).set_index("mrgid").to_crs(EPSG3035).geometry
     shared_coast = pd.read_csv(path_to_shared_coast, index_col=0)
     shared_coast.index = shared_coast.index.map(lambda x: x.replace(".", "-"))
+    shared_coast.columns = shared_coast.columns.astype(int)
+
     ts = xr.open_dataset(path_to_timeseries)
     if year:
         ts = ts.sel(time=str(year))

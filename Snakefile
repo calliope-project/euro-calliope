@@ -1,4 +1,5 @@
 import glob
+from pathlib import Path
 
 from snakemake.utils import validate
 
@@ -23,7 +24,7 @@ BIOFUEL_FEEDSTOCKS = [
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
 include: "./rules/sync.smk"
-localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials
+localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials, download_eurocalliope_dataset
 localrules: download_capacity_factors_wind_and_solar
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
@@ -35,6 +36,7 @@ __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
 script_dir = f"{root_dir}scripts/"
 template_dir = f"{root_dir}templates/"
 test_dir = f"{root_dir}tests/"
+model_test_dir = f"{test_dir}model"
 
 onstart:
     shell("mkdir -p build/logs")
@@ -93,7 +95,7 @@ rule parameterise_template:
         biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
     output: "build/model/{template}"
     wildcard_constraints:
-        template = "((link-techs.yaml)|(storage-techs.yaml)|(demand-techs.yaml)|(renewable-techs.yaml)|(README.md)|(environment.yaml)|(interest-rate.yaml))"
+        template = "((link-techs.yaml)|(storage-techs.yaml)|(demand-techs.yaml)|(renewable-techs.yaml)|(README.md)|(environment.yaml)|(interest-rate.yaml)|(tech-costs.yaml))"
     conda: "envs/default.yaml"
     script: "scripts/parameterise_templates.py"
 
@@ -300,6 +302,7 @@ rule model:
     input:
         "build/model/interest-rate.yaml",
         "build/model/link-techs.yaml",
+        "build/model/tech-costs.yaml",
         "build/model/renewable-techs.yaml",
         "build/model/storage-techs.yaml",
         "build/model/demand-techs.yaml",
@@ -331,7 +334,7 @@ rule clean: # removes all generated results
     shell:
         """
         rm -r build/
-        echo "Data downloaded to data/automatic/ has not been cleaned."
+        echo "Data downloaded to data/automatic/ and data/euro-calliope-datasets has not been cleaned."
         """
 
 
@@ -346,10 +349,9 @@ rule docs:
 rule test:
     message: "Run tests"
     input:
-        test_dir + "test_runner.py",
-        test_dir + "test_model.py",
-        test_dir + "test_capacityfactors.py",
         "build/logs/{resolution}/model.done",
+        test_dir = model_test_dir,
+        tests = lambda wildcards: Path(model_test_dir).glob("**/test_*.py"),
         model = test_dir + "resources/{resolution}/model.yaml",
         example_model = "build/model/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
@@ -360,4 +362,11 @@ rule test:
         config = config
     output: "build/logs/{resolution}/test-report.html"
     conda: "./envs/test.yaml"
-    script: "./tests/test_runner.py"
+    script: "./tests/model/test_runner.py"
+
+
+rule download_eurocalliope_dataset:
+    message: "Downloading `{wildcards.dataset}` from Euro-Calliope dataset submodule"
+    params: url = lambda wildcards: config["data-sources"]["data-repository"].format(dataset=wildcards.dataset)
+    output: "data/euro-calliope-datasets/{dataset}"
+    shell: "curl -sLfo {output} {params.url}"

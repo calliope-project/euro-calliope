@@ -1,4 +1,4 @@
-name: test-eurocalliopelib
+name: test-eurocalliope
 channels:
     - conda-forge
 dependencies:
@@ -20,4 +20,5 @@ dependencies:
     - pytest-html=1.20.0
     - pip=21.0.1
     - pip:
-        - -e .[geo]
+        - pytest-pythonpath
+        - -e ./lib[geo]
