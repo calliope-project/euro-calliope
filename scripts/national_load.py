@@ -25,14 +25,18 @@ def national_load(
     path_to_raw_load, year, data_quality_config, path_to_output, countries
 ):
     """Extracts national load time series for all countries in a specified year."""
-    raw_load = read_load_profiles(path_to_raw_load, data_quality_config["data-source-priority-order"])
+    data_sources = data_quality_config["data-source-priority-order"]
+    raw_load = read_load_profiles(path_to_raw_load, data_sources)
     filtered_load = filter_countries(raw_load, countries)
     filtered_load = filter_outliers(filtered_load, data_quality_config)
-    gap_filled_load = fill_gaps_per_source(filtered_load, year, data_quality_config)
+    gap_filled_load = pd.concat(
+        fill_gaps_per_source(filtered_load, year, data_quality_config, source)
+        for source in data_sources
+    )
     load = get_source_choice_per_country(
         filtered_load.loc[str(year)],
         gap_filled_load,
-        data_quality_config["data-source-priority-order"]
+        data_sources
     )
 
     load.to_csv(path_to_output, header=True)
@@ -53,7 +57,7 @@ def read_load_profiles(path_to_raw_load, entsoe_priority):
 
 def filter_countries(load, countries):
     # UKM == United Kingdom of Great Britain and Northern Ireland.
-    # Other subsets of the UK exist in the data, with this being the only one to cover the whole country.
+    # Other subsets of the UK exist in the data, with UKM being the only one to cover the whole country.
     load.rename(columns={"GB_UKM": "GB"}, inplace=True)
     country_codes = {
         pycountry.countries.lookup(country).alpha_2: pycountry.countries.lookup(country).alpha_3
@@ -79,26 +83,20 @@ def filter_outliers(load, data_quality_config):
     return cleaned_load
 
 
-def fill_gaps_per_source(all_load, model_year, data_quality_config):
+def fill_gaps_per_source(all_load, model_year, data_quality_config, source):
     """For each valid data source, fills in all NaNs by interpolation or with data from other years"""
-    source_loads = []
-    for source in data_quality_config["data-source-priority-order"]:
-        source_specific_load = all_load.xs(source, level="attribute")
-        source_specific_load = _interpolate_gaps(source_specific_load, data_quality_config["interpolate-hours"])
-        source_specific_model_year_load = source_specific_load.loc[str(model_year)]
-        source_specific_model_year_load = _fill_gaps_from_other_years(
-            source_specific_model_year_load, source_specific_load, data_quality_config, source, model_year
-        )
-        if data_quality_config["fill-29th-feb-from-28th"]:
-            source_specific_model_year_load = _fill_29th_feb(source_specific_model_year_load, model_year)
+    source_specific_load = all_load.xs(source, level="attribute")
+    source_specific_load = _interpolate_gaps(source_specific_load, data_quality_config["interpolate-hours"])
+    source_specific_model_year_load = source_specific_load.loc[str(model_year)]
+    source_specific_model_year_load = _fill_gaps_from_other_years(
+        source_specific_model_year_load, source_specific_load, data_quality_config, source, model_year
+    )
 
-        source_loads.append(
-            _interpolate_gaps(source_specific_model_year_load, data_quality_config["interpolate-hours"])
-            .assign(attribute=source)
-            .set_index("attribute", append=True)
-        )
-
-    return pd.concat(source_loads)
+    return (
+        source_specific_model_year_load
+        .assign(attribute=source)
+        .set_index("attribute", append=True)
+    )
 
 
 def _fill_gaps_from_other_years(model_year_load, all_load, data_quality_config, source, model_year):
@@ -108,12 +106,16 @@ def _fill_gaps_from_other_years(model_year_load, all_load, data_quality_config, 
         updated_country_series, N_missing_timesteps, fill_years = _fill_missing_data_in_country(
             all_load.loc[:, country], model_year, data_quality_config["acceptable-year-diff-for-gap-filling"]
         )
+        if data_quality_config["fill-29th-feb-from-28th"]:
+            updated_country_series = _fill_29th_feb(updated_country_series, model_year)
+
         model_year_load.loc[:, country] = updated_country_series
         print(
             f"Using data source `{source}`, {country} has {N_missing_timesteps} missing load value(s). "
             f"A working dataset was constructed from year(s) {', '.join(fill_years)} "
             f"with {updated_country_series.isnull().sum()} remaining empty data points."
         )
+
     return model_year_load
 
 
@@ -146,7 +148,7 @@ def _fill_missing_data_in_country(country_series, model_year, acceptable_year_di
 
 
 def _get_index_of_missing_data(series, model_year):
-    attempted_interpolation = series.where(series >= 0)[str(model_year)]
+    attempted_interpolation = series.where(series > 0)[str(model_year)]
     return attempted_interpolation[attempted_interpolation.isnull()].index
 
 
@@ -164,20 +166,20 @@ def _ignore_feb_29th(this_year, next_avail_year, missing_timesteps):
 
 
 def _fill_29th_feb(load, year):
-    if pd.to_datetime(f'{year}-02-29').date() in load.index.date:
+    if f'{year}-02-29' in load.index.strftime("%Y-%m-%d"):
         filler = load.loc[f'{year}-02-28']
-        to_fill = load.loc[f'{year}-02-29']
-        filler.index = to_fill.index
-        load.loc[f'{year}-02-29'] = to_fill.fillna(filler)
-    return load
+        filler.index = filler.index + pd.DateOffset(1)
+        return load.fillna(filler)
+    else:
+        return load
 
 
 def _interpolate_gaps(load, interpolate_hours):
-    return load.interpolate(limit=interpolate_hours)
+    return load.interpolate(limit=interpolate_hours, limit_direction="both")
 
 
 def _countries_with_missing_data_in_model_year(data):
-    model_year_missing_data = data.where(data >= 0).isnull().sum() > 0
+    model_year_missing_data = data.where(data > 0).isnull().sum() > 0
     return model_year_missing_data[model_year_missing_data].index
 
 
@@ -191,7 +193,8 @@ def get_source_choice_per_country(raw_load, gap_filled_load, entsoe_priority):
     source_choice = (
         gap_filled_load
         .notnull()
-        .sum(level="attribute")
+        .groupby(level="attribute")
+        .sum()
         .loc[entsoe_priority]
         .idxmax()
         .to_frame("attribute")
@@ -205,15 +208,16 @@ def get_source_choice_per_country(raw_load, gap_filled_load, entsoe_priority):
     new_load = _select_load_by_source_priority(gap_filled_load, source_choice)
     raw_load_for_comparison = _select_load_by_source_priority(raw_load, source_choice)
 
-    if new_load.isnull().sum().all() == 0:
+    if new_load.isnull().any().any():
+        bad_index_values = new_load.isnull().stack()
+        raise AssertionError(
+            "Gap filling thresholds do not allow for a complete load dataset to be produced. "
+            f"Remaining empty data: {bad_index_values[bad_index_values].index.to_list()}"
+        )
+    else:
         print(
             "Gap filling methods lead to the following relative differences between input and output data\n"
             f"{new_load.sum() / raw_load_for_comparison.sum()}"
-        )
-    else:
-        raise AssertionError(
-            "Gap filling thresholds do not allow for a complete load dataset to be produced. "
-            f"Remaining empty data: {new_load[new_load.isnull()]}"
         )
     return new_load
 
