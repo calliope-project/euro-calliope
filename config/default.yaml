@@ -3,7 +3,7 @@ data-sources:
     biofuel-potentials: data/euro-calliope-datasets/biofuels/potentials/{feedstock}.csv
     biofuel-costs: data/euro-calliope-datasets/biofuels/costs/{feedstock}.csv
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
-    data-repository: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/develop/{dataset}
+    data-repository: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/{dataset}
     energy-balance-category-names: data/euro-calliope-datasets/energy-balance/category-names.csv
     energy-balance-carrier-names: data/euro-calliope-datasets/energy-balance/carrier-names.csv
     eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
