@@ -91,6 +91,7 @@ rule jrc_idees_industry_processed:
     wildcard_constraints:
         dataset = "((energy)|(production))"
     conda: "../envs/default.yaml"
+    threads: config["snakemake"]["max-threads"]
     script: "../scripts/jrc-idees/industry.py"
 
 

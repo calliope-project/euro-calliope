@@ -1,4 +1,6 @@
 from pathlib import Path
+from multiprocessing import Pool
+from itertools import product
 
 import numpy as np
 import pandas as pd
@@ -18,29 +20,36 @@ ENERGY_SHEET_COLORS = {
 }
 
 ENERGY_SHEET_CARRIERS = {
-    "Electricity": "electric|microwave|freeze|mechanical",
-    "Diesel oil (incl. biofuels)": "diesel",
-    "Natural gas (incl. biogas)": "gas|thermal cooling|thermal connection",
-    "Natural gas (incl. biogas)": "gas",
+    "electric|microwave|freeze|mechanical": "Electricity",
+    "diesel": "Diesel oil (incl. biofuels)",
+    "gas|thermal cooling|thermal connection": "Natural gas (incl. biogas)",
+    "gas": "Natural gas (incl. biogas)",
 }
 
 
-def process_jrc_industry_data(data_dir, dataset, out_path):
-    data_filepaths = Path(data_dir).glob("*.xlsx")
+def process_jrc_industry_data(data_dir, dataset, threads, out_path):
+    data_filepaths = list(Path(data_dir).glob("*.xlsx"))
     if dataset == "energy":
-        processed_data = process_energy(data_filepaths)
+        processed_data = process_energy(data_filepaths, threads)
     elif dataset == "production":
         processed_data = process_production(data_filepaths)
-    processed_data.stack('year').to_csv(out_path)
+
+    processed_data.columns = processed_data.columns.rename("year").astype(int)
+    processed_data.stack().to_csv(out_path)
 
 
-def process_energy(data_filepaths):
-    processed_data = pd.concat(
-        pd.concat(
-            get_jrc_idees_energy_sheet(f'{sheet}_{flow}', data_filepaths)
-            for sheet in SHEETS
+def process_energy(data_filepaths, threads):
+    with Pool(int(threads)) as pool:
+        consumption = pool.starmap(
+            get_jrc_idees_energy_sheet,
+            product((f"{sheet}_fec" for sheet in SHEETS), data_filepaths)
         )
-        for flow in ["fec", "ued"],
+        demand = pool.starmap(
+            get_jrc_idees_energy_sheet,
+            product((f"{sheet}_ued" for sheet in SHEETS), data_filepaths)
+        )
+    processed_data = pd.concat(
+        [pd.concat(i).sort_index() for i in [consumption, demand]],
         names=['energy'],
         keys=['consumption', 'demand']
     )
@@ -51,41 +60,35 @@ def process_energy(data_filepaths):
 
 
 def process_production(data_filepaths):
-    return pd.concat(
-        pd.concat(
-            get_jrc_idees_production_sheet(sheet, file)
-            for file in data_filepaths
-        )
-        for sheet in SHEETS
-    )
+    return pd.concat([
+        get_jrc_idees_production_sheet(sheet, file)
+        for file in data_filepaths for sheet in SHEETS
+    ])
 
 
-def get_jrc_idees_energy_sheet(sheet_name, files):
+def get_jrc_idees_energy_sheet(sheet_name, file):
     """
     This sheet needs to be parsed both based on the colour of the cell and the indent
     level of the text inside the cell.
     """
-    dfs = []
-    for file in files:
-        style_df = StyleFrame.read_excel(file, read_style=True, sheet_name=sheet_name)
-        df = pd.read_excel(file, sheet_name=sheet_name)
-        column_names = str(style_df.data_df.columns[0])
+    print(sheet_name, file)
+    style_df = StyleFrame.read_excel(file, read_style=True, sheet_name=sheet_name)
+    df = pd.read_excel(file, sheet_name=sheet_name)
+    column_names = str(style_df.data_df.columns[0])
 
-        last_index_of_data = int(style_df[style_df[column_names].str.find('Market shares') > -1].item())
-        df = assign_section_level_based_on_colour(style_df, df, column_names, last_index_of_data)
-        df, total_to_check = slice_on_indent(style_df, df, column_names, last_index_of_data)
-        df = rename_carriers(df)
-        df = assign_category_country_unit_information(df, column_names)
+    last_index_of_data = int(style_df[style_df[column_names].str.find('Market shares') > -1].item())
+    df = assign_section_level_based_on_colour(style_df, df, column_names, last_index_of_data)
+    df, total_to_check = slice_on_indent(style_df, df, column_names, last_index_of_data)
+    df = rename_carriers(df)
+    df = assign_category_country_unit_information(df, column_names)
 
-        # Check that we haven't lost some data
-        assert np.allclose(
-            total_to_check.reindex(df.columns).astype(float),
-            df.sum().astype(float)
-        )
+    # Check that we haven't lost some data
+    assert np.allclose(
+        total_to_check.reindex(df.columns).astype(float),
+        df.sum().astype(float)
+    )
 
-        dfs.append(df)
-
-    return pd.concat(dfs)
+    return df
 
 
 def assign_section_level_based_on_colour(style_df, df, column_names, last_index_of_data):
@@ -99,9 +102,9 @@ def assign_section_level_based_on_colour(style_df, df, column_names, last_index_
 
 
 def slice_on_indent(style_df, df, column_names, last_index_of_data):
-
-    df.loc[:last_index_of_data, 'indent'] = (
-        style_df[column_names].style.indent.loc[:last_index_of_data].astype(int)
+    df = df.loc[:last_index_of_data]
+    df = df.assign(
+        indent=style_df[column_names].style.indent.loc[:last_index_of_data].astype(int)
     )
 
     # indent of 1 tab == high-level summed data.
@@ -109,19 +112,21 @@ def slice_on_indent(style_df, df, column_names, last_index_of_data):
     total_to_check = df[df.indent == 1].sum()
 
     df = df.dropna(subset=['section', 'subsection', 'end_use', 'carrier_name'], how='all')
+
     # All data between section/subsection names correspond to the preceding section/subsection name
-    df['section'] = df.section.ffill()
-    df['subsection'] = df.subsection.ffill()
+    df["section"].ffill(inplace=True)
+    df["subsection"].ffill(inplace=True)
 
     # When the indent decreases from one row to the next it signals that the data in that row
-    # is a sum of a set of previous data. We don't want these summed data rows in our final result.
-    df = df[df.indent >= df.indent.shift(-1).fillna(df.indent)]
+    # is an aggregation of a set of previous data.
+    # We don't want these aggregated data rows in our final result.
+    df = df.where(df.indent >= df.indent.shift(-1).fillna(df.indent)).dropna(how="all")
 
     return df, total_to_check
 
 
 def rename_carriers(df):
-    for carrier_group, carrier_search_string in ENERGY_SHEET_CARRIERS.items():
+    for carrier_search_string, carrier_group in ENERGY_SHEET_CARRIERS.items():
         df.loc[
             df.end_use.str.lower().str.contains(
                 carrier_search_string, regex=True, na=False
@@ -135,6 +140,7 @@ def rename_carriers(df):
 
 
 def assign_category_country_unit_information(df, column_names):
+    index = ['section', 'subsection', 'carrier_name', 'country_code', 'cat_name', 'unit']
     return (
         df
         .assign(
@@ -142,9 +148,9 @@ def assign_category_country_unit_information(df, column_names):
             country_code=column_names.split(': ')[0],
             unit='ktoe'
         )
-        .set_index(['section', 'subsection', 'carrier_name', 'country_code', 'cat_name', 'unit'])
+        .set_index(index)
         .drop([column_names, 'indent', 'end_use'], axis="columns")
-        .groupby(axis=0).sum()
+        .sum(level=index)
     )
 
 
@@ -172,5 +178,6 @@ if __name__ == "__main__":
     process_jrc_industry_data(
         data_dir=snakemake.input.unprocessed_data,
         dataset=snakemake.wildcards.dataset,
+        threads=snakemake.threads,
         out_path=snakemake.output[0]
     )

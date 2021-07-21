@@ -1,4 +1,6 @@
 # For descriptions of the configuration values, see `./schema.yaml`.
+snakemake:
+    max-threads: 4
 data-sources:
     biofuel-potentials: data/euro-calliope-datasets/biofuels/potentials/{feedstock}.csv
     biofuel-costs: data/euro-calliope-datasets/biofuels/costs/{feedstock}.csv

@@ -58,7 +58,7 @@ RAIL_CARRIERS = {
 
 
 def process_jrc_transport_data(data_dir, dataset, out_path):
-    data_filepaths = Path(data_dir).glob("*.xlsx")
+    data_filepaths = list(Path(data_dir).glob("*.xlsx"))
     processed_data = pd.concat([
         read_transport_excel(file, **DATASET_PARAMS[dataset])
         for file in data_filepaths
@@ -74,8 +74,8 @@ def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, unit):
     style_df = StyleFrame.read_excel(file, read_style=True, sheet_name=sheet_name)
     df = pd.read_excel(file, sheet_name=sheet_name)
     column_names = str(style_df.data_df.columns[0])
-    idx_start = int(style_df[style_df[column_names].str.find(idx_start_str) > -1].item())
-    idx_end = int(style_df[style_df[column_names].str.find(idx_end_str) > -1].item())
+    idx_start = int(style_df[style_df[column_names].str.find(idx_start_str) > -1][0])
+    idx_end = int(style_df[style_df[column_names].str.find(idx_end_str) > -1][0])
     df = df.assign(indent=style_df[column_names].style.indent.astype(int)).loc[idx_start:idx_end]
 
     total_to_check = df.iloc[0]
