@@ -40,7 +40,9 @@ snakemake --use-conda --conda-frontend conda --list # test your installation
 
 Because input data is large, the actual model including its data is not part of this repository. To use the model, you first need to build it from input data and scripts. Running the build step will build the model in the `./model` folder.
 
-    snakemake --use-conda --cores all
+    snakemake --use-conda --cores <N_CORES>
+
+`N_CORES` is the number of cores of your machine you want to use. It can be anything between `1` and `all`. Please have a look at [Snakemake's documentation](https://snakemake.readthedocs.io) for more information.
 
 ## Build the model on a cluster
 
@@ -54,17 +56,17 @@ If you want to run on another cluster, read [snakemake's documentation on cluste
 
 If you are like us, you may want to work locally (to change configuration parameters, add modules etc), but execute remotely on the cluster. We support this workflow through three Snakemake rules: `send`, `receive`, and `clean_cluster_results`. It works like the following.
 
-First, start local and make sure the `cluster-sync` configuration parameters fit your environment. Next, run `snakemake --use-conda --cores all send` to send the entire repository to your cluster. On the cluster, execute the workflow with Snakemake (see above). After the workflow has finished, download results by locally running `snakemake --use-conda --cores all receive`. By default, this will download results into `build/cluster`.
+First, start local and make sure the `cluster-sync` configuration parameters fit your environment. Next, run `snakemake --use-conda --cores 1 send` to send the entire repository to your cluster. On the cluster, execute the workflow with Snakemake (see above). After the workflow has finished, download results by locally running `snakemake --use-conda --cores 1 receive`. By default, this will download results into `build/cluster`.
 
-This workflow works iteratively too. After analysing your cluster results locally, you may want to make changes locally, send these changes to the cluster (`snakemake --use-conda --cores all send`), rerun on the cluster, and download updated results (`snakemake --use-conda --cores all receive`).
+This workflow works iteratively too. After analysing your cluster results locally, you may want to make changes locally, send these changes to the cluster (`snakemake --use-conda --cores 1 send`), rerun on the cluster, and download updated results (`snakemake --use-conda --cores 1 receive`).
 
-To remove cluster results on your local machine, run `snakemake --use-conda --cores all clean_cluster_results`.
+To remove cluster results on your local machine, run `snakemake --use-conda --cores 1 clean_cluster_results`.
 
 ## Be notified of build successes or fails
 
  As the execution of this workflow may take a while, you can be notified whenever the execution terminates either successfully or unsuccessfully. Notifications are sent by email. To activate notifications, add the email address of the recipient to the configuration key `email`. You can add the key to your configuration file, or you can run the workflow the following way to receive notifications:
 
-     snakemake --use-conda --cores all --config email=<your-email>
+     snakemake --use-conda --config email=<your-email>
 
 ## Example use of the model
 
@@ -100,7 +102,7 @@ After a successful full build (see "Build the model"), the following files will 
 └── storage-techs.yaml                     <- Definition of storage technologies.
 ```
 
-Alternatively to a full build, each of these model components can be built individually, by running `snakemake --use-conda --cores all <path-to-component>`. The model components can be used to [configure a Calliope model](https://calliope.readthedocs.io/en/stable/user/building.html). For an example model configuration, see "Example use of the model" above.
+Alternatively to a full build, each of these model components can be built individually, by running `snakemake --use-conda --cores <N_CORES> <path-to-component>`. The model components can be used to [configure a Calliope model](https://calliope.readthedocs.io/en/stable/user/building.html). For an example model configuration, see "Example use of the model" above.
 
 ## Units and scaling
 
@@ -130,7 +132,7 @@ Small datasets that are not available for direct download are stored in the [Eur
 
 Tests of models with continental and national resolution run automatically when you run the entire workflow. To run the tests of models with regional resolution do the following:
 
-    snakemake --use-conda --cores all build/logs/regional/test-report.html
+    snakemake --use-conda --cores <N_CORES> build/logs/regional/test-report.html
 
 Exchanging `regional` with `national` or `continental` allows you to run tests on the respective resolution explicitly.
 
@@ -138,7 +140,7 @@ Exchanging `regional` with `national` or `continental` allows you to run tests o
 
 As a developer, you may want to run the entire workflow often to spot errors early. For that, you can use a minimal test configuration that takes less time to run.
 
-    snakemake --use-conda --cores all --configfile="config/minimal.yaml"
+    snakemake --use-conda --cores <N_CORES> --configfile="config/minimal.yaml"
 
 Make sure to run this in a clean working directory. Do not use the working directory in which you are using your normal configuration.
 
