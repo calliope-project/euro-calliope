@@ -12,6 +12,7 @@
 * **ADD** minimal configuration to be able to test the entire workflow more quickly (#60).
 * **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59).
 * **ADD** sync infrastructure to easily send and receive files to and from a cluster (#74).
+* **ADD** parameter `station-nearest-basin-max-km` controlling the mapping of hydro power stations to basins (#138).
 * **ADD** optional email notifications whenever builds fail or succeed (#92).
 
 * **UPDATE** EEZ updated from v10 to v11 (difference in offshore area is < 1% for all relevant countries) (#99).
