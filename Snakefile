@@ -171,9 +171,9 @@ rule load_shedding:
     message: "Generate override allowing load shedding."
     input:
         script = script_dir + "load_shedding.py",
-        shapes = rules.units.output[0]
+        units = rules.units_without_shape.output[0]
     output: "build/model/{resolution}/load-shedding.yaml"
-    conda: "envs/geo.yaml"
+    conda: "envs/default.yaml"
     script: "scripts/load_shedding.py"
 
 

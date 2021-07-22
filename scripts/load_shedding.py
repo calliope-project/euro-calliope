@@ -1,6 +1,6 @@
 """Create override allowing load shedding."""
 import jinja2
-import geopandas as gpd
+import pandas as pd
 
 TEMPLATE = """overrides:
     load-shedding:
@@ -11,11 +11,9 @@ TEMPLATE = """overrides:
 """
 
 
-def load_shedding(path_to_shapes, path_to_result):
+def load_shedding(path_to_units, path_to_result):
     """Generate a file that allows load shedding."""
-    locations = gpd.GeoDataFrame(
-        gpd.read_file(path_to_shapes).set_index("id")
-    )
+    locations = pd.read_csv(path_to_units, index_col=0)
     template = jinja2.Template(TEMPLATE)
     rendered = template.render(
         locations=locations
@@ -26,6 +24,6 @@ def load_shedding(path_to_shapes, path_to_result):
 
 if __name__ == "__main__":
     load_shedding(
-        path_to_shapes=snakemake.input.shapes,
+        path_to_units=snakemake.input.units,
         path_to_result=snakemake.output[0]
     )
