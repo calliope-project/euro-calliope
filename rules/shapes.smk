@@ -14,6 +14,7 @@ SCHEMA_UNITS = {
 
 configfile: "config/default.yaml"
 localrules: download_raw_gadm_administrative_borders, raw_gadm_administrative_borders, download_raw_nuts_units
+localrules: download_eez
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 script_dir = f"{root_dir}scripts/"
 
