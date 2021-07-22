@@ -16,7 +16,7 @@ scenarios:
     default: []
     connected: ["connect"]
     directional-pv: ["directional-rooftop-pv"]
-    e-to-p-ratios: ["exclusive-e-to-p-ratios"]
+    e-to-p-ratios: ["exclusive-energy-to-power-ratios"]
     frozen-hydro: ["freeze-hydro-capacities", "no-hydro-fixed-cost"]
     alternative-cost: ["dea-renewable-cost", "schroeder-hydro-cost"]
 overrides:
