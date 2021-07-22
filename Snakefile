@@ -351,7 +351,7 @@ rule test:
     input:
         "build/logs/{resolution}/model.done",
         test_dir = model_test_dir,
-        tests = lambda wildcards: Path(model_test_dir).glob("**/test_*.py"),
+        tests = map(str, Path(model_test_dir).glob("**/test_*.py")),
         model = test_dir + "resources/{resolution}/model.yaml",
         example_model = "build/model/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
