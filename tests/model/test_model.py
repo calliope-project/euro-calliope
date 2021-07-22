@@ -12,6 +12,7 @@ TECHNOLOGIES = {
     "default": DEFAULT_TECHNOLOGIES,
     "connected": DEFAULT_TECHNOLOGIES,
     "directional-pv": (DEFAULT_TECHNOLOGIES | DIRECTIONAL_PV) - set(["roof_mounted_pv"]),
+    "e-to-p-ratios": DEFAULT_TECHNOLOGIES,
     "frozen-hydro": DEFAULT_TECHNOLOGIES,
     "alternative-cost": DEFAULT_TECHNOLOGIES,
     "shed-load": DEFAULT_TECHNOLOGIES | set(["load_shedding"]),
