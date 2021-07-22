@@ -20,8 +20,9 @@
 * **UPDATE** JRC hydro database v4 -> v7 (#48). This entails one patch being removed:
     1. Romanian PHS data is no longer manually added from Geth et al. (2015).
 * **UPDATE** Improve gap-filling method for national electricity load data (#3).
-* **UPDATE** dependencies (#44):
+* **UPDATE** dependencies (#44, #142):
     * Python 3.7 -> 3.8
+    * Snakemake 5.8.2 -> 6.1.1 (uses mamba by default)
     * atlite -> 0.2.1
     * geo packages from gdal 2.4 -> 3.2.1
     * Updates to NumPy, Pandas, xarray, and others
