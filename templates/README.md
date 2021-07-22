@@ -58,6 +58,14 @@ Constrains the energy to power ratios of battery and hydrogen storage in a way t
 
 By default, euro-calliope allows capacities of run-of-river hydro, reservoir hydro, and pumped storage hydro capacities up to today's levels. Alternatively, it's possible to freeze these capacities to today's levels using the `freeze-hydro-capacities` override.
 
+> load-shedding
+
+Adds an option to shed load at each location. You can use this to model blackouts, brownouts, or controlled shedding of load as a form of demand response.
+
+In euro-calliope, we model load shedding not as actual reduction of demand but as an unconstrained supply of electricity. This supply has high variable cost (see `tech-cost.yaml` parameter file) and no fixed cost. Due to its high cost, it will only be used when no other, less costly, option is available.
+
+Calliope provides a built-in mechanism that is similiar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/stable/user/building.html#allowing-for-unmet-demand). The benefit of using the `load-shedding` override over Calliope's built-in mechanism is that it is more targeted towards modelling shedding of electrical load and provides more flexibility -- for example in terms of the cost of shed load.
+
 ## Model components
 
 The models contain the following files. All files in the root directory are independent of the spatial resolution. All files that depend on the spatial resolution are within subfolders named by the resolution.
@@ -69,6 +77,7 @@ The models contain the following files. All files in the root directory are inde
 │   ├── electricity-demand.csv             <- Timeseries of electricity demand on each node.
 │   ├── example-model.yaml                 <- Calliope model definition.
 │   ├── link-all-neighbours.yaml           <- Connects neighbouring locations with transmission.
+│   ├── load-shedding.yaml                 <- Override adding option to shed load.
 │   ├── locations.csv                      <- Map from Calliope location id to name of location.
 │   └── locations.yaml                     <- Defines all locations and their max capacities.
 ├── build-metadata.yaml                    <- Metadata of the build process.

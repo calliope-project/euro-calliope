@@ -6,6 +6,7 @@ import:
     - '../../../build/model/link-techs.yaml'
     - '../../../build/model/demand-techs.yaml'
     - '../../../build/model/continental/locations.yaml'
+    - '../../../build/model/continental/load-shedding.yaml'
     - '../../../build/model/continental/directional-rooftop.yaml'
 model:
     name: 'Test model with continental spatial resolution'
@@ -18,6 +19,7 @@ scenarios:
     e-to-p-ratios: ["exclusive-energy-to-power-ratios"]
     frozen-hydro: ["freeze-hydro-capacities", "no-hydro-fixed-cost"]
     alternative-cost: ["dea-renewable-cost", "schroeder-hydro-cost"]
+    shed-load: ["load-shedding"]
 run:
     solver: gurobi
     solver_io: python
