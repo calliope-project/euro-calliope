@@ -55,7 +55,11 @@ By default, euro-calliope allows capacities of run-of-river hydro, reservoir hyd
 
 > load-shedding
 
-Adds an option to shed load to each location. Shedding load comes with high a variable cost (see `tech-cost.yaml` parameter file) and will only be used when no other, less costly, option is available. Load shedding is not restricted in its total power or energy and has no fixed cost. If no load must be shed in your model (in cost-minimisation terms: if load shedding is economically unattractive), using this override will not change your results.
+Adds an option to shed load at each location. You can use this to model blackouts, brownouts, or controlled shedding of load as a form of demand response.
+
+In euro-calliope, we model load shedding not as actual reduction of demand but as an unconstrained supply of electricity. This supply has high variable cost (see `tech-cost.yaml` parameter file) and no fixed cost. Due to its high cost, it will only be used when no other, less costly, option is available.
+
+Calliope provides a built-in mechanism that is similiar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/stable/user/building.html#allowing-for-unmet-demand). The benefit of using the `load-shedding` override over Calliope's built-in mechanism is that it is more targeted towards modelling shedding of electrical load and provides more flexibility -- for example in terms of the cost of shed load.
 
 ## Model components
 
