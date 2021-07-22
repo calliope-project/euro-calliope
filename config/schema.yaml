@@ -14,7 +14,7 @@ properties:
                 pattern: ^(https?|http?):\/\/.+{dataset}.tsv.gz$
                 description: Base URL for Eurostat data
             swiss-stat:
-                description: Set of data sources for Swiss-specific data 
+                description: Set of data sources for Swiss-specific data
                 type: object
                 properties:
                     end-use:
@@ -68,6 +68,10 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of database of hydro stations.
+            jrc-idees:
+                type: string
+                pattern: ^(https?|http?):\/\/.+{country_code}.*\.zip$
+                description: Web address of JRC-IDEES dataset repository. Must contain {country_code} placeholder.
             load:
                 type: string
                 pattern: ^(https?|http?):\/\/.+

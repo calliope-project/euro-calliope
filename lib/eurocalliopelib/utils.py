@@ -51,13 +51,18 @@ def to_numeric(series):
     Returns a numeric pandas.Series.
 
     """
-    series = series.astype(str).str.extract("(\-*\d+\.*\d*)")[0]
+    series = series.astype(str).str.extract("(\\-*\\d+\\.*\\d*)")[0]
     return pd.to_numeric(series, errors="coerce")
 
 
 def gwh_to_tj(array):
     """Convert GWh to TJ"""
     return array * 3.6
+
+
+def ktoe_to_twh(array):
+    """Convert KTOE to TWH"""
+    return array * 1.163e-2
 
 
 def add_idx_level(data, **level_info):
@@ -68,7 +73,7 @@ def add_idx_level(data, **level_info):
     ----------
     data : pd.Series or pd.DataFrame
         data to which Index level is added
-    level_info : 
+    level_info :
         kwargs where keys are the level names, and values are the level values.
     """
     new_data = data.copy()
@@ -86,27 +91,27 @@ def add_idx_level(data, **level_info):
     )
 
     return new_data
-    
+
 
 def read_eurostat_tsv(path_to_tsv, index_names, slice_idx=None, slice_lvl=None):
     """
-    
+
     Read a typical tab-delimited file from EUROSTAT. These have a specific structure
     where the data is tab-delimited but the multi-index data is comma delimited.
     This function also prepares the data in the expectation that it is all numeric
     and that the columns are given as years (a standard EUROSTAT format)
-    
+
     Parameters
     ---------
     path_to_tsv: str
     index_names : array
-        names to which the index levels correspond. Must be the same length as 
+        names to which the index levels correspond. Must be the same length as
         the number of expected index levels.
     slice_idx : str, optional
         Index level value to slice on, if required to remove potentially function-breaking data. Requires `slice_lvl` to also be defined.
     slice_lvl : str, optional
         Index level name to slice on, if required to remove potentially function-breaking data. Requires `slice_idx` to also be defined.
-    """    
+    """
     df = pd.read_csv(path_to_tsv, delimiter='\t', index_col=0)
     df.index = df.index.str.split(',', expand=True).rename(index_names)
     if slice_idx is not None:
@@ -117,7 +122,7 @@ def read_eurostat_tsv(path_to_tsv, index_names, slice_idx=None, slice_lvl=None):
 
 def remove_digits():
     """
-    Functionality to be passed to str.translate to remove numbers from 
+    Functionality to be passed to str.translate to remove numbers from
     string endings
     """
     return str.maketrans("", "", digits)

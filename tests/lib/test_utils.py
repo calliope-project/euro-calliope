@@ -3,7 +3,8 @@ import io
 
 import numpy as np
 import pandas as pd
-from eurocalliopelib.utils import convert_country_code, read_eurostat_tsv, remove_digits, add_idx_level
+from pandas.api.types import is_numeric_dtype
+from eurocalliopelib.utils import convert_country_code, read_eurostat_tsv, remove_digits, add_idx_level, to_numeric
 
 
 class TestEurostatTSV:
@@ -43,7 +44,7 @@ AFC,BIOE,TW,AL	3211.056	3129	0
     @pytest.mark.parametrize("file", [FILE_NUMERIC, FILE_WITH_STRINGS])
     def test_eurostat_tsv_column_values(self, df, file):
         assert set(df(file).columns) == set([2019, 2018, 2017])
-    
+
     @pytest.mark.parametrize("file", [FILE_NUMERIC, FILE_WITH_STRINGS])
     def test_eurostat_tsv_column_dtype(self, df, file):
         assert df(file).columns.dtype == int
@@ -61,11 +62,11 @@ AFC,BIOE,TW,AL	3211.056	3129	0
         assert df.index.difference([("AFC", "BIOE", "AL")]).empty
         assert np.allclose(df.values, [[3211.056, 3129, 0]])
 
-        
+
 class TestAddIndexLevel:
     DF = pd.DataFrame([["foo", "bar"]], columns=["A", "B"], index=pd.Index([1], name="C"))
     SERIES = pd.Series(["foo"], name="A", index=pd.Index([1], name="C"))
-    
+
     @pytest.mark.parametrize(
         ("level_name", "level_value"), [("foobar", "baz"), ("foobar", 1)]
     )
@@ -115,3 +116,27 @@ def test_country_code_conversion_no_output_specified(input_country, iso3166):
 @pytest.mark.parametrize("string_with_digits", ["trial01"])
 def test_digit_removal_from_string(string_with_digits):
     assert string_with_digits.translate(remove_digits()) == 'trial'
+
+class TestToNumeric:
+
+    def test_dash_to_NaN(self):
+        new_series = to_numeric(pd.Series(["-", 1, "-"]))
+        assert new_series.isna().sum() == 2
+        assert is_numeric_dtype(new_series)
+
+    @pytest.mark.parametrize(
+        ("raw", "expected"), [
+            ([1, "1a", "2-"], [1, 1, 2]),
+            ([10, "100a", "1000-"], [10, 100, 1000]),
+            ([1.0, "1.0a", "-1-"], [1.0, 1.0, -1])
+        ]
+    )
+    def test_remove_non_numeric_characters(self, raw, expected):
+        new_series = to_numeric(pd.Series(raw))
+        assert np.allclose(new_series, expected)
+        assert is_numeric_dtype(new_series)
+
+    def test_no_change_to_numeric_characters(self):
+        original_series = pd.Series([0, 1, 100, 2.0, np.nan])
+        new_series = to_numeric(original_series.copy())
+        assert new_series.equals(original_series)
