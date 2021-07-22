@@ -14,7 +14,7 @@
 * **ADD** optional email notifications whenever builds fail or succeed (#92).
 
 * **UPDATE** EEZ updated from v10 to v11 (difference in offshore area is < 1% for all relevant countries) (#99).
-* **UPDATE** ENTSOE national electricity load data gap filling priority order included in config (#42).
+* **UPDATE** ENTSOE national electricity load data gap filling methods (priority order, interpolation distance, outlier handling, 29th Feb handling) included in config (#42, #91).
 * **UPDATE** IRENA hydro generation data from 2018 to 2020 (#40).
 * **UPDATE** Make scaling pumped hydro capacity according to Geth et al. (2015) optional with a boolean config parameter `scale-phs-according-to-geth-et-al` which defaults to False (no scaling) (#49).
 * **UPDATE** JRC hydro database v4 -> v7 (#48). This entails one patch being removed:

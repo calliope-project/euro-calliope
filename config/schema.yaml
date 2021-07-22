@@ -235,7 +235,6 @@ properties:
                         - interpolate empty data when the data gap is small
                         - fill larger data gaps with data from nearby years
                         - If 29th of February is empty and couldn't previously be filled, use data from the 28th of February
-                        - interpolate across remaining data gaps if they are now small enough
                         - select most complete dataset for each country from list of data sources, based on a priority order
 
                         This process will fail if the 'most complete dataset' for any country has any remaining gaps.
@@ -249,9 +248,6 @@ properties:
                             relative-to-mean-max:
                                 type: number
                                 description: Upper bound cut-off value for any hourly data relative to the annual mean load of a country. Any values above this upper bound will be replaced by interpolated values.
-                            percentage-deviation-post-cleaning-max:
-                                type: number
-                                description: Allowable deviation in annual load for any country following removal and subsequent interpolation of outlier data.
                     interpolate-hours:
                         type: integer
                         description: Maximum number of hours over which missing load data can be interpolated.
