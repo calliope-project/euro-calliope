@@ -30,6 +30,8 @@
     * geo packages from gdal 2.4 -> 3.2.1
     * Updates to NumPy, Pandas, xarray, and others
 
+* **FIX** the centroid determination of all locations which had been calculated on an unprojected reference system before and was therefore slightly off (#147).
+
 ## 1.0.0 (2020-07-01)
 
 First public release.
