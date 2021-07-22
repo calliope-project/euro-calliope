@@ -36,8 +36,9 @@ class TestLoadHelperFunctions:
 
     @pytest.mark.parametrize(
         ("interpolate_hours", "expected"),
-        ([1, [[0, 0], [0, 1], [1, np.nan] , [2, 3], [2, 4]]],
-        [2, [[0, 0], [0, 1], [1, 2] , [2, 3], [2, 4]]])
+        ([0, [[np.nan, 0], [0, np.nan], [1, np.nan] , [2, np.nan], [np.nan, 4]]],
+         [1, [[0, 0], [0, 1], [1, np.nan] , [2, 3], [2, 4]]],
+         [2, [[0, 0], [0, 1], [1, 2] , [2, 3], [2, 4]]])
     )
     def test_interpolate_gaps(self, interpolate_hours, expected):
         nan_data = [[np.nan, 0], [0, np.nan], [1, np.nan] , [2, np.nan], [np.nan, 4]]

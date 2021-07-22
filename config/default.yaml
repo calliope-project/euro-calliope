@@ -57,7 +57,7 @@ quality-control:
         outlier-data-thresholds:
             relative-to-mean-min: 0.25
             relative-to-mean-max: 2
-        interpolate-hours: 5
+        interpolate-hours: 3
         acceptable-year-diff-for-gap-filling: 5
         fill-29th-feb-from-28th: true
         data-source-priority-order:

@@ -175,7 +175,10 @@ def _fill_29th_feb(load, year):
 
 
 def _interpolate_gaps(load, interpolate_hours):
-    return load.interpolate(limit=interpolate_hours, limit_direction="both")
+    if interpolate_hours == 0:
+        return load
+    else:
+        return load.interpolate(limit=interpolate_hours, limit_direction="both")
 
 
 def _countries_with_missing_data_in_model_year(data):
