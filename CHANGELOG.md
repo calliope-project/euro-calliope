@@ -2,21 +2,21 @@
 
 ## 2.0 (unpublished)
 
-* **ADD** pipeline to download and process JRC-IDEES datasets for use in industry/tertiary/transport sector rules (#133)
-* **ADD** download and preliminary pre-processing of Eurostat and equivalent Swiss data, for use in most downstream sector-coupling processing (#113)
+* **ADD** Pipeline to download and process JRC-IDEES datasets for use in industry/tertiary/transport sector rules (#133)
+* **ADD** Download and preliminary pre-processing of Eurostat and equivalent Swiss data, for use in most downstream sector-coupling processing (#113)
 
 ## 1.1 (unpublished)
 
-* **ADD** automatic download of EEZ (#99).
+* **ADD** Automatic download of EEZ (#99).
 * **ADD** Danish Energy Agency and Schroeder et al (2013) cost data as well as no hydro fixed costs as optional overrides (#18, #129).
 * **ADD** Add basic documentation to ReadTheDocs (#114).
-* **ADD** ability to move working directory (#45).
-* **ADD** schema that automatically validates configuration files (#45).
-* **ADD** automatic download of hydro basins data (#34).
-* **ADD** minimal configuration to be able to test the entire workflow more quickly (#60).
-* **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59).
-* **ADD** sync infrastructure to easily send and receive files to and from a cluster (#74).
-* **ADD** optional email notifications whenever builds fail or succeed (#92).
+* **ADD** Ability to move working directory (#45).
+* **ADD** Schema that automatically validates configuration files (#45).
+* **ADD** Automatic download of hydro basins data (#34).
+* **ADD** Minimal configuration to be able to test the entire workflow more quickly (#60).
+* **ADD** Installation of `curl` and `unzip` from conda-forge, to increase portability (#59).
+* **ADD** Sync infrastructure to easily send and receive files to and from a cluster (#74).
+* **ADD** Optional email notifications whenever builds fail or succeed (#92).
 
 * **UPDATE** EEZ updated from v10 to v11 (difference in offshore area is < 1% for all relevant countries) (#99).
 * **UPDATE** ENTSOE national electricity load data gap filling priority order included in config (#42).
@@ -25,7 +25,7 @@
 * **UPDATE** JRC hydro database v4 -> v7 (#48). This entails one patch being removed:
     1. Romanian PHS data is no longer manually added from Geth et al. (2015).
 * **UPDATE** Improve gap-filling method for national electricity load data (#3).
-* **UPDATE** dependencies (#44):
+* **UPDATE** Dependencies (#44):
     * Python 3.7 -> 3.8
     * atlite -> 0.2.1
     * geo packages from gdal 2.4 -> 3.2.1

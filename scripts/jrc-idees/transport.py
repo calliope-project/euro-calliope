@@ -74,11 +74,15 @@ def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, unit):
     style_df = StyleFrame.read_excel(file, read_style=True, sheet_name=sheet_name)
     df = pd.read_excel(file, sheet_name=sheet_name)
     column_names = str(style_df.data_df.columns[0])
+    # We have manually identified the section of data which is of use to us,
+    # given by idx_start_str and idx_end_str.
     idx_start = int(style_df[style_df[column_names].str.find(idx_start_str) > -1][0])
     idx_end = int(style_df[style_df[column_names].str.find(idx_end_str) > -1][0])
     df = df.assign(indent=style_df[column_names].style.indent.astype(int)).loc[idx_start:idx_end]
 
     total_to_check = df.iloc[0]
+    # The indent of the strings in the first column of data indicates their hierarchy in a multi-level index.
+    # Two levels of the hierarchy are identified here and ffill() is used to match all relevant rows to the top-level name.
     df['section'] = df.where(df.indent == 1).iloc[:, 0].ffill()
     df['vehicle_type'] = df.where(df.indent == 2).iloc[:, 0].ffill()
 
@@ -107,7 +111,7 @@ def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, unit):
 
 def process_rail(df, column_names):
     df['carrier'] = df.where(df.indent == 3).iloc[:, 0]
-    # ASSUME: All metro/tram/high speed rail is electrically powered
+    # ASSUME: All metro/tram/high speed rail is electrically powered (this is implicit when looking at the Excel sheet directly)
     df.loc[df.vehicle_type == 'Metro and tram, urban light rail', 'carrier'] = 'electricity'
     df.loc[df.vehicle_type == 'High speed passenger trains', 'carrier'] = 'electricity'
 
@@ -124,8 +128,12 @@ def process_rail(df, column_names):
 
 
 def process_road_vehicles(df, column_names):
+    # The indent of the strings in the first column of data indicates their hierarchy in a multi-level index.
+    # The vehicle subtype is identified here and ffill() is used to match all relevant rows to this subtype.
     df['vehicle_subtype'] = df.where(df.indent == 3).iloc[:, 0]
-    # ASSUME: 2-wheelers are powered by fuel oil
+    # ASSUME: 2-wheelers are powered by fuel oil.
+    # All useful information is either when the index column string is indented 3 times,
+    # or when the vehicle type is a 2-wheeler. One of the many ways in which this dataset is a pain.
     df = df.where(
         (df.indent == 3) | (df.vehicle_type == 'Powered 2-wheelers')
     ).dropna(how='all')
@@ -138,17 +146,25 @@ def process_road_vehicles(df, column_names):
 
 
 def process_road_energy(df, column_names):
+    # The indent of the strings in the first column of data indicates their hierarchy in a multi-level index.
+    # The vehicle subtype is identified here and ffill() is used to match all relevant rows to this subtype.
     df['vehicle_subtype'] = df.where(df.indent == 3).iloc[:, 0].ffill()
+    # Remove bracketed information from the vehicle type and subtype
     df['vehicle_type'] = df['vehicle_type'].str.split('(', expand=True)[0].str.strip()
     df['vehicle_subtype'] = df['vehicle_subtype'].str.split('(', expand=True)[0].str.strip()
+    # ASSUME: Powered 2-wheelers are gasoline engine only (this is implicit when looking at the Excel sheet directly)
     df.loc[df.vehicle_type == 'Powered 2-wheelers', 'vehicle_subtype'] = 'Gasoline engine'
     df['carrier'] = df.where(df.indent == 4).iloc[:, 0]
     df['carrier'] = df['carrier'].str.replace('of which ', '')
+    # Powered 2-wheelers use petrol, some of which is biofuels (we deal with the 'of which' part later)
     df.loc[(df.vehicle_type == 'Powered 2-wheelers') & (df.indent == 2), 'carrier'] = 'petrol'
     df.loc[(df.vehicle_type == 'Powered 2-wheelers') & (df.indent == 3), 'carrier'] = 'biofuels'
+    # ASSUME: both domestic and international freight uses diesel (this is implicit when looking at the Excel sheet directly)
     df.loc[(df.vehicle_subtype == 'Domestic') & (df.indent == 3), 'carrier'] = 'diesel'
     df.loc[(df.vehicle_subtype == 'International') & (df.indent == 3), 'carrier'] = 'diesel'
+    # All other vehicle types mention the drive-train directly, so we translate that to energy carrier here
     df['carrier'] = df['carrier'].fillna(df.vehicle_subtype.replace(ROAD_CARRIERS))
+
     df = (
         df
         .where((df.indent > 2) | (df.vehicle_type == 'Powered 2-wheelers'))
