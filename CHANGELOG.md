@@ -17,7 +17,7 @@
 * **UPDATE** ENTSOE national electricity load data gap filling priority order included in config (#42).
 * **UPDATE** IRENA hydro generation data from 2018 to 2020 (#40).
 * **UPDATE** Make scaling pumped hydro capacity according to Geth et al. (2015) optional with a boolean config parameter `scale-phs-according-to-geth-et-al` which defaults to False (no scaling) (#49).
-* **UPDATE** JRC hydro database v4 -> v7 (#48). This entails one patch being removed:
+* **UPDATE** JRC hydro database v4 -> v9 (#48, #57). This entails one patch being removed:
     1. Romanian PHS data is no longer manually added from Geth et al. (2015).
 * **UPDATE** Improve gap-filling method for national electricity load data (#3).
 * **UPDATE** dependencies (#44):
