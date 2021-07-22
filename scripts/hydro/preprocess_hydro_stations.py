@@ -1,6 +1,5 @@
 import pandas as pd
 import geopandas as gpd
-from shapely.geometry import Point
 import pycountry
 
 from eurocalliopelib import utils
@@ -126,7 +125,7 @@ def station_in_any_basin(basins):
 def ensure_stations_within_basins(stations, path_to_basins, buffer_size_m):
     geo_stations = gpd.GeoDataFrame(
         stations.copy(),
-        geometry=[Point(station["lon"], station["lat"]) for _, station in stations.iterrows()],
+        geometry=gpd.points_from_xy(stations["lon"], stations["lat"]),
         crs=WGS84
     ).to_crs(EPSG3035)
     hydrobasins = gpd.read_file(path_to_basins).to_crs(EPSG3035)
@@ -135,8 +134,8 @@ def ensure_stations_within_basins(stations, path_to_basins, buffer_size_m):
     for station_id, station in ill_placed_stations.iterrows():
         geo_stations.loc[station_id, "geometry"] = new_coords(station, buffer_size_m, hydrobasins)
     assert geo_stations.apply(station_in_any_basin(hydrobasins), axis="columns").all()
-    stations["lon"] = geo_stations.to_crs(WGS84).geometry.apply(lambda point: point.coords[0][0])
-    stations["lat"] = geo_stations.to_crs(WGS84).geometry.apply(lambda point: point.coords[0][1])
+    stations["lon"] = geo_stations.to_crs(WGS84).geometry.x
+    stations["lat"] = geo_stations.to_crs(WGS84).geometry.y
     return stations
 
 
