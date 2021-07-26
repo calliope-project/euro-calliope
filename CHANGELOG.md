@@ -14,6 +14,7 @@
 * **ADD** sync infrastructure to easily send and receive files to and from a cluster (#74).
 * **ADD** parameter `station-nearest-basin-max-km` controlling the mapping of hydro power stations to basins (#138).
 * **ADD** optional email notifications whenever builds fail or succeed (#92).
+* **ADD** option to shed load at all locations (#131).
 
 * **UPDATE** EEZ updated from v10 to v11 (difference in offshore area is < 1% for all relevant countries) (#99).
 * **UPDATE** ENTSOE national electricity load data gap filling methods (priority order, interpolation distance, outlier handling, 29th Feb handling) included in config (#42, #91).
@@ -28,6 +29,8 @@
     * atlite -> 0.2.1
     * geo packages from gdal 2.4 -> 3.2.1
     * Updates to NumPy, Pandas, xarray, and others
+
+* **FIX** the centroid determination of all locations which had been calculated on an unprojected reference system before and was therefore slightly off (#147).
 
 ## 1.0.0 (2020-07-01)
 

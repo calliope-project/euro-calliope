@@ -4,6 +4,7 @@ import pandas as pd
 import geopandas as gpd
 
 from eurocalliopelib import filters
+from eurocalliopelib.geo import WGS84, EPSG3035
 
 TEMPLATE = """locations:
     {% for id, location in locations.iterrows() %}
@@ -71,7 +72,7 @@ def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hy
     )
     locations = (
         locations
-        .assign(centroid=locations.centroid.rename("centroid"))
+        .assign(centroid=locations.to_crs(EPSG3035).centroid.to_crs(WGS84).rename("centroid"))
         .loc[:, ["name", "centroid"]]
     )
     capacities = _from_area_to_installed_capacity(
@@ -88,7 +89,7 @@ def construct_locations(path_to_shapes, path_to_land_eligibility_km2, path_to_hy
         right_index=True,
         validate="one_to_one"
     )
-    locations = locations.assign(id=locations.index.str.replace(".", "-")).set_index("id")
+    locations = locations.assign(id=locations.index.str.replace(".", "-", regex=False)).set_index("id")
 
     env = jinja2.Environment()
     env.filters["unit"] = filters.unit
