@@ -66,6 +66,14 @@ In euro-calliope, we model load shedding not as actual reduction of demand but a
 
 Calliope provides a built-in mechanism that is similiar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/stable/user/building.html#allowing-for-unmet-demand). The benefit of using the `load-shedding` override over Calliope's built-in mechanism is that it is more targeted towards modelling shedding of electrical load and provides more flexibility -- for example in terms of the cost of shed load.
 
+## Manipulating the model using file imports
+
+The `model.yaml` configuration file in each resolution sub-directory (e.g. `national/model.yaml`) specifies a list of other configuration files to bring together to describe the model. This list can be changed by the modeller to change between configuration files. The final result is similar to the use of overrides, except that that model is *never* aware of the configuration being overridden.
+
+> national/link-all-neighbours.yaml -> national/enstoe-tyndp-links.yaml
+
+This change will replace a generic definition of transmission links with those defined by an ENTSO-E ten-year development plan 2020 scenario. The generic definition sets no transmission capacities and defines links as any countries with shared borders + a selection of pre-defined sub-sea links. The ENTSO-E links define all existing and planned international connections, including their predicted net transfer capacities (NTCs).
+
 ## Model components
 
 The models contain the following files. All files in the root directory are independent of the spatial resolution. All files that depend on the spatial resolution are within subfolders named by the resolution.
@@ -77,6 +85,7 @@ The models contain the following files. All files in the root directory are inde
 │   ├── electricity-demand.csv             <- Timeseries of electricity demand on each node.
 │   ├── example-model.yaml                 <- Calliope model definition.
 │   ├── link-all-neighbours.yaml           <- Connects neighbouring locations with transmission.
+│   ├── enstoe-tyndp-links.yaml            <- Connects regions according to ENTSO-E; exists only if resolution = "national".
 │   ├── load-shedding.yaml                 <- Override adding option to shed load.
 │   ├── locations.csv                      <- Map from Calliope location id to name of location.
 │   └── locations.yaml                     <- Defines all locations and their max capacities.
