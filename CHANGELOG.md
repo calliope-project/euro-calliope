@@ -16,6 +16,7 @@
 * **ADD** optional email notifications whenever builds fail or succeed (#92).
 * **ADD** option to shed load at all locations (#131).
 
+* **UPDATE** Calliope version from 0.6.5 to [0.6.6.post1](https://calliope.readthedocs.io/en/stable/history.html#id1) (#73).
 * **UPDATE** EEZ updated from v10 to v11 (difference in offshore area is < 1% for all relevant countries) (#99).
 * **UPDATE** ENTSOE national electricity load data gap filling priority order included in config (#42).
 * **UPDATE** IRENA hydro generation data from 2018 to 2020 (#40).
@@ -23,12 +24,12 @@
 * **UPDATE** JRC hydro database v4 -> v9 (#48, #57). This entails one patch being removed:
     1. Romanian PHS data is no longer manually added from Geth et al. (2015).
 * **UPDATE** Improve gap-filling method for national electricity load data (#3).
-* **UPDATE** dependencies (#44, #142):
+* **UPDATE** dependencies (#44, #73, #142):
     * Python 3.7 -> 3.8
     * Snakemake 5.8.2 -> 6.1.1 (uses mamba by default)
     * atlite -> 0.2.1
     * geo packages from gdal 2.4 -> 3.2.1
-    * Updates to NumPy, Pandas, xarray, and others
+    * Updates to NumPy, Pandas, xarray, pytest, and others
 
 * **FIX** the centroid determination of all locations which had been calculated on an unprojected reference system before and was therefore slightly off (#147).
 
