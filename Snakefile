@@ -156,14 +156,14 @@ rule directional_rooftop_pv:
     message: "Generate override for directional rooftop PV in {wildcards.resolution} resolution."
     input:
         script = script_dir + "directional_rooftop.py",
-        shapes = rules.units.output[0],
+        units = rules.units_without_shape.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
     params:
         roof_shares = config["parameters"]["roof-share"],
         maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],
         scaling_factors = config["scaling-factors"],
     output: "build/model/{resolution}/directional-rooftop.yaml"
-    conda: "envs/geo.yaml"
+    conda: "envs/default.yaml"
     script: "scripts/directional_rooftop.py"
 
 
