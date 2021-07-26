@@ -25,7 +25,7 @@ include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
 include: "./rules/sync.smk"
 localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials, download_eurocalliope_dataset
-localrules: download_capacity_factors_wind_and_solar, download_enstoe_tyndp_zip
+localrules: download_capacity_factors_wind_and_solar, download_entsoe_tyndp_zip
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
 wildcard_constraints:
@@ -275,8 +275,8 @@ rule electricity_load:
     script: "scripts/load.py"
 
 
-rule download_enstoe_tyndp_zip:
-    message: "Download ENSTOE ten-year network development plan (TYNDP) 2020 scenario dataset"
+rule download_entsoe_tyndp_zip:
+    message: "Download ENTSO-E ten-year network development plan (TYNDP) 2020 scenario dataset"
     params: url = config["data-sources"]["entsoe-tyndp"]
     output: protected("data/automatic/raw-entsoe-tyndp.xlsx.zip")
     conda: "envs/shell.yaml"
@@ -285,11 +285,11 @@ rule download_enstoe_tyndp_zip:
 
 rule entsoe_tyndp_xlsx:
     message: "Unzip ENTSO-E TYNDP 2020 scenario dataset."
-    input: rules.download_enstoe_tyndp_zip.output[0]
+    input: rules.download_entsoe_tyndp_zip.output[0]
     shadow: "minimal"
-    output: "build/data/TYNDP-2020-Scenario-Datafile.xlsx",
+    output: "build/data/national/TYNDP-2020-Scenario-Datafile.xlsx",
     conda: "envs/shell.yaml"
-    shell: "unzip -o {input} 'TYNDP-2020-Scenario-Datafile.xlsx' -d build/data"
+    shell: "unzip -o {input} 'TYNDP-2020-Scenario-Datafile.xlsx' -d build/data/national"
 
 
 rule entsoe_tyndp_links:
@@ -299,13 +299,15 @@ rule entsoe_tyndp_links:
         units = rules.units_without_shape.output[0],
         entsoe_tyndp = rules.entsoe_tyndp_xlsx.output[0]
     params:
-        entsoe_scenario = config["parameters"]["entsoe-tyndp"]["scenario"],
-        entsoe_grid = config["parameters"]["entsoe-tyndp"]["grid"],
-        entsoe_ntc_limit = config["parameters"]["entsoe-tyndp"]["entsoe_ntc_limit"],
+        scenario = config["parameters"]["entsoe-tyndp"]["scenario"],
+        grid = config["parameters"]["entsoe-tyndp"]["grid"],
+        ntc_limit = config["parameters"]["entsoe-tyndp"]["ntc_limit"],
         energy_cap_limit = config["parameters"]["entsoe-tyndp"]["energy_cap_limit"],
-        entsoe_year = config["parameters"]["entsoe-tyndp"]["projection-year"],
+        year = config["parameters"]["entsoe-tyndp"]["projection-year"],
         scaling_factor = config["scaling-factors"]["power"]
-    output: "build/model/{resolution}/enstoe-tyndp-links.yaml"
+    output: "build/model/{resolution}/entsoe-tyndp-links.yaml"
+    wildcard_constraints:
+        resolution = "national"
     conda: "envs/default.yaml"
     script: "scripts/link_entsoe_tyndp.py"
 

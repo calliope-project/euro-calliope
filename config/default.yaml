@@ -57,7 +57,7 @@ parameters:
         scenario: National Trends
         grid: Reference
         projection-year: 2040
-        entsoe_ntc_limit: max
+        ntc_limit: max
         energy_cap_limit: equals
 quality-control:
     load:

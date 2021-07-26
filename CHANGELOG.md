@@ -2,7 +2,7 @@
 
 ## 1.1 (unpublished)
 
-* **ADD** Link YAML file defining national net-transfer capacities from ENTSO-E TYNDP 2020 scenarios (#).
+* **ADD** Link YAML file defining national net-transfer capacities from ENTSO-E TYNDP 2020 scenarios (#61).
 * **ADD** automatic download of EEZ (#99).
 * **ADD** Danish Energy Agency and Schroeder et al (2013) cost data as well as no hydro fixed costs as optional overrides (#18, #129).
 * **ADD** override to constrain energy to power ratios of battery and hydrogen storage (#130).

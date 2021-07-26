@@ -172,13 +172,13 @@ properties:
                         type: integer
                         description: ENTSO-E TYNDP model year.
                         enum: [2025, 2030, 2040]
-                    entsoe_ntc_limit:
+                    ntc_limit:
                         type: string
                         description: Limit on net-transfer capacity (NTC) between two regions to take as the value for that inter-regional exchange. Some NTCs are different depending on the direction of the link, but we are not capturing that in the technology definition.
                         enum: [min, max]
                     energy_cap_limit:
                         type: string
-                        description: How to use ENTSO-E-based NTCs to constraint link energy capacity in the Calliope model.
+                        description: How to use ENTSO-E-based NTCs to constrain link energy capacity in the Calliope model.
                         enum: [min, equals, max]
     scope:
         type: object

@@ -68,11 +68,11 @@ Calliope provides a built-in mechanism that is similiar: [`ensure-feasibility`](
 
 ## Manipulating the model using file imports
 
-The `model.yaml` configuration file in each resolution sub-directory (e.g. `national/model.yaml`) specifies a list of other configuration files to bring together to describe the model. This list can be changed by the modeller to change between configuration files. The final result is similar to the use of overrides, except that that model is *never* aware of the configuration being overridden.
+The `example-model.yaml` configuration file in each resolution sub-directory (e.g. `national/model.yaml`) specifies a list of other configuration files to bring together to describe the model. This list can be changed by the modeller to select a combination of different configuration files. The final result is similar to the use of overrides, except that that model is *never* aware of the configuration being overridden.
 
-> national/link-all-neighbours.yaml -> national/enstoe-tyndp-links.yaml
+> Transmission links
 
-This change will replace a generic definition of transmission links with those defined by an ENTSO-E ten-year development plan 2020 scenario. The generic definition sets no transmission capacities and defines links as any countries with shared borders + a selection of pre-defined sub-sea links. The ENTSO-E links define all existing and planned international connections, including their predicted net transfer capacities (NTCs).
+There are no transmission links specified in `example-model.yaml` by default. At all resolutions, `link-all-neighbours.yaml` can be added to link neighbouring regions + a selection of pre-defined sub-sea links, but with no capacity limits. At the national resolution, transmission links can be set based on an ENTSO-E ten-year development plan 2020 scenario (`national/entsoe-tyndp-links.yaml`). The ENTSO-E links define all existing and planned international connections, including their predicted net transfer capacities (NTCs).
 
 ## Model components
 
@@ -85,7 +85,7 @@ The models contain the following files. All files in the root directory are inde
 │   ├── electricity-demand.csv             <- Timeseries of electricity demand on each node.
 │   ├── example-model.yaml                 <- Calliope model definition.
 │   ├── link-all-neighbours.yaml           <- Connects neighbouring locations with transmission.
-│   ├── enstoe-tyndp-links.yaml            <- Connects regions according to ENTSO-E; exists only if resolution = "national".
+│   ├── entsoe-tyndp-links.yaml            <- Connects regions according to ENTSO-E; exists only if resolution = "national".
 │   ├── load-shedding.yaml                 <- Override adding option to shed load.
 │   ├── locations.csv                      <- Map from Calliope location id to name of location.
 │   └── locations.yaml                     <- Defines all locations and their max capacities.
