@@ -11,65 +11,86 @@ from scripts.national_load import (
     _countries_with_missing_data_in_model_year,
     _get_index_of_missing_data,
     _ignore_feb_29th,
-    read_load_profiles,
-    filter_countries,
-    fill_gaps_per_source,
-    get_source_choice_per_country
+    clean_load_data
 )
 
 THIS_DIR = os.path.dirname(__file__)
 
 class TestLoadHelperFunctions:
+    @pytest.fixture
+    def foobar_df(self):
+        def _foobar_df(foo, bar):
+            return pd.DataFrame({"foo": foo, "bar": bar})
+        return _foobar_df
+
+
     @pytest.mark.parametrize(
-        ("min_thresh", "max_tresh", "expected"),
-        ([0, 2, [[0, 1], [1, 3]]], [0.5, 2, [[np.nan, 1], [1, 3]]], [0.5, 1.5, [[np.nan, 1], [np.nan, 3]]])
+        ("min_thresh", "max_tresh", "expected_foo", "expected_bar"), (
+            [0, 2, [0, 1], [1, 3]],
+            [0.5, 2, [np.nan, 1], [1, 3]],
+            [0.75, 1.5, [np.nan, np.nan], [np.nan, 3]]
+        )
     )
-    def test_filter_outliers(self, min_thresh, max_tresh, expected):
-        input_load = pd.DataFrame([[0, 1], [1, 3]], columns=["foo", "bar"])
+    def test_filter_outliers(self, min_thresh, max_tresh, expected_foo, expected_bar, foobar_df):
+        input_load = foobar_df(
+            foo=[0, 1], # mean: 0.5
+            bar=[1, 3]  # mean: 2
+        )
         config = {
             "outlier-data-thresholds": {
                 "relative-to-mean-min": min_thresh, "relative-to-mean-max": max_tresh
             }
         }
         filtered = filter_outliers(input_load, config)
+        expected = foobar_df(expected_foo, expected_bar)
         assert np.allclose(expected, filtered.values, equal_nan=True)
 
     @pytest.mark.parametrize(
-        ("interpolate_hours", "expected"),
-        ([0, [[np.nan, 0], [0, np.nan], [1, np.nan] , [2, np.nan], [np.nan, 4]]],
-         [1, [[0, 0], [0, 1], [1, np.nan] , [2, 3], [2, 4]]],
-         [2, [[0, 0], [0, 1], [1, 2] , [2, 3], [2, 4]]])
+        ("interpolate_timesteps", "expected_foo", "expected_bar"),
+        ([0, [np.nan, 0, 1, 2, np.nan], [0, np.nan, np.nan, np.nan, 4]],
+         [1, [0, 0, 1, 2, 2], [0, 1, np.nan, 3, 4]],
+         [2, [0, 0, 1, 2, 2], [0, 1, 2, 3, 4]])
     )
-    def test_interpolate_gaps(self, interpolate_hours, expected):
-        nan_data = [[np.nan, 0], [0, np.nan], [1, np.nan] , [2, np.nan], [np.nan, 4]]
-        input_load = pd.DataFrame(nan_data, columns=["foo", "bar"])
-        interpolated = _interpolate_gaps(input_load, interpolate_hours)
+    def test_interpolate_gaps(self, interpolate_timesteps, expected_foo, expected_bar, foobar_df):
+        input_load = foobar_df(
+            foo=[np.nan, 0, 1, 2, np.nan],
+            bar=[0, np.nan, np.nan, np.nan, 4]
+        )
+        interpolated = _interpolate_gaps(input_load, interpolate_timesteps)
+        expected = foobar_df(expected_foo, expected_bar)
         assert np.allclose(expected, interpolated, equal_nan=True)
 
     @pytest.mark.parametrize(
-        ("input_load", "expected"),
-        ([[0, 1, 2, np.nan], [0]],
-        [[1, 1, np.nan, 3], [2]],
-        [[1, 1, 2.0, 3], []])
+        ("input_load", "year", "expected"),
+        ([[0, 1, 2, np.nan], 2016, [0]],
+         [[1, 1, np.nan, 3], 2016, [2]],
+         [[1, 1, 2.0, 3], 2016, []],
+         [[0, 1, 2, np.nan], 2017, [3]],
+         [[1, 1, np.nan, 0], 2017, [3]],
+         [[1, 1, 2.0, 3], 2017, []])
     )
-    def test_get_index_of_missing_data(self, input_load, expected):
+    def test_get_index_of_missing_data(self, input_load, year, expected):
+        # index = 2016-12-29 to 2017-01-01;
+        # `_get_index_of_missing_data` will only return index values for the year of interest
         index = pd.date_range(start="2016-12-29 00:00:00", periods=4, freq="D")
         input_series = pd.Series(input_load, index=index)
-        missing_index = _get_index_of_missing_data(input_series, 2016)
+        missing_index = _get_index_of_missing_data(input_series, year)
         assert (index[expected] == missing_index).all()
 
     @pytest.mark.parametrize(
-        ("this_year", "next_year", "input_timeseries", "expected"),
+        ("model_year", "next_available_year_of_data", "input_timeseries", "expected"),
         ([2016, 2017, ["2016-02-28 23:00:00", "2016-02-29 00:00:00"], ["2016-02-28 23:00:00"]],
         [2016, 2017, ["2016-02-28 22:00:00", "2016-02-28 23:00:00"], ["2016-02-28 22:00:00", "2016-02-28 23:00:00"]],
         [2016, 2020, ["2016-02-28 22:00:00", "2016-02-28 23:00:00"], ["2016-02-28 22:00:00", "2016-02-28 23:00:00"]],
         [2016, 2020, ["2016-02-28 23:00:00", "2016-02-29 00:00:00"], ["2016-02-28 23:00:00", "2016-02-29 00:00:00"]],
         [2015, 2016, ["2015-02-28 22:00:00", "2015-02-28 23:00:00"], ["2015-02-28 22:00:00", "2015-02-28 23:00:00"]])
     )
-    def test_ignore_feb_29th(self, this_year, next_year, input_timeseries, expected):
+    def test_ignore_feb_29th(self, model_year, next_available_year_of_data, input_timeseries, expected):
         input_timeseries = pd.to_datetime(input_timeseries)
         expected = pd.to_datetime(expected)
-        filtered_timeseries = _ignore_feb_29th(this_year, next_year, input_timeseries)
+        filtered_timeseries = _ignore_feb_29th(
+            model_year, next_available_year_of_data, input_timeseries
+        )
         assert (filtered_timeseries == expected).all()
 
     @pytest.mark.parametrize(
@@ -89,71 +110,56 @@ class TestLoadHelperFunctions:
         assert expected.astype(float).equals(filled_load.astype(float))
 
     @pytest.mark.parametrize(
-        ("input_load", "expected"),
-        ([[[0, 1], [np.nan, 3]], [0]],
-        [[[1, np.nan], [np.nan, 3]], [0, 1]],
-        [[[0, 1], [0, 3]], [0]])
+        ("input_foo", "input_bar", "expected"),
+        ([[0, np.nan], [1, 3], ["foo"]],
+         [[1, np.nan], [np.nan, 3], ["foo", "bar"]],
+        [[0, 0], [1, 3], ["foo"]])
     )
-    def test_countries_with_missing_data_in_model_year(self, input_load, expected):
-        filtered = _countries_with_missing_data_in_model_year(pd.DataFrame(input_load))
-        assert np.allclose(np.array(expected), filtered, equal_nan=True)
+    def test_countries_with_missing_data_in_model_year(self, input_foo, input_bar, expected, foobar_df):
+        input_load = foobar_df(input_foo, input_bar)
+        filtered = _countries_with_missing_data_in_model_year(input_load)
+        assert filtered.difference(expected).empty
 
 class TestLoadDummyData:
-    @staticmethod
-    def data_quality_config(
-        interpolate_hours=3,
-        acceptable_year_diff_for_gap_filling=2,
-        fill_29th_feb_from_28th=True,
-        data_source_priority_order=["foo", "bar"]
-    ):
-        return {
-            "outlier-data-thresholds": {
-                "relative-to-mean-min": 0.25,
-                "relative-to-mean-max": 2,
-            },
-            "interpolate-hours": interpolate_hours,
-            "acceptable-year-diff-for-gap-filling": acceptable_year_diff_for_gap_filling,
-            "fill-29th-feb-from-28th": fill_29th_feb_from_28th,
-            "data-source-priority-order": data_source_priority_order
-        }
+    @pytest.fixture
+    def load(self):
+        def _load(
+            interpolate_timesteps=3,
+            acceptable_year_diff_for_gap_filling=2,
+            fill_29th_feb_from_28th=True,
+            data_source_priority_order=["foo", "bar"]
+        ):
+            data_quality_config = {
+                "outlier-data-thresholds": {
+                    "relative-to-mean-min": 0.25,
+                    "relative-to-mean-max": 2,
+                },
+                "max-interpolate-timesteps": interpolate_timesteps,
+                "acceptable-year-diff-for-gap-filling": acceptable_year_diff_for_gap_filling,
+                "fill-29th-feb-from-28th": fill_29th_feb_from_28th,
+                "data-source-priority-order": data_source_priority_order
+            }
+            path_to_raw_load = os.path.join(THIS_DIR, "..", "resources", "national", "dummy_load.csv")
+            countries = ["ALB", "DEU"]
+            year = 2016
 
-    def runner(self, data_quality_config):
-        path_to_raw_load = os.path.join(THIS_DIR, "..", "resources", "national", "dummy_load.csv")
-        data_sources = data_quality_config["data-source-priority-order"]
-        countries = ["ALB", "DEU"]
-        year = 2016
+            return clean_load_data(path_to_raw_load, year, data_quality_config, countries)
+        return _load
 
-        raw_load = read_load_profiles(path_to_raw_load, data_sources)
-        filtered_load = filter_countries(raw_load, countries)
-        filtered_load = filter_outliers(filtered_load, data_quality_config)
-        gap_filled_load = pd.concat(
-            fill_gaps_per_source(filtered_load, year, data_quality_config, source)
-            for source in data_sources
-        )
-        return get_source_choice_per_country(
-            filtered_load.loc[str(year)],
-            gap_filled_load,
-            data_sources
-        )
+    def test_success_with_working_data_quality_config(self, load):
+        assert load().isnull().sum().sum() == 0
 
-    def test_success_with_working_data_quality_config(self):
-        load = self.runner(self.data_quality_config())
-        assert load.isnull().sum().sum() == 0
-
+    # regex checks if the country names are in the error message, `?=` = `is in`, `?!=` = `not in`
     @pytest.mark.parametrize(
-        ("config_update", "ALB_in_err", "DEU_in_err", "err_date"),
-        ([{"interpolate_hours": 1}, True, False, "2016-02-26"],
-         [{"acceptable_year_diff_for_gap_filling": 1}, False, True, "2016-02-27"],
-         [{"fill_29th_feb_from_28th": False}, True, False, "2016-02-29"],
-         [{"data_source_priority_order": ["foo"]}, False, True, "2016-02-27"])
+        ("config_update", "countries_in_err_msg", "err_date"),
+        ([{"interpolate_timesteps": 1}, r"(?=.*ALB)(?!=.*DEU)", "2016-02-26"],
+         [{"acceptable_year_diff_for_gap_filling": 1}, r"(?!=.*ALB)(?=.*DEU)", "2016-02-27"],
+         [{"fill_29th_feb_from_28th": False}, r"(?=.*ALB)(?!=.*DEU)", "2016-02-29"],
+         [{"data_source_priority_order": ["foo"]}, r"(?!=.*ALB)(?=.*DEU)", "2016-02-27"])
     )
-    def test_fail_on_too_low_interpolate(self, config_update, ALB_in_err, DEU_in_err, err_date):
-        config = self.data_quality_config(**config_update)
-        with pytest.raises(AssertionError) as excinfo:
-            self.runner(config)
-        for country, country_error in {"ALB": ALB_in_err, "DEU": DEU_in_err}.items():
-            if country_error is True:
-                assert country in str(excinfo.value)
-            else:
-                assert country not in str(excinfo.value)
+    def test_fail_on_too_low_interpolate(
+        self, load, config_update, countries_in_err_msg, err_date
+    ):
+        with pytest.raises(AssertionError, match=countries_in_err_msg) as excinfo:
+            load(**config_update)
         assert err_date in str(excinfo.value)

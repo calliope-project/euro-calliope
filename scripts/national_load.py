@@ -9,7 +9,6 @@ Data is loaded and (optionally) gap filled as follows:
 - interpolate empty data when the data gap is small
 - fill larger data gaps with data from nearby years
 - If 29th of February is empty and couldn't previously be filled, use data from the 28th of February
-- interpolate across remaining data gaps if they are now small enough
 - select most complete dataset for each country from list of data sources, based on a priority order
 
 This process will fail if the 'most complete dataset' for any country has any remaining gaps.
@@ -25,6 +24,12 @@ def national_load(
     path_to_raw_load, year, data_quality_config, path_to_output, countries
 ):
     """Extracts national load time series for all countries in a specified year."""
+
+    load = clean_load_data(path_to_raw_load, year, data_quality_config, countries)
+    load.to_csv(path_to_output, header=True)
+
+
+def clean_load_data(path_to_raw_load, year, data_quality_config, countries):
     data_sources = data_quality_config["data-source-priority-order"]
     raw_load = read_load_profiles(path_to_raw_load, data_sources)
     filtered_load = filter_countries(raw_load, countries)
@@ -33,13 +38,11 @@ def national_load(
         fill_gaps_per_source(filtered_load, year, data_quality_config, source)
         for source in data_sources
     )
-    load = get_source_choice_per_country(
+    return get_source_choice_per_country(
         filtered_load.loc[str(year)],
         gap_filled_load,
         data_sources
     )
-
-    load.to_csv(path_to_output, header=True)
 
 
 def read_load_profiles(path_to_raw_load, entsoe_priority):
@@ -86,7 +89,7 @@ def filter_outliers(load, data_quality_config):
 def fill_gaps_per_source(all_load, model_year, data_quality_config, source):
     """For each valid data source, fills in all NaNs by interpolation or with data from other years"""
     source_specific_load = all_load.xs(source, level="attribute")
-    source_specific_load = _interpolate_gaps(source_specific_load, data_quality_config["interpolate-hours"])
+    source_specific_load = _interpolate_gaps(source_specific_load, data_quality_config["max-interpolate-timesteps"])
     source_specific_model_year_load = source_specific_load.loc[str(model_year)]
     source_specific_model_year_load = _fill_gaps_from_other_years(
         source_specific_model_year_load, source_specific_load, data_quality_config, source, model_year
@@ -174,11 +177,11 @@ def _fill_29th_feb(load, year):
         return load
 
 
-def _interpolate_gaps(load, interpolate_hours):
-    if interpolate_hours == 0:
+def _interpolate_gaps(load, interpolate_timesteps):
+    if interpolate_timesteps == 0:
         return load
     else:
-        return load.interpolate(limit=interpolate_hours, limit_direction="both")
+        return load.interpolate(limit=interpolate_timesteps, limit_direction="both")
 
 
 def _countries_with_missing_data_in_model_year(data):

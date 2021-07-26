@@ -248,15 +248,15 @@ properties:
                             relative-to-mean-max:
                                 type: number
                                 description: Upper bound cut-off value for any hourly data relative to the annual mean load of a country. Any values above this upper bound will be replaced by interpolated values.
-                    interpolate-hours:
+                    max-interpolate-timesteps:
                         type: integer
-                        description: Maximum number of hours over which missing load data can be interpolated/extrpolated. This value applies in both directions of an interpolation/extrapolation, so if it has a value of 2, the maximum interpolation is 4 and extrapolation (at either end of the timeseries) is 2. Even if the data gap > `interpolate-hours`, the gap will be filled up to the limit defined here.
+                        description: Maximum number of timesteps over which missing load data can be interpolated/extrapolated (refers to hours for the default load data). This value applies in both directions of an interpolation/extrapolation, so if it has a value of 2, the maximum interpolation is 4 and extrapolation (at either end of the timeseries) is 2. Even if the data gap > `max-interpolate-timesteps`, the gap will be filled up to the limit defined here.
                     acceptable-year-diff-for-gap-filling:
                         type: integer
                         description: When filling data gaps in electricity load data, this specifies the absolute number of years from the current year that the model can use data for filling. A value of zero effectively removes this gap filling method.
                     fill-29th-feb-from-28th:
                         type: boolean
-                        description: Whether or not to gap-fill empty 29th of February data for leap years with data from the day before. If false, and no other leaps years are in the range of `acceptable-year-diff-for-gap-filling` and `interpolate-hours` < 12, the workflow will fail due to a data gap on this day.
+                        description: Whether or not to gap-fill empty 29th of February data for leap years with data from the day before. If false, and no other leaps years are in the range of `acceptable-year-diff-for-gap-filling` and `max-interpolate-timesteps` < 12, the workflow will fail due to a data gap on this day.
                     data-source-priority-order:
                         type: array
                         uniqueItems: true
