@@ -2,7 +2,7 @@ import pandas as pd
 
 from eurocalliopelib import utils
 
-CARRIERS = {
+EUROSTAT_CARRIER_MAPPING = {
     'O4652XR5210B': 'petrol',
     'R5210B': 'biofuels',
     'O4671XR5220B': 'diesel',
@@ -12,7 +12,7 @@ CARRIERS = {
     'E7000': 'electricity'
 }
 
-CARRIERS_BIS = {
+JRC_IDEES_CARRIER_MAPPING = {
     'Diesel oil engine': 'diesel',
     'Battery electric vehicles': 'electricity',
     'Domestic': 'diesel',
@@ -35,8 +35,9 @@ def get_road_transport_demand(
     road_vehicles_df = utils.read_tdf(jrc_road_vehicles_path)
 
     # Add transport energy demand from agriculture and 'not elsewhere specified' (military)
-    # assumption: agriculture oil use goes to 'road' transport demand;
-    # 'not elsewhere specified' oil use goes predominantly to 'road' transport, except kerosene which goes to aviation
+    # ASSUME: agriculture oil use goes to 'road' transport demand;
+    # 'not elsewhere specified' oil use goes predominantly to 'road' transport,
+    # except kerosene which goes to aviation
     other_transport_aviation = (  # all kerosene from the military destined for aviation
         energy_balances
         .loc[idx['FC_OTH_NSP_E', ['O4651', 'O4653', 'O4661XR5230B', 'O4669'], :, :, :]]
@@ -63,7 +64,7 @@ def get_road_transport_demand(
         .unstack(['vehicle_type', 'vehicle_subtype'])
         .quantile(efficiency_quantile) # take future road efficiency to be based on a percentile of 2015 efficiency
         .unstack(0)
-        .groupby(CARRIERS_BIS).mean()
+        .groupby(JRC_IDEES_CARRIER_MAPPING).mean()
     )
     road_efficiency = utils.add_idx_level(road_efficiency, unit="twh_per_mio_km")
 
@@ -84,14 +85,19 @@ def get_all_distance_efficiency(
     other_transport_energy_consumption=0
 ):
 
-    transport_energy_balance = (
-        energy_balances
-        .xs(cat_name)
+    transport_energy_balance = energy_balances.xs(cat_name)
+    transport_energy_balance_mapped_carrier_names = (
+        transport_energy_balance
         .unstack('carrier_code')
-        .groupby(CARRIERS, axis=1).sum(min_count=1)
+        .groupby(EUROSTAT_CARRIER_MAPPING, axis=1).sum(min_count=1)
         .rename_axis(columns='carrier')
-        .droplevel('unit')
         .stack()
+    )
+
+    assert transport_energy_balance_mapped_carrier_names.index.get_level_values("unit").unique() == ["tj"]
+    transport_energy_balance_with_other_twh = (
+        transport_energy_balance_mapped_carrier_names
+        .droplevel('unit')
         .add(other_transport_energy_consumption, fill_value=0)
         .apply(utils.tj_to_twh)
         .rename_axis(index=['country_code', 'year', 'carrier'])
@@ -105,10 +111,10 @@ def get_all_distance_efficiency(
     # Energy consumption per transport mode by mapping transport mode
     # carrier contributions to total carrier consumption
     transport_energy_per_mode = pd.merge(
-        transport_energy_balance.to_frame('eurostat'),
+        transport_energy_balance_with_other_twh.to_frame('eurostat'),
         carrier_contribution.to_frame('jrc'),
         left_index=True,
-        right_on=transport_energy_balance.index.names
+        right_on=transport_energy_balance_with_other_twh.index.names
     )
     transport_energy_per_mode = (
         transport_energy_per_mode['eurostat'].mul(transport_energy_per_mode['jrc'])

@@ -2,7 +2,7 @@ import pandas as pd
 
 from eurocalliopelib import utils
 
-from annual_road_transport_demand import get_all_distance_efficiency, CARRIERS
+from annual_road_transport_demand import get_all_distance_efficiency
 
 idx = pd.IndexSlice
 
@@ -28,7 +28,7 @@ def get_rail_transport_demand(
         .div(rail_efficiency.xs('electricity', level='carrier').droplevel('unit'))
         .sum(level=['vehicle_type', 'country_code', 'year'])
     )
-    rail_energy = utils.add_idx_level(rail_energy, unit="twh")
+    rail_energy_twh = utils.add_idx_level(rail_energy, unit="twh")
 
     rail_electricity_bau = (
         rail_bau_consumption
@@ -37,11 +37,11 @@ def get_rail_transport_demand(
     )
     # High speed and metro are all electrified, so bau_electricity == eurocalliope_electricity
     assert abs(
-        (rail_energy - rail_bau_consumption.xs('electricity', level='carrier'))
+        (rail_energy_twh - rail_bau_consumption.xs('electricity', level='carrier'))
         [['High speed passenger trains', 'Metro and tram, urban light rail']]
     ).max() < 1e-10
 
-    rail_energy.to_csv(rail_energy_out_path)
+    rail_energy_twh.to_csv(rail_energy_out_path)
     rail_electricity_bau.to_csv(rail_bau_electricity_out_path)
 
 

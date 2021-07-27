@@ -44,61 +44,6 @@ rule annual_energy_balances:
     script: "../scripts/annual_energy_balance.py"
 
 
-rule annual_road_transport_demand:
-    message: "Calculate future road transport energy demand based on JRC IDEES"
-    input:
-        src = script_dir + "annual_road_transport_demand.py",
-        energy_balances = rules.annual_energy_balances.output[0],
-        jrc_road_energy = "build/data/jrc-idees/transport/processed-road-energy.csv",
-        jrc_road_distance = "build/data/jrc-idees/transport/processed-road-distance.csv",
-        jrc_road_vehicles = "build/data/jrc-idees/transport/processed-road-vehicles.csv",
-    params:
-        road_vehicle_efficiency = config["parameters"]["road-vehicle-efficiency"]
-    conda: "../envs/default.yaml"
-    output:
-        distance=temp("build/annual_road_transport_distance_demand.csv"),
-        vehicles=temp("build/annual_road_transport_vehicles.csv"),
-        efficiency=temp("build/annual_road_transport_efficiency.csv"),
-        road_bau_electricity=temp("build/annual_road_transport_bau_electricity.csv"),
-    script: "../scripts/annual_road_transport_demand.py"
-
-
-rule annual_rail_transport_demand:
-    message: "Calculate future rail transport energy demand based on JRC IDEES"
-    input:
-        src = script_dir + "annual_rail_transport_demand.py",
-        energy_balances = rules.annual_energy_balances.output[0],
-        jrc_rail_energy = "build/data/jrc-idees/transport/processed-rail-energy.csv",
-        jrc_rail_distance = "build/data/jrc-idees/transport/processed-rail-distance.csv",
-    conda: "../envs/default.yaml"
-    output:
-        rail_energy=temp("build/annual_rail_transport_energy_demand.csv"),
-        rail_bau_electricity=temp("build/annual_rail_transport_bau_electricity.csv"),
-    script: "../scripts/annual_rail_transport_demand.py"
-
-
-rule annual_air_transport_demand:
-    message: "Calculate future air transport energy demand based on JRC IDEES"
-    input:
-        src = script_dir + "annual_air_transport_demand.py",
-        energy_balances = rules.annual_energy_balances.output[0],
-    conda: "../envs/default.yaml"
-    output:
-        air_energy=temp("build/annual_air_transport_energy_demand.csv"),
-    script: "../scripts/annual_air_transport_demand.py"
-
-
-rule annual_marine_transport_demand:
-    message: "Calculate future marine transport energy demand based on JRC IDEES"
-    input:
-        src = script_dir + "annual_marine_transport_demand.py",
-        energy_balances = rules.annual_energy_balances.output[0],
-    conda: "../envs/default.yaml"
-    output:
-        marine_energy=temp("build/annual_marine_transport_energy_demand.csv"),
-    script: "../scripts/annual_marine_transport_demand.py"
-
-
 rule jrc_idees_zipped:
     message: "Download JRC IDEES zip file for {wildcards.country_code}"
     params: url = config["data-sources"]["jrc-idees"]
