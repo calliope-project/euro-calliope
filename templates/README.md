@@ -64,15 +64,15 @@ Adds an option to shed load at each location. You can use this to model blackout
 
 In euro-calliope, we model load shedding not as actual reduction of demand but as an unconstrained supply of electricity. This supply has high variable cost (see `tech-cost.yaml` parameter file) and no fixed cost. Due to its high cost, it will only be used when no other, less costly, option is available.
 
-Calliope provides a built-in mechanism that is similiar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/stable/user/building.html#allowing-for-unmet-demand). The benefit of using the `load-shedding` override over Calliope's built-in mechanism is that it is more targeted towards modelling shedding of electrical load and provides more flexibility -- for example in terms of the cost of shed load.
+Calliope provides a built-in mechanism that is similar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/stable/user/building.html#allowing-for-unmet-demand). The benefit of using the `load-shedding` override over Calliope's built-in mechanism is that it is more targeted towards modelling shedding of electrical load and provides more flexibility -- for example in terms of the cost of shed load.
 
 ## Manipulating the model using file imports
 
-The `example-model.yaml` configuration file in each resolution sub-directory (e.g. `national/model.yaml`) specifies a list of other configuration files to bring together to describe the model. This list can be changed by the modeller to select a combination of different configuration files. The final result is similar to the use of overrides, except that that model is *never* aware of the configuration being overridden.
+The `example-model.yaml` configuration file in each resolution sub-directory (e.g. `national/example-model.yaml`) specifies a list of other configuration files to bring together to describe the model. This list can be changed by the modeller to select a combination of different configuration files. The final result is similar to the use of overrides, except that that model is *never* aware of the configuration being overridden.
 
-> Transmission links
+> `national/link-all-neighbours.yaml` -> `national/entsoe-tyndp-links.yaml`
 
-There are no transmission links specified in `example-model.yaml` by default. At all resolutions, `link-all-neighbours.yaml` can be added to link neighbouring regions + a selection of pre-defined sub-sea links, but with no capacity limits. At the national resolution, transmission links can be set based on an ENTSO-E ten-year development plan 2020 scenario (`national/entsoe-tyndp-links.yaml`). The ENTSO-E links define all existing and planned international connections, including their predicted net transfer capacities (NTCs).
+Transmission links are specific in `link-all-neighbours.yaml` by default. At all resolutions except continental, this file includes links between all neighbouring regions + a selection of pre-defined sub-sea links, but has no capacity limits. At the national resolution, transmission links can be set based on an ENTSO-E ten-year development plan 2020 scenario (`national/entsoe-tyndp-links.yaml`). The ENTSO-E links define all existing and planned international connections, including their predicted net transfer capacities (NTCs).
 
 ## Model components
 

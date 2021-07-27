@@ -28,7 +28,7 @@ overrides:
             - './build/model/national/link-all-neighbours.yaml'
     connect_entsoe_tyndp:
         import:
-            - './build/model/national/link-entsoe-tyndp.yaml'
+            - './build/model/national/entsoe-tyndp-links.yaml'
 run:
     solver: gurobi
     solver_io: python

@@ -305,9 +305,7 @@ rule entsoe_tyndp_links:
         energy_cap_limit = config["parameters"]["entsoe-tyndp"]["energy_cap_limit"],
         year = config["parameters"]["entsoe-tyndp"]["projection-year"],
         scaling_factor = config["scaling-factors"]["power"]
-    output: "build/model/{resolution}/entsoe-tyndp-links.yaml"
-    wildcard_constraints:
-        resolution = "national"
+    output: "build/model/national/entsoe-tyndp-links.yaml"
     conda: "envs/default.yaml"
     script: "scripts/link_entsoe_tyndp.py"
 
@@ -359,7 +357,7 @@ rule model:
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
         ),
         rules.build_metadata.output,
-        lambda wildcards: rules.entsoe_tyndp_links.output if wildcards.resolution == "national" else [],
+        lambda wildcards: "build/model/national/entsoe-tyndp-links.yaml" if wildcards.resolution == "national" else [],
         example_model = template_dir + "example-model.yaml"
     output:
         log = "build/logs/{resolution}/model.done",
