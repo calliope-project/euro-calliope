@@ -26,8 +26,8 @@ idx = pd.IndexSlice
 
 def get_road_transport_demand(
     energy_balances_path, jrc_road_energy_path, jrc_road_distance_path, jrc_road_vehicles_path,
-    road_distance_out_path, road_vehicles_out_path, road_efficiency_out_path,
-    road_bau_electricity_out_path, efficiency_quantile
+    vehicle_efficiency_percentile, road_distance_out_path, road_vehicles_out_path,
+    road_efficiency_out_path, road_bau_electricity_out_path,
 ):
     energy_balances = utils.read_tdf(energy_balances_path)
     road_energy_df = utils.read_tdf(jrc_road_energy_path)
@@ -62,7 +62,7 @@ def get_road_transport_demand(
     road_efficiency = (
         (1 / road_efficiency.xs(2015, level='year'))
         .unstack(['vehicle_type', 'vehicle_subtype'])
-        .quantile(efficiency_quantile) # take future road efficiency to be based on a percentile of 2015 efficiency
+        .quantile(vehicle_efficiency_percentile) # take future road efficiency to be based on a percentile of 2015 efficiency
         .unstack(0)
         .groupby(JRC_IDEES_CARRIER_MAPPING).mean()
     )
@@ -206,9 +206,9 @@ if __name__ == "__main__":
         jrc_road_energy_path=snakemake.input.jrc_road_energy,
         jrc_road_distance_path=snakemake.input.jrc_road_distance,
         jrc_road_vehicles_path=snakemake.input.jrc_road_vehicles,
+        vehicle_efficiency_percentile=snakemake.params.vehicle_efficiency_percentile,
         road_distance_out_path=snakemake.output.distance,
         road_vehicles_out_path=snakemake.output.vehicles,
         road_efficiency_out_path=snakemake.output.efficiency,
         road_bau_electricity_out_path=snakemake.output.road_bau_electricity,
-        efficiency_quantile=snakemake.params.road_vehicle_efficiency,
     )

@@ -184,6 +184,15 @@ properties:
             biofuel-efficiency:
                 type: number
                 maximum: 1
+            transport:
+                type: object
+                description: Parameters to apply when processing transport sector demand and supply
+                properties:
+                    future-vehicle-efficiency-percentile:
+                        type: number
+                        description: Percentile of distribution described by all countries' current vehicle energy efficiency (energy consumed per distance travelled) to use to define future efficiency. A lower percentile indicates a higher efficiency (lower energy consumed per distance travelled).
+                        minimum: 0
+                        maximum: 1
             entsoe-tyndp:
                 type: object
                 description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/

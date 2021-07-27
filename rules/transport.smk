@@ -15,7 +15,7 @@ rule annual_road_transport_demand:
         jrc_road_distance = "build/data/jrc-idees/transport/processed-road-distance.csv",
         jrc_road_vehicles = "build/data/jrc-idees/transport/processed-road-vehicles.csv",
     params:
-        road_vehicle_efficiency = config["parameters"]["road-vehicle-efficiency"]
+        vehicle_efficiency_percentile = config["parameters"]["transport"]["future-vehicle-efficiency-percentile"]
     conda: "../envs/default.yaml"
     output:
         distance=temp("build/data/transport/annual_road_transport_distance_demand.csv"),

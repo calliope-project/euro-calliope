@@ -68,7 +68,8 @@ parameters:
         potential-year: "2020"
         cost-year: "2030"
     biofuel-efficiency: 0.45
-    road-vehicle-efficiency: 0.25
+    transport:
+        future-vehicle-efficiency-percentile: 0.25
     entsoe-tyndp:
         scenario: National Trends
         grid: Reference
