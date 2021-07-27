@@ -13,6 +13,7 @@ data-sources:
     nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
     potentials: https://zenodo.org/record/5112963/files/possibility-for-electricity-autarky.zip
     data-repository: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/develop/{dataset}
+    entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch
@@ -52,6 +53,12 @@ parameters:
         potential-year: "2020"
         cost-year: "2030"
     biofuel-efficiency: 0.45
+    entsoe-tyndp:
+        scenario: National Trends
+        grid: Reference
+        projection-year: 2040
+        ntc_limit: max
+        energy_cap_limit: equals
 quality-control:
     load:
         outlier-data-thresholds:

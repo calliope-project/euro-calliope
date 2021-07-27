@@ -1,7 +1,6 @@
 """Creates Calliope location files."""
 import jinja2
 import pandas as pd
-import geopandas as gpd
 
 from eurocalliopelib import filters
 
@@ -48,13 +47,11 @@ TEMPLATE = """overrides:
 """
 
 
-def directional_rooftop(path_to_shapes, path_to_land_eligibility_km2,
+def directional_rooftop(path_to_units, path_to_land_eligibility_km2,
                         roof_shares, maximum_installable_power_density,
                         scaling_factors, path_to_result):
     """Generate a file that represents locations in Calliope."""
-    locations = gpd.GeoDataFrame(
-        gpd.read_file(path_to_shapes).set_index("id").centroid.rename("centroid")
-    )
+    locations = pd.read_csv(path_to_units, index_col=0)
     capacities = _from_area_to_installed_capacity(
         land_eligibiligy_km2=pd.read_csv(path_to_land_eligibility_km2, index_col=0),
         roof_shares=roof_shares,
@@ -104,7 +101,7 @@ def _from_area_to_installed_capacity(land_eligibiligy_km2, roof_shares,
 
 if __name__ == "__main__":
     directional_rooftop(
-        path_to_shapes=snakemake.input.shapes,
+        path_to_units=snakemake.input.units,
         path_to_land_eligibility_km2=snakemake.input.land_eligibility_km2,
         path_to_result=snakemake.output[0],
         roof_shares=snakemake.params["roof_shares"],

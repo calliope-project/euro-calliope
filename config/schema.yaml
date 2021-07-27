@@ -156,6 +156,30 @@ properties:
             biofuel-efficiency:
                 type: number
                 maximum: 1
+            entsoe-tyndp:
+                type: object
+                description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/
+                properties:
+                    scenario:
+                        type: string
+                        description: High-level ENTSO-E TYNDP scenario.
+                        enum: [National Trends, Global Ambition, Distributed Energy]
+                    grid:
+                        type: string
+                        description: High-level ENTSO-E TYNDP grid scenario.
+                        enum: [Reference, Expanded]
+                    projection-year:
+                        type: integer
+                        description: ENTSO-E TYNDP model year.
+                        enum: [2025, 2030, 2040]
+                    ntc_limit:
+                        type: string
+                        description: Limit on net-transfer capacity (NTC) between two regions to take as the value for that inter-regional exchange. Some NTCs are different depending on the direction of the link, but we are not capturing that in the technology definition.
+                        enum: [min, max]
+                    energy_cap_limit:
+                        type: string
+                        description: How to use ENTSO-E-based NTCs to constrain link energy capacity in the Calliope model.
+                        enum: [min, equals, max]
     scope:
         type: object
         properties:
