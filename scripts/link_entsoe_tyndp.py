@@ -70,7 +70,7 @@ def _split_links_in_index(df):
     df.index = df.index.str.split("-", expand=True)
     df = (
         df
-        .rename(index=lambda x: utils.eu_country_code_to_iso3(x[:2]))
+        .rename(index=lambda x: utils.convert_country_code(x[:2], "alpha3"))
         .loc[:, "Value"]
         .groupby(level=[0, 1]).sum()
         .rename_axis(index=["loc_from", "loc_to"])
