@@ -4,15 +4,19 @@ snakemake:
 data-sources:
     biofuel-potentials: data/euro-calliope-datasets/biofuels/potentials/{feedstock}.csv
     biofuel-costs: data/euro-calliope-datasets/biofuels/costs/{feedstock}.csv
+    eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
+    irena-generation: data/euro-calliope-datasets/irena/hydro-generation-europe.csv
+    national-phs-storage-capacities: data/euro-calliope-datasets/pumped-hydro/storage-capacities-gwh.csv
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
     data-repository: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/{dataset}
     energy-balance-category-names: data/euro-calliope-datasets/energy-balance/category-names.csv
     energy-balance-carrier-names: data/euro-calliope-datasets/energy-balance/carrier-names.csv
+    entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
     eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
     eurostat-base-url: https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/{dataset}.tsv.gz
     gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
     hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
-    hydro-stations: https://zenodo.org/record/4289229/files/energy-modelling-toolkit/hydro-power-database-v7.zip?download=1
+    hydro-stations: https://zenodo.org/record/5119541/files/energy-modelling-toolkit/hydro-power-database-v09.zip?download=1
     irena-generation: data/euro-calliope-datasets/irena/hydro-generation-europe.csv
     jrc-idees: https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/JRC-IDEES/JRC-IDEES-2015_v1/JRC-IDEES-2015_All_xlsx_{country_code}.zip
     load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
@@ -24,6 +28,7 @@ data-sources:
         energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/gesamtenergiestatistik.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvNzUxOQ==.html
         industry-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/teilstatistiken.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODc4OA==.html
         gva: https://www.bfs.admin.ch/bfsstatic/dam/assets/10647597/master
+
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch
@@ -64,18 +69,26 @@ parameters:
         cost-year: "2030"
     biofuel-efficiency: 0.45
     road-vehicle-efficiency: 0.25
+    entsoe-tyndp:
+        scenario: National Trends
+        grid: Reference
+        projection-year: 2040
+        ntc_limit: max
+        energy_cap_limit: equals
 quality-control:
     load:
-        acceptable-load-data-gap-hours: 48
         outlier-data-thresholds:
             relative-to-mean-min: 0.25
             relative-to-mean-max: 2
-            percentage-deviation-post-cleaning-max: 1
-        entsoe-data-priority:
+        max-interpolate-timesteps: 3
+        acceptable-year-diff-for-gap-filling: 5
+        fill-29th-feb-from-28th: true
+        data-source-priority-order:
             - actual_entsoe_transparency
             - actual_entsoe_power_statistics
     hydro:
         scale-phs-according-to-geth-et-al: false
+        station-nearest-basin-max-km: 1
 sea-connections:
     continental: []
     national: # Source: https://www.entsoe.eu/data/map/

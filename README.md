@@ -16,11 +16,20 @@ euro-calliope models the European electricity system with each location represen
 
 1. The workflow is developed on macOS, tested on macOS and Linux, but it cannot run natively on Windows.
 
-2. You need [conda](https://conda.io/docs/index.html) to build and use the model. Using conda, you can create a conda environment from within you can build the model:
+2. You need [conda](https://conda.io) or [mamba](https://mamba.readthedocs.io/) to build and use the model. We recommend `mamba`, as it's a faster drop-in replacement for `conda`. Using either one, you can create a conda environment from within you can build the model:
 
+```bash
+# using mamba
+mamba env create -f environment.yaml
+conda activate euro-calliope
+snakemake --use-conda --list # test your installation
 ```
+
+```bash
+# using conda
 conda env create -f environment.yaml
 conda activate euro-calliope
+snakemake --use-conda --conda-frontend conda --list # test your installation
 ```
 
 3. You need a Gurobi license installed on your computer, or you need to choose a different solver.
@@ -31,7 +40,9 @@ conda activate euro-calliope
 
 Because input data is large, the actual model including its data is not part of this repository. To use the model, you first need to build it from input data and scripts. Running the build step will build the model in the `./model` folder.
 
-    snakemake --use-conda
+    snakemake --use-conda --cores <N_CORES>
+
+`N_CORES` is the number of cores of your machine you want to use. It can be anything between `1` and `all`. Please have a look at [Snakemake's documentation](https://snakemake.readthedocs.io) for more information.
 
 ## Build the model on a cluster
 
@@ -45,11 +56,11 @@ If you want to run on another cluster, read [snakemake's documentation on cluste
 
 If you are like us, you may want to work locally (to change configuration parameters, add modules etc), but execute remotely on the cluster. We support this workflow through three Snakemake rules: `send`, `receive`, and `clean_cluster_results`. It works like the following.
 
-First, start local and make sure the `cluster-sync` configuration parameters fit your environment. Next, run `snakemake --use-conda send` to send the entire repository to your cluster. On the cluster, execute the workflow with Snakemake (see above). After the workflow has finished, download results by locally running `snakemake --use-conda receive`. By default, this will download results into `build/cluster`.
+First, start local and make sure the `cluster-sync` configuration parameters fit your environment. Next, run `snakemake --use-conda --cores 1 send` to send the entire repository to your cluster. On the cluster, execute the workflow with Snakemake (see above). After the workflow has finished, download results by locally running `snakemake --use-conda --cores 1 receive`. By default, this will download results into `build/cluster`.
 
-This workflow works iteratively too. After analysing your cluster results locally, you may want to make changes locally, send these changes to the cluster (`snakemake --use-conda send`), rerun on the cluster, and download updated results (`snakemake --use-conda receive`).
+This workflow works iteratively too. After analysing your cluster results locally, you may want to make changes locally, send these changes to the cluster (`snakemake --use-conda --cores 1 send`), rerun on the cluster, and download updated results (`snakemake --use-conda --cores 1 receive`).
 
-To remove cluster results on your local machine, run `snakemake --use-conda clean_cluster_results`.
+To remove cluster results on your local machine, run `snakemake --use-conda --cores 1 clean_cluster_results`.
 
 ## Be notified of build successes or fails
 
@@ -91,7 +102,7 @@ After a successful full build (see "Build the model"), the following files will 
 └── storage-techs.yaml                     <- Definition of storage technologies.
 ```
 
-Alternatively to a full build, each of these model components can be built individually, by running `snakemake --use-conda <path-to-component>`. The model components can be used to [configure a Calliope model](https://calliope.readthedocs.io/en/stable/user/building.html). For an example model configuration, see "Example use of the model" above.
+Alternatively to a full build, each of these model components can be built individually, by running `snakemake --use-conda --cores <N_CORES> <path-to-component>`. The model components can be used to [configure a Calliope model](https://calliope.readthedocs.io/en/stable/user/building.html). For an example model configuration, see "Example use of the model" above.
 
 ## Units and scaling
 
@@ -121,7 +132,7 @@ Small datasets that are not available for direct download are stored in the [Eur
 
 Tests of models with continental and national resolution run automatically when you run the entire workflow. To run the tests of models with regional resolution do the following:
 
-    snakemake --use-conda build/logs/regional/test-report.html
+    snakemake --use-conda --cores <N_CORES> build/logs/regional/test-report.html
 
 Exchanging `regional` with `national` or `continental` allows you to run tests on the respective resolution explicitly.
 
@@ -129,15 +140,15 @@ Exchanging `regional` with `national` or `continental` allows you to run tests o
 
 As a developer, you may want to run the entire workflow often to spot errors early. For that, you can use a minimal test configuration that takes less time to run.
 
-    snakemake --use-conda --configfile="config/minimal.yaml"
+    snakemake --use-conda --cores <N_CORES> --configfile="config/minimal.yaml"
 
 Make sure to run this in a clean working directory. Do not use the working directory in which you are using your normal configuration.
 
 ## Run tests of library code and scripts
 
-1. Create a test environment using conda:
+1. Create a test environment using mamba or conda:
 
-    $ conda env create -f test-requirements.yaml
+    $ mamba env create -f test-requirements.yaml # or replace mamba with conda
     $ conda activate test-eurocalliope
 
 2. Run the test suite with py.test:

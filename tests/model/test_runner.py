@@ -13,7 +13,7 @@ def run_test(path_to_test_dir, path_to_output, path_to_model, path_to_example_mo
         [
             path_to_test_dir,
             f"--html={path_to_output}",
-            f"--self-contained-html",
+            "--self-contained-html",
         ],
         plugins=[
             _create_config_plugin(
@@ -33,25 +33,40 @@ def _create_config_plugin(path_to_model, path_to_example_model, paths_to_cf_time
 
     class SnakemakeConfigPlugin():
 
-        @pytest.fixture(scope="function")
+        @pytest.fixture(scope="session")
         def config(self):
             return dict(config)
 
-        @pytest.fixture(scope="function", params=_read_scenario_names_from_yaml(path_to_model))
+        @pytest.fixture(scope="session")
+        def scaling_factors(self, config):
+            return config["scaling-factors"]
+
+        @pytest.fixture(scope="session", params=_read_scenario_names_from_yaml(path_to_model))
         def scenario(self, request):
             return request.param
 
-        @pytest.fixture(scope="function")
+        @pytest.fixture(scope="session")
         def model(self, scenario):
             return calliope.Model(path_to_model, scenario=scenario)
+
+        @pytest.fixture(scope="session")
+        def optimised_model(self, model):
+            model.run()
+            return model
+
+        @pytest.fixture(scope="session")
+        def energy_cap(self, optimised_model, scaling_factors):
+            return optimised_model.get_formatted_array("energy_cap") / scaling_factors["power"]
 
         @pytest.fixture(scope="module", params=_read_locs(paths_to_cf_timeseries[0]))
         def location(self, request):
             return request.param
 
-        @pytest.fixture(scope="function")
-        def example_model(self):
-            return calliope.Model(path_to_example_model)
+        @pytest.fixture(scope="session")
+        def optimised_example_model(self):
+            model = calliope.Model(path_to_example_model)
+            model.run()
+            return model
 
         @pytest.fixture(scope="function", params=paths_to_cf_timeseries)
         def capacity_factor_timeseries(self, request):
