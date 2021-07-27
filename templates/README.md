@@ -49,9 +49,30 @@ By default, euro-calliope contains a single technology for rooftop PV. This tech
 
 When using the `directional-rooftop-pv` override, there are three instead of just one technologies for rooftop PV. The three technologies comprise (1) south-facing and flat rooftops, (2) east- and west-facing rooftops, and (3) north-facing rooftops. This leads to higher capacity factors of rooftop PV as long as the potential of rooftop PV is not fully exploited. However, this also increases the complexity of the model.
 
+> exclusive-energy-to-power-ratios
+
+Constrains the energy to power ratios of battery and hydrogen storage in a way that they do not overlap (in Calliope terms: energy="storage capacity", power="energy capacity"). Battery storage is constrained to a ratio of ≤4h while hydrogen is constrained to a ratio of ≥4h. The ratio is derived from typical values of commercial lithium-ion batteries available today (2021). Constraining hydrogen storage as well ensures it does not directly compete with battery storage, but is used instead for durations of fours hours and longer.
+
+
 > freeze-hydro-capacities
 
 By default, euro-calliope allows capacities of run-of-river hydro, reservoir hydro, and pumped storage hydro capacities up to today's levels. Alternatively, it's possible to freeze these capacities to today's levels using the `freeze-hydro-capacities` override.
+
+> load-shedding
+
+Adds an option to shed load at each location. You can use this to model blackouts, brownouts, or controlled shedding of load as a form of demand response.
+
+In euro-calliope, we model load shedding not as actual reduction of demand but as an unconstrained supply of electricity. This supply has high variable cost (see `tech-cost.yaml` parameter file) and no fixed cost. Due to its high cost, it will only be used when no other, less costly, option is available.
+
+Calliope provides a built-in mechanism that is similar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/stable/user/building.html#allowing-for-unmet-demand). The benefit of using the `load-shedding` override over Calliope's built-in mechanism is that it is more targeted towards modelling shedding of electrical load and provides more flexibility -- for example in terms of the cost of shed load.
+
+## Manipulating the model using file imports
+
+The `example-model.yaml` configuration file in each resolution sub-directory (e.g. `national/example-model.yaml`) specifies a list of other configuration files to bring together to describe the model. This list can be changed by the modeller to select a combination of different configuration files. The final result is similar to the use of overrides, except that that model is *never* aware of the configuration being overridden.
+
+> `national/link-all-neighbours.yaml` -> `national/entsoe-tyndp-links.yaml`
+
+Transmission links are specific in `link-all-neighbours.yaml` by default. At all resolutions except continental, this file includes links between all neighbouring regions + a selection of pre-defined sub-sea links, but has no capacity limits. At the national resolution, transmission links can be set based on an ENTSO-E ten-year development plan 2020 scenario (`national/entsoe-tyndp-links.yaml`). The ENTSO-E links define all existing and planned international connections, including their predicted net transfer capacities (NTCs).
 
 ## Model components
 
@@ -64,6 +85,8 @@ The models contain the following files. All files in the root directory are inde
 │   ├── electricity-demand.csv             <- Timeseries of electricity demand on each node.
 │   ├── example-model.yaml                 <- Calliope model definition.
 │   ├── link-all-neighbours.yaml           <- Connects neighbouring locations with transmission.
+│   ├── entsoe-tyndp-links.yaml            <- Connects regions according to ENTSO-E; exists only if resolution = "national".
+│   ├── load-shedding.yaml                 <- Override adding option to shed load.
 │   ├── locations.csv                      <- Map from Calliope location id to name of location.
 │   └── locations.yaml                     <- Defines all locations and their max capacities.
 ├── build-metadata.yaml                    <- Metadata of the build process.

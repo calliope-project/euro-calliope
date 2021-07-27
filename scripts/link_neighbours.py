@@ -4,7 +4,8 @@ import shapely
 import jinja2
 import networkx as nx
 
-EPSG_3035_PROJ4 = "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +units=m +no_defs "
+from eurocalliopelib.geo import EPSG3035
+
 K_EDGE_CONNECTION = 1 # every component of the graph is connect with at least this amount of edges
 TEMPLATE = """
 links:
@@ -21,6 +22,7 @@ def link_neighbours(path_to_locations, sea_connections, path_to_result):
     graph = _create_graph_with_land_connections(path_to_locations)
     if sea_connections:
         graph.add_edges_from([(loc1, loc2) for loc1, loc2 in sea_connections])
+
     assert nx.is_connected(graph), "There are electrical islands in the network graph."
     links = jinja2.Template(TEMPLATE).render(
         graph=graph
@@ -30,7 +32,7 @@ def link_neighbours(path_to_locations, sea_connections, path_to_result):
 
 
 def _create_graph_with_land_connections(path_to_locations):
-    regions = gpd.read_file(path_to_locations).to_crs(EPSG_3035_PROJ4).set_index("id")
+    regions = gpd.read_file(path_to_locations).to_crs(EPSG3035).set_index("id")
     graph = nx.Graph()
     graph.add_nodes_from([
         (region_id, {"centroid": region_centroid})
@@ -51,6 +53,7 @@ def _neighbours(region_geometry, region_index, regions):
     region_geometry = shapely.prepared.prep(region_geometry)
     return [other_index for other_index, other_region in regions.iterrows()
             if (other_index is not region_index) and region_geometry.intersects(other_region.geometry)]
+
 
 
 if __name__ == "__main__":

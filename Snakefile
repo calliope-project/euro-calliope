@@ -26,7 +26,7 @@ include: "./rules/hydro.smk"
 include: "./rules/sync.smk"
 include: "./rules/data-processing.smk"
 localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials, download_eurocalliope_dataset
-localrules: download_capacity_factors_wind_and_solar
+localrules: download_capacity_factors_wind_and_solar, download_entsoe_tyndp_zip
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
 wildcard_constraints:
@@ -158,14 +158,14 @@ rule directional_rooftop_pv:
     message: "Generate override for directional rooftop PV in {wildcards.resolution} resolution."
     input:
         script = script_dir + "directional_rooftop.py",
-        shapes = rules.units.output[0],
+        units = rules.units_without_shape.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
     params:
         roof_shares = config["parameters"]["roof-share"],
         maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],
         scaling_factors = config["scaling-factors"],
     output: "build/model/{resolution}/directional-rooftop.yaml"
-    conda: "envs/geo.yaml"
+    conda: "envs/default.yaml"
     script: "scripts/directional_rooftop.py"
 
 
@@ -173,9 +173,9 @@ rule load_shedding:
     message: "Generate override allowing load shedding."
     input:
         script = script_dir + "load_shedding.py",
-        shapes = rules.units.output[0]
+        units = rules.units_without_shape.output[0]
     output: "build/model/{resolution}/load-shedding.yaml"
-    conda: "envs/geo.yaml"
+    conda: "envs/default.yaml"
     script: "scripts/load_shedding.py"
 
 
@@ -255,9 +255,7 @@ rule electricity_load_national:
     output: "build/data/electricity-demand-national.csv"
     params:
         year = config["year"],
-        acceptable_gap_hours = config["quality-control"]["load"]["acceptable-load-data-gap-hours"],
-        outlier_thresholds = config["quality-control"]["load"]["outlier-data-thresholds"],
-        entsoe_priority = config["quality-control"]["load"]["entsoe-data-priority"],
+        data_quality_config = config["quality-control"]["load"],
         countries = config["scope"]["countries"]
     conda: "envs/default.yaml"
     script: "scripts/national_load.py"
@@ -275,6 +273,41 @@ rule electricity_load:
     output: "build/model/{resolution}/electricity-demand.csv"
     conda: "envs/geo.yaml"
     script: "scripts/load.py"
+
+
+rule download_entsoe_tyndp_zip:
+    message: "Download ENTSO-E ten-year network development plan (TYNDP) 2020 scenario dataset"
+    params: url = config["data-sources"]["entsoe-tyndp"]
+    output: protected("data/automatic/raw-entsoe-tyndp.xlsx.zip")
+    conda: "envs/shell.yaml"
+    shell: "curl -sLo {output} '{params.url}'"
+
+
+rule entsoe_tyndp_xlsx:
+    message: "Unzip ENTSO-E TYNDP 2020 scenario dataset."
+    input: rules.download_entsoe_tyndp_zip.output[0]
+    shadow: "minimal"
+    output: "build/data/national/TYNDP-2020-Scenario-Datafile.xlsx",
+    conda: "envs/shell.yaml"
+    shell: "unzip -o {input} 'TYNDP-2020-Scenario-Datafile.xlsx' -d build/data/national"
+
+
+rule entsoe_tyndp_links:
+    message: "Create YAML file of national-scale links with ENTSO-E TYNDP net-transfer capacities"
+    input:
+        script = script_dir + "link_entsoe_tyndp.py",
+        units = rules.units_without_shape.output[0],
+        entsoe_tyndp = rules.entsoe_tyndp_xlsx.output[0]
+    params:
+        scenario = config["parameters"]["entsoe-tyndp"]["scenario"],
+        grid = config["parameters"]["entsoe-tyndp"]["grid"],
+        ntc_limit = config["parameters"]["entsoe-tyndp"]["ntc_limit"],
+        energy_cap_limit = config["parameters"]["entsoe-tyndp"]["energy_cap_limit"],
+        year = config["parameters"]["entsoe-tyndp"]["projection-year"],
+        scaling_factor = config["scaling-factors"]["power"]
+    output: "build/model/national/entsoe-tyndp-links.yaml"
+    conda: "envs/default.yaml"
+    script: "scripts/link_entsoe_tyndp.py"
 
 
 rule link_neighbours:
@@ -318,11 +351,13 @@ rule model:
         rules.capacity_factors_hydro.output,
         rules.hydro_capacities.output,
         rules.directional_rooftop_pv.output,
+        rules.load_shedding.output,
         expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
         ),
         rules.build_metadata.output,
+        lambda wildcards: "build/model/national/entsoe-tyndp-links.yaml" if wildcards.resolution == "national" else [],
         example_model = template_dir + "example-model.yaml"
     output:
         log = "build/logs/{resolution}/model.done",
@@ -355,7 +390,7 @@ rule test:
     input:
         "build/logs/{resolution}/model.done",
         test_dir = model_test_dir,
-        tests = lambda wildcards: Path(model_test_dir).glob("**/test_*.py"),
+        tests = map(str, Path(model_test_dir).glob("**/test_*.py")),
         model = test_dir + "resources/{resolution}/model.yaml",
         example_model = "build/model/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
