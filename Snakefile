@@ -25,6 +25,7 @@ include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
 include: "./rules/sync.smk"
 include: "./rules/data-processing.smk"
+include: "./rules/transport.smk"
 localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials, download_eurocalliope_dataset
 localrules: download_capacity_factors_wind_and_solar
 configfile: "config/default.yaml"

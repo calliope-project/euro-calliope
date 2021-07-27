@@ -11,7 +11,6 @@ EU28 = [
     "SE", "SI", "SK", "UK"
 ]
 
-
 rule eurostat_data_tsv:
     message: "Get {wildcards.dataset} from Eurostat"
     params:
@@ -56,11 +55,7 @@ rule jrc_idees_unzipped:
     message: "Unzip all JRC-IDEES {wildcards.sector} sector country data"
     input:
         countries = [
-            f"data/automatic/jrc-idees/{country_code}.zip"
-            for country_code in [
-                pycountry.countries.lookup(country).alpha_2 for country in config['scope']['countries']
-            ]
-            if country_code in EU28
+            f"data/automatic/jrc-idees/{country_code}.zip" for country_code in EU28
         ]
     params: sector_title_case = lambda wildcards: wildcards.sector.title()
     wildcard_constraints:
