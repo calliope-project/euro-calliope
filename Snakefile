@@ -71,7 +71,9 @@ rule potentials:
     input: rules.download_potentials.output[0]
     shadow: "minimal"
     output:
-        land_eligibility_km2 = "build/data/{resolution}/technical-potential/areas.csv",
+        land_eligibility_km2 = "build/data/{{resolution}}/{scenario}/areas.csv".format(
+            scenario=config["parameters"]["wind-and-solar-potential-scenario"]
+        ),
         shared_coast = "build/data/{resolution}/shared-coast.csv",
         demand = "build/data/{resolution}/demand.csv",
         population = "build/data/{resolution}/population.csv",
