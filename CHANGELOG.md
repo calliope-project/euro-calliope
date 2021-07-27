@@ -15,6 +15,7 @@
 * **ADD** parameter `station-nearest-basin-max-km` controlling the mapping of hydro power stations to basins (#138).
 * **ADD** optional email notifications whenever builds fail or succeed (#92).
 * **ADD** option to shed load at all locations (#131).
+* **ADD** option to choose solar and wind potential scenario, limiting the amount of eligible surfaces (#153).
 
 * **UPDATE** EEZ updated from v10 to v11 (difference in offshore area is < 1% for all relevant countries) (#99).
 * **UPDATE** ENTSOE national electricity load data gap filling priority order included in config (#42).
