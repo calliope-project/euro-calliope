@@ -1,9 +1,15 @@
 """Rules to process input data."""
 
 configfile: "./config/default.yaml"
-localrules: eurostat_data_tsv, ch_data_xlsx
+localrules: eurostat_data_tsv, ch_data_xlsx, jrc_idees_zipped
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 script_dir = f"{root_dir}scripts/"
+
+EU28 = [
+    "AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR",
+    "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO",
+    "SE", "SI", "SK", "UK"
+]
 
 
 rule eurostat_data_tsv:
@@ -43,9 +49,9 @@ rule annual_road_transport_demand:
     input:
         src = script_dir + "annual_road_transport_demand.py",
         energy_balances = rules.annual_energy_balances.output[0],
-        jrc_road_energy = "data/transport/jrc_idees_processed_road_energy.csv",
-        jrc_road_distance = "data/transport/jrc_idees_processed_road_distance.csv",
-        jrc_road_vehicles = "data/transport/jrc_idees_processed_road_vehicles.csv",
+        jrc_road_energy = "build/data/jrc-idees/transport/processed-road-energy.csv",
+        jrc_road_distance = "build/data/jrc-idees/transport/processed-road-distance.csv",
+        jrc_road_vehicles = "build/data/jrc-idees/transport/processed-road-vehicles.csv",
     params:
         road_vehicle_efficiency = config["parameters"]["road-vehicle-efficiency"]
     conda: "../envs/default.yaml"
@@ -62,8 +68,8 @@ rule annual_rail_transport_demand:
     input:
         src = script_dir + "annual_rail_transport_demand.py",
         energy_balances = rules.annual_energy_balances.output[0],
-        jrc_rail_energy = "data/transport/jrc_idees_processed_rail_energy.csv",
-        jrc_rail_distance = "data/transport/jrc_idees_processed_rail_distance.csv",
+        jrc_rail_energy = "build/data/jrc-idees/transport/processed-rail-energy.csv",
+        jrc_rail_distance = "build/data/jrc-idees/transport/processed-rail-distance.csv",
     conda: "../envs/default.yaml"
     output:
         rail_energy=temp("build/annual_rail_transport_energy_demand.csv"),
@@ -78,7 +84,7 @@ rule annual_air_transport_demand:
         energy_balances = rules.annual_energy_balances.output[0],
     conda: "../envs/default.yaml"
     output:
-        air_energy=temp("build/annual_air_transport_energy_demand.csv"),  
+        air_energy=temp("build/annual_air_transport_energy_demand.csv"),
     script: "../scripts/annual_air_transport_demand.py"
 
 
@@ -92,3 +98,63 @@ rule annual_marine_transport_demand:
         marine_energy=temp("build/annual_marine_transport_energy_demand.csv"),
     script: "../scripts/annual_marine_transport_demand.py"
 
+
+rule jrc_idees_zipped:
+    message: "Download JRC IDEES zip file for {wildcards.country_code}"
+    params: url = config["data-sources"]["jrc-idees"]
+    output: protected("data/automatic/jrc-idees/{country_code}.zip")
+    conda: "../envs/shell.yaml"
+    shell: "curl -sLo {output} '{params.url}'"
+
+
+rule jrc_idees_unzipped:
+    message: "Unzip all JRC-IDEES {wildcards.sector} sector country data"
+    input:
+        countries = [
+            f"data/automatic/jrc-idees/{country_code}.zip"
+            for country_code in [
+                pycountry.countries.lookup(country).alpha_2 for country in config['scope']['countries']
+            ]
+            if country_code in EU28
+        ]
+    params: sector_title_case = lambda wildcards: wildcards.sector.title()
+    wildcard_constraints:
+        sector = "((industry)|(transport)|(tertiary))"
+    output: temp(directory("build/data/jrc-idees/{sector}/unprocessed"))
+    conda: "../envs/shell.yaml"
+    shell: "unzip 'data/automatic/jrc-idees/*.zip' '*{params.sector_title_case}*' -d {output}"
+
+
+rule jrc_idees_transport_processed:
+    message: "Process {wildcards.dataset} transport data from JRC-IDEES to be used in understanding current and future transport demand"
+    input:
+        script = script_dir + "jrc-idees/transport.py",
+        unprocessed_data = "build/data/jrc-idees/transport/unprocessed"
+    output: "build/data/jrc-idees/transport/processed-{dataset}.csv"
+    wildcard_constraints:
+        dataset = "((road-energy)|(road-distance)|(road-vehicles)|(rail-energy)|(rail-distance))"
+    conda: "../envs/default.yaml"
+    script: "../scripts/jrc-idees/transport.py"
+
+
+rule jrc_idees_industry_processed:
+    message: "Process {wildcards.dataset} industry data from JRC-IDEES to be used in understanding current and future industry demand"
+    input:
+        script = script_dir + "jrc-idees/industry.py",
+        unprocessed_data = "build/data/jrc-idees/industry/unprocessed"
+    output: "build/data/jrc-idees/industry/processed-{dataset}.csv"
+    wildcard_constraints:
+        dataset = "((energy)|(production))"
+    conda: "../envs/default.yaml"
+    threads: config["snakemake"]["max-threads"]
+    script: "../scripts/jrc-idees/industry.py"
+
+
+rule jrc_idees_tertiary_processed:
+    message: "Process tertiary sector energy data from JRC-IDEES to be used in understanding current and future tertiary sector demand"
+    input:
+        script = script_dir + "jrc-idees/tertiary.py",
+        unprocessed_data = "build/data/jrc-idees/tertiary/unprocessed"
+    output: "build/data/jrc-idees/tertiary/processed-energy.csv"
+    conda: "../envs/default.yaml"
+    script: "../scripts/jrc-idees/tertiary.py"

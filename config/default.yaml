@@ -1,25 +1,30 @@
+# For descriptions of the configuration values, see `./schema.yaml`.
+snakemake:
+    max-threads: 4
 data-sources:
+    biofuel-potentials: data/euro-calliope-datasets/biofuels/potentials/{feedstock}.csv
+    biofuel-costs: data/euro-calliope-datasets/biofuels/costs/{feedstock}.csv
+    capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
+    data-repository: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/{dataset}
+    energy-balance-category-names: data/euro-calliope-datasets/energy-balance/category-names.csv
+    energy-balance-carrier-names: data/euro-calliope-datasets/energy-balance/carrier-names.csv
+    eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
     eurostat-base-url: https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/{dataset}.tsv.gz
+    gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
+    hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
+    hydro-stations: https://zenodo.org/record/4289229/files/energy-modelling-toolkit/hydro-power-database-v7.zip?download=1
+    irena-generation: data/euro-calliope-datasets/irena/hydro-generation-europe.csv
+    jrc-idees: https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/JRC-IDEES/JRC-IDEES-2015_v1/JRC-IDEES-2015_All_xlsx_{country_code}.zip
+    load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
+    national-phs-storage-capacities: data/euro-calliope-datasets/pumped-hydro/storage-capacities-gwh.csv
+    nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
+    potentials: https://zenodo.org/record/5112963/files/possibility-for-electricity-autarky.zip
     swiss-stat:
         end-use: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/energieverbrauch-nach-verwendungszweck.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvOTg1NA==.html
         energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/gesamtenergiestatistik.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvNzUxOQ==.html
         industry-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/teilstatistiken.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODc4OA==.html
         gva: https://www.bfs.admin.ch/bfsstatic/dam/assets/10647597/master
-    biofuel-potentials: data/biofuels/potentials/{feedstock}.csv
-    biofuel-costs: data/biofuels/costs/{feedstock}.csv
-    eez: data/World_EEZ_v10_20180221/eez_v10.shp
-    energy-balance-category-names: data/energy_balance_category_names.csv
-    energy-balance-carrier-names: data/energy_balance_carrier_names.csv
-    irena-generation: data/irena/hydro-generation-europe.csv
-    national-phs-storage-capacities: data/pumped-hydro/storage-capacities-gwh.csv
-    capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
-    gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
-    hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
-    hydro-stations: https://zenodo.org/record/4289229/files/energy-modelling-toolkit/hydro-power-database-v7.zip?download=1
-    load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
-    nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
-    potentials: https://zenodo.org/record/3533038/files/possibility-for-electricity-autarky.zip
-root-directory: . # point to the root directory if working directory is not root directory
+root-directory: .
 cluster-sync:
     url: euler.ethz.ch
     send-ignore: .syncignore-send
@@ -31,29 +36,29 @@ scaling-factors: # values are tuned for models with a few hours resolution and o
     area: 0.0001 # from km2 to 10,000 km2
     monetary: 0.000000001 # from EUR to 1 billion EUR
 capacity-factors:
-    min: 0.001 # consider smaller values to be 0; this helps numerics in the LP
-    max: 10 # for hydro reservoirs, leading to a numerical range of 1e5 (hourly resolution)
-    average: # average estimation used to transform annual fixed to variable costs
+    min: 0.001
+    max: 10 # 0.001 -> 10 leads to a numerical range of 1e5 (hourly resolution)
+    average:
         pv: 0.139 # median of average 2016 open-field factors for ~2700 points in Europe
         onshore: 0.3021 # median of average 2016 factors for ~2700 points in Europe
         offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
         ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
-    trim-ninja-timeseries: True # trims renewables.ninja timeseries to the year in question
+    trim-ninja-timeseries: True
 year: 2016
 crs: "EPSG:4326"
 parameters:
-    maximum-installable-power-density: # this is not the yield, but the density of installed power
-        pv-on-tilted-roofs: 160 # (MW/km^2) from [@Gagnon:2016][@Klauser:2016], i.e. 16% efficiency
-        pv-on-flat-areas: 80 # (MW/km^2) from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
-        onshore-wind: 8 # (MW/km^2) from [@EuropeanEnvironmentAgency:2009]
-        offshore-wind: 15 # (MW/km^2) from [@EuropeanEnvironmentAgency:2009]
+    maximum-installable-power-density:
+        pv-on-tilted-roofs: 160 # from [@Gagnon:2016][@Klauser:2016], i.e. 16% efficiency
+        pv-on-flat-areas: 80 # from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
+        onshore-wind: 8 # from [@EuropeanEnvironmentAgency:2009]
+        offshore-wind: 15 # from [@EuropeanEnvironmentAgency:2009]
     roof-share: # from [@Trondle:2019]
         E: 0.1660
         N: 0.1817
         S: 0.1821
         W: 0.1681
         flat: 0.3020
-    jrc-biofuel:
+    jrc-biofuel: # from [@Ruiz Castello et al:2015]
         scenario: "medium"
         potential-year: "2020"
         cost-year: "2030"
@@ -61,7 +66,7 @@ parameters:
     road-vehicle-efficiency: 0.25
 quality-control:
     load:
-        acceptable-load-data-gap-hours: 48  # some load data is patchy and we fill it with other years' data if the missing data in a given year is above this many hours.
+        acceptable-load-data-gap-hours: 48
         outlier-data-thresholds:
             relative-to-mean-min: 0.25
             relative-to-mean-max: 2
@@ -72,7 +77,7 @@ quality-control:
     hydro:
         scale-phs-according-to-geth-et-al: false
 sea-connections:
-    continental:
+    continental: []
     national: # Source: https://www.entsoe.eu/data/map/
         - [ITA, GRC]
         - [EST, FIN]
@@ -166,10 +171,10 @@ scope:
         - "Serbia"
         - "Switzerland"
     bounds:
-        x_min: -15.8 # in degrees east
-        x_max: 37  # in degrees east
-        y_min: 30  # in degrees north
-        y_max: 75  # in degrees north
+        x_min: -15.8
+        x_max: 37
+        y_min: 30
+        y_max: 75
 shapes: # This config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
     continental:
         Austria: nuts0

@@ -51,7 +51,7 @@ def to_numeric(series):
     Returns a numeric pandas.Series.
 
     """
-    series = series.astype(str).str.extract("(\-*\d+\.*\d*)")[0]
+    series = series.astype(str).str.extract("(\\-*\\d+\\.*\\d*)")[0]
     return pd.to_numeric(series, errors="coerce")
 
 
@@ -68,6 +68,11 @@ def pj_to_twh(array):
 def tj_to_twh(array):
     """Convert TJ to TWh"""
     return pj_to_twh(array) * 1e-3
+
+
+def ktoe_to_twh(array):
+    """Convert KTOE to TWH"""
+    return array * 1.163e-2
 
 
 def read_tdf(filename):

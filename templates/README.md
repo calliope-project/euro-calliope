@@ -31,13 +31,17 @@ For more information on how to use and modify Calliope models, see [Calliope's d
 
 ## Manipulating the model using overrides
 
-Calliope [overrides](https://calliope.readthedocs.io/en/stable/user/building.html#scenarios-and-overrides) allow to easily manipulate models. An override named `freeze-hydro-capacities` can be used for example in this way:
+Calliope [overrides](https://calliope.readthedocs.io/en/stable/user/building.html#scenarios-and-overrides) allow to easily manipulate models. An override named `dea-renewable-cost` can be used for example in this way:
 
 ```bash
-calliope run build/model/continental/example-model.yaml --scenario=freeze-hydro-capacities
+calliope run build/model/continental/example-model.yaml --scenario=dea-renewable-cost
 ```
 
 You can define your own overrides to manipulate any model component. The following overrides are built into euro-calliope:
+
+> cost assumptions
+
+By default, euro-calliope uses cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014. The `dea-renewable-cost` override allows to use the projections from the Danish Energy Agency instead for solar PV and wind power and `schroeder-hydro-cost` provides another source for the hydropower assumptions. Using the override `no-hydro-fixed-cost` allows to only consider variable and O&M costs for hydropower. This may make sense especially in combination with the `freeze-hydro-capacities` override (see below).
 
 > directional-rooftop-pv
 
@@ -68,6 +72,7 @@ The models contain the following files. All files in the root directory are inde
 ├── interest-rate.yaml                     <- Interest rates of all capacities.
 ├── link-techs.yaml                        <- Definition of link technologies.
 ├── README.md                              <- The file you are currently looking at.
+├── tech-costs.yaml                        <- Definition of cost data.
 ├── renewable-techs.yaml                   <- Definition of supply technologies.
 └── storage-techs.yaml                     <- Definition of storage technologies.
 ```
@@ -87,7 +92,7 @@ These units were chosen in order to minimise numerical issues within the optimis
 
 euro-calliope is developed and maintained within the [Calliope project](https://www.callio.pe).
 
-<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>.
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
 
 Contains modified Copernicus Atmosphere Monitoring Service information 2020. Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.
 

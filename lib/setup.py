@@ -8,7 +8,7 @@ setup(
     description='Library code of the euro-calliope workflow.',
     maintainer='calliope-project',
     maintainer_email='tim.troendle@usys.ethz.ch',
-    packages=find_packages(exclude=['tests*']),
+    packages=find_packages(),
     include_package_data=True,
     install_requires=[
         "numpy",

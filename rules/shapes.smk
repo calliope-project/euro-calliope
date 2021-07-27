@@ -107,17 +107,26 @@ rule units_without_shape:
     script: "../scripts/shapes/nogeo.py"
 
 
+rule download_eez:
+    message: "Download Exclusive Economic Zones as zip"
+    output: protected("data/automatic/eez.zip")
+    params: url = config["data-sources"]["eez"]
+    conda: "../envs/shell.yaml"
+    shell: "curl -sLo {output} '{params.url}'"
+
+
 rule eez:
     message: "Clip exclusive economic zones to study area."
-    input: config["data-sources"]["eez"]
+    input: rules.download_eez.output[0]
     output: "build/data/eez.geojson"
     params:
         bounds="{x_min},{y_min},{x_max},{y_max}".format(**config["scope"]["bounds"]),
-        countries=",".join(["'{}'".format(country) for country in config["scope"]["countries"]])
+        countries=",".join(["'{}'".format(country) for country in config["scope"]["countries"]]),
     conda: "../envs/geo.yaml"
+    shadow: "minimal"
     shell:
         """
-        fio cat --bbox {params.bounds} {input}\
-        | fio filter "f.properties.Territory1 in [{params.countries}]"\
+        fio cat --bbox {params.bounds} "zip://{input}"\
+        | fio filter "f.properties.territory1 in [{params.countries}]"\
         | fio collect > {output}
         """
