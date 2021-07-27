@@ -61,12 +61,13 @@ parameters:
         energy_cap_limit: equals
 quality-control:
     load:
-        acceptable-load-data-gap-hours: 48
         outlier-data-thresholds:
             relative-to-mean-min: 0.25
             relative-to-mean-max: 2
-            percentage-deviation-post-cleaning-max: 1
-        entsoe-data-priority:
+        max-interpolate-timesteps: 3
+        acceptable-year-diff-for-gap-filling: 5
+        fill-29th-feb-from-28th: true
+        data-source-priority-order:
             - actual_entsoe_transparency
             - actual_entsoe_power_statistics
     hydro:
