@@ -2,6 +2,7 @@
 
 ## 1.1 (unpublished)
 
+* **ADD** Link YAML file defining national net-transfer capacities from ENTSO-E TYNDP 2020 scenarios (#61).
 * **ADD** automatic download of EEZ (#99).
 * **ADD** Danish Energy Agency and Schroeder et al (2013) cost data as well as no hydro fixed costs as optional overrides (#18, #129).
 * **ADD** override to constrain energy to power ratios of battery and hydrogen storage (#130).
@@ -18,7 +19,7 @@
 * **ADD** option to choose solar and wind potential scenario, limiting the amount of eligible surfaces (#153).
 
 * **UPDATE** EEZ updated from v10 to v11 (difference in offshore area is < 1% for all relevant countries) (#99).
-* **UPDATE** ENTSOE national electricity load data gap filling priority order included in config (#42).
+* **UPDATE** ENTSO-E national electricity load data gap filling methods (priority order, interpolation distance, outlier handling, 29th Feb handling) included in config (#42, #91).
 * **UPDATE** IRENA hydro generation data from 2018 to 2020 (#40).
 * **UPDATE** Make scaling pumped hydro capacity according to Geth et al. (2015) optional with a boolean config parameter `scale-phs-according-to-geth-et-al` which defaults to False (no scaling) (#49).
 * **UPDATE** JRC hydro database v4 -> v9 (#48, #57). This entails one patch being removed:
