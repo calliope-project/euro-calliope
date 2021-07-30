@@ -11,7 +11,7 @@ import:
     - 'link-all-neighbours.yaml'
 model:
     name: 'Example model'
-    calliope_version: 0.6.6.post1
+    calliope_version: 0.6.7
     timeseries_data_path: '.'
     subset_time: ['2016-01-01', '2016-01-01']
 run:
