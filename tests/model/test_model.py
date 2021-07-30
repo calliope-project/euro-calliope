@@ -10,7 +10,8 @@ DIRECTIONAL_PV = set(["roof_mounted_pv_s_flat", "roof_mounted_pv_n", "roof_mount
 
 TECHNOLOGIES = {
     "default": DEFAULT_TECHNOLOGIES,
-    "connected": DEFAULT_TECHNOLOGIES,
+    "connected_all_neighbours": DEFAULT_TECHNOLOGIES | set(["ac_transmission"]),
+    "connected_entsoe_tyndp": DEFAULT_TECHNOLOGIES | set(["ac_transmission"]),
     "directional-pv": (DEFAULT_TECHNOLOGIES | DIRECTIONAL_PV) - set(["roof_mounted_pv"]),
     "e-to-p-ratios": DEFAULT_TECHNOLOGIES,
     "frozen-hydro": DEFAULT_TECHNOLOGIES,
@@ -34,7 +35,12 @@ def test_example_model_runs(optimised_example_model):
 
 def test_technologies_are_available(energy_cap, location, technologies):
     for technology in technologies:
-        assert (
-            (technology in energy_cap.techs)
-            and pd.notna(energy_cap.sel(locs=location, techs=technology).item())
-        )
+        if "transmission" in technology:
+            assert pd.notna(
+                energy_cap.where(energy_cap.techs.str.find(technology) > -1).sum(min_count=1).item()
+            )
+        else:
+            assert (
+                (technology in energy_cap.techs)
+                and pd.notna(energy_cap.sel(locs=location, techs=technology).item())
+            )
