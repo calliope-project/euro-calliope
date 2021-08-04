@@ -93,10 +93,9 @@ def get_all_distance_efficiency(
         .rename_axis(columns='carrier')
         .stack()
     )
-    assert transport_energy_balance_mapped_carrier_names.index.get_level_values("unit").unique().item().lower() == "tj"
     transport_energy_balance_with_other_twh = (
         transport_energy_balance_mapped_carrier_names
-        .droplevel('unit')
+        .xs("TJ", level="unit")
         .add(other_transport_energy_consumption, fill_value=0)
         .apply(utils.tj_to_twh)
         .rename_axis(index=['country_code', 'year', 'carrier'])
