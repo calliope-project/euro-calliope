@@ -1,0 +1,15 @@
+site_name: Euro Calliope
+nav:
+    - Home: index.md
+    - Basic usage: basic.md
+    - Advanced usage: advanced.md
+    - Model: model.md
+    - Customisation: customisation.md
+    - Release notes: changelog.md
+    - Sources: sources.md
+theme: readthedocs
+repo_url: https://github.com/calliope-project/euro-calliope/
+site_dir: build/docs
+markdown_extensions:
+    - toc:
+        permalink: "#"

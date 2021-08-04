@@ -378,11 +378,11 @@ rule clean: # removes all generated results
 
 
 rule docs:
-    message: "Build workflow documentation"
-    input: *glob.glob("docs/source/*")
+    message: "Build documentation"
+    input: *glob.glob("docs/*")
     conda: "envs/docs.yaml"
-    output: directory("docs/build/html")
-    shell: "sphinx-build -b html docs/source {output}"
+    output: directory("build/docs")
+    shell: "mkdocs build --no-directory-urls"
 
 
 rule test:
