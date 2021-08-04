@@ -72,7 +72,9 @@ rule potentials:
     input: rules.download_potentials.output[0]
     shadow: "minimal"
     output:
-        land_eligibility_km2 = "build/data/{resolution}/technical-potential/areas.csv",
+        land_eligibility_km2 = "build/data/{{resolution}}/{scenario}/areas.csv".format(
+            scenario=config["parameters"]["wind-and-solar-potential-scenario"]
+        ),
         shared_coast = "build/data/{resolution}/shared-coast.csv",
         demand = "build/data/{resolution}/demand.csv",
         population = "build/data/{resolution}/population.csv",
@@ -305,7 +307,8 @@ rule entsoe_tyndp_links:
         energy_cap_limit = config["parameters"]["entsoe-tyndp"]["energy_cap_limit"],
         year = config["parameters"]["entsoe-tyndp"]["projection-year"],
         scaling_factor = config["scaling-factors"]["power"]
-    output: "build/model/national/entsoe-tyndp-links.yaml"
+    output: "build/model/{resolution}/entsoe-tyndp-links.yaml"
+    wildcard_constraints: resolution = "national"
     conda: "envs/default.yaml"
     script: "scripts/link_entsoe_tyndp.py"
 
@@ -357,7 +360,7 @@ rule model:
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
         ),
         rules.build_metadata.output,
-        lambda wildcards: "build/model/national/entsoe-tyndp-links.yaml" if wildcards.resolution == "national" else [],
+        lambda wildcards: rules.entsoe_tyndp_links.output[0] if wildcards.resolution == "national" else [],
         example_model = template_dir + "example-model.yaml"
     output:
         log = "build/logs/{resolution}/model.done",

@@ -7,8 +7,15 @@ import calliope
 import pandas as pd
 
 
-def run_test(path_to_test_dir, path_to_output, path_to_model, path_to_example_model, paths_to_cf_timeseries,
-             path_to_annual_energy_balances, config):
+def run_test(
+    path_to_test_dir,
+    path_to_output,
+    path_to_model,
+    path_to_example_model,
+    paths_to_cf_timeseries,
+    path_to_annual_energy_balances,
+    config
+):
     exit_code = pytest.main(
         [
             path_to_test_dir,

@@ -183,7 +183,13 @@ properties:
                         enum: ["2010", "2030", "2050"]
             biofuel-efficiency:
                 type: number
+                description: Combustion efficiency of the `biofuel` technology.
+                minimum: 0
                 maximum: 1
+            wind-and-solar-potential-scenario:
+                type: string
+                description: Scenario defining the amount of surfaces eligible for solar and wind power from [@Trondle:2019].
+                enum: ["technical-potential", "technical-social-potential"]
             entsoe-tyndp:
                 type: object
                 description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/

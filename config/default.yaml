@@ -68,6 +68,7 @@ parameters:
         potential-year: "2020"
         cost-year: "2030"
     biofuel-efficiency: 0.45
+    wind-and-solar-potential-scenario: technical-potential
     entsoe-tyndp:
         scenario: National Trends
         grid: Reference
