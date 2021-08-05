@@ -4,7 +4,9 @@ For an in-depth description of all model components and the data preprocessing s
 
 ## Model files
 
-The models contain the following files. All files in the root directory are independent of the spatial resolution. All files that depend on the spatial resolution are within subfolders named by the resolution.
+The models contain the following files.
+All files in the root directory are independent of the spatial resolution.
+All files that depend on the spatial resolution are within subfolders named by the resolution.
 
 ```
 ├── {resolution}                           <- For each spatial resolution an individual folder.
@@ -37,6 +39,11 @@ The units of quantities within the models are the following:
 * area: 10,000 km²
 * monetary cost: billion EUR
 
-All data going into Calliope and all Calliope result data will be given using these units. While they may be unusual, these units lead to a numerical model that is well suited for the interior-point solution algorithm that is used by default. The units are tuned so as to work best for models with a time resolution of a few hours and a duration of one year. For other types of problems, or other solution algorithms, the units may need to be changed to avoid numerical issues within the solver.
+All data going into Calliope and all Calliope result data will be given using these units.
+While they may be unusual, these units lead to a numerical model that is well suited for the interior-point solution algorithm that is used by default.
+The units are tuned so as to work best for models with a time resolution of a few hours and a duration of one year.
+For other types of problems, or other solution algorithms, the units may need to be changed to avoid numerical issues within the solver.
 
-When you run the workflow, you can easily change the units and scale all values using the `scaling-factor` configuration parameters, see [Configuration](./customisation.md#configuration). The base units on which the scaling factors are applied are `1 MW`, `1 MWh`, `EUR`, and `km2`. So for example, the default unit for energy (100 GWh) is derived by scaling the base unit (1 MWh) with a scaling factor of `0.00001`.
+When you run the workflow, you can easily change the units and scale all values using the `scaling-factor` configuration parameters, see [Configuration](./customisation.md#configuration).
+The base units on which the scaling factors are applied are `1 MW`, `1 MWh`, `EUR`, and `km2`.
+So for example, the default unit for energy (100 GWh) is derived by scaling the base unit (1 MWh) with a scaling factor of `0.00001`.
