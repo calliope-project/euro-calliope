@@ -1,8 +1,8 @@
 # Customising your model
 
-The example models that come with euro-calliope are complete models that you can run using Calliope.
+The example models that come with Euro-Calliope are complete models that you can run using Calliope.
 However, it's unlikely that these models fit your purpose optimally.
-To make them fit-for-purpose, euro-calliope models can be configured, adapted, and extended.
+To make them fit-for-purpose, Euro-Calliope models can be configured, adapted, and extended.
 You have the following three options:
 
 1. [Manual changes](./customisation.md#manual-changes)
@@ -17,7 +17,7 @@ This kind of customisation can be useful to get to know the model and its parame
 To create reliable results, we do not advice to make any manual changes to anything but the model definition as this may impact traceability of your results.
 For the model definition (as in `./{resolution}/example-model.yaml`) we encourage you to do manual changes.
 A typical customisation here would be to change the solver from `gurobi` to an open-source solver, e.g. `cbc` (see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/user/config_defaults.html#run-configuration)).
-We consider all euro-calliope model components but the model definition as a toolbox from which you can choose to define your model -- see the [Import customisation option](./customisation.md#imports).
+We consider all Euro-Calliope model components but the model definition as a toolbox from which you can choose to define your model -- see the [Import customisation option](./customisation.md#imports).
 
 ## Imports
 
@@ -45,21 +45,21 @@ calliope run build/model/continental/example-model.yaml --scenario=dea-renewable
 ```
 
 You can define your own overrides to manipulate any model component.
-The following overrides are built into euro-calliope.
+The following overrides are built into Euro-Calliope.
 
 ### Cost
 
-By default, euro-calliope uses cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014.
+By default, Euro-Calliope uses cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014.
 The `dea-renewable-cost` override allows to use the projections from the Danish Energy Agency instead for solar PV and wind power and `schroeder-hydro-cost` provides another source for the hydropower assumptions.
 Using the override `no-hydro-fixed-cost` allows to only consider variable and O&M costs for hydropower.
 This may make sense especially in combination with the `freeze-hydro-capacities` override (see below).
 
 ### directional-rooftop-pv
 
-By default, euro-calliope contains a single technology for rooftop PV.
+By default, Euro-Calliope contains a single technology for rooftop PV.
 This technology comprises the total rooftop PV potential in each location, in particular including east-, west-, and north-facing rooftops.
 While this allows to fully exploit the potential of rooftop PV, it leads to less than optimal capacity factors as long as the potential is not fully exploited.
-That is because in reality, one would likely first exploit all south-facing rooftops, then east- and west-facing rooftops, and only then -- if at all -- north-facing rooftops. By default, euro-calliope cannot model that.
+That is because in reality, one would likely first exploit all south-facing rooftops, then east- and west-facing rooftops, and only then -- if at all -- north-facing rooftops. By default, Euro-Calliope cannot model that.
 
 When using the `directional-rooftop-pv` override, there are three instead of just one technologies for rooftop PV.
 The three technologies comprise (1) south-facing PV (on either south-facing or flat rooftops), (2) east- and west-facing PV, and (3) north-facing PV.
@@ -75,7 +75,7 @@ Constraining hydrogen storage as well ensures it does not directly compete with 
 
 ### freeze-hydro-capacities
 
-By default, euro-calliope allows capacities of run-of-river hydro, reservoir hydro, and pumped storage hydro capacities up to today's levels.
+By default, Euro-Calliope allows capacities of run-of-river hydro, reservoir hydro, and pumped storage hydro capacities up to today's levels.
 Alternatively, it's possible to freeze these capacities to today's levels using the `freeze-hydro-capacities` override.
 
 ### load-shedding
@@ -83,7 +83,7 @@ Alternatively, it's possible to freeze these capacities to today's levels using 
 The `load-shedding` override adds an option to shed load at each location.
 You can use this to model blackouts, brownouts, or controlled shedding of load as a form of demand response.
 
-In euro-calliope, we model load shedding not as actual reduction of demand but as an unconstrained supply of electricity.
+In Euro-Calliope, we model load shedding not as actual reduction of demand but as an unconstrained supply of electricity.
 This supply has high variable cost (see `tech-cost.yaml` parameter file) and no fixed cost.
 Due to its high cost, it will only be used when no other, less costly, option is available.
 
@@ -92,4 +92,4 @@ The benefit of using the `load-shedding` override over Calliope's built-in mecha
 
 ## Rebuild
 
-When above options do not provide enough flexibility for you, you can rebuild the model using euro-calliope's workflow and use the [customisation options of the workflow](../workflow/customisation.md).
+When above options do not provide enough flexibility for you, you can rebuild the model using Euro-Calliope's workflow and use the [customisation options of the workflow](../workflow/customisation.md).

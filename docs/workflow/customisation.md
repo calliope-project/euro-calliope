@@ -24,10 +24,10 @@ For details on how the configuration mechanism works, please read [Snakemake's d
 
 Beyond configuration through parameters, you can adapt and extend the workflow in any possible way.
 You can adapt the data pre-processing steps and the way model files are generated, but you can also extend the model by adding your own model files or overrides.
-Customising euro-calliope in this way requires a solid understanding of the workflow management system [Snakemake](https://snakemake.readthedocs.io/en/v6.1.1/index.html) that we use.
+Customising Euro-Calliope in this way requires a solid understanding of the workflow management system [Snakemake](https://snakemake.readthedocs.io/en/v6.1.1/index.html) that we use.
 
-Whenever we applied euro-calliope in our research we made use of this option.
-Below you will find a list of publications in which we applied euro-calliope models.
+Whenever we applied Euro-Calliope in our research we made use of this option.
+Below you will find a list of publications in which we applied Euro-Calliope models.
 These may serve as a starting point for you to understand the possibilities of the adaptable and extendable workflow.
 
 * Tröndle, T., Lilliestam, J., Marelli, S., &#38; Pfenninger, S. (2020). Trade-offs between geographic scale, cost, and infrastructure requirements for fully renewable electricity in Europe. <i>Joule</i>, <i>4</i>(9), 1929–1948. [![article DOI](https://img.shields.io/badge/article-10.1016/j.joule.2020.07.018-blue)](https://doi.org/10.1016/j.joule.2020.07.018)[![workflow DOI](https://img.shields.io/badge/workflow-10.5281/zenodo.3950774-blue)](https://doi.org/10.5281/zenodo.3950774)

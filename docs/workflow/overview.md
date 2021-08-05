@@ -1,21 +1,21 @@
 # Workflow overview
 
-euro-calliope's workflow builds the models from raw data.
+Euro-Calliope's workflow builds the models from raw data.
 In essence, it is composed out of three things: scripts that retrieve raw data, process data, and formulate the model; execution environments that explicitly define software dependencies and requirements (equivalent to the conditions in a lab); and the glue ensuring all scripts run in the correct execution environment and the right order.
 Scripts are written in Python; the execution environments are [conda environments](https://docs.conda.io/en/latest/); and the glue holding everything together is the workflow management system [Snakemake](https://snakemake.readthedocs.io/en/v6.1.1/).
 
 ## Rationale
 
 "Wait! Why all this workflow wizardry?" you may ask.
-The purpose of euro-calliope is to automatically build models out of raw data, as you can see in the image below.
+The purpose of Euro-Calliope is to automatically build models out of raw data, as you can see in the image below.
 Automation is key for traceability, reproducibility, and adaptability.
 
-![euro-calliope within the energy system modelling process.](../img/ec-in-modelling-process.png)
+![Euro-Calliope within the energy system modelling process.](../img/ec-in-modelling-process.png)
 
 Automation makes models **traceable** because everyone can look up all the steps necessary to build the models.
 While manual steps are traceable when they are documented properly, in practice, it is just too easy to forget to document one step or to forget to update the documentation.
-euro-calliope's workflow does not contain any manual steps.
-In that sense, the workflow is the most comprehensive methods section of any study building on euro-calliope.
+Euro-Calliope's workflow does not contain any manual steps.
+In that sense, the workflow is the most comprehensive methods section of any study building on Euro-Calliope.
 One may have to dig to discover modelling decisions.
 One may have to dig deep and one may get dirty hands in the process.
 Either way, one will find the answer in the workflow.

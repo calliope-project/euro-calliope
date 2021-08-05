@@ -1,10 +1,10 @@
 # Model overview
 
-No matter whether you have downloaded euro-calliope's pre-builts or you have built the models yourself successfully, you will have a set of files in front of you. Let's make sense of these files.
+No matter whether you have downloaded Euro-Calliope's pre-builts or you have built the models yourself successfully, you will have a set of files in front of you. Let's make sense of these files.
 
 ## File structure
 
-By default, euro-calliope is a set of three models on different spatial resolutions: continental, national, and regional.
+By default, Euro-Calliope is a set of three models on different spatial resolutions: continental, national, and regional.
 All files that depend on the spatial resolution are within subfolders named by the resolution.
 All files in the root directory are independent of the spatial resolution.
 
@@ -50,4 +50,4 @@ So for example, the default unit for energy (100 GWh) is derived by scaling the 
 
 ## Components and assumptions
 
-For an in-depth description of all model components and the data preprocessing steps, please read the [open-access article introducing euro-calliope in Joule](https://doi.org/10.1016/j.joule.2020.07.018).
+For an in-depth description of all model components and the data preprocessing steps, please read the [open-access article introducing Euro-Calliope in Joule](https://doi.org/10.1016/j.joule.2020.07.018).
