@@ -1,6 +1,6 @@
 # Euro Calliope
 
-Models of the European electricity system for Calliope.
+Models of the European electricity system for _Calliope_.
 
 This repository contains the workflow routines that automatically build models from raw data. Alternatively to building models yourself, you can use [pre-built models](https://doi.org/10.5281/zenodo.3949553) that run out-of-the-box. You can find a more detailed description of the first application in a [scientific article in Joule](https://doi.org/10.1016/j.joule.2020.07.018).
 

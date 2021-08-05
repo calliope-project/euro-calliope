@@ -1,6 +1,6 @@
 # pre-built euro-calliope
 
-Ready to use models of the European electricity system built using Calliope. Models are available on three different spatial resolutions: continental, national, and regional.
+Ready to use models of the European electricity system built for use in _Calliope_. Models are available on three different spatial resolutions: continental, national, and regional.
 
 In addition, euro-calliope models can be built manually which adds more configuration options. To learn how to build euro-calliope manually, head over to [euro-calliope's documentation](https://euro-calliope.readthedocs.io).
 
@@ -10,7 +10,7 @@ euro-calliope models the European electricity system with each location represen
 
 ## Prepare
 
-1. You need a Gurobi license installed on your computer. You may as well choose another solver than Gurobi. See [Calliope's documentation](https://calliope.readthedocs.io/en/stable/user/config_defaults.html?highlight=solver#run-configuration) to understand how to switch to another solver.
+1. Install a Gurobi license on your computer ([academic license](https://www.gurobi.com/downloads/end-user-license-agreement-academic/) comes at no cost), or [choose a different solver](./customisation.md#manual).
 
 2. Install Calliope and all required dependencies. The easiest way to do so is using [conda](https://conda.io/) or [mamba](https://mamba.readthedocs.io/). Using conda, you can install Calliope:
 
@@ -28,9 +28,13 @@ There are three models in the directory of the pre-builts -- one for each of the
 calliope run ./continental/example-model.yaml
 ```
 
+## Customise
+
+The pre-built models are examples and very likely require customisation to fit your purpose. Once you've managed to run them, it's a good point in time to learn about [customisation options in euro-calliope](https://euro-calliope.readthedocs.io/customisation).
+
 ## More information
 
-For more information on euro-calliope and how to use and modify the models, see [euro-calliope's](https://euro-calliope.readthedocs.io) documentation.
+For more information on euro-calliope and how to use and modify the models, see [euro-calliope's documentation](https://euro-calliope.readthedocs.io).
 
 ## License and attribution
 

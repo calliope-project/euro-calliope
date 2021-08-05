@@ -34,7 +34,7 @@ JRC. (2014). <i>ETRI 2014 -- Energy Technology Reference Indicator projections f
 
 European Environment Agency. (2009). <i>Europe’s onshore and offshore wind energy potential</i> [Publication]. https://www.eea.europa.eu/publications/europes-onshore-and-offshore-wind-energy-potential
 
-### @Ruiz Catello et al:2015
+### @RuizCastello:2015
 
 Ruiz Castello, P., Sgobbi, A., Nijs, W., Thiel, C., Dalla Longa, F., Kober, T., Elbersen, B., &#38; Hengeveld, G. (2015). <i>The JRC-EU-TIMES model. Bioenergy potentials for EU and neighbouring countries.</i> https://ec.europa.eu/jrc/en/publication/eur-scientific-and-technical-research-reports/jrc-eu-times-model-bioenergy-potentials-eu-and-neighbouring-countries
 

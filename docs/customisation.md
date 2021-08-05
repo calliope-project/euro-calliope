@@ -10,11 +10,11 @@ No matter whether you are using the pre-builts as a starting point or you are bu
 
 ## Manual changes
 
-With the Calliope model in your hands, you will be able to change any model parameter, any technology specifics, and the model definition to your liking. This kind of customisation can be useful to get to know the model and its parameters. To create reliable results, we do not advice to make any manual changes to anything but the model definition as this may impact traceability of your results. For the model definition (as in `./{resolution}/example-model.yaml`) we encourage you to do manual changes. We consider all euro-calliope model components but the model definition as a toolbox from which you can choose to define your model -- see the [Import customisation option](./customisation.md#imports).
+With the Calliope model in your hands, you will be able to change any model parameter, any technology specifics, and the model definition to your liking. This kind of customisation can be useful to get to know the model and its parameters. To create reliable results, we do not advice to make any manual changes to anything but the model definition as this may impact traceability of your results. For the model definition (as in `./{resolution}/example-model.yaml`) we encourage you to do manual changes. A typical customisation here would be to change the solver from `gurobi` to an open-source solver, e.g. `cbc` (see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/user/config_defaults.html#run-configuration)). We consider all euro-calliope model components but the model definition as a toolbox from which you can choose to define your model -- see the [Import customisation option](./customisation.md#imports).
 
 ## Imports
 
-The `example-model.yaml` definition file in each resolution sub-directory (e.g. `national/example-model.yaml`) specifies a list of other files to bring together to describe the model. This list can be changed by the modeller to select a combination of different files (see also [Calliope's documentation](https://calliope.readthedocs.io/en/stable/user/building.html#files-that-define-a-model)).
+The `example-model.yaml` definition file in each resolution sub-directory (e.g. `national/example-model.yaml`) specifies a list of other files to bring together to describe the model. This list can be changed by the modeller to select a combination of different files (see also [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#files-that-define-a-model)).
 
 ### Transmission links
 
@@ -26,7 +26,7 @@ At the national resolution, transmission links can be set based on an ENTSO-E te
 
 ## Overrides
 
-Calliope [overrides](https://calliope.readthedocs.io/en/stable/user/building.html#scenarios-and-overrides) allow to easily manipulate models. An override named `dea-renewable-cost` can be used for example in this way:
+Calliope [overrides](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#scenarios-and-overrides) enable models to be easily manipulated. An override named `dea-renewable-cost` can be used for example in this way:
 
 ```bash
 calliope run build/model/continental/example-model.yaml --scenario=dea-renewable-cost
@@ -58,19 +58,20 @@ The `load-shedding` override adds an option to shed load at each location. You c
 
 In euro-calliope, we model load shedding not as actual reduction of demand but as an unconstrained supply of electricity. This supply has high variable cost (see `tech-cost.yaml` parameter file) and no fixed cost. Due to its high cost, it will only be used when no other, less costly, option is available.
 
-Calliope provides a built-in mechanism that is similar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/stable/user/building.html#allowing-for-unmet-demand). The benefit of using the `load-shedding` override over Calliope's built-in mechanism is that it is more targeted towards modelling shedding of electrical load and provides more flexibility -- for example in terms of the cost of shed load.
+Calliope provides a built-in mechanism that is similar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#allowing-for-unmet-demand). The benefit of using the `load-shedding` override over Calliope's built-in mechanism is that it is more targeted towards modelling shedding of electrical load and provides more flexibility -- for example in terms of the cost of shed load.
 
 ## Configuration
 
-When you [build models on your own](./advanced.md) using euro-calliope's workflow, you can configure many more aspects in the build process. You can, for example, change the temporal and spatial scope of the data and model, change data sources, and change the way raw data is preprocessed.
+When you [build models on your own](./build.md) using euro-calliope's workflow, you can configure many more aspects in the build process. You can, for example, change the temporal and spatial scope of the data and model, change data sources, and change the way raw data is preprocessed.
 
-The configuration builds on Snakemake's configuration mechanism and consists of two parts: a default configuration `./config/default.yaml` and a schema declaring all configuration parameters `./config/schema.yaml`. To override configuration parameters, you can add another configuration file with just your updates or change parameter values on the command line when calling `snakemake`. For details on how the configuration mechanism works, please read [Snakemake's documention](https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html).
+The configuration builds on Snakemake's configuration mechanism and consists of two parts: a default configuration `./config/default.yaml` and a schema declaring all configuration parameters `./config/schema.yaml`. To override configuration parameters, you can add another configuration file with just your updates or change parameter values on the command line when calling `snakemake`. For details on how the configuration mechanism works, please read [Snakemake's documention](https://snakemake.readthedocs.io/en/v6.1.1/snakefiles/configuration.html).
 
-**When you change configuration parameters, please consider this important caveat of Snakemake:** While Snakemake does understand that parameters have changed, it will not rerun rules with updated parameters by default (see also this [feature request](https://github.com/snakemake/snakemake/issues/976)). To ensure that your configuration parameters are used, you must manually rerun all rules that use the updated parameter. The easiest is to start the build process from scratch by running `snakemake clean`.
+!!! note
+    When you change configuration parameters, please consider this important caveat of Snakemake: While Snakemake does understand that parameters have changed, it will not rerun rules with updated parameters by default (see also this [feature request](https://github.com/snakemake/snakemake/issues/976)). To ensure that your configuration parameters are used, you must manually rerun all rules that use the updated parameter. The easiest is to start the build process from scratch by running `snakemake clean`.
 
 ## Adaptation
 
-When you [build models on your own](./advanced.md) using euro-calliope's workflow, you can not only configure the workflow but adapt and extend it in any possible way. You can adapt the data pre-processing steps and the way model files are generated, but you can also extend the model by adding your own model files or overrides. Customising euro-calliope in this way requires a solid understanding of the workflow management system [Snakemake](https://snakemake.readthedocs.io/en/stable/index.html) that we use.
+When you [build models on your own](./build.md) using euro-calliope's workflow, you can not only configure the workflow but adapt and extend it in any possible way. You can adapt the data pre-processing steps and the way model files are generated, but you can also extend the model by adding your own model files or overrides. Customising euro-calliope in this way requires a solid understanding of the workflow management system [Snakemake](https://snakemake.readthedocs.io/en/v6.1.1/index.html) that we use.
 
 Whenever we applied euro-calliope in our research we made use of this option. Below you will find a list of publications in which we applied euro-calliope models. These may serve as a starting point for you to understand the possibilities of the adaptable and extendable workflow.
 
