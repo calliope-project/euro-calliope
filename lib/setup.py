@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='eurocalliopelib',
-    version='0.1.0', # additionally defined in __init__.py
+    version='1.2.dev', # additionally defined in __init__.py
     description='Library code of the euro-calliope workflow.',
     maintainer='calliope-project',
     maintainer_email='tim.troendle@usys.ethz.ch',
