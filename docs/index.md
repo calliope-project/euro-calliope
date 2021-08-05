@@ -26,7 +26,7 @@ Due to the flexibility of Calliope and the availability of the routines building
 The easiest and quickest way to start using euro-calliope is by downloading and running our pre-built models.
 These models are readily available Calliope models that you can adapt and extend using Calliope's mechanisms.
 To use our pre-builts you need no prior knowledge in using Calliope but you should have some or expert knowledge in modelling energy systems.
-[Learn more about using the pre-built models.](./pre-built.md)
+[Learn more about using the pre-built models.](./model/pre-built.md)
 
 **All customisation options using your own builds**:
 When you require more flexibility in adapting or extending the models than Calliope's built-in mechanisms can provide, you can build euro-calliope models from raw data.
@@ -34,4 +34,4 @@ This process is fully automated and we provide all necessary routines that we us
 By building the models yourself, you have many more options to configure, extend, and adapt the models.
 You should have some or expert knowledge in scientific workflows and execution environments, or be willing to learn about those.
 Building the models will require to download several gigabytes of raw data and a few hours of compute time on a regular personal computer.
-[Learn more about using your own builds.](./build.md)
+[Learn more about using your own builds.](./workflow/build.md)

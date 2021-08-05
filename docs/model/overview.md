@@ -1,12 +1,12 @@
-# The models
+# Model overview
 
-For an in-depth description of all model components and the data preprocessing steps, please read the [open-access article introducing euro-calliope in Joule](https://doi.org/10.1016/j.joule.2020.07.018).
+No matter whether you have downloaded euro-calliope's pre-builts or you have built the models yourself successfully, you will have a set of files in front of you. Let's make sense of these files.
 
-## Model files
+## File structure
 
-The models contain the following files.
-All files in the root directory are independent of the spatial resolution.
+By default, euro-calliope is a set of three models on different spatial resolutions: continental, national, and regional.
 All files that depend on the spatial resolution are within subfolders named by the resolution.
+All files in the root directory are independent of the spatial resolution.
 
 ```
 ├── {resolution}                           <- For each spatial resolution an individual folder.
@@ -47,3 +47,7 @@ For other types of problems, or other solution algorithms, the units may need to
 When you run the workflow, you can easily change the units and scale all values using the `scaling-factor` configuration parameters, see [Configuration](./customisation.md#configuration).
 The base units on which the scaling factors are applied are `1 MW`, `1 MWh`, `EUR`, and `km2`.
 So for example, the default unit for energy (100 GWh) is derived by scaling the base unit (1 MWh) with a scaling factor of `0.00001`.
+
+## Components and assumptions
+
+For an in-depth description of all model components and the data preprocessing steps, please read the [open-access article introducing euro-calliope in Joule](https://doi.org/10.1016/j.joule.2020.07.018).
