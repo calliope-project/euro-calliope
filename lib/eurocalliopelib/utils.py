@@ -79,13 +79,15 @@ def convert_unit(df, output_unit, input_unit=None, unit_in_output_idx=True):
             raise ValueError("Cannot infer unit for data")
         else:
             mask = df.index
-    df.loc[mask] *= UNIT_CONVERSION_MAPPING[(input_unit.lower(), output_unit.lower())]
+
+    if input_unit.lower() != output_unit.lower():
+        df.loc[mask] *= UNIT_CONVERSION_MAPPING[(input_unit.lower(), output_unit.lower())]
 
     if units is None and unit_in_output_idx is True:
-        df = add_idx_level(df, unit=output_unit)
+        df = add_idx_level(df, unit=output_unit.lower())
     elif units is not None:
         if unit_in_output_idx is True:
-            idx_renamer = lambda x: output_unit if x == input_unit else x
+            idx_renamer = lambda x: output_unit.lower() if x == input_unit else x
             df = df.rename(idx_renamer, level="unit")
         else:
             assert len(units) == 1, f"Cannot drop the index level `unit` with multiple units {units}"
