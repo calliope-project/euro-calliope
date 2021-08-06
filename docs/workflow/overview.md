@@ -29,6 +29,20 @@ This way, everyone can ensure that the workflow does indeed build the models it 
 
 Automation makes the models **adaptable**, as one can not only reproduce the exact same model but one can also [customise and configure](./customisation.md) the workflow so that it builds a different variant of the model that fits better for ones purpose.
 
+## Workflow steps
+
+The image below shows all steps in Euro-Calliope's workflow and their connections.
+Connected, they form a directed acyclic graph (DAG) -- a sort of data pipeline from raw data at the top of the graph to the final model at the bottom of the graph.
+Most steps at the top of the graph download raw data from the source.
+At the bottom, there are three final steps: model, test, and all.
+In the _model_ step, the models are composed out of all their components.
+In the _test_ step, the models are tested through a set of test routines.
+The final step _all_ is a Snakemake specificity and exists only to ensure the model and built steps ran through successfully.
+
+Some of the steps run more than once, but this hidden in the visualisation below. For example, the _model_ step runs three times: once for each model resolution continental, national, and regional.
+
+![All workflow steps and their connections forming a directed acyclic graph.](../img/dag.png)
+
 ## Folder structure
 
 When you have downloaded or cloned the workflow, you will have a set of files in front of you. Most of these files represent either scripts, execution environments, or the glue that brings everything together. Here's an an overview over the most important folders and their content.

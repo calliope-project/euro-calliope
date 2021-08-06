@@ -21,3 +21,7 @@ markdown_extensions:
     - admonition
     - toc:
         permalink: "#"
+plugins:
+    - dag:
+        path_to_snakefile: ./Snakefile
+        path_to_png: ./docs/img/dag.png
