@@ -1,119 +1,44 @@
-# pre-built euro-calliope
+# Pre-built Euro-Calliope
 
-Ready to use models of the European electricity system built using Calliope. Models are available on three different spatial resolutions: continental, national, and regional.
+Ready to use models of the European electricity system built for use in _Calliope_. Models are available on three different spatial resolutions: continental, national, and regional.
 
-In addition, euro-calliope models can be built manually which adds more configuration options. To build euro-calliope manually, head over to [GitHub](https://github.com/calliope-project/euro-calliope).
+In addition, Euro-Calliope models can be built manually which adds more configuration options. To learn how to build Euro-Calliope manually, head over to [Euro-Calliope's documentation](https://euro-calliope.readthedocs.io).
 
 ## At a glance
 
-euro-calliope models the European electricity system with each location representing an administrative unit. It is built on three spatial resolutions: on the continental level as a single location, on the national level with 34 locations, and on the regional level with 497 locations. On each node, renewable generation capacities (wind, solar, bioenergy) and balancing capacities (battery, hydrogen) can be built. In addition, hydro electricity and pumped hydro storage capacities can be built up to the extent to which they exist today. All capacities are used to satisfy electricity demand on all locations which is based on historic data. Locations are connected through transmission lines of unrestricted capacity. Using [Calliope](https://www.callio.pe), the model is formulated as a linear optimisation problem with total monetary cost of all capacities as the minimisation objective. The pre-built models can be manipulated by updating any of the files. In addition to the pre-built models, models can be built manually. Manual builds provide more flexibility in adapting and configuring the model. To build euro-calliope manually, head over to [GitHub](https://github.com/calliope-project/euro-calliope).
+Euro-Calliope models the European electricity system with each location representing an administrative unit. It is built on three spatial resolutions: on the continental level as a single location, on the national level with 34 locations, and on the regional level with 497 locations. At each location, renewable generation capacities (wind, solar, bioenergy) and balancing capacities (battery, hydrogen) can be built. In addition, hydro electricity and pumped hydro storage capacities can be built up to the extent to which they exist today. All capacities are used to satisfy electricity demand on all locations where demand is based on historic data. Locations are connected through transmission lines of either unrestricted capacity or projections. Using [Calliope](https://www.callio.pe), the model is formulated as a linear optimisation problem with total monetary cost of all capacities as the minimisation objective. Due to the flexibility of Calliope and the availability of the routines building the model all components can be adapted to the modeller's needs.
 
-## Get ready to run the models
+## Prepare
 
-1. You need a Gurobi license installed on your computer. You may as well choose another solver than Gurobi. See [Calliope's documentation](https://calliope.readthedocs.io/en/stable/user/config_defaults.html?highlight=solver#run-configuration) to understand how to switch to another solver.
+1. Install a Gurobi license on your computer ([academic license](https://www.gurobi.com/downloads/end-user-license-agreement-academic/) comes at no cost), or [choose a different solver](./customisation.md#manual).
 
-2. You need to have Calliope and Gurobi installed in your environment. The easiest way to do so is using [conda](https://conda.io/docs/index.html). Using conda, you can create a conda environment from within you can build the model:
+2. Install Calliope and all required dependencies. The easiest way to do so is using [conda](https://conda.io/) or [mamba](https://mamba.readthedocs.io/). Using conda, you can install Calliope:
 
-```
+```bash
+cd pre-built-euro-calliope-v1.1
 conda env create -f environment.yaml
 conda activate euro-calliope
 ```
 
-## Run the models
+## Run
 
-There are three models in this directory -- one for each of the three spatial resolutions continental, national, and regional. You can run all three models out-of-the-box, but you may want to modify the model. By default, the model runs for the first day of January only. To run the example model on the continental resolution type:
-
-```Bash
-$ calliope run ./continental/example-model.yaml
-```
-
-For more information on how to use and modify Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io).
-
-## Manipulating the model using overrides
-
-Calliope [overrides](https://calliope.readthedocs.io/en/stable/user/building.html#scenarios-and-overrides) allow to easily manipulate models. An override named `dea-renewable-cost` can be used for example in this way:
+There are three models in the directory of the pre-builts -- one for each of the three spatial resolutions continental, national, and regional. You can run all three models out-of-the-box, but you may want to modify the model. By default, the model runs for the first day of January only. To run the example model on the continental resolution type:
 
 ```bash
-calliope run build/model/continental/example-model.yaml --scenario=dea-renewable-cost
+calliope run ./continental/example-model.yaml
 ```
 
-You can define your own overrides to manipulate any model component. The following overrides are built into euro-calliope:
+## Customise
 
-> cost assumptions
+The pre-built models are examples and very likely require customisation to fit your purpose. Once you've managed to run them, it's a good point in time to learn about [model customisation options in Euro-Calliope](https://euro-calliope.readthedocs.io/model/customisation).
 
-By default, euro-calliope uses cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014. The `dea-renewable-cost` override allows to use the projections from the Danish Energy Agency instead for solar PV and wind power and `schroeder-hydro-cost` provides another source for the hydropower assumptions. Using the override `no-hydro-fixed-cost` allows to only consider variable and O&M costs for hydropower. This may make sense especially in combination with the `freeze-hydro-capacities` override (see below).
+## More information
 
-> directional-rooftop-pv
-
-By default, euro-calliope contains a single technology for rooftop PV. This technology comprises the total rooftop PV potential in each location, in particular including east-, west-, and north-facing rooftops. While this allows to fully exploit the potential of rooftop PV, it leads to less than optimal capacity factors as long as the potential is not fully exploited. That is because, one would likely first exploit all south-facing rooftop, then east- and west-facing rooftops, and only then -- if at all -- north-facing rooftops. By default, euro-calliope cannot model that.
-
-When using the `directional-rooftop-pv` override, there are three instead of just one technologies for rooftop PV. The three technologies comprise (1) south-facing and flat rooftops, (2) east- and west-facing rooftops, and (3) north-facing rooftops. This leads to higher capacity factors of rooftop PV as long as the potential of rooftop PV is not fully exploited. However, this also increases the complexity of the model.
-
-> exclusive-energy-to-power-ratios
-
-Constrains the energy to power ratios of battery and hydrogen storage in a way that they do not overlap (in Calliope terms: energy="storage capacity", power="energy capacity"). Battery storage is constrained to a ratio of ≤4h while hydrogen is constrained to a ratio of ≥4h. The ratio is derived from typical values of commercial lithium-ion batteries available today (2021). Constraining hydrogen storage as well ensures it does not directly compete with battery storage, but is used instead for durations of fours hours and longer.
-
-
-> freeze-hydro-capacities
-
-By default, euro-calliope allows capacities of run-of-river hydro, reservoir hydro, and pumped storage hydro capacities up to today's levels. Alternatively, it's possible to freeze these capacities to today's levels using the `freeze-hydro-capacities` override.
-
-> load-shedding
-
-Adds an option to shed load at each location. You can use this to model blackouts, brownouts, or controlled shedding of load as a form of demand response.
-
-In euro-calliope, we model load shedding not as actual reduction of demand but as an unconstrained supply of electricity. This supply has high variable cost (see `tech-cost.yaml` parameter file) and no fixed cost. Due to its high cost, it will only be used when no other, less costly, option is available.
-
-Calliope provides a built-in mechanism that is similar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/stable/user/building.html#allowing-for-unmet-demand). The benefit of using the `load-shedding` override over Calliope's built-in mechanism is that it is more targeted towards modelling shedding of electrical load and provides more flexibility -- for example in terms of the cost of shed load.
-
-## Manipulating the model using file imports
-
-The `example-model.yaml` configuration file in each resolution sub-directory (e.g. `national/example-model.yaml`) specifies a list of other configuration files to bring together to describe the model. This list can be changed by the modeller to select a combination of different configuration files. The final result is similar to the use of overrides, except that that model is *never* aware of the configuration being overridden.
-
-> `national/link-all-neighbours.yaml` -> `national/entsoe-tyndp-links.yaml`
-
-Transmission links are specific in `link-all-neighbours.yaml` by default. At all resolutions except continental, this file includes links between all neighbouring regions + a selection of pre-defined sub-sea links, but has no capacity limits. At the national resolution, transmission links can be set based on an ENTSO-E ten-year development plan 2020 scenario (`national/entsoe-tyndp-links.yaml`). The ENTSO-E links define all existing and planned international connections, including their predicted net transfer capacities (NTCs).
-
-## Model components
-
-The models contain the following files. All files in the root directory are independent of the spatial resolution. All files that depend on the spatial resolution are within subfolders named by the resolution.
-
-```
-├── {resolution}                           <- For each spatial resolution an individual folder.
-│   ├── capacityfactors-{technology}.csv   <- Timeseries of capacityfactors of all renewables.
-│   ├── directional-rooftop.yaml           <- Override discriminating rooftop PV by orientation.
-│   ├── electricity-demand.csv             <- Timeseries of electricity demand on each node.
-│   ├── example-model.yaml                 <- Calliope model definition.
-│   ├── link-all-neighbours.yaml           <- Connects neighbouring locations with transmission.
-│   ├── entsoe-tyndp-links.yaml            <- Connects regions according to ENTSO-E; exists only if resolution = "national".
-│   ├── load-shedding.yaml                 <- Override adding option to shed load.
-│   ├── locations.csv                      <- Map from Calliope location id to name of location.
-│   └── locations.yaml                     <- Defines all locations and their max capacities.
-├── build-metadata.yaml                    <- Metadata of the build process.
-├── demand-techs.yaml                      <- Definition of demand technologies.
-├── environment.yaml                       <- Conda file defining an environment to run the model in.
-├── interest-rate.yaml                     <- Interest rates of all capacities.
-├── link-techs.yaml                        <- Definition of link technologies.
-├── README.md                              <- The file you are currently looking at.
-├── tech-costs.yaml                        <- Definition of cost data.
-├── renewable-techs.yaml                   <- Definition of supply technologies.
-└── storage-techs.yaml                     <- Definition of storage technologies.
-```
-
-## Units of quantities
-
-The units of quantities within the models are the following:
-
-* power: {{ (1 / scaling_factors.power) | unit("MW", parenthesis=False) }}
-* energy: {{ (1 / scaling_factors.power) | unit("MWh", parenthesis=False) }}
-* area: {{ (1 / scaling_factors.area) | unit("km2", parenthesis=False) }}
-* monetary cost: {{ (1 / scaling_factors.monetary) | unit("EUR", parenthesis=False) }}
-
-These units were chosen in order to minimise numerical issues within the optimisation algorithm.
+For more information on Euro-Calliope and how to use and modify the models, see [Euro-Calliope's documentation](https://euro-calliope.readthedocs.io).
 
 ## License and attribution
 
-euro-calliope is developed and maintained within the [Calliope project](https://www.callio.pe).
+Euro-Calliope is developed and maintained within the [Calliope project](https://www.callio.pe).
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons Licence" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
 

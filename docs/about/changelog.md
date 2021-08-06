@@ -1,4 +1,4 @@
-# Changelog
+# Release Notes
 
 ## 1.1 (unpublished)
 
@@ -6,7 +6,7 @@
 * **ADD** automatic download of EEZ (#99).
 * **ADD** Danish Energy Agency and Schroeder et al (2013) cost data as well as no hydro fixed costs as optional overrides (#18, #129).
 * **ADD** override to constrain energy to power ratios of battery and hydrogen storage (#130).
-* **ADD** Add basic documentation to ReadTheDocs (#114).
+* **ADD** documentation to ReadTheDocs and extend it extensively (#114, #154).
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
 * **ADD** automatic download of hydro basins data (#34).

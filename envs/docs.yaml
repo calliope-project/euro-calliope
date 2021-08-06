@@ -2,6 +2,5 @@ name: docs
 channels:
     - conda-forge
 dependencies:
-    - sphinx=3.5.4
-    - sphinx_rtd_theme
-    - myst-parser=0.14.0
+    - Python=3.8
+    - mkdocs=1.2.2

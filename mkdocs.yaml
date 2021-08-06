@@ -1,0 +1,23 @@
+site_name: Euro-Calliope
+nav:
+    - Home: index.md
+    - Access:
+        - Use pre-built models: model/pre-built.md
+        - Build models yourself: workflow/build.md
+        - Build on a cluster: workflow/build-remote.md
+    - Model:
+        - Overview: model/overview.md
+        - Customisation: model/customisation.md
+    - Workflow:
+        - Overview: workflow/overview.md
+        - Customisation: workflow/customisation.md
+    - About:
+        - Release notes: about/changelog.md
+        - References: about/references.md
+theme: readthedocs
+repo_url: https://github.com/calliope-project/euro-calliope/
+site_dir: build/docs
+markdown_extensions:
+    - admonition
+    - toc:
+        permalink: "#"

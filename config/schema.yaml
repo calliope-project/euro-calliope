@@ -139,7 +139,7 @@ properties:
                         maximum: 1
             jrc-biofuel:
                 type: object
-                description: Bioenergy potential under different scenarios, to select specific data from [@Ruiz Catello et al:2015]
+                description: Bioenergy potential under different scenarios, to select specific data from [@RuizCastello:2015]
                 properties:
                     scenario:
                         type: string
