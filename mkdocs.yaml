@@ -2,7 +2,7 @@ site_name: Euro-Calliope
 nav:
     - Home: index.md
     - Access:
-        - Use pre-builts: model/pre-built.md
+        - Use pre-built models: model/pre-built.md
         - Build models yourself: workflow/build.md
         - Build on a cluster: workflow/build-remote.md
     - Model:
