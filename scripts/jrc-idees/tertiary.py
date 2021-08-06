@@ -35,8 +35,7 @@ CARRIER_NAMES = {
 def process_jrc_tertiary_data(data_dir, out_path):
     data_filepaths = list(Path(data_dir).glob("*.xlsx"))
     processed_data = pd.concat([get_tertiary_sector_data(file) for file in data_filepaths])
-    processed_data = processed_data.apply(utils.ktoe_to_twh)
-    processed_data.index = processed_data.index.set_levels(['twh'], level='unit')
+    processed_data = utils.convert_unit(processed_data, output_unit="twh")
     processed_data.to_csv(out_path)
 
 

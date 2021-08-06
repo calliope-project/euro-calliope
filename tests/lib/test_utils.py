@@ -4,7 +4,7 @@ import io
 import numpy as np
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
-from eurocalliopelib.utils import convert_country_code, read_eurostat_tsv, remove_digits, add_idx_level, to_numeric
+from eurocalliopelib.utils import convert_country_code, read_eurostat_tsv, remove_digits, add_idx_level, to_numeric, convert_unit, UNIT_CONVERSION_MAPPING
 
 
 class TestEurostatTSV:
@@ -139,4 +139,92 @@ class TestToNumeric:
     def test_no_change_to_numeric_characters(self):
         original_series = pd.Series([0, 1, 100, 2.0, np.nan])
         new_series = to_numeric(original_series.copy())
-        assert new_series.equals(original_series)
+        pd.testing.assert_series_equal(new_series, original_series)
+
+
+class TestConvertUnit:
+    @pytest.fixture
+    def create_df(self):
+        def _create_df(input_units):
+            index = pd.MultiIndex.from_product([["foo", "bar"], input_units], names=["baz", "unit"])
+            return pd.Series(index=index, data=1)
+        return _create_df
+
+    def get_conversions():
+        return [(val, *from_to) for from_to, val in UNIT_CONVERSION_MAPPING.items()]
+
+    @pytest.mark.parametrize(("conversion_val", "convert_from", "convert_to"), get_conversions())
+    @pytest.mark.parametrize("index", [pd.Index(["foo"], name="baz"), pd.MultiIndex.from_tuples([("foo", "bar")], names=["baz", "foobar"])])
+    def test_no_unit_in_index_in_or_out(self, conversion_val, convert_from, convert_to, index):
+        df = pd.DataFrame([1], index=index)
+        df_converted = convert_unit(df, convert_to, convert_from, unit_in_output_idx=False)
+        pd.testing.assert_frame_equal(df_converted, df * conversion_val)
+
+    @pytest.mark.parametrize(("conversion_val", "convert_from", "convert_to"), get_conversions())
+    @pytest.mark.parametrize("index", [pd.Index(["foo"], name="baz"), pd.MultiIndex.from_tuples([("foo", "bar")], names=["baz", "foobar"])])
+    def test_no_unit_in_index_in(self, conversion_val, convert_from, convert_to, index):
+        df = pd.DataFrame([1], index=index)
+        df_converted = convert_unit(df, convert_to, convert_from, unit_in_output_idx=True)
+        assert "unit" in df_converted.index.names
+        assert df_converted.index.get_level_values("unit").difference([convert_to]).empty
+
+        pd.testing.assert_frame_equal(df_converted.droplevel("unit"), df * conversion_val)
+
+
+    @pytest.mark.parametrize(("conversion_val", "convert_from", "convert_to"), get_conversions())
+    def test_unit_in_index_in_not_out(self, conversion_val, convert_from, convert_to, create_df):
+        df = create_df([convert_from])
+        df_converted = convert_unit(df, convert_to, convert_from, unit_in_output_idx=False)
+        assert "unit" not in df_converted.index.names
+        pd.testing.assert_series_equal(df_converted, df.droplevel("unit") * conversion_val)
+
+
+    @pytest.mark.parametrize(("conversion_val", "convert_from", "convert_to"), get_conversions())
+    def test_unit_in_index_in_and_out(self, conversion_val, convert_from, convert_to, create_df):
+        df = create_df([convert_from])
+        df_converted = convert_unit(df, convert_to, convert_from, unit_in_output_idx=True)
+        assert "unit" in df_converted.index.names
+        assert df_converted.index.get_level_values("unit").difference([convert_to]).empty
+
+        pd.testing.assert_series_equal(df_converted.droplevel("unit"), df.droplevel("unit") * conversion_val)
+
+
+    @pytest.mark.parametrize(("conversion_val", "convert_from", "convert_to"), get_conversions())
+    def test_infer_unit_in(self, conversion_val, convert_from, convert_to, create_df):
+        df = create_df([convert_from])
+        df_converted = convert_unit(df, convert_to, unit_in_output_idx=True)
+        assert "unit" in df_converted.index.names
+        assert df_converted.index.get_level_values("unit").difference([convert_to]).empty
+
+        pd.testing.assert_series_equal(df_converted.droplevel("unit"), df.droplevel("unit") * conversion_val)
+
+
+    @pytest.mark.parametrize(("conversion_val", "convert_from", "convert_to"), get_conversions())
+    def test_infer_unit_in_from_multiple(self, conversion_val, convert_from, convert_to, create_df):
+        df = create_df([convert_from, "foo"])
+        df_converted = convert_unit(df, convert_to, convert_from, unit_in_output_idx=True)
+        assert "unit" in df_converted.index.names
+        assert df_converted.index.get_level_values("unit").difference([convert_to, "foo"]).empty
+
+        pd.testing.assert_series_equal(df_converted.xs(convert_to, level="unit"), df.xs(convert_from, level="unit") * conversion_val, check_dtype=False)
+        pd.testing.assert_series_equal(df_converted.xs("foo", level="unit"), df.xs("foo", level="unit"), check_dtype=False)
+
+
+    @pytest.mark.parametrize("index", [pd.Index(["foo"], name="baz"), pd.MultiIndex.from_tuples([("foo", "bar")], names=["baz", "foobar"])])
+    def test_cannot_infer_unit_without_idx_level(self, index):
+        df = pd.DataFrame([1], index=index)
+        with pytest.raises(ValueError, match="Cannot infer unit for data"):
+            convert_unit(df, "twh")
+
+
+    def test_cannot_infer_unit_from_multiple_in(self, create_df):
+        df = create_df(["tj", "foo"])
+        with pytest.raises(AssertionError, match="Cannot infer unit for data with multiple available units"):
+            convert_unit(df, "twh")
+
+
+    def test_cannot_remove_unit_from_multiple_in(self, create_df):
+        df = create_df(["tj", "foo"])
+        with pytest.raises(AssertionError, match="Cannot drop the index level"):
+            convert_unit(df, "twh", input_unit="tj", unit_in_output_idx=False)
+

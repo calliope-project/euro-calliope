@@ -64,8 +64,7 @@ def process_jrc_transport_data(data_dir, dataset, out_path):
         for file in data_filepaths
     ])
     if DATASET_PARAMS[dataset]["unit"] == "ktoe":
-        processed_data = processed_data.apply(utils.ktoe_to_twh)
-        processed_data.index = processed_data.index.set_levels(['twh'], level='unit')
+        processed_data = utils.convert_unit(processed_data, output_unit="twh")
 
     processed_data.stack('year').to_csv(out_path)
 

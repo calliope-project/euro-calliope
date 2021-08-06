@@ -53,8 +53,7 @@ def process_energy(data_filepaths, threads):
         names=['energy'],
         keys=['consumption', 'demand']
     )
-    processed_data = processed_data.apply(utils.ktoe_to_twh)
-    processed_data.index = processed_data.index.set_levels(['twh'], level='unit')
+    processed_data = utils.convert_unit(processed_data, output_unit="twh")
 
     return processed_data
 

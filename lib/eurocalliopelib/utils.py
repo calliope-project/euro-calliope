@@ -1,8 +1,17 @@
 """Utility functions."""
 import pycountry
 import pandas as pd
+from datetime import datetime
 
 from string import digits
+
+UNIT_CONVERSION_MAPPING = {
+    ("gwh", "tj"): 3.6,
+    ("ktoe", "twh"): 1.163e-2,
+    ("tj", "twh"): 1e3 / 3.6,
+    ("pj", "twh"): 1 / 3.6,
+    ("tj", "ktoe"): 23.88e-3
+}
 
 
 def convert_country_code(input_country, output="alpha3"):
@@ -51,18 +60,37 @@ def to_numeric(series):
     Returns a numeric pandas.Series.
 
     """
+    series_name = series.name
     series = series.astype(str).str.extract("(\\-*\\d+\\.*\\d*)")[0]
-    return pd.to_numeric(series, errors="coerce")
+    return pd.to_numeric(series.rename(series_name), errors="coerce")
 
 
-def gwh_to_tj(array):
-    """Convert GWh to TJ"""
-    return array * 3.6
+def convert_unit(df, output_unit, input_unit=None, unit_in_output_idx=True):
+    df = df.copy()
+    if isinstance(df.index, pd.MultiIndex) and "unit" in df.index.names:
+        units = df.index.get_level_values("unit").unique()
+        if input_unit is None:
+            assert len(units) == 1, f"Cannot infer unit for data with multiple available units {units}"
+            input_unit = units[0]
+        mask = df.index.get_level_values("unit") == input_unit
+    else:
+        units = None
+        if input_unit is None:
+            raise ValueError("Cannot infer unit for data")
+        else:
+            mask = df.index
+    df.loc[mask] *= UNIT_CONVERSION_MAPPING[(input_unit.lower(), output_unit.lower())]
 
-
-def ktoe_to_twh(array):
-    """Convert KTOE to TWH"""
-    return array * 1.163e-2
+    if units is None and unit_in_output_idx is True:
+        df = add_idx_level(df, unit=output_unit)
+    elif units is not None:
+        if unit_in_output_idx is True:
+            idx_renamer = lambda x: output_unit if x == input_unit else x
+            df = df.rename(idx_renamer, level="unit")
+        else:
+            assert len(units) == 1, f"Cannot drop the index level `unit` with multiple units {units}"
+            df = df.xs(input_unit, level="unit")
+    return df
 
 
 def add_idx_level(data, **level_info):
@@ -83,13 +111,19 @@ def add_idx_level(data, **level_info):
                 "Cannot add index level of the same name as the pandas Series"
             )
         new_data = new_data.to_frame()
+        please_squeeze = True
+    else:
+        please_squeeze = False
+        orig_cols = new_data.columns
     new_data = (
         new_data
         .assign(**level_info)
         .set_index([i for i in level_info.keys()], append=True)
-        .squeeze(axis=1)
     )
-
+    if please_squeeze:
+        new_data = new_data.squeeze(axis=1)
+    else:
+        new_data.columns = orig_cols
     return new_data
 
 
