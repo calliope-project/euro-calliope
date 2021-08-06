@@ -150,29 +150,44 @@ class TestConvertUnit:
             return pd.Series(index=index, data=1)
         return _create_df
 
+    @pytest.fixture
+    def create_idx(self):
+        def _create_idx(multi_or_single):
+            if multi_or_single == "multi":
+                return pd.MultiIndex.from_tuples([("foo", "bar")], names=["baz", "foobar"])
+            elif multi_or_single == "single":
+                return pd.Index(["foo"], name="baz")
+        return _create_idx
+
     def get_conversions():
         return [(val, *from_to) for from_to, val in UNIT_CONVERSION_MAPPING.items()]
 
     @pytest.mark.parametrize(("conversion_val", "convert_from", "convert_to"), get_conversions())
-    @pytest.mark.parametrize("index", [pd.Index(["foo"], name="baz"), pd.MultiIndex.from_tuples([("foo", "bar")], names=["baz", "foobar"])])
-    def test_no_unit_in_index_in_or_out(self, conversion_val, convert_from, convert_to, index):
-        df = pd.DataFrame([1], index=index)
+    @pytest.mark.parametrize("index_type", ("multi", "single"))
+    def test_no_unit_in_index_in_or_out(self, conversion_val, convert_from, convert_to, create_idx, index_type):
+        df = pd.DataFrame([1], index=create_idx(index_type))
         df_converted = convert_unit(df, convert_to, convert_from, unit_in_output_idx=False)
         pd.testing.assert_frame_equal(df_converted, df * conversion_val)
 
     @pytest.mark.parametrize(("conversion_val", "convert_from", "convert_to"), get_conversions())
-    @pytest.mark.parametrize("index", [pd.Index(["foo"], name="baz"), pd.MultiIndex.from_tuples([("foo", "bar")], names=["baz", "foobar"])])
-    def test_no_unit_in_index_in(self, conversion_val, convert_from, convert_to, index):
-        df = pd.DataFrame([1], index=index)
+    @pytest.mark.parametrize("index_type", ("multi", "single"))
+    def test_no_unit_in_index_in(self, conversion_val, convert_from, convert_to, create_idx, index_type):
+        df = pd.DataFrame([1], index=create_idx(index_type))
         df_converted = convert_unit(df, convert_to, convert_from, unit_in_output_idx=True)
         assert "unit" in df_converted.index.names
         assert df_converted.index.get_level_values("unit").difference([convert_to]).empty
 
         pd.testing.assert_frame_equal(df_converted.droplevel("unit"), df * conversion_val)
 
-    @pytest.mark.parametrize("index", [pd.Index(["foo"], name="baz"), pd.MultiIndex.from_tuples([("foo", "bar")], names=["baz", "foobar"])])
-    def test_same_unit_in_and_out_no_unit_in_idx(self, index):
-        df = pd.DataFrame([1], index=index)
+    @pytest.mark.parametrize(("unit_in", "unit_out"), [("TJ", "TWh"), ("TJ", "twh"), ("tj", "TWh")])
+    def test_upper_lower(self, unit_in, unit_out, create_df):
+        df = create_df([unit_in])
+        df_converted = convert_unit(df, unit_out, unit_in, unit_in_output_idx=True)
+        assert df_converted.index.get_level_values("unit").difference([unit_out.lower()]).empty
+
+    @pytest.mark.parametrize("index_type", ["multi", "single"])
+    def test_same_unit_in_and_out_no_unit_in_idx(self, create_idx, index_type):
+        df = pd.DataFrame([1], index=create_idx(index_type))
         df_converted = convert_unit(df, "twh", "twh", unit_in_output_idx=False)
         pd.testing.assert_frame_equal(df_converted, df)
 
@@ -229,9 +244,9 @@ class TestConvertUnit:
         pd.testing.assert_series_equal(df_converted.xs(convert_to, level="unit"), df.xs(convert_from, level="unit") * conversion_val, check_dtype=False)
         pd.testing.assert_series_equal(df_converted.xs("foo", level="unit"), df.xs("foo", level="unit"), check_dtype=False)
 
-    @pytest.mark.parametrize("index", [pd.Index(["foo"], name="baz"), pd.MultiIndex.from_tuples([("foo", "bar")], names=["baz", "foobar"])])
-    def test_cannot_infer_unit_without_idx_level(self, index):
-        df = pd.DataFrame([1], index=index)
+    @pytest.mark.parametrize("index_type", ["multi", "single"])
+    def test_cannot_infer_unit_without_idx_level(self, create_idx, index_type):
+        df = pd.DataFrame([1], index=create_idx(index_type))
         with pytest.raises(ValueError, match="Cannot infer unit for data"):
             convert_unit(df, "twh")
 

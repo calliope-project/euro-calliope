@@ -66,6 +66,29 @@ def to_numeric(series):
 
 
 def convert_unit(df, output_unit, input_unit=None, unit_in_output_idx=True):
+    """
+    Convert between units in a dataframe, e.g. from "TJ" to "TWh" in energy data
+
+    Parameters
+    ----------
+    df : pd.DataFrame or pd.Series with single-/multi-index
+    output_unit : str
+        Unit to which data must be converted.
+    input_unit : str, optional, default None
+        Unit in which data is currently stored.
+        If not given, will be inferred from the "unit" index level in `df`.
+    unit_in_output_idx : bool, default True
+        If True, include an index level "unit" with `output_unit` as the value.
+        If "unit" index level already exists, will rename the index level values
+        corresponding to `input_unit` to match `output_unit`.
+
+    Returns
+    -------
+    df : pd.DataFrame or pd.Series with single-/multi-index
+        If `unit_in_output_idx` is True, `df` will have an index level `unit` with value of
+        `output_unit` ALWAYS in lower case.
+        If `unit_in_output_idx` is False, there will be no index level `unit` in `df`.
+    """
     df = df.copy()
     if isinstance(df.index, pd.MultiIndex) and "unit" in df.index.names:
         units = df.index.get_level_values("unit").unique()
@@ -79,15 +102,16 @@ def convert_unit(df, output_unit, input_unit=None, unit_in_output_idx=True):
             raise ValueError("Cannot infer unit for data")
         else:
             mask = df.index
-
-    if input_unit.lower() != output_unit.lower():
-        df.loc[mask] *= UNIT_CONVERSION_MAPPING[(input_unit.lower(), output_unit.lower())]
+    low_input_unit = input_unit.lower()
+    low_output_unit = output_unit.lower()
+    if low_input_unit != low_output_unit:
+        df.loc[mask] *= UNIT_CONVERSION_MAPPING[(low_input_unit, low_output_unit)]
 
     if units is None and unit_in_output_idx is True:
-        df = add_idx_level(df, unit=output_unit.lower())
+        df = add_idx_level(df, unit=low_output_unit)
     elif units is not None:
         if unit_in_output_idx is True:
-            idx_renamer = lambda x: output_unit.lower() if x == input_unit else x
+            idx_renamer = lambda x: low_output_unit if x.lower() == low_input_unit else x
             df = df.rename(idx_renamer, level="unit")
         else:
             assert len(units) == 1, f"Cannot drop the index level `unit` with multiple units {units}"
