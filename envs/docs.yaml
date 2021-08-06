@@ -11,4 +11,4 @@ dependencies:
     - snakemake-minimal=6.1.1
     - pip=21.0.1
     - pip:
-        - -e ../../lib[docs]
+        - -e ../lib[docs]

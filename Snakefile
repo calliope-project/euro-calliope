@@ -378,14 +378,6 @@ rule clean: # removes all generated results
         """
 
 
-rule docs:
-    message: "Build documentation"
-    input: *glob.glob("docs/*")
-    conda: "envs/docs.yaml"
-    output: directory("build/docs")
-    shell: "mkdocs build --no-directory-urls"
-
-
 rule test:
     message: "Run tests"
     input:
