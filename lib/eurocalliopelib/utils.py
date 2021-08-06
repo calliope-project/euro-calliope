@@ -90,7 +90,9 @@ def convert_unit(df, output_unit, input_unit=None, unit_in_output_idx=True):
         If `unit_in_output_idx` is False, there will be no index level `unit` in `df`.
     """
     df = df.copy()
+    low_output_unit = output_unit.lower()
     if isinstance(df.index, pd.MultiIndex) and "unit" in df.index.names:
+        df = df.rename(lambda x: x.lower(), level="unit")
         units = df.index.get_level_values("unit").unique()
         if input_unit is None:
             assert len(units) == 1, f"Cannot infer unit for data with multiple available units {units}"
@@ -103,7 +105,6 @@ def convert_unit(df, output_unit, input_unit=None, unit_in_output_idx=True):
         else:
             mask = df.index
     low_input_unit = input_unit.lower()
-    low_output_unit = output_unit.lower()
     if low_input_unit != low_output_unit:
         df.loc[mask] *= UNIT_CONVERSION_MAPPING[(low_input_unit, low_output_unit)]
 
@@ -111,11 +112,11 @@ def convert_unit(df, output_unit, input_unit=None, unit_in_output_idx=True):
         df = add_idx_level(df, unit=low_output_unit)
     elif units is not None:
         if unit_in_output_idx is True:
-            idx_renamer = lambda x: low_output_unit if x.lower() == low_input_unit else x
+            idx_renamer = lambda x: low_output_unit if x == low_input_unit else x
             df = df.rename(idx_renamer, level="unit")
         else:
             assert len(units) == 1, f"Cannot drop the index level `unit` with multiple units {units}"
-            df = df.xs(input_unit, level="unit")
+            df = df.xs(low_input_unit, level="unit")
     return df
 
 

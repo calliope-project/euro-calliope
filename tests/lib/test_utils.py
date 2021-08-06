@@ -179,10 +179,10 @@ class TestConvertUnit:
 
         pd.testing.assert_frame_equal(df_converted.droplevel("unit"), df * conversion_val)
 
-    @pytest.mark.parametrize(("unit_in", "unit_out"), [("TJ", "TWh"), ("TJ", "twh"), ("tj", "TWh")])
+    @pytest.mark.parametrize(("unit_in", "unit_out"), [(["TJ"], "TWh"), (["TJ"], "twh"), (["tj"], "TWh"), (["tj", "TJ"], "twh")])
     def test_upper_lower(self, unit_in, unit_out, create_df):
-        df = create_df([unit_in])
-        df_converted = convert_unit(df, unit_out, unit_in, unit_in_output_idx=True)
+        df = create_df(unit_in)
+        df_converted = convert_unit(df, unit_out, unit_in_output_idx=True)
         assert df_converted.index.get_level_values("unit").difference([unit_out.lower()]).empty
 
     @pytest.mark.parametrize("index_type", ["multi", "single"])
