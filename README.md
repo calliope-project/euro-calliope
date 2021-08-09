@@ -18,7 +18,7 @@ Here is where you can find more information:
 
 * [Full documentation](https://euro-calliope.readthedocs.io/)
 * [Release notes](./docs/changelog.md)
-* [Citation information](./CITATION.md)
+* [Citation information](./docs/about/citation.md)
 * [License](./LICENSE.md)
 
 ## License

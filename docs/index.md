@@ -1,5 +1,9 @@
 # Euro-Calliope
 
+[![article DOI](https://img.shields.io/badge/article-10.1016/j.joule.2020.07.018-blue)](https://doi.org/10.1016/j.joule.2020.07.018)
+[![pre-built models DOI](https://img.shields.io/badge/prebuilts-10.5281%2Fzenodo.3949553-blue)](https://doi.org/10.5281/zenodo.3949553)
+[![workflow DOI](https://img.shields.io/badge/workflow-10.5281/zenodo.3949793-blue)](https://doi.org/10.5281/zenodo.3949793)
+
 Models of the European electricity system for _Calliope_.
 
 Euro-Calliope is a suite of pre-built models and routines to build these models from raw data.
@@ -33,3 +37,9 @@ By building the models yourself, you have many more options to configure, extend
 You should have some or expert knowledge in scientific workflows and execution environments, or be willing to learn about those.
 Building the models will require to download several gigabytes of raw data and a few hours of compute time on a regular personal computer.
 [Learn more about using your own builds.](./workflow/build.md)
+
+## Citation
+
+If you use Euro-Calliope in an academic publication, please cite the following article:
+
+[![article DOI](https://img.shields.io/badge/article-10.1016/j.joule.2020.07.018-blue)](https://doi.org/10.1016/j.joule.2020.07.018): Tröndle, T., Lilliestam, J., Marelli, S., & Pfenninger, S. (2020). Trade-offs between geographic scale, cost, and infrastructure requirements for fully renewable electricity in Europe. *Joule*, *4*(9), 1929–1948. [https://doi.org/10.1016/j.joule.2020.07.018](https://doi.org/10.1016/j.joule.2020.07.018)

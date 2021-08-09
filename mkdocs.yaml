@@ -14,6 +14,7 @@ nav:
     - About:
         - Release notes: about/changelog.md
         - References: about/references.md
+        - Citation: about/citation.md
 theme: readthedocs
 repo_url: https://github.com/calliope-project/euro-calliope/
 site_dir: build/docs
