@@ -4,7 +4,7 @@ on:
     push:
     pull_request:
     schedule:
-        - cron: "0 3 * * *" # Runs every day at 3am.
+        - cron: "0 3 * * MON" # Runs Mondays at 3am.
 
 jobs:
   markdown-link-check:
