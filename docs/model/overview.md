@@ -51,3 +51,7 @@ So for example, the default unit for energy (100 GWh) is derived by scaling the 
 ## Components and assumptions
 
 For an in-depth description of all model components and the data preprocessing steps, please read the [open-access article introducing Euro-Calliope in Joule](https://doi.org/10.1016/j.joule.2020.07.018).
+
+## Your feedback
+
+Do you have an idea how we could improve Euro-Calliope? Did you find an issue with the model or its execution? [Please let us know by contributing to our issue tracker.](https://github.com/calliope-project/euro-calliope/issues/new/choose)
