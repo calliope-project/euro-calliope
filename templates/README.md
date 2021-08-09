@@ -10,7 +10,7 @@ Euro-Calliope models the European electricity system with each location represen
 
 ## Prepare
 
-1. Install a Gurobi license on your computer ([academic license](https://www.gurobi.com/downloads/end-user-license-agreement-academic/) comes at no cost), or [choose a different solver](./customisation.md#manual).
+1. Install a Gurobi license on your computer ([academic license](https://www.gurobi.com/downloads/end-user-license-agreement-academic/) comes at no cost), or [choose a different solver](https://euro-calliope.readthedocs.io/en/latest/model/customisation/#manual-changes).
 
 2. Install Calliope and all required dependencies. The easiest way to do so is using [conda](https://conda.io/) or [mamba](https://mamba.readthedocs.io/). Using conda, you can install Calliope:
 
@@ -30,7 +30,7 @@ calliope run ./continental/example-model.yaml
 
 ## Customise
 
-The pre-built models are examples and very likely require customisation to fit your purpose. Once you've managed to run them, it's a good point in time to learn about [model customisation options in Euro-Calliope](https://euro-calliope.readthedocs.io/model/customisation).
+The pre-built models are examples and very likely require customisation to fit your purpose. Once you've managed to run them, it's a good point in time to learn about [model customisation options in Euro-Calliope](https://euro-calliope.readthedocs.io/en/latest/model/customisation/).
 
 ## More information
 

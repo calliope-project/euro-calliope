@@ -17,7 +17,7 @@ Euro-Calliope models the European electricity system with each location represen
 Here is where you can find more information:
 
 * [Full documentation](https://euro-calliope.readthedocs.io/)
-* [Release notes](./docs/changelog.md)
+* [Release notes](./docs/about/changelog.md)
 * [Citation information](./docs/about/citation.md)
 * [License](./LICENSE.md)
 
