@@ -3,10 +3,10 @@
 Running the workflow on the machine of your choice may turn out to be not as easy as you or we would hope.
 We often see issues with reproducing the necessary conda execution environments and with unsuitable local configuration.
 Do not worry:
-Running into these problems is completely normal and in many cases a solution is easy to reach.
+running into these problems is completely normal and in many cases a solution is easy to reach.
 Here are some steps we advise you to go through:
 
-1. Read through our frequency asked questions below.
+1. Read through our frequently asked questions below.
 2. If you did not find an answer to your question, check [Snakemake's documentation](https://snakemake.readthedocs.io/en/v6.1.1/).
 3. If you still did not find an answer to your question, [open an issue](https://github.com/calliope-project/euro-calliope/issues/new/choose) on our issue tracker.
 
@@ -57,13 +57,14 @@ This is not because the data is particularly large or because the server is part
 When the Snakemake log is not proceeding for a while you may wonder whether Snakemake froze.
 We have never experienced Snakemake to freeze, so chances are high that Snakemake is simply waiting for a job to terminate.
 You can find out which job it is waiting for in the following way:
-In the Snakemake log (the command line output) you can see which jobs have been started and which jobs terminated.
+in the Snakemake log (the command line output) you can see which jobs have been started and which jobs terminated.
 This will tell you _which_ jobs are still running.
 
 Only if you are running on a cluster and you are [using our cluster interface](./build-remote.md), you may have run into a [known issue](https://github.com/calliope-project/euro-calliope/issues/93):
-The cluster scheduler could have killed your jobs without Snakemake noticing.
+the cluster scheduler could have killed your jobs without Snakemake noticing.
 Run `bjobs` on the cluster to verify whether the jobs are still running.
 If they are not, the cluster has killed your jobs, likely due to resource overuse.
+You can look up the reason by reading the corresponding log file in `build/logs`.
 Terminate Snakemake manually, increase the requested resources, and only then restart the workflow.
 
 ### I have updated configuration parameters but this seems to have no effect. Did I do something wrong?

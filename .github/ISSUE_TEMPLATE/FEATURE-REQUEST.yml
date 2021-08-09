@@ -1,5 +1,5 @@
 name: Feature Request
-description: Suggest an idea for Euro-Calliope
+description: Suggest an idea for Euro-Calliope.
 labels: [enhancement]
 body:
   - type: markdown
@@ -9,7 +9,7 @@ body:
   - type: textarea
     id: description
     attributes:
-      label: What can be improvded?
+      label: What can be improved?
       placeholder: Tell us what you would like to see!
       value: "Euro-Calliope should include nuclear fusion!"
     validations:
@@ -21,5 +21,7 @@ body:
       description: What version of Euro-Calliope are you using?
       options:
         - 1.0.0
+        - 1.1.0.dev
+        - 1.2.0.dev
     validations:
       required: true
