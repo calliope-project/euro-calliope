@@ -3,7 +3,7 @@
 When the pre-built models provide not enough flexibility for you, join us in the Euro-Calliope workshop where you can build your own models.
 Next to pre-built models, Euro-Calliope contains the routines that allow to automatically build models from raw data.
 All routines glued together form a scientific workflow.
-When you execute the workflow yourself, you have more flexibility and more [customisation options](./customisation).
+When you execute the workflow yourself, you have more flexibility and more [customisation options](./customisation.md).
 You should have experience executing scientific workflows or the willingness to learn.
 The build process will require an internet connection, several gigabytes of available disk space, and a few hours of compute time.
 

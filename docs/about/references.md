@@ -20,7 +20,7 @@ Wirth, H. (2017). <i>Aktuelle Fakten zur Photovoltaik in Deutschland</i>. Fraunh
 
 ### @Klauser:2016
 
-Klauser, D. (2016). <i>Solarpotentialanalyse für Sonnendach.ch</i> (p. 50). Swiss Federal Office of Energy. [http://www.bfe.admin.ch/geoinformation/06409/index.html?lang=de&#38;dossier_id=06527](http://www.bfe.admin.ch/geoinformation/06409/index.html?lang=de&#38;dossier_id=06527)
+Klauser, D. (2016). <i>Solarpotentialanalyse für Sonnendach.ch</i> (p. 50). Swiss Federal Office of Energy. [https://www.bfe.admin.ch/bfe/de/home/news-und-medien/publikationen.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODE5Ng==.html](https://www.bfe.admin.ch/bfe/de/home/news-und-medien/publikationen.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODE5Ng==.html)
 
 ### @Gagnon:2016
 
@@ -28,7 +28,7 @@ Gagnon, P., Margolis, R., Melius, J., Phillips, C., &#38; Elmore, R. (2016). Est
 
 ### @JRC:2014
 
-JRC. (2014). <i>ETRI 2014 -- Energy Technology Reference Indicator projections for 2010-2050</i>. JRC. [https://setis.ec.europa.eu/related-jrc-activities/jrc-setis-reports/etri-2014](https://setis.ec.europa.eu/related-jrc-activities/jrc-setis-reports/etri-2014)
+JRC. (2014). <i>ETRI 2014 -- Energy Technology Reference Indicator projections for 2010-2050</i>. JRC. [https://ec.europa.eu/jrc/en/science-update/etri](https://ec.europa.eu/jrc/en/science-update/etri)
 
 ### @EuropeanEnvironmentAgency:2009
 
