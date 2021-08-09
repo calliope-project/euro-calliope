@@ -12,7 +12,7 @@ The build process will require an internet connection, several gigabytes of avai
 !!! Info
     The workflow is developed on macOS, tested on macOS and Linux, but it cannot run natively on Windows.
 
-1. [Download](https://doi.org/10.5281/zenodo.3949793) your copy of the latest Euro-Calliope release or [clone any version from GitHub](https://github.com/calliope-project/euro-calliope).
+1. Download your copy of the latest Euro-Calliope release: [![workflow DOI](https://img.shields.io/badge/workflow-10.5281/zenodo.3949793-blue)](https://doi.org/10.5281/zenodo.3949793) (or [clone any version from GitHub](https://github.com/calliope-project/euro-calliope)).
 
 2. Create a conda environment from within which you can build the model.
 This requires that you have [conda](https://conda.io) or [mamba](https://mamba.readthedocs.io/) installed on your machine.
