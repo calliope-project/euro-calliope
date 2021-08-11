@@ -11,7 +11,7 @@ To build the model on Euler, use the following command:
 snakemake --use-conda --profile config/euler
 ```
 
-If you want to run on another cluster, read [snakemake's documentation on cluster execution](https://snakemake.readthedocs.io/en/v6.1.1/executable.html#cluster-execution) and take `config/euler` as a starting point.
+If you want to run on another cluster, read [snakemake's documentation on cluster execution](https://snakemake.readthedocs.io/en/stable/executing/cluster.html) and take `config/euler` as a starting point.
 
 ## Work local, build on remote
 

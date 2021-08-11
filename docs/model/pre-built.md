@@ -7,7 +7,7 @@ After going through these first steps, we advise you to head over to [Calliope's
 
 ## Prepare
 
-1. [Download](https://doi.org/10.5281/zenodo.3949552) the pre-built models.
+1. Download the pre-built models: [![pre-built models DOI](https://img.shields.io/badge/prebuilts-10.5281%2Fzenodo.3949553-blue)](https://doi.org/10.5281/zenodo.3949553).
 
 2. Install a Gurobi license on your computer ([academic license](https://www.gurobi.com/downloads/end-user-license-agreement-academic/) comes at no cost), or [choose a different solver](./customisation.md#manual).
 

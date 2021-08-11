@@ -7,6 +7,9 @@ This repository contains the workflow routines that automatically build models f
 [![article DOI](https://img.shields.io/badge/article-10.1016/j.joule.2020.07.018-blue)](https://doi.org/10.1016/j.joule.2020.07.018)
 [![pre-built models DOI](https://img.shields.io/badge/prebuilts-10.5281%2Fzenodo.3949553-blue)](https://doi.org/10.5281/zenodo.3949553)
 [![Documentation Status](https://readthedocs.org/projects/euro-calliope/badge/?version=latest)](https://euro-calliope.readthedocs.io/en/latest/?badge=latest)
+[![Check Markdown links](https://github.com/calliope-project/euro-calliope/actions/workflows/externallinks.yaml/badge.svg)](https://github.com/calliope-project/euro-calliope/actions/workflows/externallinks.yaml)
+[![Tests of YAML configuration and schema](https://github.com/calliope-project/euro-calliope/actions/workflows/schemavalidation.yaml/badge.svg)](https://github.com/calliope-project/euro-calliope/actions/workflows/schemavalidation.yaml)
+[![Tests of eurocalliopelib and scripts](https://github.com/calliope-project/euro-calliope/actions/workflows/pythonpackage.yaml/badge.svg)](https://github.com/calliope-project/euro-calliope/actions/workflows/pythonpackage.yaml)
 
 ## At a glance
 
@@ -17,8 +20,8 @@ Euro-Calliope models the European electricity system with each location represen
 Here is where you can find more information:
 
 * [Full documentation](https://euro-calliope.readthedocs.io/)
-* [Release notes](./docs/changelog.md)
-* [Citation information](./CITATION.md)
+* [Release notes](./docs/about/changelog.md)
+* [Citation information](./docs/about/citation.md)
 * [License](./LICENSE.md)
 
 ## License
