@@ -19,6 +19,7 @@ repo_url: https://github.com/calliope-project/euro-calliope/
 site_dir: build/docs
 markdown_extensions:
     - admonition
+    - attr_list
     - toc:
         permalink: "#"
 plugins:
@@ -26,3 +27,4 @@ plugins:
         path_to_snakefile: ./Snakefile
         path_to_png: ./docs/img/dag.png
         path_to_cache: ./build/.dag-cache
+extra_css: [./css/extras.css]

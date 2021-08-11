@@ -41,7 +41,7 @@ The final step _all_ is a Snakemake specificity and exists only to ensure the mo
 
 Some of the steps run more than once, but this hidden in the visualisation below. For example, the _model_ step runs three times: once for each model resolution continental, national, and regional.
 
-![All workflow steps and their connections forming a directed acyclic graph.](../img/dag.png)
+![All workflow steps and their connections forming a directed acyclic graph.](../img/dag.png){: id="dag" }
 
 ## Folder structure
 
