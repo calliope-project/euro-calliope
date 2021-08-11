@@ -25,6 +25,7 @@ markdown_extensions:
     - toc:
         permalink: "#"
 plugins:
+    - search
     - dag:
         path_to_snakefile: ./Snakefile
         path_to_png: ./docs/img/dag.png
