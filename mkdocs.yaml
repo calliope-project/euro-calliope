@@ -28,6 +28,6 @@ plugins:
     - search
     - dag:
         path_to_snakefile: ./Snakefile
-        path_to_png: ./docs/img/dag.png
-        path_to_cache: ./build/.dag-cache
+        path_to_src_dir: ./build/.docs
+        path_to_png_relative_to_site: ./img/dag.png
 extra_css: [./css/extras.css]
