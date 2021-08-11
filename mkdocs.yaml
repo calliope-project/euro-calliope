@@ -25,3 +25,4 @@ plugins:
     - dag:
         path_to_snakefile: ./Snakefile
         path_to_png: ./docs/img/dag.png
+        path_to_cache: ./build/.dag-cache
