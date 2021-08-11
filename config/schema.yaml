@@ -1,5 +1,5 @@
 $schema: http://json-schema.org/draft-07/schema#
-description: Euro-Calliope configuration schema
+description: Below you can find a complete enumeration of all configuration parameters of Euro-Calliope's workflow including short descriptions and datatypes. To learn how to change the parameter values for your model builds, head over to the Customisation section of the workflow documentation.
 properties:
     email:
         type: string
@@ -8,6 +8,7 @@ properties:
         pattern: ^\S+@\S+\.\S+$
     data-sources:
         type: object
+        description: Paths and URLs to datasets.
         properties:
             biofuel-potentials:
                 type: string
@@ -65,6 +66,7 @@ properties:
         description: Path to the root directory of euro-calliope containing scripts and template folders.
     cluster-sync:
         type: object
+        description: Configuration for the "work local, build on remote" workflow.
         properties:
             url:
                 type: string
@@ -90,29 +92,34 @@ properties:
                 description: "Applied to all quantities of energy and power (base: MW(h))."
             area:
                 type: number
-                description: "Applied to all quantities of area (base: km2)."
+                description: "Applied to all quantities of area (base: km²)."
             monetary:
                 type: number
                 description: "Applied to all quantities of monetary cost (base: EUR)."
     parameters:
         type: object
+        description: Parameter values of the models.
         properties:
             maximum-installable-power-density:
                 type: object
-                description: Installable capacity density in MW/km^2 (not annual energy yield).
+                description: Installable capacity density in MW/km² (not annual energy yield).
                 properties:
                     pv-on-tilted-roofs:
                         type: number
-                        description: (MW/km^2)
+                        minimum: 0
+                        description: (MW/km²)
                     pv-on-flat-areas:
                         type: number
-                        description: (MW/km^2)
+                        minimum: 0
+                        description: (MW/km²)
                     onshore-wind:
                         type: number
-                        description: (MW/km^2)
+                        minimum: 0
+                        description: (MW/km²)
                     offshore-wind:
                         type: number
-                        description: (MW/km^2)
+                        minimum: 0
+                        description: (MW/km²)
             roof-share:
                 type: object
                 description: Share of roofs by orientation (should add up to 1)
@@ -120,22 +127,27 @@ properties:
                     E:
                         type: number
                         description: East-facing roofs
+                        minimum: 0
                         maximum: 1
                     N:
                         type: number
                         description: North-facing roofs
+                        minimum: 0
                         maximum: 1
                     S:
                         type: number
                         description: South-facing roofs
+                        minimum: 0
                         maximum: 1
                     W:
                         type: number
                         description: West-facing roofs
+                        minimum: 0
                         maximum: 1
                     flat:
                         type: number
                         description: Flat roofs
+                        minimum: 0
                         maximum: 1
             jrc-biofuel:
                 type: object
@@ -188,12 +200,13 @@ properties:
                         enum: [min, equals, max]
     scope:
         type: object
+        description: The spatial scope of the models.
         properties:
             countries:
                 type: array
+                description: Countries covered by the models.
                 items:
                     type: string
-                    description: countries to include in the model
                     enum:
                         - "Austria"
                         - "Belgium"
@@ -231,7 +244,7 @@ properties:
                         - "Switzerland"
             bounds:
                 type: object
-                description: extent of system
+                description: Spatial extent.
                 properties:
                     x_min:
                         type: number
@@ -255,17 +268,29 @@ properties:
                         maximum: 90
     quality-control:
         type: object
+        description: Parameters controlling the data preprocessing steps.
         properties:
+            hydro:
+                type: object
+                description: Parameters for the preprocessing of hydro data.
+                properties:
+                    scale-phs-according-to-geth-et-al:
+                        type: boolean
+                        description: Whether or not to use pumped hydro capacities derived from Geth et al. (2015) to scale pumped hydro capacities givven by the JRC hydro database.
+                    station-nearest-basin-max-km:
+                        type: number
+                        minimum: 0
+                        description: Move stations outside of hydrobasins into closest basin by max this amount (fails otherwise).
             load:
                 type: object
                 description: >
                     Data quality enforcing methods for open-power-system-data.org-derived national load data. These cover, in order:
-                        - remove outlier data hours, based on full dataset
-                        - select only data for year of interest
-                        - interpolate empty data when the data gap is small
-                        - fill larger data gaps with data from nearby years
-                        - If 29th of February is empty and couldn't previously be filled, use data from the 28th of February
-                        - select most complete dataset for each country from list of data sources, based on a priority order
+                        1. remove outlier data hours, based on full dataset
+                        2. select only data for year of interest
+                        3. interpolate empty data when the data gap is small
+                        4. fill larger data gaps with data from nearby years
+                        5. If 29th of February is empty and couldn't previously be filled, use data from the 28th of February
+                        6. select most complete dataset for each country from list of data sources, based on a priority order
 
                         This process will fail if the 'most complete dataset' for any country has any remaining gaps.
                 properties:
@@ -302,28 +327,19 @@ properties:
                                 - forecast_entsoe_transparency
                                 - forecast_tso
                         description: Order in which to prioritise available electricity load data from open-power-system-data.org. The first source in the list will be used to initialise the data; the remaining data sources in the list will be use to gap fill in order from first to last.
-            hydro:
-                type: object
-                properties:
-                    scale-phs-according-to-geth-et-al:
-                        type: boolean
-                        description: Whether or not to use pumped hydro capacities derived from Geth et al. (2015) to scale pumped hydro capacities givven by the JRC hydro database.
-                    station-nearest-basin-max-km:
-                        type: number
-                        minimum: 0
-                        description: Move stations outside of hydrobasins into closest basin by max this amount (fails otherwise).
     capacity_factors:
         type: object
+        description: Parameters related to average or time-dependent capacity factors of renewables.
         properties:
             min:
                 type: number
-                description: Set smaller values to 0; this helps numerics in the LP.
+                description: Set smaller values in time series to 0; this helps numerics in the LP.
             max:
                 type: number
-                description: Cap larger values; this helps numerics in the LP (hydro reservoir can have > 1).
+                description: Cap larger values in time series; this helps numerics in the LP (hydro reservoir can have > 1).
             average:
                 type: object
-                description: Average estimation used to transform annual fixed to variable costs
+                description: Average estimation used to transform annual fixed to variable costs.
                 properties:
                     pv:
                         type: number
@@ -339,7 +355,7 @@ properties:
                         description: Average annual run-of-river hydro capacity factor
             trim-ninja-timeseries:
                 type: boolean
-                description: If true, trims renewables.ninja timeseries to the year in question
+                description: If true, trims renewables.ninja time series to the year in question
     year:
         type: integer
         description: Model year, which will be used to subset data during processing
@@ -378,4 +394,3 @@ properties:
                 patternProperties:
                     ^[a-zA-Z]+.*$:
                         type: string
-

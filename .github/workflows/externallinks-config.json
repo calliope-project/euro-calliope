@@ -2,6 +2,9 @@
     "ignorePatterns": [
       {
         "pattern": "dag.png"
+      },
+      {
+        "pattern": "schema.md"
       }
     ]
 }
