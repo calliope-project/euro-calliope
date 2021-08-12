@@ -15,7 +15,7 @@ setup(
         "scipy",
         "pandas",
         "xarray",
-        "pycountry>=18.12.8"
+        "pycountry==18.12.8"
     ],
     extras_require={
         'geo': [
@@ -23,6 +23,16 @@ setup(
             "rasterio",
             "rasterstats",
         ],
+        'docs': [
+            "pydot",
+            "graphviz",
+            "mkdocs"
+        ]
+    },
+    entry_points={
+        'mkdocs.plugins': [
+            'dag = eurocalliopelib.docs.dag:DAGPlugin',
+        ]
     },
     classifiers=[
         'Environment :: Console',

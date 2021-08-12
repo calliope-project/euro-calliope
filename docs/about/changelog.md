@@ -2,11 +2,15 @@
 
 ## 1.1 (unpublished)
 
+* **ADD** documentation to ReadTheDocs (#114) and extend it massively:
+    * **ADD** an entire section for each use case: the pre-built models and the workflow (#154).
+    * **ADD** a troubleshooting section (#159).
+    * **ADD** templates to our issue tracker (#156).
+    * **ADD** a visualisation of directed acyclic graph spanned by all workflow rules (#108).
 * **ADD** Link YAML file defining national net-transfer capacities from ENTSO-E TYNDP 2020 scenarios (#61).
 * **ADD** automatic download of EEZ (#99).
 * **ADD** Danish Energy Agency and Schroeder et al (2013) cost data as well as no hydro fixed costs as optional overrides (#18, #129).
 * **ADD** override to constrain energy to power ratios of battery and hydrogen storage (#130).
-* **ADD** documentation to ReadTheDocs and extend it extensively (#114, #154).
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
 * **ADD** automatic download of hydro basins data (#34).
