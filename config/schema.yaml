@@ -283,16 +283,15 @@ properties:
                         description: Move stations outside of hydrobasins into closest basin by max this amount (fails otherwise).
             load:
                 type: object
-                description: >
+                description: >-
                     Data quality enforcing methods for open-power-system-data.org-derived national load data. These cover, in order:
-                        1. remove outlier data hours, based on full dataset
-                        2. select only data for year of interest
-                        3. interpolate empty data when the data gap is small
-                        4. fill larger data gaps with data from nearby years
-                        5. If 29th of February is empty and couldn't previously be filled, use data from the 28th of February
-                        6. select most complete dataset for each country from list of data sources, based on a priority order
-
-                        This process will fail if the 'most complete dataset' for any country has any remaining gaps.
+                    1. remove outlier data hours, based on full dataset;
+                    2. select only data for year of interest;
+                    3. interpolate empty data when the data gap is small;
+                    4. fill larger data gaps with data from nearby years;
+                    5. if 29th of February is empty and couldn't previously be filled, use data from the 28th of February;
+                    6. select most complete dataset for each country from list of data sources, based on a priority order.
+                    This process will fail if the 'most complete dataset' for any country has any remaining gaps.
                 properties:
                     outlier-data-thresholds:
                         type: object
@@ -316,6 +315,7 @@ properties:
                         type: array
                         uniqueItems: true
                         minItems: 1
+                        description: Order in which to prioritise available electricity load data from open-power-system-data.org. The first source in the list will be used to initialise the data; the remaining data sources in the list will be use to gap fill in order from first to last.
                         items:
                             type: string
                             enum:
@@ -326,7 +326,7 @@ properties:
                                 - actual_gross_generation_tso
                                 - forecast_entsoe_transparency
                                 - forecast_tso
-                        description: Order in which to prioritise available electricity load data from open-power-system-data.org. The first source in the list will be used to initialise the data; the remaining data sources in the list will be use to gap fill in order from first to last.
+
     capacity_factors:
         type: object
         description: Parameters related to average or time-dependent capacity factors of renewables.

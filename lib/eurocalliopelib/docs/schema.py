@@ -34,7 +34,6 @@ class SchemaPlugin(BasePlugin):
         parser = jsonschema2md.Parser()
         with path_to_schema.open("r") as f_schema:
             schema = yaml.safe_load(f_schema)
-        schema = SchemaPlugin.move_quality_control(schema)
         with path_to_md.open("w") as f_md:
             lines = parser.parse_schema(schema)
             lines = SchemaPlugin.customise_markdown(lines)
@@ -48,14 +47,6 @@ class SchemaPlugin(BasePlugin):
         )
         files.append(schema_md_file)
         return files
-
-    @staticmethod
-    def move_quality_control(schema):
-        # Move quality-control to the end as it causes issues
-        qc = schema['properties']['quality-control']
-        del schema['properties']['quality-control']
-        schema['properties']['quality-control'] = qc
-        return schema
 
     @staticmethod
     def customise_markdown(lines):
