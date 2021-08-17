@@ -63,7 +63,7 @@ parameters:
         S: 0.1821
         W: 0.1681
         flat: 0.3020
-    jrc-biofuel: # from [@Ruiz Castello et al:2015]
+    jrc-biofuel: # from [@RuizCastello:2015]
         scenario: "medium"
         potential-year: "2020"
         cost-year: "2030"

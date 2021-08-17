@@ -1,7 +1,14 @@
 name: docs
 channels:
     - conda-forge
+    - bioconda
 dependencies:
-    - sphinx=3.5.4
-    - sphinx_rtd_theme
-    - myst-parser=0.14.0
+    - Python=3.8
+    - mkdocs=1.2.2
+    - graphviz=2.48.0
+    - pydot=1.4.2
+    - pycountry=18.12.8
+    - snakemake-minimal=6.1.1
+    - pip=21.0.1
+    - pip:
+        - -e ../lib[docs]

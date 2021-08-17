@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 setup(
     name='eurocalliopelib',
     version='1.2.0.dev', # additionally defined in __init__.py
-    description='Library code of the euro-calliope workflow.',
+    description='Library code of the Euro-Calliope workflow.',
     maintainer='calliope-project',
     maintainer_email='tim.troendle@usys.ethz.ch',
     packages=find_packages(),
@@ -15,7 +15,7 @@ setup(
         "scipy",
         "pandas",
         "xarray",
-        "pycountry>=18.12.8"
+        "pycountry==18.12.8"
     ],
     extras_require={
         'geo': [
@@ -23,6 +23,16 @@ setup(
             "rasterio",
             "rasterstats",
         ],
+        'docs': [
+            "pydot",
+            "graphviz",
+            "mkdocs"
+        ]
+    },
+    entry_points={
+        'mkdocs.plugins': [
+            'dag = eurocalliopelib.docs.dag:DAGPlugin',
+        ]
     },
     classifiers=[
         'Environment :: Console',
