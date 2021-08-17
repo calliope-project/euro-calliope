@@ -32,6 +32,7 @@ class SchemaPlugin(BasePlugin):
         path_to_md.parent.mkdir(parents=True, exist_ok=True)
 
         parser = jsonschema2md.Parser()
+        parser.tab_size = 4
         with path_to_schema.open("r") as f_schema:
             schema = yaml.safe_load(f_schema)
         with path_to_md.open("w") as f_md:
@@ -50,12 +51,10 @@ class SchemaPlugin(BasePlugin):
 
     @staticmethod
     def customise_markdown(lines):
-        # 1. Move from 2 spaces to 4 spaces intend as the 2 spaces don't work properly with mkdocs
-        lines = ['    '.join(line.split('  ')) for line in lines]
-        # 2. Change headline
+        # 1. Change headline
         assert lines[0] == '# JSON Schema\n\n'
         lines[0] = "# Configuration parameters of Euro-Calliope's workflow\n\n"
-        # 3. Remove main description and subheadline
+        # 2. Remove main description and subheadline
         assert lines[2] == '## Properties\n\n'
         del lines[2]
         #del lines[1]
