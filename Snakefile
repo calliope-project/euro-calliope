@@ -392,7 +392,7 @@ rule test:
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES + ["hydro-ror", "hydro-reservoir-inflow"]
         ),
-        annual_energy_balances = "build/data/annual-energy-balances.csv"
+        annual_energy_balances = "build/data/annual-energy-balances.nc"
     params:
         config = config
     output: "build/logs/{resolution}/test-report.html"

@@ -5,6 +5,7 @@ import yaml
 import pytest
 import calliope
 import pandas as pd
+import xarray as xr
 
 
 def run_test(
@@ -97,7 +98,7 @@ def _create_config_plugin(path_to_model, path_to_example_model, paths_to_cf_time
 
         @pytest.fixture(scope="module", params=path_to_annual_energy_balances)
         def annual_energy_balances(self, request):
-            return pd.read_csv(request.param, index_col=0, parse_dates=True)
+            return xr.open_dataarray(request.param)
 
     return SnakemakeConfigPlugin()
 
