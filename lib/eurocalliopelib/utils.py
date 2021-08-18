@@ -1,6 +1,7 @@
 """Utility functions."""
 import pycountry
 import pandas as pd
+import xarray as xr
 
 from string import digits
 
@@ -40,6 +41,26 @@ def convert_country_code(input_country, output="alpha3"):
         return pycountry.countries.lookup(input_country).alpha_3
 
 
+def rename_and_groupby(da, rename_dict, dim, new_group_dim_name=None, dropna=False):
+    if new_group_dim_name is None:
+        new_group_dim_name = dim
+    rename_da = xr.DataArray(pd.Series(rename_dict).rename_axis(index=dim).rename(new_group_dim_name))
+    da = (
+        da
+        .reindex({dim: rename_da[dim]})
+        .groupby(rename_da)
+        .sum(new_group_dim_name, skipna=True, min_count=1, keep_attrs=True)
+    )
+    if dropna:
+        da = da.dropna(new_group_dim_name, how="all")
+    return da
+
+
+def merge_da(da_list):
+    datasets = [da.to_dataset(name="var") for da in da_list]
+    return xr.merge(datasets, combine_attrs="no_conflicts")["var"]
+
+
 def to_numeric(series):
     """
     Clean up a pandas.Series which was parsed as strings, but is really numeric:
@@ -58,6 +79,21 @@ def to_numeric(series):
 def gwh_to_tj(array):
     """Convert GWh to TJ"""
     return array * 3.6
+
+
+def gwh_to_twh(array):
+    """Convert GWh to TWh"""
+    return array / 1000
+
+
+def pj_to_twh(array):
+    """Convert GWh to TWh"""
+    return array / 3.6
+
+
+def tj_to_twh(array):
+    """Convert GWh to TWh"""
+    return pj_to_twh(array) / 1000
 
 
 def ktoe_to_twh(array):
