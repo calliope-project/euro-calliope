@@ -11,4 +11,5 @@ dependencies:
     - snakemake-minimal=6.1.1
     - pip=21.0.1
     - pip:
+        - jsonschema2md==0.2.1
         - -e ../lib[docs]
