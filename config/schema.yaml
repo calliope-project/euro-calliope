@@ -1,5 +1,5 @@
 $schema: http://json-schema.org/draft-07/schema#
-description: Below you can find a complete enumeration of all configuration parameters of Euro-Calliope's workflow including short descriptions and datatypes. To learn how to change the parameter values for your model builds, head over to the Customisation section of the workflow documentation.
+description: Below you can find a complete enumeration of all configuration parameters of Euro-Calliope's workflow including short descriptions and datatypes. To learn where to find default values and how to change the parameter values for your model builds, head over to the Customisation section of the workflow documentation.
 properties:
     email:
         type: string
@@ -326,7 +326,6 @@ properties:
                                 - actual_gross_generation_tso
                                 - forecast_entsoe_transparency
                                 - forecast_tso
-
     capacity_factors:
         type: object
         description: Parameters related to average or time-dependent capacity factors of renewables.

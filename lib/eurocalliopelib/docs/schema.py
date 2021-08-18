@@ -6,12 +6,6 @@ import mkdocs
 from mkdocs.plugins import BasePlugin
 from mkdocs.structure.files import File
 
-DESCRIPTION = """
-Below you can find a complete enumeration of all configuration parameters of Euro-Calliope's
-workflow including short descriptions and datatypes. To learn how to change the parameter
-values for your model builds, head over to the Customisation section of the workflow documentation.
-"""
-
 
 class SchemaPlugin(BasePlugin):
     config_scheme = (
@@ -57,5 +51,4 @@ class SchemaPlugin(BasePlugin):
         # 2. Remove main description and subheadline
         assert lines[2] == '## Properties\n\n'
         del lines[2]
-        #del lines[1]
         return lines
