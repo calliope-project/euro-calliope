@@ -6,5 +6,7 @@
       {
         "pattern": "schema.md"
       }
-    ]
+    ],
+    "timeout": "20s",
+    "retryOn429": true
 }
