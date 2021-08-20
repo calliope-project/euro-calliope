@@ -4,8 +4,8 @@
 
 version: 2
 
-sphinx:
-  configuration: docs/source/conf.py
+mkdocs:
+  configuration: mkdocs.yaml
 
 conda:
   environment: envs/docs.yaml

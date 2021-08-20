@@ -1,0 +1,9 @@
+#dag {
+    border: solid;
+    transition: transform .4s;
+}
+
+#dag:hover {
+    transform: translate(50%, 0%) scale(1.75);
+    transition: transform .4s;
+}

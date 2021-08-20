@@ -45,15 +45,22 @@ def link_tyndp(
 def _entsoe_ntcs(locations, tyndp_scenarios, scenario, grid, year, ntc_limit):
     """Get Net Transfer Capacities (NTCs) according to the ENTSO-E ten-year network nevelopment plan 2020 scenario dataset"""
 
-    tyndp_scenarios = tyndp_scenarios[
+    sliced_scenarios = tyndp_scenarios[
         (tyndp_scenarios.Scenario.str.lower() == scenario.lower()) &
-        (tyndp_scenarios.Case.str.lower() == f"{grid} Grid".lower()) &
         (tyndp_scenarios.Year == year) &
         (tyndp_scenarios["Climate Year"] == 2007)  # not entirely sure what this is, but there is the choice between 1982, 1984, and 2007
     ]
+    if grid.lower() == "reference":
+        sliced_scenarios = sliced_scenarios[
+            sliced_scenarios.Case.str.lower() == "reference grid"
+        ]
+    elif grid.lower == "expanded":
+        sliced_scenarios = sliced_scenarios[
+            sliced_scenarios.Case.str.lower().isin(["reference grid", "expanded grid"])
+        ]
     # Capacity is in MW
-    tyndp_import = _split_links_in_index(tyndp_scenarios[tyndp_scenarios.Parameter == "Import Capacity"])
-    tyndp_export = _split_links_in_index(tyndp_scenarios[tyndp_scenarios.Parameter == "Export Capacity"])
+    tyndp_import = _split_links_in_index(sliced_scenarios[sliced_scenarios.Parameter == "Import Capacity"])
+    tyndp_export = _split_links_in_index(sliced_scenarios[sliced_scenarios.Parameter == "Export Capacity"])
 
     # Some NTCs are different depending on whether it is import or export between countries.
     # Here, we take either the minimum or maximum NTC of a link, depending on what a user defines for `ntc_limit`

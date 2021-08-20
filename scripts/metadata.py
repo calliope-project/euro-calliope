@@ -9,7 +9,7 @@ def metadata(config, version, path_to_output):
     metadata = {
         "description":
             "This is the metadata of the build process of "
-            "the euro-calliope model in the same directory.",
+            "the Euro-Calliope model in the same directory.",
         "euro-calliope-version": version,
         "euro-calliope-lib-version": eurocalliopelib.__version__,
         "generated-utc": datetime.utcnow(),
