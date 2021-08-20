@@ -12,13 +12,14 @@ rule download_runoff_data:
     input:
         script = script_dir + "hydro/runoff.py"
     params:
-        year = config["year"],
+        start_year = config["start_year"],
+        end_year = config["end_year"],
         x_min = config["scope"]["bounds"]["x_min"],
         x_max = config["scope"]["bounds"]["x_max"],
         y_min = config["scope"]["bounds"]["y_min"],
         y_max = config["scope"]["bounds"]["y_max"]
     output:
-        protected("data/automatic/europe-cutout-{}.nc".format(config["year"]))
+        protected("data/automatic/europe-cutout.nc")
     conda: "../envs/hydro.yaml"
     script: "../scripts/hydro/runoff.py"
 
@@ -101,7 +102,9 @@ rule inflow_m3:
         stations = rules.preprocess_hydro_stations.output[0],
         basins = rules.preprocess_basins.output[0],
         runoff = rules.download_runoff_data.output[0]
-    params: year = config["year"]
+    params:
+        start_year = config["start_year"],
+        end_year = config["end_year"],
     output: "build/data/hydro-electricity-with-water-inflow.nc"
     conda: "../envs/hydro.yaml"
     script: "../scripts/hydro/inflow_m3.py"
@@ -114,7 +117,8 @@ rule inflow_mwh:
         stations = rules.inflow_m3.output[0],
         generation = config["data-sources"]["irena-generation"]
     params:
-        year = config["year"],
+        start_year = config["start_year"],
+        end_year = config["end_year"],
         max_capacity_factor = config["capacity-factors"]["max"]
     output: "build/data/hydro-electricity-with-energy-inflow.nc"
     conda: "../envs/hydro.yaml"

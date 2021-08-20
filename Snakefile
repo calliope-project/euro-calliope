@@ -197,7 +197,8 @@ rule capacity_factors_onshore_wind_and_solar:
         coordinates = ancient("data/automatic/capacityfactors/wind-onshore-timeseries.nc")
     params:
         threshold = config["capacity-factors"]["min"],
-        year = config["year"],
+        start_year = config["start_year"],
+        end_year = config["end_year"],
         trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
     wildcard_constraints:
         technology = "((wind-onshore)|(rooftop-pv)|(open-field-pv)|(rooftop-pv-n)|(rooftop-pv-e-w)|(rooftop-pv-s-flat))"
@@ -216,7 +217,8 @@ rule capacity_factors_offshore:
         timeseries = ancient("data/automatic/capacityfactors/wind-offshore-timeseries.nc")
     params:
         threshold = config["capacity-factors"]["min"],
-        year = config["year"],
+        start_year = config["start_year"],
+        end_year = config["end_year"],
         trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
     output: "build/model/{resolution}/capacityfactors-wind-offshore.csv"
     conda: "envs/geo.yaml"
@@ -254,7 +256,8 @@ rule electricity_load_national:
         load = rules.download_raw_load.output[0]
     output: "build/data/electricity-demand-national.csv"
     params:
-        year = config["year"],
+        start_year = config["start_year"],
+        end_year = config["end_year"],
         data_quality_config = config["quality-control"]["load"],
         countries = config["scope"]["countries"]
     conda: "envs/default.yaml"

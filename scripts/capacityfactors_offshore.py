@@ -9,7 +9,7 @@ EPSG3035 = "EPSG:3035"
 
 
 def capacityfactors(path_to_eez, path_to_shared_coast, path_to_timeseries,
-                    threshold, path_to_result, year=None):
+                    threshold, path_to_result, start_year=None, end_year=None):
     """Generate offshore capacityfactor time series for each location."""
     eez = gpd.read_file(path_to_eez).set_index("mrgid").to_crs(EPSG3035).geometry
     shared_coast = pd.read_csv(path_to_shared_coast, index_col=0)
@@ -17,8 +17,18 @@ def capacityfactors(path_to_eez, path_to_shared_coast, path_to_timeseries,
     shared_coast.columns = shared_coast.columns.astype(int)
 
     ts = xr.open_dataset(path_to_timeseries)
-    if year:
-        ts = ts.sel(time=str(year))
+    ts = ts.sel(time=slice(start_year, end_year))
+    # xarray will silently miss the fact that data doesn't exist with slice
+    if start_year is not None and start_year not in ts.time.to_index().year.astype(str).unique():
+        raise ValueError(
+            f"Cannot access capacity factor data for timeseries {path_to_timeseries} "
+            f"with a start year of {start_year}."
+        )
+    if end_year is not None and end_year not in ts.time.to_index().year.astype(str).unique():
+        raise ValueError(
+            f"Cannot access capacity factor data for timeseries {path_to_timeseries} "
+            f"with an end year of {end_year}."
+        )
     ts = convert_old_style_capacity_factor_time_series(ts)
 
     capacityfactors_per_eez = area_weighted_time_series(
@@ -50,6 +60,7 @@ if __name__ == '__main__':
         path_to_shared_coast=snakemake.input.shared_coast,
         path_to_timeseries=snakemake.input.timeseries,
         threshold=float(snakemake.params.threshold),
-        year=snakemake.params.year if snakemake.params.trim_ts else None,
+        start_year=str(snakemake.params.start_year) if snakemake.params.trim_ts else None,
+        end_year=str(snakemake.params.end_year) if snakemake.params.trim_ts else None,
         path_to_result=snakemake.output[0]
     )

@@ -340,9 +340,12 @@ properties:
             trim-ninja-timeseries:
                 type: boolean
                 description: If true, trims renewables.ninja timeseries to the year in question
-    year:
+    start_year:
         type: integer
-        description: Model year, which will be used to subset data during processing
+        description: First model year, which will be used as the lower bound to subset data during processing
+    end_year:
+        type: integer
+        description: Final model year, which will be used as the upper bound to subset data during processing. Set to the same as `start_year` to limit processing to only one year
     crs:
         type: string
         pattern: ^EPSG:\d+$

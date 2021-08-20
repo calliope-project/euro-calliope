@@ -21,25 +21,25 @@ import pycountry
 
 
 def national_load(
-    path_to_raw_load, year, data_quality_config, path_to_output, countries
+    path_to_raw_load, start_year, end_year, data_quality_config, path_to_output, countries
 ):
     """Extracts national load time series for all countries in a specified year."""
 
-    load = clean_load_data(path_to_raw_load, year, data_quality_config, countries)
+    load = clean_load_data(path_to_raw_load, start_year, end_year, data_quality_config, countries)
     load.to_csv(path_to_output, header=True)
 
 
-def clean_load_data(path_to_raw_load, year, data_quality_config, countries):
+def clean_load_data(path_to_raw_load, start_year, end_year, data_quality_config, countries):
     data_sources = data_quality_config["data-source-priority-order"]
     raw_load = read_load_profiles(path_to_raw_load, data_sources)
     filtered_load = filter_countries(raw_load, countries)
     filtered_load = filter_outliers(filtered_load, data_quality_config)
     gap_filled_load = pd.concat(
         fill_gaps_per_source(filtered_load, year, data_quality_config, source)
-        for source in data_sources
+        for source in data_sources for year in range(start_year, end_year + 1)
     )
     return get_source_choice_per_country(
-        filtered_load.loc[str(year)],
+        filtered_load.loc[slice(str(start_year), str(end_year))],
         gap_filled_load,
         data_sources
     )
@@ -243,7 +243,8 @@ def _select_load_by_source_priority(load, source_priority):
 if __name__ == "__main__":
     national_load(
         path_to_raw_load=snakemake.input.load,
-        year=snakemake.params.year,
+        start_year=snakemake.params.start_year,
+        end_year=snakemake.params.end_year,
         data_quality_config=snakemake.params.data_quality_config,
         countries=snakemake.params.countries,
         path_to_output=snakemake.output[0]

@@ -17,6 +17,7 @@ TECHNOLOGIES = {
     "frozen-hydro": DEFAULT_TECHNOLOGIES,
     "alternative-cost": DEFAULT_TECHNOLOGIES,
     "shed-load": DEFAULT_TECHNOLOGIES | set(["load_shedding"]),
+    "multi-year": DEFAULT_TECHNOLOGIES,
 }
 
 

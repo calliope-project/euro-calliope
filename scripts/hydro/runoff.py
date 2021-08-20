@@ -5,12 +5,12 @@ from pathlib import Path
 import atlite
 
 
-def runoff(path_to_cutout, year, x_min, x_max, y_min, y_max):
+def runoff(path_to_cutout, start_year, end_year, x_min, x_max, y_min, y_max):
     """Retrieve runoff data from ERA5 as atlite cutout."""
     logging.basicConfig(level=logging.INFO)
     x_range = slice(x_min, x_max)
     y_range = slice(y_max, y_min)
-    time_range = slice(f"{year - 1}-01", f"{year}-12")
+    time_range = slice(f"{start_year - 1}-01", f"{end_year}-12")
 
     cutout = atlite.Cutout(
         path=path_to_cutout,
@@ -24,7 +24,8 @@ def runoff(path_to_cutout, year, x_min, x_max, y_min, y_max):
 
 if __name__ == "__main__":
     runoff(
-        year=snakemake.params.year,
+        start_year=snakemake.params.start_year,
+        end_year=snakemake.params.end_year,
         x_min=snakemake.params.x_min,
         x_max=snakemake.params.x_max,
         y_min=snakemake.params.y_min,

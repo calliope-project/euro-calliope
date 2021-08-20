@@ -34,7 +34,8 @@ capacity-factors:
         offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
         ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
     trim-ninja-timeseries: True
-year: 2016
+start_year: 2016
+end_year: 2016
 crs: "EPSG:4326"
 parameters:
     maximum-installable-power-density:

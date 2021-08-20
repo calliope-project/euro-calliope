@@ -27,3 +27,4 @@ shapes: # This config must be consistent with data from https://doi.org/10.5281/
     regional:
         Ireland: gadm1
         United Kingdom: gadm1
+start_year: 2015
