@@ -34,7 +34,7 @@ setup(
         'mkdocs.plugins': [
             'dag = eurocalliopelib.docs.dag:DAGPlugin',
             'schema = eurocalliopelib.docs.schema:SchemaPlugin',
-            'softlink-file = eurocalliopelib.docs.softlink:SoftLinkPlugin'
+            'add-file = eurocalliopelib.docs.addfile:AddFilePlugin'
         ]
     },
     classifiers=[
