@@ -33,7 +33,7 @@ conda activate docs
 mkdocs serve
 ```
 
-The documentation HTML files can be then accessed at `http://127.0.0.1:8000/`.
+The documentation can be then accessed at `http://127.0.0.1:8000/`.
 ## License
 
 Euro-Calliope is developed and maintained within the [Calliope project](https://www.callio.pe). The code in this repository is [MIT licensed](./LICENSE.md).
