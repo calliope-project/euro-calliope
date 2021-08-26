@@ -274,18 +274,18 @@ properties:
                                 maximum: 90
             temporal:
                 type: object
-                description: The temporal scope of the models.
+                description: The temporal scope of the models. Available range of 2010 - 2016 is set by electricity load data availability (lower bound) and capacity factor data availability (upper bound).
                 properties:
                     first-year:
                         type: integer
                         minimum: 2010
                         maximum: 2016
-                        description: First model year, which will be used as the lower bound to subset data during processing
+                        description: First model year, which will be used as the lower bound to subset data during processing.
                     final-year:
                         type: integer
                         minimum: 2010
                         maximum: 2016
-                        description: Final model year, which will be used as the upper bound to subset data during processing. Set to the same as `first-year` to limit processing to only one year
+                        description: Final model year, which will be used as the upper bound (inclusive) to subset data during processing. Set to the same as `first-year` to limit processing to only one year.
     quality-control:
         type: object
         description: Parameters controlling the data preprocessing steps.
