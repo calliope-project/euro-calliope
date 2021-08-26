@@ -30,10 +30,11 @@ If you are unable to access the full documentation via ReadTheDocs following the
 ```bash
 conda env install -f envs/docs.yaml
 conda activate docs
-mkdocs serve
+mkdocs build --no-directory-urls
 ```
 
-The documentation can be then accessed at `http://127.0.0.1:8000/`.
+The documentation can then be accessed by opening `build/docs/index.html`.
+
 ## License
 
 Euro-Calliope is developed and maintained within the [Calliope project](https://www.callio.pe). The code in this repository is [MIT licensed](./LICENSE.md).
