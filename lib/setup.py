@@ -33,7 +33,8 @@ setup(
     entry_points={
         'mkdocs.plugins': [
             'dag = eurocalliopelib.docs.dag:DAGPlugin',
-            'schema = eurocalliopelib.docs.schema:SchemaPlugin'
+            'schema = eurocalliopelib.docs.schema:SchemaPlugin',
+            'changelog = eurocalliopelib.docs.changelog:ChangelogPlugin'
         ]
     },
     classifiers=[
