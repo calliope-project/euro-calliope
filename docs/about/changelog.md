@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.2 (unpublished)
+
+* **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality.
+
 ## 1.1 (unpublished)
 
 * **ADD** documentation to ReadTheDocs (#114) and extend it massively:
