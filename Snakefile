@@ -53,6 +53,9 @@ rule all:
     input:
         "build/logs/continental/test-report.html",
         "build/logs/national/test-report.html",
+        "build/logs/continental/model.done",
+        "build/logs/national/model.done",
+        "build/logs/regional/model.done",
         "build/model/build-metadata.yaml"
 
 
