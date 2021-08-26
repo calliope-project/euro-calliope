@@ -24,6 +24,16 @@ Here is where you can find more information:
 * [Citation information](./docs/about/citation.md)
 * [License](./LICENSE.md)
 
+If you are unable to access the full documentation via ReadTheDocs following the link above, or otherwise want to build the documentation locally, you can run the following from the repository top-level directory:
+
+
+```bash
+conda env install -f envs/docs.yaml
+conda activate docs
+mkdocs serve
+```
+
+The documentation HTML files can be then accessed at `http://127.0.0.1:8000/`.
 ## License
 
 Euro-Calliope is developed and maintained within the [Calliope project](https://www.callio.pe). The code in this repository is [MIT licensed](./LICENSE.md).
