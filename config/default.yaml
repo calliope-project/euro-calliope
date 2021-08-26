@@ -34,8 +34,6 @@ capacity-factors:
         offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
         ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
     trim-ninja-timeseries: True
-start_year: 2016
-end_year: 2016
 crs: "EPSG:4326"
 parameters:
     maximum-installable-power-density:
@@ -134,46 +132,50 @@ sea-connections:
         - [EST.7_1, EST.2_1] # Lääne and Hiiu
         - [EST.7_1, EST.12_1] # Lääne and Saare
 scope:
-    countries:
-        - "Austria"
-        - "Belgium"
-        - "Bulgaria"
-        - "Croatia"
-        - "Cyprus"
-        - "Czech Republic"
-        - "Denmark"
-        - "Estonia"
-        - "Finland"
-        - "France"
-        - "Germany"
-        - "Greece"
-        - "Hungary"
-        - "Ireland"
-        - "Italy"
-        - "Latvia"
-        - "Lithuania"
-        - "Luxembourg"
-        - "Netherlands"
-        - "Poland"
-        - "Portugal"
-        - "Romania"
-        - "Slovakia"
-        - "Slovenia"
-        - "Spain"
-        - "Sweden"
-        - "United Kingdom"
-        - "Albania"
-        - "Bosnia and Herzegovina"
-        - "Macedonia, Republic of"
-        - "Montenegro"
-        - "Norway"
-        - "Serbia"
-        - "Switzerland"
-    bounds:
-        x_min: -15.8
-        x_max: 37
-        y_min: 30
-        y_max: 75
+    spatial:
+        countries:
+            - "Austria"
+            - "Belgium"
+            - "Bulgaria"
+            - "Croatia"
+            - "Cyprus"
+            - "Czech Republic"
+            - "Denmark"
+            - "Estonia"
+            - "Finland"
+            - "France"
+            - "Germany"
+            - "Greece"
+            - "Hungary"
+            - "Ireland"
+            - "Italy"
+            - "Latvia"
+            - "Lithuania"
+            - "Luxembourg"
+            - "Netherlands"
+            - "Poland"
+            - "Portugal"
+            - "Romania"
+            - "Slovakia"
+            - "Slovenia"
+            - "Spain"
+            - "Sweden"
+            - "United Kingdom"
+            - "Albania"
+            - "Bosnia and Herzegovina"
+            - "Macedonia, Republic of"
+            - "Montenegro"
+            - "Norway"
+            - "Serbia"
+            - "Switzerland"
+        bounds:
+            x_min: -15.8
+            x_max: 37
+            y_min: 30
+            y_max: 75
+    temporal:
+        first-year: 2016
+        final-year: 2016
 shapes: # This config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
     continental:
         Austria: nuts0

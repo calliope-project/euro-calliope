@@ -21,10 +21,13 @@ scenarios:
     frozen-hydro: ["freeze-hydro-capacities", "no-hydro-fixed-cost"]
     alternative-cost: ["dea-renewable-cost", "schroeder-hydro-cost"]
     shed-load: ["load-shedding"]
+    multi-year: ["two-years"]
 overrides:
     connect_all_neighbours:
         import:
             - './build/model/regional/link-all-neighbours.yaml'
+    two-years:
+        model.subset_time: ['2015-12-31', '2016-01-01']
 run:
     solver: gurobi
     solver_io: python

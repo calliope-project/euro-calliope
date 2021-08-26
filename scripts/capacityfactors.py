@@ -6,22 +6,22 @@ from eurocalliopelib.geo import area_weighted_time_series, convert_old_style_cap
 
 
 def capacityfactors(path_to_locations, path_to_timeseries, path_to_timeseries_with_coordinates, threshold,
-                    path_to_result, start_year=None, end_year=None):
+                    path_to_result, first_year=None, final_year=None):
     """Generate capacityfactor time series for each location."""
     locations = gpd.read_file(path_to_locations).set_index("id").to_crs(EPSG3035).geometry
     locations.index = locations.index.map(lambda x: x.replace(".", "-"))
     ts = xr.open_dataset(path_to_timeseries)
-    ts = ts.sel(time=slice(start_year, end_year))
+    ts = ts.sel(time=slice(first_year, final_year))
     # xarray will silently miss the fact that data doesn't exist with slice
-    if start_year is not None and start_year not in ts.time.to_index().year.astype(str).unique():
+    if first_year is not None and first_year not in ts.time.to_index().year.astype(str).unique():
         raise ValueError(
             f"Cannot access capacity factor data for timeseries {path_to_timeseries} "
-            f"with a start year of {start_year}."
+            f"with a start year of {first_year}."
         )
-    if end_year is not None and end_year not in ts.time.to_index().year.astype(str).unique():
+    if final_year is not None and final_year not in ts.time.to_index().year.astype(str).unique():
         raise ValueError(
             f"Cannot access capacity factor data for timeseries {path_to_timeseries} "
-            f"with an end year of {end_year}."
+            f"with an end year of {final_year}."
         )
     if ("lat" not in ts.dims) or ("lon" not in ts.dims): # rooftop pv comes without coordinates
         ts_with_latlon = xr.open_dataset(path_to_timeseries_with_coordinates)
@@ -42,7 +42,7 @@ if __name__ == '__main__':
         path_to_timeseries=snakemake.input.timeseries,
         path_to_timeseries_with_coordinates=snakemake.input.coordinates,
         threshold=float(snakemake.params.threshold),
-        start_year=str(snakemake.params.start_year) if snakemake.params.trim_ts else None,
-        end_year=str(snakemake.params.end_year) if snakemake.params.trim_ts else None,
+        first_year=str(snakemake.params.first_year) if snakemake.params.trim_ts else None,
+        final_year=str(snakemake.params.final_year) if snakemake.params.trim_ts else None,
         path_to_result=snakemake.output[0]
     )

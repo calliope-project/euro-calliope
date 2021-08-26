@@ -4,14 +4,16 @@ import xarray as xr
 from scipy.optimize import minimize
 
 
-def determine_energy_inflow(path_to_stations_with_water_inflow, path_to_generation, start_year,
-                            end_year, max_capacity_factor, path_to_output):
+def determine_energy_inflow(path_to_stations_with_water_inflow, path_to_generation, first_year,
+                            final_year, max_capacity_factor, path_to_output):
     plants_with_inflow_m3 = xr.open_dataset(path_to_stations_with_water_inflow)
-    inflows = []
-    for year in range(start_year, end_year + 1):
-        annual_national_generation_mwh = read_generation(path_to_generation, year)
-        inflows.append(energy_inflow(plants_with_inflow_m3.sel(time=str(year)), annual_national_generation_mwh, max_capacity_factor))
-    inflow_MWh = xr.merge(inflows)
+    inflow_MWh = xr.merge([
+        energy_inflow(
+            plants_with_inflow_m3.sel(time=str(year)),
+            read_generation(path_to_generation, year),
+            max_capacity_factor
+        ) for year in range(first_year, final_year + 1)
+    ])
     xr.merge([plants_with_inflow_m3, inflow_MWh]).to_netcdf(path_to_output)
 
 
@@ -114,8 +116,8 @@ if __name__ == "__main__":
     determine_energy_inflow(
         path_to_stations_with_water_inflow=snakemake.input.stations,
         path_to_generation=snakemake.input.generation,
-        start_year=snakemake.params.start_year,
-        end_year=snakemake.params.end_year,
+        first_year=snakemake.params.first_year,
+        final_year=snakemake.params.final_year,
         max_capacity_factor=snakemake.params.max_capacity_factor,
         path_to_output=snakemake.output[0]
     )

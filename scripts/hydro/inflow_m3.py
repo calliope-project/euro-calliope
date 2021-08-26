@@ -6,13 +6,13 @@ from shapely.geometry import Point
 import pycountry
 
 
-def determine_water_inflow(path_to_cutout, path_to_stations, path_to_basins, start_year, end_year, path_to_output):
+def determine_water_inflow(path_to_cutout, path_to_stations, path_to_basins, first_year, final_year, path_to_output):
     plants = read_plants(path_to_stations)
 
     inflow_m3 = water_inflow(plants, path_to_cutout, path_to_basins)
     (xr.merge([plants.to_xarray(), inflow_m3])
        .drop("geometry")
-       .sel(time=slice(str(start_year), str(end_year)))
+       .sel(time=slice(str(first_year), str(final_year)))
        .to_netcdf(path_to_output))
 
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         path_to_cutout=snakemake.input.runoff,
         path_to_stations=snakemake.input.stations,
         path_to_basins=snakemake.input.basins,
-        start_year=snakemake.params.start_year,
-        end_year=snakemake.params.end_year,
+        first_year=snakemake.params.first_year,
+        final_year=snakemake.params.final_year,
         path_to_output=snakemake.output[0]
     )

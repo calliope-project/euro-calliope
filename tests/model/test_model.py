@@ -8,22 +8,18 @@ DEFAULT_TECHNOLOGIES = set([
 ])
 DIRECTIONAL_PV = set(["roof_mounted_pv_s_flat", "roof_mounted_pv_n", "roof_mounted_pv_e_w"])
 
+# Only includes scenarios with non-default technology sets
 TECHNOLOGIES = {
-    "default": DEFAULT_TECHNOLOGIES,
     "connected_all_neighbours": DEFAULT_TECHNOLOGIES | set(["ac_transmission"]),
     "connected_entsoe_tyndp": DEFAULT_TECHNOLOGIES | set(["ac_transmission"]),
     "directional-pv": (DEFAULT_TECHNOLOGIES | DIRECTIONAL_PV) - set(["roof_mounted_pv"]),
-    "e-to-p-ratios": DEFAULT_TECHNOLOGIES,
-    "frozen-hydro": DEFAULT_TECHNOLOGIES,
-    "alternative-cost": DEFAULT_TECHNOLOGIES,
     "shed-load": DEFAULT_TECHNOLOGIES | set(["load_shedding"]),
-    "multi-year": DEFAULT_TECHNOLOGIES,
 }
 
 
 @pytest.fixture(scope="function")
 def technologies(scenario):
-    return TECHNOLOGIES[scenario]
+    return TECHNOLOGIES.get(scenario, DEFAULT_TECHNOLOGIES)
 
 
 def test_model_runs(optimised_model):

@@ -9,7 +9,7 @@ EPSG3035 = "EPSG:3035"
 
 
 def capacityfactors(path_to_eez, path_to_shared_coast, path_to_timeseries,
-                    threshold, path_to_result, start_year=None, end_year=None):
+                    threshold, path_to_result, first_year=None, final_year=None):
     """Generate offshore capacityfactor time series for each location."""
     eez = gpd.read_file(path_to_eez).set_index("mrgid").to_crs(EPSG3035).geometry
     shared_coast = pd.read_csv(path_to_shared_coast, index_col=0)
@@ -17,17 +17,17 @@ def capacityfactors(path_to_eez, path_to_shared_coast, path_to_timeseries,
     shared_coast.columns = shared_coast.columns.astype(int)
 
     ts = xr.open_dataset(path_to_timeseries)
-    ts = ts.sel(time=slice(start_year, end_year))
+    ts = ts.sel(time=slice(first_year, final_year))
     # xarray will silently miss the fact that data doesn't exist with slice
-    if start_year is not None and start_year not in ts.time.to_index().year.astype(str).unique():
+    if first_year is not None and first_year not in ts.time.to_index().year.astype(str).unique():
         raise ValueError(
             f"Cannot access capacity factor data for timeseries {path_to_timeseries} "
-            f"with a start year of {start_year}."
+            f"with a start year of {first_year}."
         )
-    if end_year is not None and end_year not in ts.time.to_index().year.astype(str).unique():
+    if final_year is not None and final_year not in ts.time.to_index().year.astype(str).unique():
         raise ValueError(
             f"Cannot access capacity factor data for timeseries {path_to_timeseries} "
-            f"with an end year of {end_year}."
+            f"with an end year of {final_year}."
         )
     ts = convert_old_style_capacity_factor_time_series(ts)
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
         path_to_shared_coast=snakemake.input.shared_coast,
         path_to_timeseries=snakemake.input.timeseries,
         threshold=float(snakemake.params.threshold),
-        start_year=str(snakemake.params.start_year) if snakemake.params.trim_ts else None,
-        end_year=str(snakemake.params.end_year) if snakemake.params.trim_ts else None,
+        first_year=str(snakemake.params.first_year) if snakemake.params.trim_ts else None,
+        final_year=str(snakemake.params.final_year) if snakemake.params.trim_ts else None,
         path_to_result=snakemake.output[0]
     )

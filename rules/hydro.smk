@@ -12,12 +12,12 @@ rule download_runoff_data:
     input:
         script = script_dir + "hydro/runoff.py"
     params:
-        start_year = config["start_year"],
-        end_year = config["end_year"],
-        x_min = config["scope"]["bounds"]["x_min"],
-        x_max = config["scope"]["bounds"]["x_max"],
-        y_min = config["scope"]["bounds"]["y_min"],
-        y_max = config["scope"]["bounds"]["y_max"]
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
+        x_min = config["scope"]["spatial"]["bounds"]["x_min"],
+        x_max = config["scope"]["spatial"]["bounds"]["x_max"],
+        y_min = config["scope"]["spatial"]["bounds"]["y_min"],
+        y_max = config["scope"]["spatial"]["bounds"]["y_max"]
     output:
         protected("data/automatic/europe-cutout.nc")
     conda: "../envs/hydro.yaml"
@@ -70,10 +70,10 @@ rule preprocess_basins:
         script = script_dir + "hydro/preprocess_basins.py",
         basins = rules.basins_database.output[0]
     params:
-        x_min = config["scope"]["bounds"]["x_min"],
-        x_max = config["scope"]["bounds"]["x_max"],
-        y_min = config["scope"]["bounds"]["y_min"],
-        y_max = config["scope"]["bounds"]["y_max"]
+        x_min = config["scope"]["spatial"]["bounds"]["x_min"],
+        x_max = config["scope"]["spatial"]["bounds"]["x_max"],
+        y_min = config["scope"]["spatial"]["bounds"]["y_min"],
+        y_max = config["scope"]["spatial"]["bounds"]["y_max"]
     output: "build/data/hybas_eu_lev07_v1c.gpkg"
     conda: "../envs/hydro.yaml"
     script: "../scripts/hydro/preprocess_basins.py"
@@ -88,7 +88,7 @@ rule preprocess_hydro_stations:
         phs_storage_capacities = config["data-sources"]["national-phs-storage-capacities"]
     params:
         buffer_size_m = config["quality-control"]["hydro"]["station-nearest-basin-max-km"] * 1000,
-        countries = config["scope"]["countries"],
+        countries = config["scope"]["spatial"]["countries"],
         scale_phs = config["quality-control"]["hydro"]["scale-phs-according-to-geth-et-al"]
     output: "build/data/jrc-hydro-power-plant-database-preprocessed.csv"
     conda: "../envs/hydro.yaml"
@@ -103,8 +103,8 @@ rule inflow_m3:
         basins = rules.preprocess_basins.output[0],
         runoff = rules.download_runoff_data.output[0]
     params:
-        start_year = config["start_year"],
-        end_year = config["end_year"],
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
     output: "build/data/hydro-electricity-with-water-inflow.nc"
     conda: "../envs/hydro.yaml"
     script: "../scripts/hydro/inflow_m3.py"
@@ -117,8 +117,8 @@ rule inflow_mwh:
         stations = rules.inflow_m3.output[0],
         generation = config["data-sources"]["irena-generation"]
     params:
-        start_year = config["start_year"],
-        end_year = config["end_year"],
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
         max_capacity_factor = config["capacity-factors"]["max"]
     output: "build/data/hydro-electricity-with-energy-inflow.nc"
     conda: "../envs/hydro.yaml"
