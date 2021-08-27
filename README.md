@@ -24,7 +24,7 @@ Here is where you can find more information:
 * [Citation information](./docs/about/citation.md)
 * [License](./LICENSE.md)
 
-If you are unable to access the full documentation via ReadTheDocs following the link above, or otherwise want to build the documentation locally, you can run the following from the repository top-level directory:
+If you are unable to access the full documentation via ReadTheDocs following the link above, or otherwise want to build the documentation locally, you can run the following from the repository top-level directory (assuming you have [conda](https://conda.io) installed):
 
 
 ```bash
