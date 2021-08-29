@@ -8,6 +8,7 @@
     * **ADD** templates to our issue tracker (#156).
     * **ADD** a visualisation of directed acyclic graph spanned by all workflow rules (#108).
     * **ADD** a complete enumeration of the configuration parameters of the workflow (#68).
+    * **ADD** a developer documentation that aids contributions (#109).
 * **ADD** Link YAML file defining national net-transfer capacities from ENTSO-E TYNDP 2020 scenarios (#61).
 * **ADD** automatic download of EEZ (#99).
 * **ADD** Danish Energy Agency and Schroeder et al (2013) cost data as well as no hydro fixed costs as optional overrides (#18, #129).

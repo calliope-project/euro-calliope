@@ -58,6 +58,17 @@ rule all:
         "build/logs/national/test-report.html",
 
 
+rule all_tests:
+    message: "Generate euro-calliope pre-built models and run all tests."
+    input:
+        "build/logs/continental/model.done",
+        "build/logs/national/model.done",
+        "build/logs/regional/model.done",
+        "build/logs/continental/test-report.html",
+        "build/logs/national/test-report.html",
+        "build/logs/regional/test-report.html",
+
+
 rule download_potentials:
     message: "Download potential data."
     params: url = config["data-sources"]["potentials"]
