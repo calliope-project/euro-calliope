@@ -20,9 +20,20 @@ Euro-Calliope models the European electricity system with each location represen
 Here is where you can find more information:
 
 * [Full documentation](https://euro-calliope.readthedocs.io/)
-* [Release notes](./docs/about/changelog.md)
+* [Release notes](./CHANGELOG.md)
 * [Citation information](./docs/about/citation.md)
 * [License](./LICENSE.md)
+
+If you are unable to access the full documentation via ReadTheDocs following the link above, or otherwise want to build the documentation locally, you can run the following from the repository top-level directory (assuming you have [conda](https://conda.io) installed):
+
+
+```bash
+conda env install -f envs/docs.yaml
+conda activate docs
+mkdocs build --no-directory-urls
+```
+
+The documentation can then be accessed by opening `build/docs/index.html`.
 
 ## License
 
