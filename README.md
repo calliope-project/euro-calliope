@@ -22,6 +22,7 @@ Here is where you can find more information:
 * [Full documentation](https://euro-calliope.readthedocs.io/)
 * [Release notes](./CHANGELOG.md)
 * [Citation information](./docs/about/citation.md)
+* [Contributing information](./CONTRIBUTING.md)
 * [License](./LICENSE.md)
 
 If you are unable to access the full documentation via ReadTheDocs following the link above, or otherwise want to build the documentation locally, you can run the following from the repository top-level directory (assuming you have [conda](https://conda.io) installed):
