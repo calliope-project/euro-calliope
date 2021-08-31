@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
-from rasterio.transform import from_origin
 from shapely.geometry import Point
 from geopandas.tools import overlay
 

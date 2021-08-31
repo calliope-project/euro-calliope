@@ -9,7 +9,7 @@ Models of the European electricity system for _Calliope_.
 Euro-Calliope is a suite of pre-built models and routines to build these models from raw data.
 You can configure, adapt, and extend both models and routines in many ways to build your own model that is fit for your purpose.
 
-![Euro-Calliope within the energy system modelling process.](./img/ec-in-modelling-process.png)
+![Spatial scope and resolutions of Euro-Calliope.](./img/spatial-scope-and-resolutions.png)
 
 ## At a glance
 
@@ -21,6 +21,8 @@ All capacities are used to satisfy electricity demand on all locations where dem
 Locations are connected through transmission lines of either unrestricted capacity or projections.
 Using [Calliope](https://www.callio.pe), the model is formulated as a linear optimisation problem with total monetary cost of all capacities as the minimisation objective.
 Due to the flexibility of Calliope and the availability of the routines building the model all components can be adapted to the modeller's needs.
+
+![Euro-Calliope within the energy system modelling process.](./img/ec-in-modelling-process.png)
 
 ## Where to start?
 
