@@ -84,7 +84,7 @@ rule preprocess_hydro_stations:
         script = script_dir + "hydro/preprocess_hydro_stations.py",
         stations = rules.stations_database.output[0],
         basins = rules.preprocess_basins.output[0],
-        phs_storage_capacities = config["data-sources"]["national-phs-storage-capacities"]
+        phs_storage_capacities = rules.euro_calliope_datasets.output.national_phs_storage_capacities
     params:
         buffer_size_m = config["quality-control"]["hydro"]["station-nearest-basin-max-km"] * 1000,
         countries = config["scope"]["countries"],
@@ -112,7 +112,7 @@ rule inflow_mwh:
     input:
         script = script_dir + "hydro/inflow_mwh.py",
         stations = rules.inflow_m3.output[0],
-        generation = config["data-sources"]["irena-generation"]
+        generation = rules.euro_calliope_datasets.output.irena_generation
     params:
         year = config["year"],
         max_capacity_factor = config["capacity-factors"]["max"]

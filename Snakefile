@@ -7,30 +7,19 @@ ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
     "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat"
 ]
-BIOFUEL_FEEDSTOCKS = [
-    "forestry-energy-residues",
-    "landscape-care-residues",
-    "manure",
-    "municipal-waste",
-    "primary-agricultural-residues",
-    "roundwood-chips",
-    "roundwood-fuelwood",
-    "secondary-forestry-residues-sawdust",
-    "secondary-forestry-residues-woodchips",
-    "sludge"
-]
 
-
-include: "./rules/shapes.smk"
-include: "./rules/hydro.smk"
-include: "./rules/sync.smk"
-localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials, download_eurocalliope_dataset
-localrules: download_capacity_factors_wind_and_solar, download_entsoe_tyndp_zip
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
 wildcard_constraints:
         resolution = "((continental)|(national)|(regional))"
 
+include: "./rules/data.smk"
+include: "./rules/shapes.smk"
+include: "./rules/hydro.smk"
+include: "./rules/sync.smk"
+
+localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials,
+localrules: download_capacity_factors_wind_and_solar, download_entsoe_tyndp_zip
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
 script_dir = f"{root_dir}scripts/"
@@ -133,8 +122,8 @@ rule biofuels:
         units = rules.units.output[0],
         land_cover = rules.potentials.output.land_cover,
         population = rules.potentials.output.population,
-        national_potentials = expand(config["data-sources"]["biofuel-potentials"], feedstock=BIOFUEL_FEEDSTOCKS),
-        costs = expand(config["data-sources"]["biofuel-costs"], feedstock=BIOFUEL_FEEDSTOCKS)
+        national_potentials = rules.euro_calliope_datasets.output.biofuel_potentials,
+        costs = rules.euro_calliope_datasets.output.biofuel_costs
     params:
         potential_year = config["parameters"]["jrc-biofuel"]["potential-year"],
         cost_year = config["parameters"]["jrc-biofuel"]["cost-year"]
@@ -389,7 +378,7 @@ rule clean: # removes all generated results
     shell:
         """
         rm -r build/
-        echo "Data downloaded to data/automatic/ and data/euro-calliope-datasets has not been cleaned."
+        echo "Data downloaded to data/automatic/ has not been cleaned."
         """
 
 
@@ -410,11 +399,3 @@ rule test:
     output: "build/logs/{resolution}/test-report.html"
     conda: "./envs/test.yaml"
     script: "./tests/model/test_runner.py"
-
-
-rule download_eurocalliope_dataset:
-    message: "Downloading `{wildcards.dataset}` from Euro-Calliope dataset submodule"
-    params: url = lambda wildcards: config["data-sources"]["data-repository"].format(dataset=wildcards.dataset)
-    output: "data/euro-calliope-datasets/{dataset}"
-    conda: "envs/shell.yaml"
-    shell: "curl -sLfo {output} {params.url}"

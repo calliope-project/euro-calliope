@@ -10,25 +10,9 @@ properties:
         type: object
         description: Paths and URLs to datasets.
         properties:
-            biofuel-potentials:
-                type: string
-                pattern: .*{feedstock}.*\.csv$
-                description: Path to local biofuel potentials. Must contain {feedstock} placeholder.
-            biofuel-costs:
-                type: string
-                pattern: .*{feedstock}.*\.csv$
-                description: Path to local cost data. Must contain {feedstock} placeholder.
             eez:
                 type: string
                 description: Path to local geospatial Exclusive Economic Zones data.
-            irena-generation:
-                type: string
-                pattern: .*\.csv$
-                description: Path to local hydro generation data from IRENA.
-            national-phs-storage-capacities:
-                type: string
-                pattern: .*\.csv$
-                description: Path to local storage capacities data (in GWh).
             capacity-factors:
                 type: string
                 pattern: ^(https?|http?):\/\/.+{filename}.*
@@ -59,7 +43,7 @@ properties:
                 description: Web address of potentials of solar and wind.
             data-repository:
                 type: string
-                pattern: ^(https?|http?):\/\/.+{dataset}.*
+                pattern: ^(https?|http?):\/\/.+
                 description: Web address of proprietry datasets that have been pre-processed for specific use in Euro-Calliope.
     root-directory:
         type: string

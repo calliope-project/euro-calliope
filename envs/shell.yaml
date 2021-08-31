@@ -5,3 +5,4 @@ dependencies:
     - curl=7.76.0
     - unzip=6.0
     - rsync=3.2.3
+    - tar=1.34
