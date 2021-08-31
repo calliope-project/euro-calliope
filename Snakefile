@@ -324,6 +324,22 @@ rule link_neighbours:
     script: "scripts/link_neighbours.py"
 
 
+# TODO add tests
+# TODO add documentation
+
+rule net_self_sufficiency:
+    message: "Create net self-sufficiency overrides for {wildcards.resolution} resolution."
+    input:
+        sript = script_dir + "net_self_sufficiency.py",
+        units = rules.units_without_shape.output[0]
+    params:
+        levels = config["parameters"]["net-self-sufficiency"]["levels"],
+        connected_regions = config["parameters"]["net-self-sufficiency"]["connected-regions"]
+    conda: "envs/default.yaml"
+    output: "build/model/{resolution}/net-self-sufficiency.yaml"
+    script: "scripts/net_self_sufficiency.py"
+
+
 rule build_metadata:
     message: "Generate build metadata."
     input:
@@ -357,6 +373,7 @@ rule model:
         rules.hydro_capacities.output,
         rules.directional_rooftop_pv.output,
         rules.load_shedding.output,
+        rules.net_self_sufficiency.output,
         expand(
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES

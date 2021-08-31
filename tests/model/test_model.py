@@ -17,6 +17,8 @@ TECHNOLOGIES = {
     "frozen-hydro": DEFAULT_TECHNOLOGIES,
     "alternative-cost": DEFAULT_TECHNOLOGIES,
     "shed-load": DEFAULT_TECHNOLOGIES | set(["load_shedding"]),
+    "national-net-self-sufficiency": DEFAULT_TECHNOLOGIES,
+    "regional-net-self-sufficiency": DEFAULT_TECHNOLOGIES
 }
 
 

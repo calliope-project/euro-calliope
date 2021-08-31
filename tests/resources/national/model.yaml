@@ -8,6 +8,7 @@ import:
     - '../../../build/model/national/locations.yaml'
     - '../../../build/model/national/load-shedding.yaml'
     - '../../../build/model/national/directional-rooftop.yaml'
+    - '../../../build/model/national/net-self-sufficiency.yaml'
 model:
     name: 'Test model with national spatial resolution'
     calliope_version: 0.6.7
@@ -16,12 +17,13 @@ model:
 scenarios:
     default: []
     connected_all_neighbours: ["connect_all_neighbours"]
-    connected_entsoe_tyndp: ["connect_entsoe_tyndp"]
     directional-pv: ["directional-rooftop-pv"]
     e-to-p-ratios: ["exclusive-energy-to-power-ratios"]
     frozen-hydro: ["freeze-hydro-capacities", "no-hydro-fixed-cost"]
     alternative-cost: ["dea-renewable-cost", "schroeder-hydro-cost"]
     shed-load: ["load-shedding"]
+    national-net-self-sufficiency: ["national-net-self-sufficiency-100-percent"]
+    connected_entsoe_tyndp: ["connect_entsoe_tyndp"]
 overrides:
     connect_all_neighbours:
         import:

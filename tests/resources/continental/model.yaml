@@ -8,6 +8,7 @@ import:
     - '../../../build/model/continental/locations.yaml'
     - '../../../build/model/continental/load-shedding.yaml'
     - '../../../build/model/continental/directional-rooftop.yaml'
+    - '../../../build/model/continental/net-self-sufficiency.yaml'
 model:
     name: 'Test model with continental spatial resolution'
     calliope_version: 0.6.7

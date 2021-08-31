@@ -8,6 +8,7 @@ import:
     - '../../../build/model/regional/locations.yaml'
     - '../../../build/model/regional/load-shedding.yaml'
     - '../../../build/model/regional/directional-rooftop.yaml'
+    - '../../../build/model/regional/net-self-sufficiency.yaml'
 model:
     name: 'Test model with regional spatial resolution'
     calliope_version: 0.6.7
@@ -21,6 +22,8 @@ scenarios:
     frozen-hydro: ["freeze-hydro-capacities", "no-hydro-fixed-cost"]
     alternative-cost: ["dea-renewable-cost", "schroeder-hydro-cost"]
     shed-load: ["load-shedding"]
+    national-net-self-sufficiency: ["national-net-self-sufficiency-0-percent"]
+    regional-net-self-sufficiency: ["regional-net-self-sufficiency-0-percent"]
 overrides:
     connect_all_neighbours:
         import:

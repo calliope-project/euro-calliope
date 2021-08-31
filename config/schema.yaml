@@ -198,6 +198,32 @@ properties:
                         type: string
                         description: How to use ENTSO-E-based NTCs to constrain link energy capacity in the Calliope model.
                         enum: [min, equals, max]
+            net-self-sufficiency:
+                type: object
+                descriptions: Parameters for the overrides enforcing net self-sufficiency in countries and regions.
+                properties:
+                    levels:
+                        type: array
+                        minItems: 1
+                        uniqueItems: true
+                        description: Percentages of net self-sufficiency of the country or region.
+                        items:
+                            type: number
+                            minimum: 0
+                            maximum: 100
+                    connected-regions:
+                        type: array
+                        uniqueItems: true
+                        description: Connects regions so their self-sufficiency level is shared.
+                        items:
+                            type: array
+                            minItems: 2
+                            maxItems: 2
+                            uniqueItems: true
+                            description: Codes of regions to be connected.
+                            items:
+                                type: string
+                                description: Region code.
     scope:
         type: object
         description: The spatial scope of the models.

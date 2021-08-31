@@ -60,6 +60,14 @@ parameters:
         projection-year: 2040
         ntc_limit: max
         energy_cap_limit: equals
+    net-self-sufficiency:
+        levels: [100, 85, 70]
+        connected-regions:
+            - [AUT-9_1, AUT-3_1] # Vienna: Lower Austria
+            - [BEL-1_1, BEL-2_1] # Bruxelles: Flanders
+            - [DEU-3_1, DEU-4_1] # Berlin: Brandenburg
+            - [NOR-12_1, NOR-1_1] # Oslo: Akershus
+            - [CHE-5_1, CHE-4_1] # Basel-City: Basel-Country
 quality-control:
     load:
         outlier-data-thresholds:
