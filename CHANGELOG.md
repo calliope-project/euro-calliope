@@ -8,6 +8,7 @@
     * **ADD** templates to our issue tracker (#156).
     * **ADD** a visualisation of directed acyclic graph spanned by all workflow rules (#108).
     * **ADD** a complete enumeration of the configuration parameters of the workflow (#68).
+    * **ADD** a developer documentation that aids contributions (#109).
     * **ADD** a visualisation of administrative units on all three spatial resolutions (#165).
 * **ADD** Link YAML file defining national net-transfer capacities from ENTSO-E TYNDP 2020 scenarios (#61).
 * **ADD** automatic download of EEZ (#99).
