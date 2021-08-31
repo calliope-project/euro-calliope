@@ -8,7 +8,6 @@ dependencies:
     - pandas=1.2.3
     - pycountry=18.12.8
     - matplotlib=3.4.3
-    - seaborn=0.11.0
     - gdal=3.2.1
     - libgdal=3.2.1
     - fiona=1.8.18

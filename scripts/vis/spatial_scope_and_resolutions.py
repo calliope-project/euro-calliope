@@ -2,12 +2,10 @@ from textwrap import dedent
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 from eurocalliopelib.geo import EPSG3035
 
-BLUE = "#4F6DB8"
-LIGHT_BLUE = sns.light_palette(BLUE, as_cmap=False)[2]
+LIGHT_BLUE = "#8fa2cf"
 EDGE_WIDTH = 0.2
 WHITE = "white"
 
@@ -28,7 +26,6 @@ def spatial_scope_and_resolutions(path_to_regional_units, path_to_national_units
     axes = fig.subplots(1, 4, gridspec_kw={'width_ratios': [0.15, 0.35, 0.35, 0.15]})
     for ax in axes:
         ax.axis("off")
-    sns.despine(fig, top=True, bottom=True, left=True, right=True)
 
     # plot
     _plot_text(national, regional, ax=axes[1])
@@ -79,7 +76,6 @@ def _plot_map(data, ax, edge_width, face_color=LIGHT_BLUE, edge_color=WHITE):
     )
     ax.set_xlim(MAP_MIN_X, MAP_MAX_X)
     ax.set_ylim(MAP_MIN_Y, MAP_MAX_Y)
-    sns.despine(top=True, bottom=True, left=True, right=True)
 
 
 if __name__ == "__main__":
