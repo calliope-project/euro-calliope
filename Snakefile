@@ -68,6 +68,7 @@ rule all_tests:
         "build/logs/continental/test-report.html",
         "build/logs/national/test-report.html",
         "build/logs/regional/test-report.html",
+        "build/model/build-metadata.yaml"
 
 
 rule download_potentials:
