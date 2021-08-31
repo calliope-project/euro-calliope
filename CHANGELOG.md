@@ -24,6 +24,7 @@
 * **ADD** option to shed load at all locations (#131).
 * **ADD** option to choose solar and wind potential scenario, limiting the amount of eligible surfaces (#153).
 
+* **UPDATE** Workflow build metadata is built as part of the rule `all` instead of the rule `model` (#126).
 * **UPDATE** Calliope version from 0.6.5 to [0.6.7](https://calliope.readthedocs.io/en/v0.6.7/history.html#id1) (#73).
 * **UPDATE** EEZ updated from v10 to v11 (difference in offshore area is < 1% for all relevant countries) (#99).
 * **UPDATE** ENTSO-E national electricity load data gap filling methods (priority order, interpolation distance, outlier handling, 29th Feb handling) included in config (#42, #91).
