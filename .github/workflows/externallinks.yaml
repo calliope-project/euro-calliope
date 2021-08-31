@@ -1,10 +1,13 @@
 name: Check Markdown links
 
 on:
-    push:
-    pull_request:
-    schedule:
-        - cron: "0 3 * * MON" # Runs Mondays at 3am.
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+  schedule:
+    - cron: "0 3 * * MON" # Runs Mondays at 3am.
 
 jobs:
   markdown-link-check:

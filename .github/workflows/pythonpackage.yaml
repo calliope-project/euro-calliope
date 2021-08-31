@@ -1,6 +1,11 @@
 name: Tests of eurocalliopelib and scripts
 
-on: [push, pull_request]
+on:
+    push:
+        branches:
+            - main
+            - develop
+    pull_request:
 
 jobs:
     test:
