@@ -90,10 +90,15 @@ def fill_gaps_per_source(all_load, model_year, data_quality_config, source):
     """For each valid data source, fills in all NaNs by interpolation or with data from other years"""
     source_specific_load = all_load.xs(source, level="attribute")
     source_specific_load = _interpolate_gaps(source_specific_load, data_quality_config["max-interpolate-timesteps"])
-    source_specific_model_year_load = source_specific_load.loc[str(model_year)]
-    source_specific_model_year_load = _fill_gaps_from_other_years(
-        source_specific_model_year_load, source_specific_load, data_quality_config, source, model_year
-    )
+    if model_year in source_specific_load.index.year.unique():
+        source_specific_model_year_load = source_specific_load.loc[str(model_year)]
+        source_specific_model_year_load = _fill_gaps_from_other_years(
+            source_specific_model_year_load, source_specific_load, data_quality_config, source, model_year
+        )
+    else:
+        source_specific_model_year_load = source_specific_load.reindex(
+            pd.date_range(f"{model_year}-01-01", f"{model_year}-12-31", freq="H")
+        )
 
     return (
         source_specific_model_year_load
