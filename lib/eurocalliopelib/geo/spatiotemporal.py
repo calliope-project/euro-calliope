@@ -79,8 +79,14 @@ def weighted_time_series(weights_and_values):
     ds = (
         weights_and_values
         .where(weights_and_values.weight > 0)
-        .dropna(subset=["weight"], dim="xy") # drop all locations with weight == 0
+        .dropna(subset=["weight", "value"], dim="xy") # drop all locations with weight == 0 or value == np.nan
     )
+    if ds.weight.sum() != 1:
+        print(
+            f"Weight of shape_id {ds.shape_id.item()} only adds up to {ds.weight.sum().item()}. "
+            "Scaling to a sum of 1."
+        )
+        ds["weight"] = ds.weight / ds.weight.sum()
     return (ds * ds.weight).value.sum("xy", skipna=False)
 
 
