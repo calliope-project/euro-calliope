@@ -51,11 +51,24 @@ onerror:
 rule all:
     message: "Generate euro-calliope pre-built models and run tests."
     input:
+        "build/logs/continental/test-report.html",
+        "build/logs/national/test-report.html",
+        "build/logs/continental/model.done",
+        "build/logs/national/model.done",
+        "build/logs/regional/model.done",
+        "build/model/build-metadata.yaml"
+
+
+rule all_tests:
+    message: "Generate euro-calliope pre-built models and run all tests."
+    input:
         "build/logs/continental/model.done",
         "build/logs/national/model.done",
         "build/logs/regional/model.done",
         "build/logs/continental/test-report.html",
         "build/logs/national/test-report.html",
+        "build/logs/regional/test-report.html",
+        "build/model/build-metadata.yaml"
 
 
 rule download_potentials:
@@ -329,7 +342,10 @@ rule link_neighbours:
 rule build_metadata:
     message: "Generate build metadata."
     input:
-        script = script_dir + "metadata.py"
+        script_dir + "metadata.py",
+        "build/logs/continental/model.done",
+        "build/logs/national/model.done",
+        "build/logs/regional/model.done",
     params:
         config = config,
         version = __version__
@@ -360,7 +376,6 @@ rule model:
             "build/model/{{resolution}}/capacityfactors-{technology}.csv",
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
         ),
-        rules.build_metadata.output,
         lambda wildcards: rules.entsoe_tyndp_links.output[0] if wildcards.resolution == "national" else [],
         example_model = template_dir + "example-model.yaml"
     output:

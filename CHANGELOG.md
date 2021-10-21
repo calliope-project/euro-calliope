@@ -12,6 +12,8 @@
     * **ADD** templates to our issue tracker (#156).
     * **ADD** a visualisation of directed acyclic graph spanned by all workflow rules (#108).
     * **ADD** a complete enumeration of the configuration parameters of the workflow (#68).
+    * **ADD** a developer documentation that aids contributions (#109).
+    * **ADD** a visualisation of administrative units on all three spatial resolutions (#165).
 * **ADD** Link YAML file defining national net-transfer capacities from ENTSO-E TYNDP 2020 scenarios (#61).
 * **ADD** automatic download of EEZ (#99).
 * **ADD** Danish Energy Agency and Schroeder et al (2013) cost data as well as no hydro fixed costs as optional overrides (#18, #129).
@@ -27,6 +29,7 @@
 * **ADD** option to shed load at all locations (#131).
 * **ADD** option to choose solar and wind potential scenario, limiting the amount of eligible surfaces (#153).
 
+* **UPDATE** Workflow build metadata is built as part of the rule `all` instead of the rule `model` (#126).
 * **UPDATE** Calliope version from 0.6.5 to [0.6.7](https://calliope.readthedocs.io/en/v0.6.7/history.html#id1) (#73).
 * **UPDATE** EEZ updated from v10 to v11 (difference in offshore area is < 1% for all relevant countries) (#99).
 * **UPDATE** ENTSO-E national electricity load data gap filling methods (priority order, interpolation distance, outlier handling, 29th Feb handling) included in config (#42, #91).
