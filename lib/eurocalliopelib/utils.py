@@ -11,8 +11,6 @@ def eu_country_code_to_iso3(eu_country_code):
         iso2 = "gr"
     elif eu_country_code.lower() == "uk":
         iso2 = "gb"
-    elif eu_country_code.lower() == "bh": # this is a weird country code used in the biofuels dataset
-        iso2 = "ba"
     else:
         iso2 = eu_country_code
     return pycountry.countries.lookup(iso2).alpha_3

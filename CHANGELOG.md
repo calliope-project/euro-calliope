@@ -11,12 +11,14 @@
     * **ADD** a developer documentation that aids contributions (#109).
     * **ADD** a visualisation of administrative units on all three spatial resolutions (#165).
 * **ADD** Link YAML file defining national net-transfer capacities from ENTSO-E TYNDP 2020 scenarios (#61).
-* **ADD** automatic download of EEZ (#99).
+* **ADD** automatic downloads of the following datasources:
+    * EEZ (#99),
+    * hydro basins data (#34),
+    * biofuels potential and cost data (#194).
 * **ADD** Danish Energy Agency and Schroeder et al (2013) cost data as well as no hydro fixed costs as optional overrides (#18, #129).
 * **ADD** override to constrain energy to power ratios of battery and hydrogen storage (#130).
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
-* **ADD** automatic download of hydro basins data (#34).
 * **ADD** minimal configuration to be able to test the entire workflow more quickly (#60).
 * **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59).
 * **ADD** sync infrastructure to easily send and receive files to and from a cluster (#74).
@@ -41,6 +43,8 @@
     * geo packages from gdal 2.4 -> 3.2.1
     * Updates to NumPy, Pandas, xarray, pytest, and others
 
+* **FIX** variable cost of biofuels (#193). Together with another change (#195), this reduces variable cost of biofuels from 64.83 to 44.14 €/MWh (32%) using the default settings.
+* **FIX** alignment of cost and potential years for biofuels (#195). Together with another change (#193), this reduces variable cost of biofuels from 64.83 to 44.14 €/MWh (32%) using the default settings.
 * **FIX** the centroid determination of all locations which had been calculated on an unprojected reference system before and was therefore slightly off (#147).
 
 ## 1.0.0 (2020-07-01)

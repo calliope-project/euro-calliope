@@ -10,14 +10,10 @@ properties:
         type: object
         description: Paths and URLs to datasets.
         properties:
-            biofuel-potentials:
+            biofuel-potentials-and-costs:
                 type: string
-                pattern: .*{feedstock}.*\.csv$
-                description: Path to local biofuel potentials. Must contain {feedstock} placeholder.
-            biofuel-costs:
-                type: string
-                pattern: .*{feedstock}.*\.csv$
-                description: Path to local cost data. Must contain {feedstock} placeholder.
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of biofuel potentials and costs.
             eez:
                 type: string
                 description: Path to local geospatial Exclusive Economic Zones data.
@@ -151,20 +147,20 @@ properties:
                         maximum: 1
             jrc-biofuel:
                 type: object
-                description: Bioenergy potential under different scenarios, to select specific data from [@RuizCastello:2015]
+                description: Biofuels potential under different scenarios, to select specific data from [@Ruiz:2019]
                 properties:
                     scenario:
                         type: string
-                        description: Scenario for biofuel potential estimate
+                        description: Scenario for biofuel potential and cost estimate
                         enum: [low, medium, high]
                     potential-year:
-                        type: string
+                        type: number
                         description: Year for biomass potential estimate
-                        enum: ["2010", "2020", "2030", "2040", "2050"]
+                        enum: [2010, 2020, 2030, 2040, 2050]
                     cost-year:
-                        type: string
+                        type: number
                         description: Year for biomass cost estimate
-                        enum: ["2010", "2030", "2050"]
+                        enum: [2010, 2020, 2030, 2040, 2050]
             biofuel-efficiency:
                 type: number
                 description: Combustion efficiency of the `biofuel` technology.

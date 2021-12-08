@@ -1,7 +1,6 @@
 # For descriptions of the configuration values, see `./schema.yaml`.
 data-sources:
-    biofuel-potentials: data/euro-calliope-datasets/biofuels/potentials/{feedstock}.csv
-    biofuel-costs: data/euro-calliope-datasets/biofuels/costs/{feedstock}.csv
+    biofuel-potentials-and-costs: https://cidportal.jrc.ec.europa.eu/ftp/jrc-opendata/ENSPRESO/ENSPRESO_BIOMASS.xlsx
     eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
     irena-generation: data/euro-calliope-datasets/irena/hydro-generation-europe.csv
     national-phs-storage-capacities: data/euro-calliope-datasets/pumped-hydro/storage-capacities-gwh.csv
@@ -48,10 +47,10 @@ parameters:
         S: 0.1821
         W: 0.1681
         flat: 0.3020
-    jrc-biofuel: # from [@RuizCastello:2015]
-        scenario: "medium"
-        potential-year: "2020"
-        cost-year: "2030"
+    jrc-biofuel: # from [@Ruiz:2019]
+        scenario: medium
+        potential-year: 2020
+        cost-year: 2020
     biofuel-efficiency: 0.45
     wind-and-solar-potential-scenario: technical-potential
     entsoe-tyndp:

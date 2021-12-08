@@ -1,21 +1,12 @@
-"""Take national potentials from JRC report and allocate to regions based on proxies."""
+"""Take national potentials, allocate to regions based on feedstocks and proxies, and sum over feedstocks."""
 from enum import Enum
-from pathlib import Path
 
 import pandas as pd
-import geopandas as gpd
-
-from eurocalliopelib import utils
+import xarray as xr
 
 PJ_TO_MWH = 1 / 3600 * 1e9
 GJ_TO_MWH = 1 / 3600 * 1e3
 NAME = "biofuel_potential_mwh_per_year"
-
-SCENARIOS = {
-    "low": "Low availability scenario",
-    "medium": "Medium availability scenario",
-    "high": "High availability scenario"
-}
 
 PROXIES = {
     "forestry-energy-residues": "forest_share",
@@ -68,36 +59,31 @@ FOREST = [GlobCover.CLOSED_TO_OPEN_BROADLEAVED_FOREST.value, GlobCover.CLOSED_BR
           GlobCover.CLOSED_REGULARLY_FLOODED_FOREST.value]
 
 
-def biofuel_potential(paths_to_national_potentials, paths_to_costs, path_to_units, path_to_land_cover,
-                      path_to_population, scenario, potential_year, cost_year, path_to_potentials, path_to_costs):
+def biofuel_potential(path_to_national_potentials, path_to_national_costs, path_to_units, path_to_land_cover,
+                      path_to_population, scenario, potential_year, cost_year, paths_to_output):
     """Take national potentials from JRC report and allocate to regions based on proxies."""
-    scenario = SCENARIOS[scenario]
-    paths_to_national_potentials = [Path(path) for path in paths_to_national_potentials]
-    paths_to_costs = [Path(path) for path in paths_to_costs]
-    national_potentials = pd.concat(
-        [pd.read_csv(path, index_col=0, header=[0, 1])
-           .rename(index=utils.eu_country_code_to_iso3)
-           .loc[:, (scenario, potential_year)]
-           .rename(path.stem) * PJ_TO_MWH
-         for path in paths_to_national_potentials],
-        axis=1
+    national_potentials = (
+        pd
+        .read_csv(path_to_national_potentials, index_col=["year", "scenario", "country_code", "feedstock"])["value"]
+        .mul(PJ_TO_MWH)
+        .to_xarray()
+        .sel(year=potential_year, scenario=scenario)
     )
-    costs = pd.concat(
-        [pd.read_csv(path, index_col=0)
-           .rename(index=utils.eu_country_code_to_iso3)
-           .loc[:, cost_year]
-           .rename(path.stem) / GJ_TO_MWH
-         for path in paths_to_costs],
-        axis=1
+    national_costs = (
+        pd
+        .read_csv(path_to_national_costs, index_col=["year", "scenario", "country_code", "feedstock"])["value"]
+        .div(GJ_TO_MWH)
+        .to_xarray()
+        .sel(year=cost_year, scenario=scenario)
     )
-    if scenario == "Low availability scenario":
-        costs = costs * 1.1
-    elif scenario == "High availability scenario":
-        costs = costs * 0.9
-    units = gpd.read_file(path_to_units).set_index("id")
+    units = pd.read_csv(path_to_units).set_index("id")
     if (len(units.index) == 1) and (units.index[0] == "EUR"): # special case for continental level
-        national_potentials = pd.DataFrame(index=["EUR"], data=national_potentials.sum(axis=0).to_dict())
-        costs = pd.DataFrame(index=["EUR"], data=costs.mean(axis=0).to_dict())
+        national_costs = (
+            (national_costs * national_potentials / national_potentials.sum(["country_code", "feedstock"]))
+            .sum(["country_code", "feedstock"])
+            .expand_dims({"country_code": ["EUR"]})
+        )
+        national_potentials = national_potentials.sum("country_code").expand_dims({"country_code": ["EUR"]})
 
     total_potential = allocate_potentials(
         national_potentials=national_potentials,
@@ -105,44 +91,63 @@ def biofuel_potential(paths_to_national_potentials, paths_to_costs, path_to_unit
         population=pd.read_csv(path_to_population, index_col=0).reindex(index=units.index)["population_sum"],
         land_cover=pd.read_csv(path_to_land_cover, index_col=0).reindex(index=units.index)
     )
-    total_potential.to_csv(path_to_potentials, index=True, header=True)
-    weighted_cost = (costs * national_potentials / national_potentials.sum().sum()).sum().sum()
-    with open(path_to_costs, "w") as f_cost:
+    total_potential.to_csv(paths_to_output.potentials, index=True, header=True)
+    weighted_cost = (
+        (national_costs * national_potentials / national_potentials.sum(["country_code", "feedstock"]))
+        .sum(["country_code", "feedstock"])
+        .item()
+    )
+    with open(paths_to_output.costs, "w") as f_cost:
         f_cost.write(str(weighted_cost))
 
 
 def allocate_potentials(national_potentials, units, population, land_cover):
-    units = pd.concat([
-        units,
-        population.groupby(units.country_code)
-                  .transform(lambda x: x / x.sum())
-                  .rename("population_share"),
-        land_cover[FOREST].sum(axis=1)
-                          .groupby(units.country_code)
-                          .transform(lambda x: x / x.sum())
-                          .rename("forest_share"),
-        land_cover[FARM].sum(axis=1)
-                        .groupby(units.country_code)
-                        .transform(lambda x: x / x.sum())
-                        .rename("farm_share"),
-    ], axis=1)
-    units = units.merge(national_potentials, right_index=True, left_on="country_code")
-    return sum(
-        units[PROXIES[potential]] * units[potential]
-        for potential in national_potentials
-    ).rename(NAME)
+    ds = national_potentials.copy()
+    ds = (
+        pd
+        .merge(units["country_code"].reset_index(), ds.to_series().reset_index(), on="country_code")
+        .set_index(["id", "feedstock"])
+        .to_xarray()
+    )
+    ds["population_share"] = (
+        population
+        .groupby(units.country_code)
+        .transform(lambda x: x / x.sum())
+        .rename("population_share")
+    )
+    ds["forest_share"] = (
+        land_cover[FOREST]
+        .sum(axis=1)
+        .groupby(units.country_code)
+        .transform(lambda x: x / x.sum())
+        .rename("forest_share")
+    )
+    ds["farm_share"] = (
+        land_cover[FARM]
+        .sum(axis=1)
+        .groupby(units.country_code)
+        .transform(lambda x: x / x.sum())
+        .rename("farm_share")
+    )
+    ds["proxy"] = pd.Series(PROXIES).rename("proxy").rename_axis(index="feedstock").to_xarray()
+    proxy_value = xr.ones_like(ds.value)
+    for feedstock in ds.feedstock:
+        for id in ds.id:
+            proxy = ds.sel(id=id, feedstock=feedstock).proxy.item()
+            proxy_value.loc[dict(id=id, feedstock=feedstock)] = ds.sel(id=id)[proxy].item()
+    ds["value"] = ds.value * proxy_value
+    return ds.value.sum("feedstock").rename(NAME).to_series()
 
 
 if __name__ == "__main__":
     biofuel_potential(
-        paths_to_national_potentials=snakemake.input.national_potentials,
-        paths_to_costs=snakemake.input.costs,
+        path_to_national_potentials=snakemake.input.national_potentials,
+        path_to_national_costs=snakemake.input.costs,
         path_to_units=snakemake.input.units,
         path_to_land_cover=snakemake.input.land_cover,
         path_to_population=snakemake.input.population,
         scenario=snakemake.wildcards.scenario,
         potential_year=snakemake.params.potential_year,
         cost_year=snakemake.params.cost_year,
-        path_to_potentials=snakemake.output.potentials,
-        path_to_costs=snakemake.output.costs
+        paths_to_output=snakemake.output
     )

@@ -7,27 +7,16 @@ ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
     "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat"
 ]
-BIOFUEL_FEEDSTOCKS = [
-    "forestry-energy-residues",
-    "landscape-care-residues",
-    "manure",
-    "municipal-waste",
-    "primary-agricultural-residues",
-    "roundwood-chips",
-    "roundwood-fuelwood",
-    "secondary-forestry-residues-sawdust",
-    "secondary-forestry-residues-woodchips",
-    "sludge"
-]
 
+configfile: "config/default.yaml"
+validate(config, "config/schema.yaml")
 
+include: "./rules/preprocess.smk"
 include: "./rules/shapes.smk"
 include: "./rules/hydro.smk"
 include: "./rules/sync.smk"
 localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials, download_eurocalliope_dataset
 localrules: download_capacity_factors_wind_and_solar, download_entsoe_tyndp_zip
-configfile: "config/default.yaml"
-validate(config, "config/schema.yaml")
 wildcard_constraints:
         resolution = "((continental)|(national)|(regional))"
 
@@ -124,27 +113,6 @@ rule hydro_capacities:
     output: "build/data/{resolution}/hydro-capacities-mw.csv"
     conda: "envs/geo.yaml"
     script: "scripts/hydro_capacities.py"
-
-
-rule biofuels:
-    message: "Determine biofuels potential on {wildcards.resolution} resolution for scenario {wildcards.scenario}."
-    input:
-        script = script_dir + "biofuels.py",
-        units = rules.units.output[0],
-        land_cover = rules.potentials.output.land_cover,
-        population = rules.potentials.output.population,
-        national_potentials = expand(config["data-sources"]["biofuel-potentials"], feedstock=BIOFUEL_FEEDSTOCKS),
-        costs = expand(config["data-sources"]["biofuel-costs"], feedstock=BIOFUEL_FEEDSTOCKS)
-    params:
-        potential_year = config["parameters"]["jrc-biofuel"]["potential-year"],
-        cost_year = config["parameters"]["jrc-biofuel"]["cost-year"]
-    output:
-        potentials = "build/data/{resolution}/biofuel/{scenario}/potential-mwh-per-year.csv",
-        costs = "build/data/{resolution}/biofuel/{scenario}/costs-eur-per-mwh.csv" # not actually resolution dependent
-    conda: "envs/geo.yaml"
-    wildcard_constraints:
-        scenario = "((low)|(medium)|(high))"
-    script: "scripts/biofuels.py"
 
 
 rule locations:
