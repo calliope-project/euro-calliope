@@ -1,5 +1,21 @@
 $schema: http://json-schema.org/draft-07/schema#
 description: Below you can find a complete enumeration of all configuration parameters of Euro-Calliope's workflow including short descriptions and datatypes. To learn where to find default values and how to change the parameter values for your model builds, head over to the Customisation section of the workflow documentation.
+definitions:
+    feedstock:
+        type: object
+        properties:
+            include:
+                type: boolean
+                description: Include this feedstock in the total biofuel potential.
+            id:
+                type: string
+                description: The ID of the feedstock.
+            proxy:
+                type: string
+                description: The spatial proxy to allocate national to subnational potentials.
+                enum: [farmland, forest, population]
+        required: ["include", "id", "proxy"]
+type: object
 properties:
     email:
         type: string
@@ -161,6 +177,44 @@ properties:
                         type: number
                         description: Year for biomass cost estimate
                         enum: [2010, 2020, 2030, 2040, 2050]
+                    feedstocks:
+                        type: object
+                        description: Feedstocks of biofuels.
+                        properties:
+                            bioethanol-sugar-beet:
+                                $ref: "#/definitions/feedstock"
+                            rapeseeds:
+                                $ref: "#/definitions/feedstock"
+                            oil-crops:
+                                $ref: "#/definitions/feedstock"
+                            starchy-crops:
+                                $ref: "#/definitions/feedstock"
+                            grassy-crops:
+                                $ref: "#/definitions/feedstock"
+                            willow:
+                                $ref: "#/definitions/feedstock"
+                            poplar:
+                                $ref: "#/definitions/feedstock"
+                            manure:
+                                $ref: "#/definitions/feedstock"
+                            primary-agricultural-residues:
+                                $ref: "#/definitions/feedstock"
+                            roundwood-fuelwood:
+                                $ref: "#/definitions/feedstock"
+                            roundwood-chips:
+                                $ref: "#/definitions/feedstock"
+                            forestry-energy-residues:
+                                $ref: "#/definitions/feedstock"
+                            secondary-forestry-residues-woodchips:
+                                $ref: "#/definitions/feedstock"
+                            secondary-forestry-residues-sawdust:
+                                $ref: "#/definitions/feedstock"
+                            landscape-care-residues:
+                                $ref: "#/definitions/feedstock"
+                            municipal-waste:
+                                $ref: "#/definitions/feedstock"
+                            sludge:
+                                $ref: "#/definitions/feedstock"
             biofuel-efficiency:
                 type: number
                 description: Combustion efficiency of the `biofuel` technology.

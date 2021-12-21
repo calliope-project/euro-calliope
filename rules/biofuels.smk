@@ -15,13 +15,19 @@ rule download_biofuel_potentials_and_costs:
 rule preprocess_biofuel_potentials_and_cost:
     message: "Extract national potentials and cost from raw biofuel data."
     input:
-        script = script_dir + "preprocess/extract_biofuels.py",
+        script = script_dir + "biofuels/extract_biofuels.py",
         potentials_and_costs = rules.download_biofuel_potentials_and_costs.output[0]
+    params:
+        feedstocks = {
+            feedstock["id"]: name
+            for name, feedstock in config["parameters"]["jrc-biofuel"]["feedstocks"].items()
+            if feedstock["include"]
+        }
     output:
         potentials = "build/data/raw-biofuel-potentials.csv",
         costs = "build/data/raw-biofuel-costs.csv"
     conda: "../envs/default.yaml"
-    script: "../scripts/preprocess/extract_biofuels.py"
+    script: "../scripts/biofuels/extract_biofuels.py"
 
 
 rule biofuels:
@@ -35,7 +41,12 @@ rule biofuels:
         costs = rules.preprocess_biofuel_potentials_and_cost.output.costs
     params:
         potential_year = config["parameters"]["jrc-biofuel"]["potential-year"],
-        cost_year = config["parameters"]["jrc-biofuel"]["cost-year"]
+        cost_year = config["parameters"]["jrc-biofuel"]["cost-year"],
+        proxies = {
+            name: feedstock["proxy"]
+            for name, feedstock in config["parameters"]["jrc-biofuel"]["feedstocks"].items()
+            if feedstock["include"]
+        }
     output:
         potentials = "build/data/{resolution}/biofuel/{scenario}/potential-mwh-per-year.csv",
         costs = "build/data/{resolution}/biofuel/{scenario}/costs-eur-per-mwh.csv" # not actually resolution dependent

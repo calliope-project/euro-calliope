@@ -51,6 +51,75 @@ parameters:
         scenario: medium
         potential-year: 2020
         cost-year: 2020
+        feedstocks: # ASSUME no energy crop feedstocks available.
+            bioethanol-sugar-beet:
+                include: false
+                id: MINBIOCRP21
+                proxy: farmland
+            rapeseeds:
+                include: false
+                id: MINBIORPS1
+                proxy: farmland
+            oil-crops:
+                include: false
+                id: MINBIOLIQ1
+                proxy: farmland
+            starchy-crops:
+                include: false
+                id: MINBIOCRP11
+                proxy: farmland
+            grassy-crops:
+                include: false
+                id: MINBIOCRP31
+                proxy: farmland
+            willow:
+                include: false
+                id: MINBIOCRP41
+                proxy: forest
+            poplar:
+                include: false
+                id: MINBIOCRP41a
+                proxy: forest
+            manure:
+                include: true
+                id: MINBIOGAS1
+                proxy: farmland
+            primary-agricultural-residues:
+                include: true
+                id: MINBIOAGRW1
+                proxy: farmland
+            roundwood-fuelwood:
+                include: true
+                id: MINBIOWOO
+                proxy: forest
+            roundwood-chips:
+                include: true
+                id: MINBIOWOOa
+                proxy: forest
+            forestry-energy-residues:
+                include: true
+                id: MINBIOFRSR1
+                proxy: forest
+            secondary-forestry-residues-woodchips:
+                include: true
+                id: MINBIOWOOW1
+                proxy: forest
+            secondary-forestry-residues-sawdust:
+                include: true
+                id: MINBIOWOOW1a
+                proxy: forest
+            landscape-care-residues:
+                include: true
+                id: MINBIOFRSR1a
+                proxy: population
+            municipal-waste:
+                include: true
+                id: MINBIOMUN1
+                proxy: population
+            sludge:
+                include: true
+                id: MINBIOSLU1
+                proxy: population
     biofuel-efficiency: 0.45
     wind-and-solar-potential-scenario: technical-potential
     entsoe-tyndp:

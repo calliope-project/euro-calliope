@@ -8,20 +8,6 @@ PJ_TO_MWH = 1 / 3600 * 1e9
 GJ_TO_MWH = 1 / 3600 * 1e3
 NAME = "biofuel_potential_mwh_per_year"
 
-PROXIES = {
-    "forestry-energy-residues": "forest_share",
-    "forestry-care-residues": "forest_share",
-    "roundwood-chips": "forest_share",
-    "roundwood-fuelwood": "forest_share",
-    "secondary-forestry-residues-sawdust": "forest_share",
-    "secondary-forestry-residues-woodchips": "forest_share",
-    "manure": "farm_share",
-    "primary-agricultural-residues": "farm_share",
-    "municipal-waste": "population_share",
-    "landscape-care-residues": "population_share",
-    "sludge": "population_share"
-}
-
 
 class GlobCover(Enum):
     """Original categories taken from GlobCover 2009 land cover."""
@@ -60,7 +46,7 @@ FOREST = [GlobCover.CLOSED_TO_OPEN_BROADLEAVED_FOREST.value, GlobCover.CLOSED_BR
 
 
 def biofuel_potential(path_to_national_potentials, path_to_national_costs, path_to_units, path_to_land_cover,
-                      path_to_population, scenario, potential_year, cost_year, paths_to_output):
+                      path_to_population, scenario, potential_year, cost_year, proxies, paths_to_output):
     """Take national potentials from JRC report and allocate to regions based on proxies."""
     national_potentials = (
         pd
@@ -89,7 +75,8 @@ def biofuel_potential(path_to_national_potentials, path_to_national_costs, path_
         national_potentials=national_potentials,
         units=units,
         population=pd.read_csv(path_to_population, index_col=0).reindex(index=units.index)["population_sum"],
-        land_cover=pd.read_csv(path_to_land_cover, index_col=0).reindex(index=units.index)
+        land_cover=pd.read_csv(path_to_land_cover, index_col=0).reindex(index=units.index),
+        proxies=proxies
     )
     total_potential.to_csv(paths_to_output.potentials, index=True, header=True)
     weighted_cost = (
@@ -101,7 +88,7 @@ def biofuel_potential(path_to_national_potentials, path_to_national_costs, path_
         f_cost.write(str(weighted_cost))
 
 
-def allocate_potentials(national_potentials, units, population, land_cover):
+def allocate_potentials(national_potentials, units, population, land_cover, proxies):
     ds = national_potentials.copy()
     ds = (
         pd
@@ -109,27 +96,27 @@ def allocate_potentials(national_potentials, units, population, land_cover):
         .set_index(["id", "feedstock"])
         .to_xarray()
     )
-    ds["population_share"] = (
+    ds["population"] = (
         population
         .groupby(units.country_code)
         .transform(lambda x: x / x.sum())
-        .rename("population_share")
+        .rename("population")
     )
-    ds["forest_share"] = (
+    ds["forest"] = (
         land_cover[FOREST]
         .sum(axis=1)
         .groupby(units.country_code)
         .transform(lambda x: x / x.sum())
-        .rename("forest_share")
+        .rename("forest")
     )
-    ds["farm_share"] = (
+    ds["farmland"] = (
         land_cover[FARM]
         .sum(axis=1)
         .groupby(units.country_code)
         .transform(lambda x: x / x.sum())
-        .rename("farm_share")
+        .rename("farmland")
     )
-    ds["proxy"] = pd.Series(PROXIES).rename("proxy").rename_axis(index="feedstock").to_xarray()
+    ds["proxy"] = pd.Series(proxies).rename("proxy").rename_axis(index="feedstock").to_xarray()
     proxy_value = xr.ones_like(ds.value)
     for feedstock in ds.feedstock:
         for id in ds.id:
@@ -149,5 +136,6 @@ if __name__ == "__main__":
         scenario=snakemake.wildcards.scenario,
         potential_year=snakemake.params.potential_year,
         cost_year=snakemake.params.cost_year,
+        proxies=snakemake.params.proxies,
         paths_to_output=snakemake.output
     )
