@@ -29,7 +29,7 @@ If you are unable to access the full documentation via ReadTheDocs following the
 
 
 ```bash
-conda env install -f envs/docs.yaml
+conda env create -f envs/docs.yaml
 conda activate docs
 mkdocs build --no-directory-urls
 ```

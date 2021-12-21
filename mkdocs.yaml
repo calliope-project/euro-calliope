@@ -19,6 +19,7 @@ nav:
         - Citation: about/citation.md
 theme: readthedocs
 repo_url: https://github.com/calliope-project/euro-calliope/
+edit_uri: edit/develop/docs/
 site_dir: build/docs
 markdown_extensions:
     - admonition
