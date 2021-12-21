@@ -7,7 +7,7 @@ script_dir = f"{root_dir}scripts/"
 rule download_biofuel_potentials_and_costs:
     message: "Download raw biofuel potential and cost data."
     params: url = config["data-sources"]["biofuel-potentials-and-costs"]
-    output: protected("data/automatic/raw-biofuel-potentials-and-costs.xslx")
+    output: protected("data/automatic/raw-biofuel-potentials-and-costs.xlsx")
     conda: "../envs/shell.yaml"
     shell: "curl -sLo {output} '{params.url}'"
 
