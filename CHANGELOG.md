@@ -35,6 +35,7 @@
 * **UPDATE** Make scaling pumped hydro capacity according to Geth et al. (2015) optional with a boolean config parameter `scale-phs-according-to-geth-et-al` which defaults to False (no scaling) (#49).
 * **UPDATE** JRC hydro database v4 -> v9 (#48, #57). This entails one patch being removed:
     1. Romanian PHS data is no longer manually added from Geth et al. (2015).
+* **UPDATE** JRC biofuel potentials data source from @RuizCastello:2015 to ENSPRESO (@Ruiz:2019) (#194). This changes the potentials of the continent (0.1% less), Montenegro (93% less), North Macedonia (44% less), the UK (6% more), and the Netherlands (1% less).
 * **UPDATE** Improve gap-filling method for national electricity load data (#3).
 * **UPDATE** dependencies (#44, #73, #142):
     * Python 3.7 -> 3.8
@@ -43,8 +44,9 @@
     * geo packages from gdal 2.4 -> 3.2.1
     * Updates to NumPy, Pandas, xarray, pytest, and others
 
-* **FIX** variable cost of biofuels (#193). Together with another change (#195), this reduces variable cost of biofuels from 64.83 to 44.14 €/MWh (32%) using the default settings.
-* **FIX** alignment of cost and potential years for biofuels (#195). Together with another change (#193), this reduces variable cost of biofuels from 64.83 to 44.14 €/MWh (32%) using the default settings.
+* **FIX** variable cost of biofuels. This reduces variable cost of biofuels from 64.83 to 44.14 €/MWh_el (32%) using the default settings.
+    * Fix cost of municipal waste (#193).
+    * Fix alignment of cost and potential years for biofuels (#195).
 * **FIX** the centroid determination of all locations which had been calculated on an unprojected reference system before and was therefore slightly off (#147).
 
 ## 1.0.0 (2020-07-01)

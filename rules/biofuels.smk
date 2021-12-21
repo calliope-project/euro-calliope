@@ -52,5 +52,5 @@ rule biofuels:
         costs = "build/data/{resolution}/biofuel/{scenario}/costs-eur-per-mwh.csv" # not actually resolution dependent
     conda: "../envs/default.yaml"
     wildcard_constraints:
-        scenario = "((low)|(medium)|(high))"
+        scenario = "low|medium|high"
     script: "../scripts/biofuels.py"

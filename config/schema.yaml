@@ -163,7 +163,7 @@ properties:
                         maximum: 1
             jrc-biofuel:
                 type: object
-                description: Biofuels potential under different scenarios, to select specific data from [@Ruiz:2019]
+                description: Biofuel potential under different scenarios, to select specific data from [@Ruiz:2019]
                 properties:
                     scenario:
                         type: string

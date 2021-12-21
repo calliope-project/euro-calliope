@@ -49,7 +49,7 @@ rule capacity_factors_onshore_wind_and_solar:
         year = config["year"],
         trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
     wildcard_constraints:
-        technology = "((wind-onshore)|(rooftop-pv)|(open-field-pv)|(rooftop-pv-n)|(rooftop-pv-e-w)|(rooftop-pv-s-flat))"
+        technology = "wind-onshore|rooftop-pv|open-field-pv|rooftop-pv-n|rooftop-pv-e-w|rooftop-pv-s-flat"
     output: "build/model/{resolution}/capacityfactors-{technology}.csv"
     conda: "../envs/geo.yaml"
     script: "../scripts/capacityfactors.py"

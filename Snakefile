@@ -19,7 +19,7 @@ include: "./rules/sync.smk"
 localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials, download_eurocalliope_dataset
 localrules: download_capacity_factors_wind_and_solar, download_entsoe_tyndp_zip
 wildcard_constraints:
-        resolution = "((continental)|(national)|(regional))"
+        resolution = "continental|national|regional"
 
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
@@ -76,7 +76,7 @@ rule parameterise_template:
         biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
     output: "build/model/{template}"
     wildcard_constraints:
-        template = "((link-techs.yaml)|(storage-techs.yaml)|(demand-techs.yaml)|(renewable-techs.yaml)|(README.md)|(environment.yaml)|(interest-rate.yaml)|(tech-costs.yaml))"
+        template = "link-techs.yaml|storage-techs.yaml|demand-techs.yaml|renewable-techs.yaml|README.md|environment.yaml|interest-rate.yaml|tech-costs.yaml"
     conda: "envs/default.yaml"
     script: "scripts/parameterise_templates.py"
 
