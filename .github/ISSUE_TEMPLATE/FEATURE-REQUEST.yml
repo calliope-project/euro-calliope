@@ -21,7 +21,7 @@ body:
       description: What version of Euro-Calliope are you using?
       options:
         - 1.0.0
-        - 1.1.0.dev
+        - 1.1.0
         - 1.2.0.dev
     validations:
       required: true
