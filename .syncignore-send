@@ -8,5 +8,4 @@ __pycache__
 .DS_Store
 build
 data/automatic
-data/euro-calliope-datasets
 notebooks
