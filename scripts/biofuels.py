@@ -52,24 +52,21 @@ def biofuel_potential(path_to_national_potentials, path_to_national_costs, path_
         pd
         .read_csv(path_to_national_potentials, index_col=["year", "scenario", "country_code", "feedstock"])["value"]
         .mul(PJ_TO_MWH)
-        .to_xarray()
-        .sel(year=potential_year, scenario=scenario)
+        .xs((potential_year, scenario), level=("year", "scenario"))
     )
     national_costs = (
         pd
         .read_csv(path_to_national_costs, index_col=["year", "scenario", "country_code", "feedstock"])["value"]
         .div(GJ_TO_MWH)
-        .to_xarray()
-        .sel(year=cost_year, scenario=scenario)
+        .xs((potential_year, scenario), level=("year", "scenario"))
     )
     units = pd.read_csv(path_to_units).set_index("id")
     if (len(units.index) == 1) and (units.index[0] == "EUR"): # special case for continental level
-        national_costs = (
-            (national_costs * national_potentials / national_potentials.sum(["country_code", "feedstock"]))
-            .sum(["country_code", "feedstock"])
-            .expand_dims({"country_code": ["EUR"]})
+        national_potentials = (
+            national_potentials
+            .rename(lambda x: "EUR", level="country_code")
+            .sum(level=["country_code", "feedstock"])
         )
-        national_potentials = national_potentials.sum("country_code").expand_dims({"country_code": ["EUR"]})
 
     total_potential = allocate_potentials(
         national_potentials=national_potentials,
@@ -80,50 +77,36 @@ def biofuel_potential(path_to_national_potentials, path_to_national_costs, path_
     )
     total_potential.to_csv(paths_to_output.potentials, index=True, header=True)
     weighted_cost = (
-        (national_costs * national_potentials / national_potentials.sum(["country_code", "feedstock"]))
-        .sum(["country_code", "feedstock"])
-        .item()
+          national_costs
+          .mul(national_potentials)
+          .div(national_potentials.sum())
+          .sum()
     )
     with open(paths_to_output.costs, "w") as f_cost:
         f_cost.write(str(weighted_cost))
 
 
 def allocate_potentials(national_potentials, units, population, land_cover, proxies):
-    ds = national_potentials.copy()
-    ds = (
-        pd
-        .merge(units["country_code"].reset_index(), ds.to_series().reset_index(), on="country_code")
-        .set_index(["id", "feedstock"])
-        .to_xarray()
+    regional_potentials = (
+        pd.merge(
+            national_potentials.to_series().reset_index(),
+            units["country_code"].reset_index(), 
+            on="country_code"
+        )
+        .pivot(index="id", columns="feedstock", values="value")
     )
-    ds["population"] = (
-        population
+    shares = (
+        pd.concat(
+            [population, land_cover[FOREST].sum(axis=1), land_cover[FARM].sum(axis=1)], 
+            axis=1, 
+            keys=['population', 'forest', "farmland"]
+        )
         .groupby(units.country_code)
         .transform(lambda x: x / x.sum())
-        .rename("population")
     )
-    ds["forest"] = (
-        land_cover[FOREST]
-        .sum(axis=1)
-        .groupby(units.country_code)
-        .transform(lambda x: x / x.sum())
-        .rename("forest")
-    )
-    ds["farmland"] = (
-        land_cover[FARM]
-        .sum(axis=1)
-        .groupby(units.country_code)
-        .transform(lambda x: x / x.sum())
-        .rename("farmland")
-    )
-    ds["proxy"] = pd.Series(proxies).rename("proxy").rename_axis(index="feedstock").to_xarray()
-    proxy_value = xr.ones_like(ds.value)
-    for feedstock in ds.feedstock:
-        for id in ds.id:
-            proxy = ds.sel(id=id, feedstock=feedstock).proxy.item()
-            proxy_value.loc[dict(id=id, feedstock=feedstock)] = ds.sel(id=id)[proxy].item()
-    ds["value"] = ds.value * proxy_value
-    return ds.value.sum("feedstock").rename(NAME).to_series()
+    regional_potentials_sum = regional_potentials.groupby(proxies, axis=1).sum()
+    regional_potentials_weighted = regional_potentials_sum.mul(shares).sum(axis=1)
+    return regional_potentials_weighted.rename(NAME)
 
 
 if __name__ == "__main__":
