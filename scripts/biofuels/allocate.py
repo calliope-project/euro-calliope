@@ -88,7 +88,6 @@ def biofuel_potential(path_to_national_potentials, path_to_national_costs, path_
         .div(national_potentials.sum())
         .sum()
     )
-    breakpoint()
     with open(paths_to_output.costs, "w") as f_cost:
         f_cost.write(str(weighted_cost))
 

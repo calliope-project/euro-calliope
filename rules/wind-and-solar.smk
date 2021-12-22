@@ -1,5 +1,7 @@
 """Rules related to wind and solar."""
 
+localrules: download_potentials, download_capacity_factors_wind_and_solar
+
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 script_dir = f"{root_dir}scripts/"
 
