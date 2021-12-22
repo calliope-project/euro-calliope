@@ -37,6 +37,7 @@
     1. Romanian PHS data is no longer manually added from Geth et al. (2015).
 * **UPDATE** JRC biofuel potentials data source from @RuizCastello:2015 to ENSPRESO (@Ruiz:2019) (#194). This changes the potentials of the continent (0.1% less), Montenegro (93% less), North Macedonia (44% less), the UK (6% more), and the Netherlands (1% less).
 * **UPDATE** Improve gap-filling method for national electricity load data (#3).
+* **UPDATE** location of non-automatically derivable datasets: they are  not included in the workflow repository anymore, but instead published separately on Zenodo (#201).
 * **UPDATE** dependencies (#44, #73, #142):
     * Python 3.7 -> 3.8
     * Snakemake 5.8.2 -> 6.1.1 (uses mamba by default)

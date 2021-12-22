@@ -33,14 +33,14 @@ properties:
             eez:
                 type: string
                 description: Path to local geospatial Exclusive Economic Zones data.
-            irena-generation:
+            hydro-generation:
                 type: string
-                pattern: .*\.csv$
-                description: Path to local hydro generation data from IRENA.
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of hydro generation data.
             national-phs-storage-capacities:
                 type: string
-                pattern: .*\.csv$
-                description: Path to local storage capacities data (in GWh).
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of storage capacities data (in GWh).
             capacity-factors:
                 type: string
                 pattern: ^(https?|http?):\/\/.+{filename}.*
@@ -69,10 +69,6 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of potentials of solar and wind.
-            data-repository:
-                type: string
-                pattern: ^(https?|http?):\/\/.+{dataset}.*
-                description: Web address of proprietry datasets that have been pre-processed for specific use in Euro-Calliope.
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.

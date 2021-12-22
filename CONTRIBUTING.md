@@ -105,25 +105,23 @@ Take the existing fixtures as a starting point.
 Whenever you want to publish a new release of Euro-Calliope, you need to perform several manual steps.
 Be aware that you can publish a release only if you are a maintainer of the two central GitHub repositories and if you have edit access to the three Zenodo archives linked below.
 
-1. Release upstream repo [`euro-calliope-datasets`](https://github.com/calliope-project/euro-calliope-datasets) (using the same version number `vX.Y.Z`) and publish on Zenodo.
-2. Branch off of `develop` into a `release-vX.Y.Z` branch and apply the following changes:
-    1. Link to Zenodo release of `euro-calliope-datasets` in the `data-sources.data-repository` config parameter in [./config/default.yaml](./config/default.yaml).
-    2. Bump version to `vX.Y.Z` in the following places:
+1. Branch off of `develop` into a `release-vX.Y.Z` branch and apply the following changes:
+    1. Bump version to `vX.Y.Z` in the following places:
         * [./CITATION.cff](./CITATION.cff)
         * [./VERSION](./VERSION)
         * [.github/ISSUE_TEMPLATE/BUG-REPORT.yml](.github/ISSUE_TEMPLATE/BUG-REPORT.yml)
         * [.github/ISSUE_TEMPLATE/FEATURE-REQUEST.yml](.github/ISSUE_TEMPLATE/FEATURE-REQUEST.yml)
         * [./lib/setup.py](./lib/setup.py)
         * [./lib/eurocalliopelib/__init__.py](./lib/eurocalliopelib/__init__.py)
-    3. Verify consistent versions of Snakemake and Calliope.
+    2. Verify consistent versions of Snakemake and Calliope.
     Their versions are spread over the entire repository (including urls in the documentation).
     Use search and replace to make sure all versions are consistent.
-    4. Update the changelog and add the release date.
-    5. Update [./LICENSE.md](./LICENSE.md) if necessary.
+    3. Update the changelog and add the release date.
+    4. Update [./LICENSE.md](./LICENSE.md) if necessary.
     5. (If necessary) Update `docs/img/spatial-scope-and-resolutions.png` by running `snakemake -j1 --use-conda -s rules/doc.smk docs/img/spatial-scope-and-resolutions.png`. Inspect the result visually. Check it in if it changed; check out the old version if it did not change. The figure will change when the spatial scope or resolution has changed.
-3. Build the pre-builts and test everything using the `all_tests` rule.
-4. Commit, open a pull request onto `develop`, and merge the release branch into both `develop` and `main` after successful review.
-5. Add a `vX.Y.Z` release tag to `main`.
-6. Bump version on `develop` in the same places as in point 2.
-7. Upload the pre-builts to [their home on Zenodo](https://doi.org/10.5281/zenodo.3949552).
-8. Download the release version of the workflow code from GitHub and upload to [its home on Zenodo](https://doi.org/10.5281/zenodo.3949793).
+2. Build the pre-builts and test everything using the `all_tests` rule.
+3. Commit, open a pull request onto `develop`, and merge the release branch into both `develop` and `main` after successful review.
+4. Add a `vX.Y.Z` release tag to `main`.
+5. Bump version on `develop` in the same places as in point 2.
+6. Upload the pre-builts to [their home on Zenodo](https://doi.org/10.5281/zenodo.3949552).
+7. Download the release version of the workflow code from GitHub and upload to [its home on Zenodo](https://doi.org/10.5281/zenodo.3949793).
