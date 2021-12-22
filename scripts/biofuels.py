@@ -2,7 +2,6 @@
 from enum import Enum
 
 import pandas as pd
-import xarray as xr
 
 PJ_TO_MWH = 1 / 3600 * 1e9
 GJ_TO_MWH = 1 / 3600 * 1e3
@@ -62,6 +61,13 @@ def biofuel_potential(path_to_national_potentials, path_to_national_costs, path_
     )
     units = pd.read_csv(path_to_units).set_index("id")
     if (len(units.index) == 1) and (units.index[0] == "EUR"): # special case for continental level
+        cost = (
+            national_costs
+            .mul(national_potentials)
+            .div(national_potentials.sum())
+            .sum()
+        )
+        national_costs = pd.Series([cost], index=["EUR"]).rename_axis(index="country_code")
         national_potentials = (
             national_potentials
             .rename(lambda x: "EUR", level="country_code")
@@ -77,11 +83,12 @@ def biofuel_potential(path_to_national_potentials, path_to_national_costs, path_
     )
     total_potential.to_csv(paths_to_output.potentials, index=True, header=True)
     weighted_cost = (
-          national_costs
-          .mul(national_potentials)
-          .div(national_potentials.sum())
-          .sum()
+        national_costs
+        .mul(national_potentials)
+        .div(national_potentials.sum())
+        .sum()
     )
+    breakpoint()
     with open(paths_to_output.costs, "w") as f_cost:
         f_cost.write(str(weighted_cost))
 
@@ -89,16 +96,16 @@ def biofuel_potential(path_to_national_potentials, path_to_national_costs, path_
 def allocate_potentials(national_potentials, units, population, land_cover, proxies):
     regional_potentials = (
         pd.merge(
-            national_potentials.to_series().reset_index(),
-            units["country_code"].reset_index(), 
+            national_potentials.reset_index(),
+            units["country_code"].reset_index(),
             on="country_code"
         )
         .pivot(index="id", columns="feedstock", values="value")
     )
     shares = (
         pd.concat(
-            [population, land_cover[FOREST].sum(axis=1), land_cover[FARM].sum(axis=1)], 
-            axis=1, 
+            [population, land_cover[FOREST].sum(axis=1), land_cover[FARM].sum(axis=1)],
+            axis=1,
             keys=['population', 'forest', "farmland"]
         )
         .groupby(units.country_code)
