@@ -28,3 +28,7 @@ def test_open_field_vs_rooftop(open_field_pv_capacity_factor_timeseries,
     of = open_field_pv_capacity_factor_timeseries.loc[:, location].mean()
     rt = rooftop_pv_capacity_factor_timeseries.loc[:, location].mean()
     assert of > rt
+
+
+def test_wind_onshore(wind_onshore_capacity_factor_timeseries, location):
+    assert wind_onshore_capacity_factor_timeseries.loc[:, location].mean() > 0

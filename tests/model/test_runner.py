@@ -80,6 +80,11 @@ def _create_config_plugin(path_to_model, path_to_example_model, paths_to_cf_time
             path = self._select_capacity_factor_time_series("rooftop-pv")
             return pd.read_csv(path, index_col=0, parse_dates=True)
 
+        @pytest.fixture(scope="module")
+        def wind_onshore_capacity_factor_timeseries(self):
+            path = self._select_capacity_factor_time_series("wind-onshore")
+            return pd.read_csv(path, index_col=0, parse_dates=True)
+
         def _select_capacity_factor_time_series(self, technology):
             selected = [path for path in paths_to_cf_timeseries
                         if Path(path).name == f"capacityfactors-{technology}.csv"]
