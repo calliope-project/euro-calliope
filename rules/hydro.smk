@@ -1,6 +1,5 @@
 """Rules to generate hydro electricity capacities and time series."""
 
-configfile: "./config/default.yaml"
 localrules: download_runoff_data, download_basins_database, download_stations_database
 localrules: basins_database, stations_database
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""

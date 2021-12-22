@@ -7,29 +7,19 @@ ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
     "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat"
 ]
-BIOFUEL_FEEDSTOCKS = [
-    "forestry-energy-residues",
-    "landscape-care-residues",
-    "manure",
-    "municipal-waste",
-    "primary-agricultural-residues",
-    "roundwood-chips",
-    "roundwood-fuelwood",
-    "secondary-forestry-residues-sawdust",
-    "secondary-forestry-residues-woodchips",
-    "sludge"
-]
 
+configfile: "config/default.yaml"
+validate(config, "config/schema.yaml")
 
 include: "./rules/shapes.smk"
+include: "./rules/wind-and-solar.smk"
+include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
 include: "./rules/sync.smk"
 localrules: all, download_raw_load, model, clean, parameterise_template, download_potentials, download_eurocalliope_dataset
 localrules: download_capacity_factors_wind_and_solar, download_entsoe_tyndp_zip
-configfile: "config/default.yaml"
-validate(config, "config/schema.yaml")
 wildcard_constraints:
-        resolution = "((continental)|(national)|(regional))"
+        resolution = "continental|national|regional"
 
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
@@ -71,30 +61,6 @@ rule all_tests:
         "build/model/build-metadata.yaml"
 
 
-rule download_potentials:
-    message: "Download potential data."
-    params: url = config["data-sources"]["potentials"]
-    output: protected("data/automatic/raw-potentials.zip")
-    conda: "envs/shell.yaml"
-    shell: "curl -sLo {output} '{params.url}'"
-
-
-rule potentials:
-    message: "Unzip potentials."
-    input: rules.download_potentials.output[0]
-    shadow: "minimal"
-    output:
-        land_eligibility_km2 = "build/data/{{resolution}}/{scenario}/areas.csv".format(
-            scenario=config["parameters"]["wind-and-solar-potential-scenario"]
-        ),
-        shared_coast = "build/data/{resolution}/shared-coast.csv",
-        demand = "build/data/{resolution}/demand.csv",
-        population = "build/data/{resolution}/population.csv",
-        land_cover = "build/data/{resolution}/land-cover.csv"
-    conda: "envs/shell.yaml"
-    shell: "unzip -o {input} -d build/data"
-
-
 rule parameterise_template:
     message: "Apply config parameters to file {wildcards.template} from templates."
     input:
@@ -110,7 +76,7 @@ rule parameterise_template:
         biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
     output: "build/model/{template}"
     wildcard_constraints:
-        template = "((link-techs.yaml)|(storage-techs.yaml)|(demand-techs.yaml)|(renewable-techs.yaml)|(README.md)|(environment.yaml)|(interest-rate.yaml)|(tech-costs.yaml))"
+        template = "link-techs.yaml|storage-techs.yaml|demand-techs.yaml|renewable-techs.yaml|README.md|environment.yaml|interest-rate.yaml|tech-costs.yaml"
     conda: "envs/default.yaml"
     script: "scripts/parameterise_templates.py"
 
@@ -124,27 +90,6 @@ rule hydro_capacities:
     output: "build/data/{resolution}/hydro-capacities-mw.csv"
     conda: "envs/geo.yaml"
     script: "scripts/hydro_capacities.py"
-
-
-rule biofuels:
-    message: "Determine biofuels potential on {wildcards.resolution} resolution for scenario {wildcards.scenario}."
-    input:
-        script = script_dir + "biofuels.py",
-        units = rules.units.output[0],
-        land_cover = rules.potentials.output.land_cover,
-        population = rules.potentials.output.population,
-        national_potentials = expand(config["data-sources"]["biofuel-potentials"], feedstock=BIOFUEL_FEEDSTOCKS),
-        costs = expand(config["data-sources"]["biofuel-costs"], feedstock=BIOFUEL_FEEDSTOCKS)
-    params:
-        potential_year = config["parameters"]["jrc-biofuel"]["potential-year"],
-        cost_year = config["parameters"]["jrc-biofuel"]["cost-year"]
-    output:
-        potentials = "build/data/{resolution}/biofuel/{scenario}/potential-mwh-per-year.csv",
-        costs = "build/data/{resolution}/biofuel/{scenario}/costs-eur-per-mwh.csv" # not actually resolution dependent
-    conda: "envs/geo.yaml"
-    wildcard_constraints:
-        scenario = "((low)|(medium)|(high))"
-    script: "scripts/biofuels.py"
 
 
 rule locations:
@@ -190,50 +135,6 @@ rule load_shedding:
     output: "build/model/{resolution}/load-shedding.yaml"
     conda: "envs/default.yaml"
     script: "scripts/load_shedding.py"
-
-
-rule download_capacity_factors_wind_and_solar:
-    message: "Download data/automatic/capacityfactors/{wildcards.filename}."
-    params: url = lambda wildcards: config["data-sources"]["capacity-factors"].format(filename=wildcards.filename)
-    output: protected("data/automatic/capacityfactors/{filename}")
-    conda: "envs/shell.yaml"
-    shell: "curl -sLo {output} '{params.url}'"
-
-
-rule capacity_factors_onshore_wind_and_solar:
-    message: "Generate capacityfactor time series disaggregated by location on "
-             "{wildcards.resolution} resolution for {wildcards.technology}."
-    input:
-        script = script_dir + "capacityfactors.py",
-        locations = rules.units.output[0],
-        timeseries = ancient("data/automatic/capacityfactors/{technology}-timeseries.nc"),
-        coordinates = ancient("data/automatic/capacityfactors/wind-onshore-timeseries.nc")
-    params:
-        threshold = config["capacity-factors"]["min"],
-        year = config["year"],
-        trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
-    wildcard_constraints:
-        technology = "((wind-onshore)|(rooftop-pv)|(open-field-pv)|(rooftop-pv-n)|(rooftop-pv-e-w)|(rooftop-pv-s-flat))"
-    output: "build/model/{resolution}/capacityfactors-{technology}.csv"
-    conda: "envs/geo.yaml"
-    script: "scripts/capacityfactors.py"
-
-
-rule capacity_factors_offshore:
-    message: "Generate capacityfactor time series disaggregated by location on "
-             "{wildcards.resolution} resolution for wind-offshore."
-    input:
-        script = script_dir + "capacityfactors_offshore.py",
-        eez = rules.eez.output[0],
-        shared_coast = rules.potentials.output.shared_coast,
-        timeseries = ancient("data/automatic/capacityfactors/wind-offshore-timeseries.nc")
-    params:
-        threshold = config["capacity-factors"]["min"],
-        year = config["year"],
-        trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
-    output: "build/model/{resolution}/capacityfactors-wind-offshore.csv"
-    conda: "envs/geo.yaml"
-    script: "scripts/capacityfactors_offshore.py"
 
 
 rule capacity_factors_hydro:

@@ -34,9 +34,8 @@ JRC. (2014). <i>ETRI 2014 -- Energy Technology Reference Indicator projections f
 
 European Environment Agency. (2009). <i>Europe’s onshore and offshore wind energy potential</i> [Publication]. [https://www.eea.europa.eu/publications/europes-onshore-and-offshore-wind-energy-potential](https://www.eea.europa.eu/publications/europes-onshore-and-offshore-wind-energy-potential)
 
-### @RuizCastello:2015
-
-Ruiz Castello, P., Sgobbi, A., Nijs, W., Thiel, C., Dalla Longa, F., Kober, T., Elbersen, B., &#38; Hengeveld, G. (2015). <i>The JRC-EU-TIMES model. Bioenergy potentials for EU and neighbouring countries.</i> [https://ec.europa.eu/jrc/en/publication/eur-scientific-and-technical-research-reports/jrc-eu-times-model-bioenergy-potentials-eu-and-neighbouring-countries](https://ec.europa.eu/jrc/en/publication/eur-scientific-and-technical-research-reports/jrc-eu-times-model-bioenergy-potentials-eu-and-neighbouring-countries)
+### @Ruiz:2019
+Ruiz, P., Nijs, W., Tarvydas, D., Sgobbi, A., Zucker, A., Pilli, R., Jonsson, R., Camia, A., Thiel, C., Hoyer-Klick, C., Dalla Longa, F., Kober, T., Badger, J., Volker, P., Elbersen, B. S., Brosowski, A., &#38; Thrän, D. (2019). ENSPRESO - an open, EU-28 wide, transparent and coherent database of wind, solar and biomass energy potentials. <i>Energy Strategy Reviews</i>, <i>26</i>, 100379. [https://doi.org/10.1016/j.esr.2019.100379](https://doi.org/10.1016/j.esr.2019.100379)
 
 ### @schroeder:2013
 
