@@ -11,12 +11,14 @@
     * **ADD** a developer documentation that aids contributions (#109).
     * **ADD** a visualisation of administrative units on all three spatial resolutions (#165).
 * **ADD** Link YAML file defining national net-transfer capacities from ENTSO-E TYNDP 2020 scenarios (#61).
-* **ADD** automatic download of EEZ (#99).
+* **ADD** automatic downloads of the following datasources:
+    * EEZ (#99),
+    * hydro basins data (#34),
+    * biofuels potential and cost data (#194).
 * **ADD** Danish Energy Agency and Schroeder et al (2013) cost data as well as no hydro fixed costs as optional overrides (#18, #129).
 * **ADD** override to constrain energy to power ratios of battery and hydrogen storage (#130).
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
-* **ADD** automatic download of hydro basins data (#34).
 * **ADD** minimal configuration to be able to test the entire workflow more quickly (#60).
 * **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59).
 * **ADD** sync infrastructure to easily send and receive files to and from a cluster (#74).
@@ -33,7 +35,9 @@
 * **UPDATE** Make scaling pumped hydro capacity according to Geth et al. (2015) optional with a boolean config parameter `scale-phs-according-to-geth-et-al` which defaults to False (no scaling) (#49).
 * **UPDATE** JRC hydro database v4 -> v9 (#48, #57). This entails one patch being removed:
     1. Romanian PHS data is no longer manually added from Geth et al. (2015).
+* **UPDATE** JRC biofuel potentials data source from @RuizCastello:2015 to ENSPRESO (@Ruiz:2019) (#194). This changes the potentials of the continent (0.1% less), Montenegro (93% less), North Macedonia (44% less), the UK (6% more), and the Netherlands (1% less).
 * **UPDATE** Improve gap-filling method for national electricity load data (#3).
+* **UPDATE** location of non-automatically derivable datasets: they are  not included in the workflow repository anymore, but instead published separately on Zenodo (#201).
 * **UPDATE** dependencies (#44, #73, #142):
     * Python 3.7 -> 3.8
     * Snakemake 5.8.2 -> 6.1.1 (uses mamba by default)
@@ -41,6 +45,9 @@
     * geo packages from gdal 2.4 -> 3.2.1
     * Updates to NumPy, Pandas, xarray, pytest, and others
 
+* **FIX** variable cost of biofuels. This reduces variable cost of biofuels from 64.83 to 44.14 €/MWh_el (32%) using the default settings.
+    * Fix cost of municipal waste (#193).
+    * Fix alignment of cost and potential years for biofuels (#195).
 * **FIX** the centroid determination of all locations which had been calculated on an unprojected reference system before and was therefore slightly off (#147).
 
 ## 1.0.0 (2020-07-01)

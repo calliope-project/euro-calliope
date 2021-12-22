@@ -50,7 +50,6 @@ When you have downloaded or cloned the workflow, you will have a set of files in
 * `build/model`: Contains the entire model after the build step, including Calliope definition files and data (does not exist initially).
 * `config`: Files with configuration parameters that customise the model build process.
 * `data/automatic`: Contains data automatically downloaded from third-party sources within the model build process (does not exist initially).
-* `data/euro-calliope-dataset`: Contains data automatically downloaded from the [Euro-Calliope datasets repository](https://github.com/calliope-project/euro-calliope-datasets) within the model build process (does not exist initially).
 * `docs`: Documentation of the model and the build process.
 * `envs`: Files defining the conda environments that are used to build the model.
 * `lib`: Library code in form of a Python package that is reused in many places of this repository.

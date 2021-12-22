@@ -1,10 +1,9 @@
 # For descriptions of the configuration values, see `./schema.yaml`.
 data-sources:
-    biofuel-potentials: data/euro-calliope-datasets/biofuels/potentials/{feedstock}.csv
-    biofuel-costs: data/euro-calliope-datasets/biofuels/costs/{feedstock}.csv
+    biofuel-potentials-and-costs: https://cidportal.jrc.ec.europa.eu/ftp/jrc-opendata/ENSPRESO/ENSPRESO_BIOMASS.xlsx
     eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
-    irena-generation: data/euro-calliope-datasets/irena/hydro-generation-europe.csv
-    national-phs-storage-capacities: data/euro-calliope-datasets/pumped-hydro/storage-capacities-gwh.csv
+    hydro-generation: https://zenodo.org/record/5797549/files/hydro-generation.csv?download=1
+    national-phs-storage-capacities: https://zenodo.org/record/5797549/files/pumped-hydro-storage-capacities-gwh.csv?download=1
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
     gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
     hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
@@ -12,7 +11,6 @@ data-sources:
     load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
     nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
     potentials: https://zenodo.org/record/5112963/files/possibility-for-electricity-autarky.zip
-    data-repository: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/develop/{dataset}
     entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
 root-directory: .
 cluster-sync:
@@ -48,10 +46,79 @@ parameters:
         S: 0.1821
         W: 0.1681
         flat: 0.3020
-    jrc-biofuel: # from [@RuizCastello:2015]
-        scenario: "medium"
-        potential-year: "2020"
-        cost-year: "2030"
+    jrc-biofuel: # from [@Ruiz:2019]
+        scenario: medium
+        potential-year: 2020
+        cost-year: 2020
+        feedstocks: # ASSUME no energy crop feedstocks available.
+            bioethanol-sugar-beet:
+                include: false
+                id: MINBIOCRP21
+                proxy: farmland
+            rapeseeds:
+                include: false
+                id: MINBIORPS1
+                proxy: farmland
+            oil-crops:
+                include: false
+                id: MINBIOLIQ1
+                proxy: farmland
+            starchy-crops:
+                include: false
+                id: MINBIOCRP11
+                proxy: farmland
+            grassy-crops:
+                include: false
+                id: MINBIOCRP31
+                proxy: farmland
+            willow:
+                include: false
+                id: MINBIOCRP41
+                proxy: forest
+            poplar:
+                include: false
+                id: MINBIOCRP41a
+                proxy: forest
+            manure:
+                include: true
+                id: MINBIOGAS1
+                proxy: farmland
+            primary-agricultural-residues:
+                include: true
+                id: MINBIOAGRW1
+                proxy: farmland
+            roundwood-fuelwood:
+                include: true
+                id: MINBIOWOO
+                proxy: forest
+            roundwood-chips:
+                include: true
+                id: MINBIOWOOa
+                proxy: forest
+            forestry-energy-residues:
+                include: true
+                id: MINBIOFRSR1
+                proxy: forest
+            secondary-forestry-residues-woodchips:
+                include: true
+                id: MINBIOWOOW1
+                proxy: forest
+            secondary-forestry-residues-sawdust:
+                include: true
+                id: MINBIOWOOW1a
+                proxy: forest
+            landscape-care-residues:
+                include: true
+                id: MINBIOFRSR1a
+                proxy: population
+            municipal-waste:
+                include: true
+                id: MINBIOMUN1
+                proxy: population
+            sludge:
+                include: true
+                id: MINBIOSLU1
+                proxy: population
     biofuel-efficiency: 0.45
     wind-and-solar-potential-scenario: technical-potential
     entsoe-tyndp:
