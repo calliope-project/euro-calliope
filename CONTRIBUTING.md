@@ -57,7 +57,7 @@ As a developer, you may want to run the entire workflow often to spot errors ear
 For that, you can use a minimal test configuration that takes less time to run than the default configuration.
 
 ```bash
-snakemake --use-conda --cores <N_CORES> --configfile="config/minimal.yaml"
+snakemake --use-conda --cores <N_CORES> --configfile="config/minimal.yaml" all_tests
 ```
 
 Make sure to run this in a clean working directory.
