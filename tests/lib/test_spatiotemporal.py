@@ -242,13 +242,40 @@ def test_four_shapes(four_shapes, make_spatiotemporal_data):
     assert (weighted_ts.iloc[:, 3].values == 3).all()
 
 
-def test_returns_nan_with_nodata_within_shapes(single_shape, spatiotemporal_data_with_nodata_within_single_shape):
-    weighted_ts = area_weighted_time_series(
+def test_fails_with_too_many_nans_within_shapes(single_shape, make_spatiotemporal_data):
+    spatiotemporal_data = make_spatiotemporal_data([0, np.nan, 2, 3])
+    with pytest.raises(AssertionError):
+        area_weighted_time_series(
+            shapes=single_shape,
+            spatiotemporal=spatiotemporal_data,
+            gridcell_overlap_threshold=DEFAULT_THRESHOLD
+        )
+
+
+def test_handles_not_too_many_nans_within_shapes(single_shape, make_spatiotemporal_data):
+    spatiotemporal_data = make_spatiotemporal_data([0, np.nan, 2, 3])
+    area_weighted_time_series(
+        shapes=single_shape,
+        spatiotemporal=spatiotemporal_data,
+        gridcell_overlap_threshold=0.75
+    )
+
+
+def test_fails_with_too_much_nodata_within_shapes(single_shape, spatiotemporal_data_with_nodata_within_single_shape):
+    with pytest.raises(AssertionError):
+        area_weighted_time_series(
+            shapes=single_shape,
+            spatiotemporal=spatiotemporal_data_with_nodata_within_single_shape,
+            gridcell_overlap_threshold=DEFAULT_THRESHOLD
+        )
+
+
+def test_handles_not_too_much_nodata_within_shapes(single_shape, spatiotemporal_data_with_nodata_within_single_shape):
+    area_weighted_time_series(
         shapes=single_shape,
         spatiotemporal=spatiotemporal_data_with_nodata_within_single_shape,
-        gridcell_overlap_threshold=DEFAULT_THRESHOLD
+        gridcell_overlap_threshold=0.75
     )
-    assert pd.isna(weighted_ts).all().all()
 
 
 def test_returns_normal_with_nodata_outside_shape(single_shape, spatiotemporal_data_with_nodata_outside_single_shape):
