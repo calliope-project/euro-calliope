@@ -141,6 +141,8 @@ quality-control:
     hydro:
         scale-phs-according-to-geth-et-al: false
         station-nearest-basin-max-km: 1
+    capacity-factor-gridcell-overlap-threshold: 0.995
+
 sea-connections:
     continental: []
     national: # Source: https://www.entsoe.eu/data/map/

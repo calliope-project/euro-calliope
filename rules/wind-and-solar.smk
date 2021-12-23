@@ -47,7 +47,8 @@ rule capacity_factors_onshore_wind_and_solar:
         timeseries = ancient("data/automatic/capacityfactors/{technology}-timeseries.nc"),
         coordinates = ancient("data/automatic/capacityfactors/wind-onshore-timeseries.nc")
     params:
-        threshold = config["capacity-factors"]["min"],
+        cf_threshold = config["capacity-factors"]["min"],
+        gridcell_overlap_threshold=config["quality-control"]["capacity-factor-gridcell-overlap-threshold"],
         year = config["year"],
         trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
     wildcard_constraints:
@@ -66,7 +67,8 @@ rule capacity_factors_offshore:
         shared_coast = rules.potentials.output.shared_coast,
         timeseries = ancient("data/automatic/capacityfactors/wind-offshore-timeseries.nc")
     params:
-        threshold = config["capacity-factors"]["min"],
+        cf_threshold = config["capacity-factors"]["min"],
+        gridcell_overlap_threshold=config["quality-control"]["capacity-factor-gridcell-overlap-threshold"],
         year = config["year"],
         trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
     output: "build/model/{resolution}/capacityfactors-wind-offshore.csv"
