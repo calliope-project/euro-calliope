@@ -13,6 +13,7 @@ def run_test(path_to_test_dir, path_to_output, path_to_model, path_to_example_mo
             path_to_test_dir,
             f"--html={path_to_output}",
             "--self-contained-html",
+            "--verbose",
         ],
         plugins=[
             _create_config_plugin(

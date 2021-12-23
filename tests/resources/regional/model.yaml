@@ -12,14 +12,11 @@ model:
     name: 'Test model with regional spatial resolution'
     calliope_version: 0.6.7
     timeseries_data_path: '../../../build/model/regional'
-    subset_time: ['2016-01-01', '2016-01-01']
+    subset_time: ['2016-01-01 00:00', '2016-01-01 04:00']
 scenarios:
     default: ["connect_all_neighbours"]
-    directional-pv: ["connect_all_neighbours", "directional-rooftop-pv"]
-    e-to-p-ratios: ["connect_all_neighbours", "exclusive-energy-to-power-ratios"]
-    frozen-hydro: ["connect_all_neighbours", "freeze-hydro-capacities", "no-hydro-fixed-cost"]
-    alternative-cost: ["connect_all_neighbours", "dea-renewable-cost", "schroeder-hydro-cost"]
-    shed-load: ["connect_all_neighbours", "load-shedding"]
+    all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
+                    "dea-renewable-cost", "schroeder-hydro-cost", "freeze-hydro-capacities", "load-shedding"]
 overrides:
     connect_all_neighbours:
         import:
