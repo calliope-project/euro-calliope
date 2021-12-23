@@ -81,7 +81,7 @@ def weighted_time_series(weights_and_values, gridcell_overlap_threshold):
     ds = (  # drop all locations with weight == 0 or value == np.nan
         weights_and_values
         .where(weights_and_values.weight > 0)
-        .dropna(subset=["weight", "value"], dim="xy", how="all")
+        .dropna(subset=["weight", "value"], dim="xy", how="any")
     )
     assert ds.weight.sum() >= gridcell_overlap_threshold
     if ds.weight.sum().round(5) != 1:
