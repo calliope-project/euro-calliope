@@ -83,7 +83,7 @@ def weighted_time_series(weights_and_values, gridcell_overlap_threshold):
         .where(weights_and_values.weight > 0)
         .dropna(subset=["weight", "value"], dim="xy", how="any")
     )
-    assert ds.weight.sum() >= gridcell_overlap_threshold
+    assert ds.weight.sum() >= gridcell_overlap_threshold, ds.weight.sum()
     if ds.weight.sum().round(5) != 1:
         print(
             f"Weight of shape_id {ds.shape_id.item()} only adds up to {ds.weight.sum().item()}. "
