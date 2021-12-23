@@ -71,8 +71,9 @@ def process_jrc_transport_data(data_dir, dataset, out_path):
 
 
 def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, unit):
-    style_df = StyleFrame.read_excel(file, read_style=True, sheet_name=sheet_name)
-    df = pd.read_excel(file, sheet_name=sheet_name)
+    xls = pd.ExcelFile(file)
+    style_df = StyleFrame.read_excel(xls, read_style=True, sheet_name=sheet_name)
+    df = pd.read_excel(xls, sheet_name=sheet_name)
     column_names = str(style_df.data_df.columns[0])
     # We have manually identified the section of data which is of use to us,
     # given by idx_start_str and idx_end_str.

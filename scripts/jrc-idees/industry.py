@@ -40,19 +40,12 @@ def process_jrc_industry_data(data_dir, dataset, threads, out_path):
 
 def process_energy(data_filepaths, threads):
     with Pool(int(threads)) as pool:
-        consumption = pool.starmap(
-            get_jrc_idees_energy_sheet,
-            product((f"{sheet}_fec" for sheet in SHEETS), data_filepaths)
+        demand_consumption = pool.starmap(
+            get_jrc_idees_demand_consumption,
+            product(SHEETS, data_filepaths)
         )
-        demand = pool.starmap(
-            get_jrc_idees_energy_sheet,
-            product((f"{sheet}_ued" for sheet in SHEETS), data_filepaths)
-        )
-    processed_data = pd.concat(
-        [pd.concat(i).sort_index() for i in [consumption, demand]],
-        names=['energy'],
-        keys=['consumption', 'demand']
-    )
+
+    processed_data = pd.concat(demand_consumption).sort_index()
     processed_data = processed_data.apply(utils.ktoe_to_twh)
     processed_data.index = processed_data.index.set_levels(['twh'], level='unit')
 
@@ -60,20 +53,33 @@ def process_energy(data_filepaths, threads):
 
 
 def process_production(data_filepaths):
-    return pd.concat([
-        get_jrc_idees_production_sheet(sheet, file)
-        for file in data_filepaths for sheet in SHEETS
-    ])
+    all_dfs = []
+    for file in data_filepaths:
+        xls = pd.ExcelFile(file)
+        all_dfs.extend([get_jrc_idees_production_sheet(sheet, xls) for sheet in SHEETS])
+
+    return pd.concat(all_dfs)
 
 
-def get_jrc_idees_energy_sheet(sheet_name, file):
+def get_jrc_idees_demand_consumption(sheet, file):
+    print(sheet, file)
+    xls = pd.ExcelFile(file)
+    consumption = get_jrc_idees_energy_sheet(f"{sheet}_fec", xls)
+    demand = get_jrc_idees_energy_sheet(f"{sheet}_ued", xls)
+    return pd.concat(
+        [consumption, demand],
+        names=['energy'],
+        keys=['consumption', 'demand']
+    )
+
+
+def get_jrc_idees_energy_sheet(sheet_name, xls):
     """
     This sheet needs to be parsed both based on the colour of the cell and the indent
     level of the text inside the cell.
     """
-    print(sheet_name, file)
-    style_df = StyleFrame.read_excel(file, read_style=True, sheet_name=sheet_name)
-    df = pd.read_excel(file, sheet_name=sheet_name)
+    style_df = StyleFrame.read_excel(xls, read_style=True, sheet_name=sheet_name)
+    df = pd.read_excel(xls, sheet_name=sheet_name)
     column_names = str(style_df.data_df.columns[0])
 
     last_index_of_data = int(style_df[style_df[column_names].str.find('Market shares') > -1].item())
@@ -154,8 +160,8 @@ def assign_category_country_unit_information(df, column_names):
     )
 
 
-def get_jrc_idees_production_sheet(sheet_name, file):
-    df = pd.read_excel(file, sheet_name=sheet_name, index_col=0)
+def get_jrc_idees_production_sheet(sheet_name, xls):
+    df = pd.read_excel(xls, sheet_name=sheet_name, index_col=0)
     start = df.filter(regex='Physical output', axis=0)
     end = df.filter(regex='Installed capacity', axis=0)
 
