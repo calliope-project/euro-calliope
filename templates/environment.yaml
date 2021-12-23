@@ -1,0 +1,12 @@
+name: euro-calliope
+channels:
+    - conda-forge
+    - gurobi
+dependencies:
+    - python=3.8
+    - numpy=1.19.5
+    - pandas=1.2.4
+    - xarray=0.17.0
+    - gurobi=9.1.2
+    - calliope=0.6.7
+    - pyomo=6.0.1

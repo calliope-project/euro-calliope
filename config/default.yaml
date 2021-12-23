@@ -1,37 +1,150 @@
+# For descriptions of the configuration values, see `./schema.yaml`.
+data-sources:
+    biofuel-potentials-and-costs: https://cidportal.jrc.ec.europa.eu/ftp/jrc-opendata/ENSPRESO/ENSPRESO_BIOMASS.xlsx
+    eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
+    hydro-generation: https://zenodo.org/record/5797549/files/hydro-generation.csv?download=1
+    national-phs-storage-capacities: https://zenodo.org/record/5797549/files/pumped-hydro-storage-capacities-gwh.csv?download=1
+    capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
+    gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
+    hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
+    hydro-stations: https://zenodo.org/record/5119541/files/energy-modelling-toolkit/hydro-power-database-v09.zip?download=1
+    load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
+    nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
+    potentials: https://zenodo.org/record/5112963/files/possibility-for-electricity-autarky.zip
+    entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
+root-directory: .
+cluster-sync:
+    url: euler.ethz.ch
+    send-ignore: .syncignore-send
+    receive-ignore: .syncignore-receive
+    cluster-base-dir: ~/Develop/euro-calliope/
+    local-results-dir: build/cluster
 scaling-factors: # values are tuned for models with a few hours resolution and one year duration
     power: 0.00001 # from MW(h) to 100 GW(h)
     area: 0.0001 # from km2 to 10,000 km2
     monetary: 0.000000001 # from EUR to 1 billion EUR
 capacity-factors:
-    min: 0.001 # consider smaller values to be 0; this helps numerics in the LP
-    max: 10 # for hydro reservoirs, leading to a numerical range of 1e5 (hourly resolution)
-    average: # average estimation used to transform annual fixed to variable costs
+    min: 0.001
+    max: 10 # 0.001 -> 10 leads to a numerical range of 1e5 (hourly resolution)
+    average:
         pv: 0.139 # median of average 2016 open-field factors for ~2700 points in Europe
         onshore: 0.3021 # median of average 2016 factors for ~2700 points in Europe
         offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
         ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
-    trim-ninja-timeseries: True # trims renewables.ninja timeseries to the year in question
+    trim-ninja-timeseries: True
 year: 2016
 crs: "EPSG:4326"
 parameters:
-    maximum-installable-power-density: # this is not the yield, but the density of installed power
-        pv-on-tilted-roofs: 160 # (MW/km^2) from [@Gagnon:2016][@Klauser:2016], i.e. 16% efficiency
-        pv-on-flat-areas: 80 # (MW/km^2) from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
-        onshore-wind: 8 # (MW/km^2) from [@EuropeanEnvironmentAgency:2009]
-        offshore-wind: 15 # (MW/km^2) from [@EuropeanEnvironmentAgency:2009]
+    maximum-installable-power-density:
+        pv-on-tilted-roofs: 160 # from [@Gagnon:2016][@Klauser:2016], i.e. 16% efficiency
+        pv-on-flat-areas: 80 # from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
+        onshore-wind: 8 # from [@EuropeanEnvironmentAgency:2009]
+        offshore-wind: 15 # from [@EuropeanEnvironmentAgency:2009]
     roof-share: # from [@Trondle:2019]
         E: 0.1660
         N: 0.1817
         S: 0.1821
         W: 0.1681
         flat: 0.3020
-    jrc-biofuel:
-        scenario: "medium"
-        potential-year: "2020"
-        cost-year: "2030"
+    jrc-biofuel: # from [@Ruiz:2019]
+        scenario: medium
+        potential-year: 2020
+        cost-year: 2020
+        feedstocks: # ASSUME no energy crop feedstocks available.
+            bioethanol-sugar-beet:
+                include: false
+                id: MINBIOCRP21
+                proxy: farmland
+            rapeseeds:
+                include: false
+                id: MINBIORPS1
+                proxy: farmland
+            oil-crops:
+                include: false
+                id: MINBIOLIQ1
+                proxy: farmland
+            starchy-crops:
+                include: false
+                id: MINBIOCRP11
+                proxy: farmland
+            grassy-crops:
+                include: false
+                id: MINBIOCRP31
+                proxy: farmland
+            willow:
+                include: false
+                id: MINBIOCRP41
+                proxy: forest
+            poplar:
+                include: false
+                id: MINBIOCRP41a
+                proxy: forest
+            manure:
+                include: true
+                id: MINBIOGAS1
+                proxy: farmland
+            primary-agricultural-residues:
+                include: true
+                id: MINBIOAGRW1
+                proxy: farmland
+            roundwood-fuelwood:
+                include: true
+                id: MINBIOWOO
+                proxy: forest
+            roundwood-chips:
+                include: true
+                id: MINBIOWOOa
+                proxy: forest
+            forestry-energy-residues:
+                include: true
+                id: MINBIOFRSR1
+                proxy: forest
+            secondary-forestry-residues-woodchips:
+                include: true
+                id: MINBIOWOOW1
+                proxy: forest
+            secondary-forestry-residues-sawdust:
+                include: true
+                id: MINBIOWOOW1a
+                proxy: forest
+            landscape-care-residues:
+                include: true
+                id: MINBIOFRSR1a
+                proxy: population
+            municipal-waste:
+                include: true
+                id: MINBIOMUN1
+                proxy: population
+            sludge:
+                include: true
+                id: MINBIOSLU1
+                proxy: population
     biofuel-efficiency: 0.45
+    wind-and-solar-potential-scenario: technical-potential
+    entsoe-tyndp:
+        scenario: National Trends
+        grid: Reference
+        projection-year: 2040
+        ntc_limit: max
+        energy_cap_limit: equals
+quality-control:
+    load:
+        outlier-data-thresholds:
+            relative-to-mean-min: 0.25
+            relative-to-mean-max: 2
+        max-interpolate-timesteps: 3
+        acceptable-year-diff-for-gap-filling: 5
+        fill-29th-feb-from-28th: true
+        data-source-priority-order:
+            - actual_entsoe_transparency
+            - actual_entsoe_power_statistics
+    hydro:
+        scale-phs-according-to-geth-et-al: false
+        station-nearest-basin-max-km: 1
+    capacity-factor-gridcell-overlap-threshold: 0.97 # Ceuta y Melilla has smallest overlap
+
 sea-connections:
-    continental:
+    continental: []
     national: # Source: https://www.entsoe.eu/data/map/
         - [ITA, GRC]
         - [EST, FIN]
@@ -125,10 +238,10 @@ scope:
         - "Serbia"
         - "Switzerland"
     bounds:
-        x_min: -15.8 # in degrees east
-        x_max: 37  # in degrees east
-        y_min: 30  # in degrees north
-        y_max: 75  # in degrees north
+        x_min: -15.8
+        x_max: 37
+        y_min: 30
+        y_max: 75
 shapes: # This config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
     continental:
         Austria: nuts0

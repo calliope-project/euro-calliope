@@ -13,13 +13,7 @@ __pycache__
 *.egg-info
 .cache/
 .pytest_cache
-src/data
 
 # Snakemake
 .snakemake/
 dag.pdf
-
-# Sync infrastructure
-.syncignore
-.syncignore-build
-rules/sync.smk

@@ -1,0 +1,31 @@
+techs:
+    battery:
+        essentials:
+            name: 'Battery storage'
+            parent: storage
+            carrier: electricity
+        constraints:
+            energy_cap_max: inf
+            storage_cap_max: inf
+    pumped_hydro:
+        essentials:
+            name: 'Pumped hydro power storage'
+            parent: storage
+            carrier: electricity
+        constraints:
+            energy_cap_max: inf
+            storage_cap_max: inf
+    hydrogen:
+        essentials:
+            name: Hydrogen power storage
+            parent: storage
+            carrier: electricity
+        constraints:
+            energy_cap_max: inf
+            storage_cap_max: inf
+overrides:
+    exclusive-energy-to-power-ratios:
+        # Ensures exclusive energy to power ratios of battery (≤4h) and hydrogen (≥4h) storage.
+        techs:
+            battery.constraints.energy_cap_per_storage_cap_min: 0.25 # ≤ 4h full-power discharge
+            hydrogen.constraints.energy_cap_per_storage_cap_max: 0.25 # ≥ 4h full-power discharge

@@ -1,0 +1,447 @@
+$schema: http://json-schema.org/draft-07/schema#
+description: Below you can find a complete enumeration of all configuration parameters of Euro-Calliope's workflow including short descriptions and datatypes. To learn where to find default values and how to change the parameter values for your model builds, head over to the Customisation section of the workflow documentation.
+definitions:
+    feedstock:
+        type: object
+        properties:
+            include:
+                type: boolean
+                description: Include this feedstock in the total biofuel potential.
+            id:
+                type: string
+                description: The ID of the feedstock.
+            proxy:
+                type: string
+                description: The spatial proxy to allocate national to subnational potentials.
+                enum: [farmland, forest, population]
+        required: ["include", "id", "proxy"]
+type: object
+properties:
+    email:
+        type: string
+        description: Email address to notify of build successes or fails.
+        format: email
+        pattern: ^\S+@\S+\.\S+$
+    data-sources:
+        type: object
+        description: Paths and URLs to datasets.
+        properties:
+            biofuel-potentials-and-costs:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of biofuel potentials and costs.
+            eez:
+                type: string
+                description: Path to local geospatial Exclusive Economic Zones data.
+            hydro-generation:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of hydro generation data.
+            national-phs-storage-capacities:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of storage capacities data (in GWh).
+            capacity-factors:
+                type: string
+                pattern: ^(https?|http?):\/\/.+{filename}.*
+                description: Web address of the capacity factor timeseries. Must contain {filename} placeholder.
+            gadm:
+                type: string
+                pattern: ^(https?|http?):\/\/.+{country_code}.*
+                description: Web address of geospatial GADM data. Must contain {country_code} placeholder.
+            hydro-basins:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of geospatial basins data.
+            hydro-stations:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of database of hydro stations.
+            load:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of load data.
+            nuts:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of geospatial NUTS data.
+            potentials:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of potentials of solar and wind.
+    root-directory:
+        type: string
+        description: Path to the root directory of euro-calliope containing scripts and template folders.
+    cluster-sync:
+        type: object
+        description: Configuration for the "work local, build on remote" workflow.
+        properties:
+            url:
+                type: string
+                description: URL of the cluster.
+            send-ignore:
+                type: string
+                description: Path to local file defining files and folders to ignore when sending to cluster (relative to workdir).
+            receive-ignore:
+                type: string
+                description: Path to local file defining files and folders to ignore when receiving from cluster (relative to workdir).
+            cluster-base-dir:
+                type: string
+                description: Path on cluster into which files are sent from local machine (must exist).
+            local-results-dir:
+                type: string
+                description: Path to local folder into which results from cluster are downloaded (relative to workdir).
+    scaling-factors:
+        type: object
+        description: Factors to scale the optimisation problem to decrease its numerical range.
+        properties:
+            power:
+                type: number
+                description: "Applied to all quantities of energy and power (base: MW(h))."
+            area:
+                type: number
+                description: "Applied to all quantities of area (base: km²)."
+            monetary:
+                type: number
+                description: "Applied to all quantities of monetary cost (base: EUR)."
+    parameters:
+        type: object
+        description: Parameter values of the models.
+        properties:
+            maximum-installable-power-density:
+                type: object
+                description: Installable capacity density in MW/km² (not annual energy yield).
+                properties:
+                    pv-on-tilted-roofs:
+                        type: number
+                        minimum: 0
+                        description: (MW/km²)
+                    pv-on-flat-areas:
+                        type: number
+                        minimum: 0
+                        description: (MW/km²)
+                    onshore-wind:
+                        type: number
+                        minimum: 0
+                        description: (MW/km²)
+                    offshore-wind:
+                        type: number
+                        minimum: 0
+                        description: (MW/km²)
+            roof-share:
+                type: object
+                description: Share of roofs by orientation (should add up to 1)
+                properties:
+                    E:
+                        type: number
+                        description: East-facing roofs
+                        minimum: 0
+                        maximum: 1
+                    N:
+                        type: number
+                        description: North-facing roofs
+                        minimum: 0
+                        maximum: 1
+                    S:
+                        type: number
+                        description: South-facing roofs
+                        minimum: 0
+                        maximum: 1
+                    W:
+                        type: number
+                        description: West-facing roofs
+                        minimum: 0
+                        maximum: 1
+                    flat:
+                        type: number
+                        description: Flat roofs
+                        minimum: 0
+                        maximum: 1
+            jrc-biofuel:
+                type: object
+                description: Biofuel potential under different scenarios, to select specific data from [@Ruiz:2019]
+                properties:
+                    scenario:
+                        type: string
+                        description: Scenario for biofuel potential and cost estimate
+                        enum: [low, medium, high]
+                    potential-year:
+                        type: number
+                        description: Year for biomass potential estimate
+                        enum: [2010, 2020, 2030, 2040, 2050]
+                    cost-year:
+                        type: number
+                        description: Year for biomass cost estimate
+                        enum: [2010, 2020, 2030, 2040, 2050]
+                    feedstocks:
+                        type: object
+                        description: Feedstocks of biofuels.
+                        properties:
+                            bioethanol-sugar-beet:
+                                $ref: "#/definitions/feedstock"
+                            rapeseeds:
+                                $ref: "#/definitions/feedstock"
+                            oil-crops:
+                                $ref: "#/definitions/feedstock"
+                            starchy-crops:
+                                $ref: "#/definitions/feedstock"
+                            grassy-crops:
+                                $ref: "#/definitions/feedstock"
+                            willow:
+                                $ref: "#/definitions/feedstock"
+                            poplar:
+                                $ref: "#/definitions/feedstock"
+                            manure:
+                                $ref: "#/definitions/feedstock"
+                            primary-agricultural-residues:
+                                $ref: "#/definitions/feedstock"
+                            roundwood-fuelwood:
+                                $ref: "#/definitions/feedstock"
+                            roundwood-chips:
+                                $ref: "#/definitions/feedstock"
+                            forestry-energy-residues:
+                                $ref: "#/definitions/feedstock"
+                            secondary-forestry-residues-woodchips:
+                                $ref: "#/definitions/feedstock"
+                            secondary-forestry-residues-sawdust:
+                                $ref: "#/definitions/feedstock"
+                            landscape-care-residues:
+                                $ref: "#/definitions/feedstock"
+                            municipal-waste:
+                                $ref: "#/definitions/feedstock"
+                            sludge:
+                                $ref: "#/definitions/feedstock"
+            biofuel-efficiency:
+                type: number
+                description: Combustion efficiency of the `biofuel` technology.
+                minimum: 0
+                maximum: 1
+            wind-and-solar-potential-scenario:
+                type: string
+                description: Scenario defining the amount of surfaces eligible for solar and wind power from [@Trondle:2019].
+                enum: ["technical-potential", "technical-social-potential"]
+            entsoe-tyndp:
+                type: object
+                description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/
+                properties:
+                    scenario:
+                        type: string
+                        description: High-level ENTSO-E TYNDP scenario.
+                        enum: [National Trends, Global Ambition, Distributed Energy]
+                    grid:
+                        type: string
+                        description: High-level ENTSO-E TYNDP grid scenario.
+                        enum: [Reference, Expanded]
+                    projection-year:
+                        type: integer
+                        description: ENTSO-E TYNDP model year.
+                        enum: [2025, 2030, 2040]
+                    ntc_limit:
+                        type: string
+                        description: Limit on net-transfer capacity (NTC) between two regions to take as the value for that inter-regional exchange. Some NTCs are different depending on the direction of the link, but we are not capturing that in the technology definition.
+                        enum: [min, max]
+                    energy_cap_limit:
+                        type: string
+                        description: How to use ENTSO-E-based NTCs to constrain link energy capacity in the Calliope model.
+                        enum: [min, equals, max]
+    scope:
+        type: object
+        description: The spatial scope of the models.
+        properties:
+            countries:
+                type: array
+                description: Countries covered by the models.
+                items:
+                    type: string
+                    enum:
+                        - "Austria"
+                        - "Belgium"
+                        - "Bulgaria"
+                        - "Croatia"
+                        - "Cyprus"
+                        - "Czech Republic"
+                        - "Denmark"
+                        - "Estonia"
+                        - "Finland"
+                        - "France"
+                        - "Germany"
+                        - "Greece"
+                        - "Hungary"
+                        - "Ireland"
+                        - "Italy"
+                        - "Latvia"
+                        - "Lithuania"
+                        - "Luxembourg"
+                        - "Netherlands"
+                        - "Poland"
+                        - "Portugal"
+                        - "Romania"
+                        - "Slovakia"
+                        - "Slovenia"
+                        - "Spain"
+                        - "Sweden"
+                        - "United Kingdom"
+                        - "Albania"
+                        - "Bosnia and Herzegovina"
+                        - "Macedonia, Republic of"
+                        - "Montenegro"
+                        - "Norway"
+                        - "Serbia"
+                        - "Switzerland"
+            bounds:
+                type: object
+                description: Spatial extent.
+                properties:
+                    x_min:
+                        type: number
+                        description: Minimum longitude, in degrees east
+                        minimum: -180
+                        maximum: 180
+                    x_max:
+                        type: number
+                        description: Maximum longitude, in degrees east
+                        minimum: -180
+                        maximum: 180
+                    y_min:
+                        type: number
+                        description: Minimum Latitude, in degrees north
+                        minimum: -90
+                        maximum: 90
+                    y_max:
+                        type: number
+                        description: Maximum Latitude, in degrees north
+                        minimum: -90
+                        maximum: 90
+    quality-control:
+        type: object
+        description: Parameters controlling the data preprocessing steps.
+        properties:
+            hydro:
+                type: object
+                description: Parameters for the preprocessing of hydro data.
+                properties:
+                    scale-phs-according-to-geth-et-al:
+                        type: boolean
+                        description: Whether or not to use pumped hydro capacities derived from Geth et al. (2015) to scale pumped hydro capacities givven by the JRC hydro database.
+                    station-nearest-basin-max-km:
+                        type: number
+                        minimum: 0
+                        description: Move stations outside of hydrobasins into closest basin by max this amount (fails otherwise).
+            load:
+                type: object
+                description: >-
+                    Data quality enforcing methods for open-power-system-data.org-derived national load data. These cover, in order:
+                    1. remove outlier data hours, based on full dataset;
+                    2. select only data for year of interest;
+                    3. interpolate empty data when the data gap is small;
+                    4. fill larger data gaps with data from nearby years;
+                    5. if 29th of February is empty and couldn't previously be filled, use data from the 28th of February;
+                    6. select most complete dataset for each country from list of data sources, based on a priority order.
+                    This process will fail if the 'most complete dataset' for any country has any remaining gaps.
+                properties:
+                    outlier-data-thresholds:
+                        type: object
+                        properties:
+                            relative-to-mean-min:
+                                type: number
+                                description: Lower bound cut-off value for any hourly data relative to the annual mean load of a country. Any values below this lower bound will be replaced by interpolated values.
+                            relative-to-mean-max:
+                                type: number
+                                description: Upper bound cut-off value for any hourly data relative to the annual mean load of a country. Any values above this upper bound will be replaced by interpolated values.
+                    max-interpolate-timesteps:
+                        type: integer
+                        description: Maximum number of timesteps over which missing load data can be interpolated/extrapolated (refers to hours for the default load data). This value applies in both directions of an interpolation/extrapolation, so if it has a value of 2, the maximum interpolation is 4 and extrapolation (at either end of the timeseries) is 2. Even if the data gap > `max-interpolate-timesteps`, the gap will be filled up to the limit defined here.
+                    acceptable-year-diff-for-gap-filling:
+                        type: integer
+                        description: When filling data gaps in electricity load data, this specifies the absolute number of years from the current year that the model can use data for filling. A value of zero effectively removes this gap filling method.
+                    fill-29th-feb-from-28th:
+                        type: boolean
+                        description: Whether or not to gap-fill empty 29th of February data for leap years with data from the day before. If false, and no other leaps years are in the range of `acceptable-year-diff-for-gap-filling` and `max-interpolate-timesteps` < 12, the workflow will fail due to a data gap on this day.
+                    data-source-priority-order:
+                        type: array
+                        uniqueItems: true
+                        minItems: 1
+                        description: Order in which to prioritise available electricity load data from open-power-system-data.org. The first source in the list will be used to initialise the data; the remaining data sources in the list will be use to gap fill in order from first to last.
+                        items:
+                            type: string
+                            enum:
+                                - actual_entsoe_power_statistics
+                                - actual_entsoe_transparency
+                                - actual_tso
+                                - actual_net_consumption_tso
+                                - actual_gross_generation_tso
+                                - forecast_entsoe_transparency
+                                - forecast_tso
+            capacity-factor-gridcell-overlap-threshold:
+                type: number
+                description: Set the lower threshold of per-region land area covered by gridcells containing capacity factor timeseries data. Not all land area is covered by data because there are sometimes small islands linked to a region which are missed by the onshore wind / PV datasets. These islands are usually very small, consitituting less than 0.01% of a region.
+                minimum: 0
+                maximum: 1
+
+    capacity_factors:
+        type: object
+        description: Parameters related to average or time-dependent capacity factors of renewables.
+        properties:
+            min:
+                type: number
+                description: Set smaller values in time series to 0; this helps numerics in the LP.
+            max:
+                type: number
+                description: Cap larger values in time series; this helps numerics in the LP (hydro reservoir can have > 1).
+            average:
+                type: object
+                description: Average estimation used to transform annual fixed to variable costs.
+                properties:
+                    pv:
+                        type: number
+                        description: Average annual PV capacity factor
+                    onshore:
+                        type: number
+                        description: Average annual onshore wind capacity factor
+                    offshore:
+                        type: number
+                        description: Average annual offshore wind capacity factor
+                    ror:
+                        type: number
+                        description: Average annual run-of-river hydro capacity factor
+            trim-ninja-timeseries:
+                type: boolean
+                description: If true, trims renewables.ninja time series to the year in question
+    year:
+        type: integer
+        description: Model year, which will be used to subset data during processing
+    crs:
+        type: string
+        pattern: ^EPSG:\d+$
+        description: Coordinate reference system to which all geographic data will be conformed
+    sea-connections:
+        type: object
+        propertyNames: {"$ref": "#/properties/shapes/propertyNames"}
+        additionalProperties: false
+        patternProperties:
+            ^[a-zA-Z]+.*$:
+                type: array
+                description: Sea connections between regions at each resolution, based on e.g. https://www.entsoe.eu/data/map/
+                items:
+                    type: array
+                    minItems: 2
+                    maxItems: 2
+                    uniqueItems: true
+                    description: Region code either side of a sea connection
+                    items:
+                        type: string
+                        description: Region code
+    shapes:
+        description: Source for geospatial shapes of all locations. The config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
+        type: object
+        propertyNames:
+            enum: [continental, national, regional]
+        additionalProperties: false
+        patternProperties:
+            ^[a-zA-Z]+.*$:
+                type: object
+                propertyNames: {"$ref": "#/properties/scope/properties/countries/items"}
+                additionalProperties: false
+                patternProperties:
+                    ^[a-zA-Z]+.*$:
+                        type: string

@@ -1,11 +1,15 @@
 name: default
 channels:
     - conda-forge
-    - bioconda
 dependencies:
-    - python=3.7
-    - ipython=7.5.0
-    - numpy=1.16.2
-    - pandas=0.24.2
+    - python=3.8
+    - ipython=7.21.0
+    - numpy=1.20.2
+    - pandas=1.2.3
+    - xlrd=2.0.1
+    - openpyxl=3.0.7
     - pycountry=18.12.8
-    - jinja2=2.11.2
+    - jinja2=2.11.3
+    - pip=21.0.1
+    - pip:
+        - -e ../../lib

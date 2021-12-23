@@ -1,0 +1,11 @@
+.snakemake
+.git
+.pytest_cache
+__pycache__
+*.pyc
+*.pyo
+.vscode
+.DS_Store
+build
+data/automatic
+notebooks

@@ -1,0 +1,2 @@
+# build files to ignore when receiving from cluster
+build/data/*.nc

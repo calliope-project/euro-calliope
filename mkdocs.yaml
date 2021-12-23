@@ -1,0 +1,42 @@
+site_name: Euro-Calliope
+nav:
+    - Home: index.md
+    - Access:
+        - Use pre-built models: model/pre-built.md
+        - Build models yourself: workflow/build.md
+        - Build on a cluster: workflow/build-remote.md
+    - Model:
+        - Overview: model/overview.md
+        - Customisation: model/customisation.md
+    - Workflow:
+        - Overview: workflow/overview.md
+        - Customisation: workflow/customisation.md
+        - Parameters: workflow/schema.md
+        - Troubleshooting: workflow/troubleshooting.md
+    - About:
+        - Release notes: CHANGELOG.md
+        - References: about/references.md
+        - Citation: about/citation.md
+theme: readthedocs
+repo_url: https://github.com/calliope-project/euro-calliope/
+edit_uri: edit/develop/docs/
+site_dir: build/docs
+markdown_extensions:
+    - admonition
+    - attr_list
+    - toc:
+        permalink: "#"
+plugins:
+    - search
+    - dag:
+        path_to_snakefile: ./Snakefile
+        path_to_src_dir: ./build/.docs
+        path_to_png_relative_to_site: ./img/dag.png
+    - schema:
+        path_to_schema: ./config/schema.yaml
+        path_to_src_dir: ./build/.docs
+        path_to_md_relative_to_site: ./workflow/schema.md
+    - add-file:
+        path_to_file: ./CHANGELOG.md
+        path_to_src_dir: .
+extra_css: [./css/extras.css]
