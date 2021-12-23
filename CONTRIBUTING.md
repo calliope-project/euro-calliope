@@ -57,7 +57,7 @@ As a developer, you may want to run the entire workflow often to spot errors ear
 For that, you can use a minimal test configuration that takes less time to run than the default configuration.
 
 ```bash
-snakemake --use-conda --cores <N_CORES> --configfile="config/minimal.yaml"
+snakemake --use-conda --cores <N_CORES> --configfile="config/minimal.yaml" all_tests
 ```
 
 Make sure to run this in a clean working directory.
@@ -119,7 +119,7 @@ Be aware that you can publish a release only if you are a maintainer of the two 
     3. Update the changelog and add the release date.
     4. Update [./LICENSE.md](./LICENSE.md) if necessary.
     5. (If necessary) Update `docs/img/spatial-scope-and-resolutions.png` by running `snakemake -j1 --use-conda -s rules/doc.smk docs/img/spatial-scope-and-resolutions.png`. Inspect the result visually. Check it in if it changed; check out the old version if it did not change. The figure will change when the spatial scope or resolution has changed.
-2. Build the pre-builts and test everything using the `all_tests` rule.
+2. Build the pre-builts and test everything using the `all_tests` rule. Make sure you start with a clean workflow folder: delete `./build` *and* `./data/automatic` should they exist.
 3. Commit, open a pull request onto `develop`, and merge the release branch into both `develop` and `main` after successful review.
 4. Add a `vX.Y.Z` release tag to `main`.
 5. Bump version on `develop` in the same places as in point 2.

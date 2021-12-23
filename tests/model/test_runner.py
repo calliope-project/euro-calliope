@@ -13,6 +13,7 @@ def run_test(path_to_test_dir, path_to_output, path_to_model, path_to_example_mo
             path_to_test_dir,
             f"--html={path_to_output}",
             "--self-contained-html",
+            "--verbose",
         ],
         plugins=[
             _create_config_plugin(
@@ -78,6 +79,11 @@ def _create_config_plugin(path_to_model, path_to_example_model, paths_to_cf_time
         @pytest.fixture(scope="module")
         def rooftop_pv_capacity_factor_timeseries(self):
             path = self._select_capacity_factor_time_series("rooftop-pv")
+            return pd.read_csv(path, index_col=0, parse_dates=True)
+
+        @pytest.fixture(scope="module")
+        def wind_onshore_capacity_factor_timeseries(self):
+            path = self._select_capacity_factor_time_series("wind-onshore")
             return pd.read_csv(path, index_col=0, parse_dates=True)
 
         def _select_capacity_factor_time_series(self, technology):

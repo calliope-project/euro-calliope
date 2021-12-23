@@ -17,6 +17,9 @@ TECHNOLOGIES = {
     "frozen-hydro": DEFAULT_TECHNOLOGIES,
     "alternative-cost": DEFAULT_TECHNOLOGIES,
     "shed-load": DEFAULT_TECHNOLOGIES | set(["load_shedding"]),
+    "all-overrides": (
+        (DEFAULT_TECHNOLOGIES | DIRECTIONAL_PV | set(["load_shedding"])) - set(["roof_mounted_pv"])
+    ),
 }
 
 

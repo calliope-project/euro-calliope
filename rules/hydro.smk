@@ -1,7 +1,7 @@
 """Rules to generate hydro electricity capacities and time series."""
 
 localrules: download_runoff_data, download_basins_database, download_stations_database
-localrules: download_generation_data, basins_database, stations_database
+localrules: download_hydro_generation_data, download_pumped_hydro_data, basins_database, stations_database
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 script_dir = f"{root_dir}scripts/"
 
