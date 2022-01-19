@@ -14,6 +14,9 @@ TECHNOLOGIES = {
     "connected_entsoe_tyndp": DEFAULT_TECHNOLOGIES | set(["ac_transmission"]),
     "directional-pv": (DEFAULT_TECHNOLOGIES | DIRECTIONAL_PV) - set(["roof_mounted_pv"]),
     "shed-load": DEFAULT_TECHNOLOGIES | set(["load_shedding"]),
+    "all-overrides": (
+        (DEFAULT_TECHNOLOGIES | DIRECTIONAL_PV | set(["load_shedding"])) - set(["roof_mounted_pv"])
+    ),
 }
 
 
