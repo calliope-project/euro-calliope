@@ -326,12 +326,12 @@ properties:
                         type: integer
                         minimum: 2010
                         maximum: 2016
-                        description: First model year, which will be used as the lower bound to subset data during processing.
+                        description: First model year, which will be used as the lower bound to subset data during processing. If subsetting to earlier than 2012 (i.e. 2010 or 2011), note that `quality-control.load.acceptable-year-diff-for-gap-filling` should be increased from its default value to handle missing load data in Albania.
                     final-year:
                         type: integer
                         minimum: 2010
                         maximum: 2016
-                        description: Final model year, which will be used as the upper bound (inclusive) to subset data during processing. Set to the same as `first-year` to limit processing to only one year.
+                        description: Final model year, which will be used as the upper bound (inclusive) to subset data during processing. To limit processing to only one year, set `final-year` to the same value as `first-year` .
     quality-control:
         type: object
         description: Parameters controlling the data preprocessing steps.
