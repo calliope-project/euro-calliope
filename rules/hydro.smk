@@ -1,6 +1,6 @@
 """Rules to generate hydro electricity capacities and time series."""
 
-localrules: download_runoff_data, download_basins_database, download_stations_database
+localrules: download_basins_database, download_stations_database
 localrules: download_hydro_generation_data, download_pumped_hydro_data, basins_database, stations_database
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 script_dir = f"{root_dir}scripts/"
@@ -27,18 +27,16 @@ rule download_pumped_hydro_data:
 
 
 rule download_runoff_data:
-    message: "Create an atlite cutout of Europe consisting of ERA5 runoff data."
+    message: "Create an atlite cutout of Europe consisting of ERA5 runoff data for the year {wildcards.year}."
     input:
         script = script_dir + "hydro/runoff.py"
     params:
-        first_year = config["scope"]["temporal"]["first-year"],
-        final_year = config["scope"]["temporal"]["final-year"],
         x_min = config["scope"]["spatial"]["bounds"]["x_min"],
         x_max = config["scope"]["spatial"]["bounds"]["x_max"],
         y_min = config["scope"]["spatial"]["bounds"]["y_min"],
         y_max = config["scope"]["spatial"]["bounds"]["y_max"]
     output:
-        protected("data/automatic/europe-cutout.nc")
+        protected("data/automatic/runoff-europe-cutout/{year}.nc")
     conda: "../envs/hydro.yaml"
     script: "../scripts/hydro/runoff.py"
 
@@ -120,10 +118,13 @@ rule inflow_m3:
         script = script_dir + "hydro/inflow_m3.py",
         stations = rules.preprocess_hydro_stations.output[0],
         basins = rules.preprocess_basins.output[0],
-        runoff = rules.download_runoff_data.output[0]
-    params:
-        first_year = config["scope"]["temporal"]["first-year"],
-        final_year = config["scope"]["temporal"]["final-year"],
+        runoff = expand(
+            "data/automatic/runoff-europe-cutout/{year}.nc",
+            year=range(
+                config["scope"]["temporal"]["first-year"],
+                config["scope"]["temporal"]["final-year"] + 1
+            )
+        )
     output: "build/data/hydro-electricity-with-water-inflow.nc"
     conda: "../envs/hydro.yaml"
     script: "../scripts/hydro/inflow_m3.py"

@@ -8,3 +8,5 @@ test:
     runtime: 240
     cores: 1
     memory: 16000
+download_runoff_data:
+    runtime: 240
