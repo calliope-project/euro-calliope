@@ -225,7 +225,7 @@ def get_source_choice_per_country(raw_load, gap_filled_load, entsoe_priority):
     if new_load.isnull().any().any():
         bad_index_values = new_load.isnull().stack()
         error_msg = "Gap filling thresholds do not allow for a complete load dataset to be produced. "
-        if bad_index_values[bad_index_values] < 100:
+        if bad_index_values[bad_index_values].size < 100:
                 error_msg = error_msg + f"Remaining empty data: {bad_index_values[bad_index_values].index.to_list()}"
         raise AssertionError(error_msg)
 
