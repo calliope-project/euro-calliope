@@ -27,16 +27,19 @@ rule download_pumped_hydro_data:
 
 
 rule download_runoff_data:
-    message: "Create an atlite cutout of Europe consisting of ERA5 runoff data for the year {wildcards.year}."
+    message: "Create an atlite cutout of Europe consisting of ERA5 runoff data."
     input:
         script = script_dir + "hydro/runoff.py"
     params:
+        # Need an extra initial year of data, since runoff inflow is shifted in time by atlite in `inflow_m3`
+        first_year = config["scope"]["temporal"]["first-year"] - 1,
+        final_year = config["scope"]["temporal"]["final-year"],
         x_min = config["scope"]["spatial"]["bounds"]["x_min"],
         x_max = config["scope"]["spatial"]["bounds"]["x_max"],
         y_min = config["scope"]["spatial"]["bounds"]["y_min"],
         y_max = config["scope"]["spatial"]["bounds"]["y_max"]
     output:
-        protected("data/automatic/runoff-europe-cutout/{year}.nc")
+        protected("data/automatic/europe-cutout-{params.first_year}-{params.final_year}.nc")
     conda: "../envs/hydro.yaml"
     script: "../scripts/hydro/runoff.py"
 
@@ -118,13 +121,10 @@ rule inflow_m3:
         script = script_dir + "hydro/inflow_m3.py",
         stations = rules.preprocess_hydro_stations.output[0],
         basins = rules.preprocess_basins.output[0],
-        runoff = expand(
-            "data/automatic/runoff-europe-cutout/{year}.nc",
-            year=range(
-                config["scope"]["temporal"]["first-year"],
-                config["scope"]["temporal"]["final-year"] + 1
-            )
-        )
+        runoff = rules.download_runoff_data.output[0]
+    params:
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
     output: "build/data/hydro-electricity-with-water-inflow.nc"
     conda: "../envs/hydro.yaml"
     script: "../scripts/hydro/inflow_m3.py"

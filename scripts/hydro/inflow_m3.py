@@ -6,10 +6,10 @@ from shapely.geometry import Point
 import pycountry
 
 
-def determine_water_inflow(paths_to_cutout, path_to_stations, path_to_basins, first_year, final_year, path_to_output):
+def determine_water_inflow(path_to_cutout, path_to_stations, path_to_basins, first_year, final_year, path_to_output):
     plants = read_plants(path_to_stations)
 
-    inflow_m3 = water_inflow(plants, paths_to_cutout, path_to_basins)
+    inflow_m3 = water_inflow(plants, path_to_cutout, path_to_basins)
     (xr.merge([plants.to_xarray(), inflow_m3])
        .drop("geometry")
        .sel(time=slice(str(first_year), str(final_year)))
@@ -26,8 +26,8 @@ def read_plants(path_to_stations):
     )
 
 
-def water_inflow(plants, paths_to_cutout, path_to_basins):
-    cutout = atlite.Cutout(data=xr.open_mfdataset(paths_to_cutout, concat_dim="time"))
+def water_inflow(plants, path_to_cutout, path_to_basins):
+    cutout = atlite.Cutout(path=path_to_cutout)
     inflow = (cutout.hydro(plants, path_to_basins)
                     .rename(plant="id")
                     .rename("inflow_m3"))
