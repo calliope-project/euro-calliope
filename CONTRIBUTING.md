@@ -103,7 +103,7 @@ Take the existing fixtures as a starting point.
 ## 4) Release
 
 Whenever you want to publish a new release of Euro-Calliope, you need to perform several manual steps.
-Be aware that you can publish a release only if you are a maintainer of the two central GitHub repositories and if you have edit access to the three Zenodo archives linked below.
+Be aware that you can publish a release only if you are a maintainer of the GitHub repository and if you have edit access to the two Zenodo archives.
 
 1. Branch off of `develop` into a `release-vX.Y.Z` branch and apply the following changes:
     1. Bump version to `vX.Y.Z` in the following places:
@@ -124,5 +124,5 @@ Be aware that you can publish a release only if you are a maintainer of the two 
 2. Build the pre-builts and test everything using the `all_tests` rule. Make sure you start with a clean workflow folder: delete `./build` *and* `./data/automatic` should they exist.
 3. Commit, open a pull request onto `develop`, and merge the release branch into both `develop` and `main` after successful review.
 4. Add a `vX.Y.Z` release tag to `main`, push it, and add a release on GitHub.
-5. Bump version on `develop` in the same places as in point 2.
+5. Bump version on `develop` in the same places as in point 1.
 6. Upload the pre-builts to [their home on Zenodo](https://doi.org/10.5281/zenodo.3949552) and make sure all metadata is correct.
