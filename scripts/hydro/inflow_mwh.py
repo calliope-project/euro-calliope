@@ -116,8 +116,8 @@ if __name__ == "__main__":
     determine_energy_inflow(
         path_to_stations_with_water_inflow=snakemake.input.stations,
         path_to_generation=snakemake.input.generation,
-        first_year=snakemake.params.first_year,
-        final_year=snakemake.params.final_year,
+        first_year=int(snakemake.wildcards.first_year),
+        final_year=int(snakemake.wildcards.final_year),
         max_capacity_factor=snakemake.params.max_capacity_factor,
         path_to_output=snakemake.output[0]
     )
