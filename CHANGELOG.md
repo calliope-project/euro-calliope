@@ -2,7 +2,9 @@
 
 ## 1.2.0 (unpublished)
 
-..
+### Fixed (models)
+
+* **FIX** spatial proxy of `landscape-care-residues` biofuel in the default configuration. National potentials were spatially allocated to sub-national regions based on `population` rather than `forest` land use. As the potential of `landscape-care-residues` is low, this change has only a minor impact on the model. Continentally, only 3.5% of the total biofuel potential is of this type. Nationally, only three countries have a share of slightly above 10%: Bosnia and Herzegovina, Albania, and Norway. National potentials are unaffected by this change.
 
 ## 1.1.0 (2021-12-22)
 

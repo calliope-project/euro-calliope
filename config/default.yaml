@@ -110,7 +110,7 @@ parameters:
             landscape-care-residues:
                 include: true
                 id: MINBIOFRSR1a
-                proxy: population
+                proxy: forest
             municipal-waste:
                 include: true
                 id: MINBIOMUN1
