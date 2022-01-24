@@ -15,7 +15,7 @@ Euro-Calliope models the European electricity system with each location represen
 2. Install Calliope and all required dependencies. The easiest way to do so is using [conda](https://conda.io/) or [mamba](https://mamba.readthedocs.io/). Using conda, you can install Calliope:
 
 ```bash
-cd pre-built-euro-calliope-v1.1
+cd pre-built-euro-calliope-v1.2.0
 conda env create -f environment.yaml
 conda activate euro-calliope
 ```
