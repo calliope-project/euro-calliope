@@ -50,3 +50,31 @@ rule bio_techs_and_locations_template:
     output: "build/model/techs_and_locations/{resolution}/supply/supply-biofuel.yaml"
     script: "../scripts/biofuels/template_bio.py"
 
+
+rule hydro_supply_techs_at_locations_template:
+    message: "Allocate hydro supply techs to {wildcards.resolution} locations from template."
+    input:
+        script = script_dir + "template_techs_and_locations.py",
+        template = locations_template_dir + "supply/supply-hydro.yaml",
+        locations = "build/data/{resolution}/hydro-capacities-mw.csv"
+    params:
+        capacity_factors = config["capacity-factors"]["average"],
+        scaling_factors = config["scaling-factors"],
+    conda: "../envs/default.yaml"
+    output: "build/model/techs_and_locations/{resolution}/supply/supply-hydro.yaml"
+    script: "../scripts/template_techs_and_locations.py"
+
+
+rule hydro_storage_techs_at_locations_template:
+    message: "Allocate hydro storage techs to {wildcards.resolution} locations from template."
+    input:
+        script = script_dir + "template_techs_and_locations.py",
+        template = locations_template_dir + "storage/storage-hydro-electricity.yaml",
+        locations = "build/data/{resolution}/hydro-capacities-mw.csv"
+    params:
+        scaling_factors = config["scaling-factors"],
+    conda: "../envs/default.yaml"
+    output: "build/model/techs_and_locations/{resolution}/storage/storage-hydro-electricity.yaml"
+    script: "../scripts/template_techs_and_locations.py"
+
+
