@@ -16,7 +16,7 @@ include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
 include: "./rules/sync.smk"
-localrules: all, download_raw_load, model, clean, parameterise_template
+localrules: all, download_raw_load, model, clean
 localrules: download_entsoe_tyndp_zip
 wildcard_constraints:
         resolution = "continental|national|regional"
@@ -24,7 +24,6 @@ wildcard_constraints:
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
 script_dir = f"{root_dir}scripts/"
-template_dir = f"{root_dir}templates/"
 test_dir = f"{root_dir}tests/"
 model_test_dir = f"{test_dir}model"
 
@@ -60,25 +59,6 @@ rule all_tests:
         "build/logs/regional/test-report.html",
         "build/model/build-metadata.yaml"
 
-
-rule parameterise_template:
-    message: "Apply config parameters to file {wildcards.template} from templates."
-    input:
-        script = script_dir + "parameterise_templates.py",
-        template = template_dir + "{template}",
-        biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
-            scenario=config["parameters"]["jrc-biofuel"]["scenario"]
-        )
-    params:
-        scaling_factors = config["scaling-factors"],
-        capacity_factors = config["capacity-factors"]["average"],
-        max_power_density = config["parameters"]["maximum-installable-power-density"],
-        biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
-    output: "build/model/{template}"
-    wildcard_constraints:
-        template = "link-techs.yaml|storage-techs.yaml|demand-techs.yaml|renewable-techs.yaml|README.md|environment.yaml|interest-rate.yaml|tech-costs.yaml"
-    conda: "envs/default.yaml"
-    script: "scripts/parameterise_templates.py"
 
 
 rule hydro_capacities:
