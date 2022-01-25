@@ -49,7 +49,8 @@ rule capacity_factors_onshore_wind_and_solar:
     params:
         cf_threshold = config["capacity-factors"]["min"],
         gridcell_overlap_threshold=config["quality-control"]["capacity-factor-gridcell-overlap-threshold"],
-        year = config["year"],
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
         trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
     wildcard_constraints:
         technology = "wind-onshore|rooftop-pv|open-field-pv|rooftop-pv-n|rooftop-pv-e-w|rooftop-pv-s-flat"
@@ -69,7 +70,8 @@ rule capacity_factors_offshore:
     params:
         cf_threshold = config["capacity-factors"]["min"],
         gridcell_overlap_threshold=config["quality-control"]["capacity-factor-gridcell-overlap-threshold"],
-        year = config["year"],
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
         trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
     output: "build/model/{resolution}/capacityfactors-wind-offshore.csv"
     conda: "../envs/geo.yaml"

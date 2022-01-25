@@ -246,72 +246,92 @@ properties:
                         enum: [min, equals, max]
     scope:
         type: object
-        description: The spatial scope of the models.
+        description: Spatial and temporal scope bounding the models.
         properties:
-            countries:
-                type: array
-                description: Countries covered by the models.
-                items:
-                    type: string
-                    enum:
-                        - "Austria"
-                        - "Belgium"
-                        - "Bulgaria"
-                        - "Croatia"
-                        - "Cyprus"
-                        - "Czech Republic"
-                        - "Denmark"
-                        - "Estonia"
-                        - "Finland"
-                        - "France"
-                        - "Germany"
-                        - "Greece"
-                        - "Hungary"
-                        - "Ireland"
-                        - "Italy"
-                        - "Latvia"
-                        - "Lithuania"
-                        - "Luxembourg"
-                        - "Netherlands"
-                        - "Poland"
-                        - "Portugal"
-                        - "Romania"
-                        - "Slovakia"
-                        - "Slovenia"
-                        - "Spain"
-                        - "Sweden"
-                        - "United Kingdom"
-                        - "Albania"
-                        - "Bosnia and Herzegovina"
-                        - "Macedonia, Republic of"
-                        - "Montenegro"
-                        - "Norway"
-                        - "Serbia"
-                        - "Switzerland"
-            bounds:
+            spatial:
                 type: object
-                description: Spatial extent.
+                description: The spatial scope of the models.
                 properties:
-                    x_min:
-                        type: number
-                        description: Minimum longitude, in degrees east
-                        minimum: -180
-                        maximum: 180
-                    x_max:
-                        type: number
-                        description: Maximum longitude, in degrees east
-                        minimum: -180
-                        maximum: 180
-                    y_min:
-                        type: number
-                        description: Minimum Latitude, in degrees north
-                        minimum: -90
-                        maximum: 90
-                    y_max:
-                        type: number
-                        description: Maximum Latitude, in degrees north
-                        minimum: -90
-                        maximum: 90
+                    countries:
+                        type: array
+                        description: Countries covered by the models.
+                        uniqueItems: true
+                        minItems: 1
+                        items:
+                            type: string
+                            enum:
+                                - "Austria"
+                                - "Belgium"
+                                - "Bulgaria"
+                                - "Croatia"
+                                - "Cyprus"
+                                - "Czech Republic"
+                                - "Denmark"
+                                - "Estonia"
+                                - "Finland"
+                                - "France"
+                                - "Germany"
+                                - "Greece"
+                                - "Hungary"
+                                - "Ireland"
+                                - "Italy"
+                                - "Latvia"
+                                - "Lithuania"
+                                - "Luxembourg"
+                                - "Netherlands"
+                                - "Poland"
+                                - "Portugal"
+                                - "Romania"
+                                - "Slovakia"
+                                - "Slovenia"
+                                - "Spain"
+                                - "Sweden"
+                                - "United Kingdom"
+                                - "Albania"
+                                - "Bosnia and Herzegovina"
+                                - "Macedonia, Republic of"
+                                - "Montenegro"
+                                - "Norway"
+                                - "Serbia"
+                                - "Switzerland"
+                    bounds:
+                        type: object
+                        description: Bounding box describing the spatial extent of geographic datasets.
+                        properties:
+                            x_min:
+                                type: number
+                                description: Minimum longitude, in degrees east
+                                minimum: -180
+                                maximum: 180
+                            x_max:
+                                type: number
+                                description: Maximum longitude, in degrees east
+                                minimum: -180
+                                maximum: 180
+                            y_min:
+                                type: number
+                                description: Minimum Latitude, in degrees north
+                                minimum: -90
+                                maximum: 90
+                            y_max:
+                                type: number
+                                description: Maximum Latitude, in degrees north
+                                minimum: -90
+                                maximum: 90
+            temporal:
+                type: object
+                description: The temporal scope of the models. Available range of 2010 - 2016 is set by electricity load data availability (lower bound) and capacity factor data availability (upper bound).
+                properties:
+                    first-year:
+                        type: integer
+                        minimum: 2010
+                        maximum: 2016
+                        description: First model year, which will be used as the lower bound to subset data during processing. If subsetting to earlier than 2012 (i.e. 2010 or 2011), note that `quality-control.load.acceptable-year-diff-for-gap-filling` should be increased from its default value to handle missing load data in Albania.
+                    final-year:
+                        type: integer
+                        minimum: 2010
+                        maximum: 2016
+                        description: Final model year, which will be used as the upper bound (inclusive) to subset data during processing. To limit processing to only one year, set `final-year` to the same value as `first-year` .
     quality-control:
         type: object
         description: Parameters controlling the data preprocessing steps.
@@ -407,9 +427,6 @@ properties:
             trim-ninja-timeseries:
                 type: boolean
                 description: If true, trims renewables.ninja time series to the year in question
-    year:
-        type: integer
-        description: Model year, which will be used to subset data during processing
     crs:
         type: string
         pattern: ^EPSG:\d+$
@@ -440,7 +457,7 @@ properties:
         patternProperties:
             ^[a-zA-Z]+.*$:
                 type: object
-                propertyNames: {"$ref": "#/properties/scope/properties/countries/items"}
+                propertyNames: {"$ref": "#/properties/scope/properties/spatial/properties/countries/items"}
                 additionalProperties: false
                 patternProperties:
                     ^[a-zA-Z]+.*$:

@@ -142,7 +142,10 @@ rule capacity_factors_hydro:
     input:
         script = script_dir + "capacityfactors_hydro.py",
         capacities = rules.hydro_capacities.output[0],
-        stations = rules.inflow_mwh.output[0],
+        stations = "build/data/hydro-electricity-with-energy-inflow-{first_year}-{final_year}.nc".format(
+            first_year = config["scope"]["temporal"]["first-year"],
+            final_year = config["scope"]["temporal"]["final-year"]
+        ),
         locations = rules.units.output[0]
     params:
         threshold = config["capacity-factors"]["min"]
@@ -166,11 +169,12 @@ rule electricity_load_national:
     input:
         script = script_dir + "national_load.py",
         load = rules.download_raw_load.output[0]
-    output: "build/data/electricity-demand-national.csv"
     params:
-        year = config["year"],
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
         data_quality_config = config["quality-control"]["load"],
-        countries = config["scope"]["countries"]
+        countries = config["scope"]["spatial"]["countries"]
+    output: "build/data/electricity-demand-national.csv"
     conda: "envs/default.yaml"
     script: "scripts/national_load.py"
 
