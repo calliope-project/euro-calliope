@@ -78,3 +78,18 @@ rule hydro_storage_techs_at_locations_template:
     script: "../scripts/template_techs_and_locations.py"
 
 
+rule wind_solar_techs_at_locations_template:
+    message: "Create {wildcards.resolution} wind & solar tech definition file from template."
+    input:
+        script = script_dir + "template_techs_and_locations.py",
+        template = locations_template_dir + "supply/supply-wind-and-solar.yaml",
+        locations = rules.area_to_capacity_limits.output[0]
+    params:
+        capacity_factors = config["capacity-factors"]["average"],
+        scaling_factors = config["scaling-factors"],
+        max_power_density = config["parameters"]["maximum-installable-power-density"]
+    conda: "../envs/default.yaml"
+    output: "build/model/techs_and_locations/{resolution}/supply/supply-wind-and-solar.yaml"
+    script: "../scripts/template_techs_and_locations.py"
+
+

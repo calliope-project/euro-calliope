@@ -1,0 +1,173 @@
+tech_groups:
+    pv:
+        essentials:
+            name: PV
+            carrier: electricity
+            parent: supply
+        constraints:
+            energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
+    pv_on_roof:  # from [@JRC:2014] Table 9
+        essentials:
+            parent: pv
+        constraints.lifetime: 25
+        costs.monetary:
+            energy_cap: {{ 880000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+            om_annual: {{ (880000 * 0.02 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2% of CAPEX
+            om_prod: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+    wind:
+        essentials:
+            name: Wind
+            carrier: electricity
+            parent: supply
+        constraints:
+            energy_cap_max: inf # see https://github.com/calliope-project/calliope/issues/161
+    wind_onshore:  # from [@JRC:2014] Table 4
+        essentials:
+            name: Onshore wind
+            parent: wind
+        constraints:
+            resource: file=supply/capacityfactors-wind-onshore.csv
+            resource_unit: energy_per_cap
+            lifetime: 25
+        costs.monetary:
+            energy_cap: {{ 1100000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+            om_annual: {{ (1100000 * 0.017 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% of CAPEX
+            om_prod: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+
+techs:
+    open_field_pv:  # from [@JRC:2014] Table 7
+        essentials:
+            name: Open field PV
+            parent: pv
+        constraints:
+            # open_field_pv and wind_onshore_competing are the only technologies with area footprints
+            # as they are the only technologies competing on the same land.
+            resource_area_per_energy_cap: {{ (1 / max_power_density["pv-on-flat-areas"]) * scaling_factors.area / scaling_factors.power }} # {{ (scaling_factors.power / scaling_factors.area) | unit("km^2/MW") }} from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
+            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
+            resource: file=supply/capacityfactors-open-field-pv.csv
+            resource_unit: energy_per_cap
+            lifetime: 25
+        costs.monetary:
+            energy_cap: {{ 520000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+            om_annual: {{ (520000 * 0.017 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% of CAPEX
+            om_prod: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+    roof_mounted_pv:
+        essentials:
+            name: Roof mounted PV
+            parent: pv_on_roof
+        constraints:
+            resource: file=supply/capacityfactors-rooftop-pv.csv
+            resource_unit: energy_per_cap
+    wind_onshore_monopoly:
+        essentials:
+            name: Onshore wind without land competition
+            parent: wind_onshore
+    wind_onshore_competing:
+        essentials:
+            name: Onshore wind competing with open field PV on land
+            parent: wind_onshore
+        constraints:
+            # open_field_pv and wind_onshore_competing are the only technologies with area footprints
+            # as they are the only technologies competing on the same land.
+            resource_area_per_energy_cap: {{ (1 / max_power_density["onshore-wind"]) * scaling_factors.area / scaling_factors.power }} # {{ (scaling_factors.power / scaling_factors.area) | unit("km^2/MW") }} from [@EuropeanEnvironmentAgency:2009]
+            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
+    wind_offshore:  # from [@JRC:2014] Table 5
+        essentials:
+            name: Offshore wind
+            parent: wind
+        constraints:
+            resource: file=supply/capacityfactors-wind-offshore.csv
+            resource_unit: energy_per_cap
+            lifetime: 30
+        costs.monetary:
+            energy_cap: {{ 2280000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+            om_annual: {{ (2280000 * 0.023 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2.3% of CAPEX
+            om_prod: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}:
+        available_area: {{ location.eligibility_onshore_wind_and_pv_km2 * scaling_factors.area }}  # {{ (1 / scaling_factors.area) | unit("km2") }} usable by onshore wind or open field pv
+        techs:
+            open_field_pv:
+            roof_mounted_pv:
+                constraints:
+                    energy_cap_max: {{ location.eligibility_rooftop_pv_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+            wind_onshore_competing:
+            wind_onshore_monopoly:
+                constraints:
+                    energy_cap_max: {{ location.eligibility_onshore_wind_monopoly_mw * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+
+            wind_offshore:
+                constraints:
+                    energy_cap_max: {{ location.eligibility_offshore_wind_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+    {% endfor %}
+
+overrides:
+    dea-renewable-cost-pv: # from [@DEA:2020]
+        tech_groups.pv_on_roof: #  Sheet 22 - Photovoltaics Small (last updated 2016)
+            constraints.lifetime: 40 # inverter lifetime is shorter but the replacement cost is included in O&M
+            costs.monetary:
+                energy_cap: {{ 587500 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
+                om_annual: {{ (9135  - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
+                om_prod: {{1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
+        techs.open_field_pv: # Sheet 22 - Photovoltaics Large (last updated 2016)
+            constraints.lifetime: 40 # inverter lifetime is shorter but the replacement cost is included in O&M
+            costs.monetary:
+                energy_cap: {{ 241000 * 1.25 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} with DC/AC sizing factor
+                om_annual: {{ (5000 * 1.25 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }} with DC/AC sizing factor
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
+
+    dea-renewable-cost-wind: # from [@DEA:2020]
+        tech_groups.wind_onshore: # Sheet 20 Onshore Turbines (last updated 2019)
+            constraints.lifetime: 30
+            costs.monetary:
+                energy_cap: {{ 963000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
+                om_annual: {{ (11340 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
+        techs.wind_offshore: # Sheet 21 Offshore Turbines (last updated 2019)
+            constraints.lifetime: 30
+            costs.monetary:
+                energy_cap: {{ 1777000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
+                om_annual: {{ (32448 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
+                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
+
+    directional-rooftop-pv:
+        techs:
+            roof_mounted_pv:
+                exists: False
+            roof_mounted_pv_s_flat:
+                essentials:
+                    name: Roof mounted PV south-facing and flat
+                    parent: pv_on_roof
+                constraints:
+                    resource: file=supply/capacityfactors-rooftop-pv-s-flat.csv
+                    resource_unit: energy_per_cap
+            roof_mounted_pv_n:
+                essentials:
+                    name: Roof mounted PV north-facing
+                    parent: pv_on_roof
+                constraints:
+                    resource: file=supply/capacityfactors-rooftop-pv-n.csv
+                    resource_unit: energy_per_cap
+            roof_mounted_pv_e_w:
+                essentials:
+                    name: Roof mounted PV east-facing and west-facing
+                    parent: pv_on_roof
+                constraints:
+                    resource: file=supply/capacityfactors-rooftop-pv-e-w.csv
+                    resource_unit: energy_per_cap
+
+        locations:
+            {% for id, location in locations.iterrows() %}
+            {{ id }}.techs:
+                roof_mounted_pv_s_flat:
+                    constraints:
+                        energy_cap_max: {{ location.eligibility_rooftop_pv_s_flat_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                roof_mounted_pv_n:
+                    constraints:
+                        energy_cap_max: {{ location.eligibility_rooftop_pv_n_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                roof_mounted_pv_e_w:
+                    constraints:
+                        energy_cap_max: {{ location.eligibility_rooftop_pv_e_w_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+            {% endfor %}
