@@ -194,14 +194,14 @@ rule test:
         "build/logs/{resolution}/model.done",
         test_dir = model_test_dir,
         tests = map(str, Path(model_test_dir).glob("**/test_*.py")),
-        model = test_dir + "resources/{resolution}/model.yaml",
-        example_model = "build/model/{resolution}/example-model.yaml",
+        example_model = "build/model/example-model-{resolution}.yaml",
         capacity_factor_timeseries = expand(
             "build/model/timeseries_data/{{resolution}}/supply/capacityfactors-{technology}.csv",
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES + ["hydro-ror", "hydro-reservoir-inflow"]
         )
     params:
-        config = config
+        config = config,
+        scenarios = list(config["test-scenarios"].keys())
     output: "build/logs/{resolution}/test-report.html"
     conda: "./envs/test.yaml"
     script: "./tests/model/test_runner.py"

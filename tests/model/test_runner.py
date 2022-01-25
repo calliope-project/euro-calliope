@@ -7,7 +7,7 @@ import calliope
 import pandas as pd
 
 
-def run_test(path_to_test_dir, path_to_output, path_to_model, path_to_example_model, paths_to_cf_timeseries, config):
+def run_test(path_to_test_dir, path_to_output, path_to_example_model, paths_to_cf_timeseries, config, scenarios):
     exit_code = pytest.main(
         [
             path_to_test_dir,
@@ -17,17 +17,17 @@ def run_test(path_to_test_dir, path_to_output, path_to_model, path_to_example_mo
         ],
         plugins=[
             _create_config_plugin(
-                path_to_model=path_to_model,
                 path_to_example_model=path_to_example_model,
                 paths_to_cf_timeseries=paths_to_cf_timeseries,
-                config=config
+                config=config,
+                scenarios=scenarios
             )
         ]
     )
     sys.exit(exit_code)
 
 
-def _create_config_plugin(path_to_model, path_to_example_model, paths_to_cf_timeseries, config):
+def _create_config_plugin(path_to_example_model, paths_to_cf_timeseries, config, scenarios):
     """Creates fixtures from Snakemake configuration."""
 
     class SnakemakeConfigPlugin():
@@ -40,13 +40,16 @@ def _create_config_plugin(path_to_model, path_to_example_model, paths_to_cf_time
         def scaling_factors(self, config):
             return config["scaling-factors"]
 
-        @pytest.fixture(scope="session", params=_read_scenario_names_from_yaml(path_to_model))
+        @pytest.fixture(scope="session", params=scenarios)
         def scenario(self, request):
             return request.param
 
         @pytest.fixture(scope="session")
-        def model(self, scenario):
-            return calliope.Model(path_to_model, scenario=scenario)
+        def model(self, config, scenario):
+            return calliope.Model(
+                path_to_example_model,
+                scenario=",".join(config["test-scenarios"][scenario])
+            )
 
         @pytest.fixture(scope="session")
         def optimised_model(self, model):
@@ -95,12 +98,6 @@ def _create_config_plugin(path_to_model, path_to_example_model, paths_to_cf_time
     return SnakemakeConfigPlugin()
 
 
-def _read_scenario_names_from_yaml(path_to_model):
-    with open(path_to_model, 'r') as stream:
-        model = yaml.safe_load(stream)
-    return model["scenarios"].keys()
-
-
 def _read_locs(path_to_cf_timeseries):
     return pd.read_csv(path_to_cf_timeseries, index_col=0, parse_dates=True).columns
 
@@ -108,9 +105,9 @@ def _read_locs(path_to_cf_timeseries):
 if __name__ == "__main__":
     run_test(
         path_to_test_dir=snakemake.input.test_dir,
-        path_to_model=snakemake.input.model,
         path_to_example_model=snakemake.input.example_model,
         paths_to_cf_timeseries=snakemake.input.capacity_factor_timeseries,
         config=snakemake.params.config,
+        scenarios=snakemake.params.scenarios,
         path_to_output=snakemake.output[0]
     )
