@@ -16,6 +16,7 @@ include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
 include: "./rules/sync.smk"
+include: "./rules/model_template.smk"
 localrules: all, download_raw_load, model, clean
 localrules: download_entsoe_tyndp_zip
 wildcard_constraints:
@@ -72,24 +73,6 @@ rule hydro_capacities:
     script: "scripts/hydro_capacities.py"
 
 
-rule locations:
-    message: "Generate locations for {wildcards.resolution} resolution."
-    input:
-        script = script_dir + "locations.py",
-        shapes = rules.units.output[0],
-        land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
-        hydro_capacities = rules.hydro_capacities.output[0],
-        biofuel = "build/data/{{resolution}}/biofuel/{scenario}/potential-mwh-per-year.csv".format(scenario=config["parameters"]["jrc-biofuel"]["scenario"])
-    params:
-        flat_roof_share = config["parameters"]["roof-share"]["flat"],
-        maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],
-        scaling_factors = config["scaling-factors"],
-        biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
-    output:
-        yaml = "build/model/{resolution}/locations.yaml",
-        csv = "build/model/{resolution}/locations.csv"
-    conda: "envs/geo.yaml"
-    script: "scripts/locations.py"
 
 
 rule directional_rooftop_pv:
@@ -107,14 +90,9 @@ rule directional_rooftop_pv:
     script: "scripts/directional_rooftop.py"
 
 
-rule load_shedding:
-    message: "Generate override allowing load shedding."
-    input:
-        script = script_dir + "load_shedding.py",
-        units = rules.units_without_shape.output[0]
-    output: "build/model/{resolution}/load-shedding.yaml"
-    conda: "envs/default.yaml"
-    script: "scripts/load_shedding.py"
+
+
+
 
 
 rule capacity_factors_hydro:
