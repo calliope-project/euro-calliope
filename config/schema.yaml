@@ -244,6 +244,12 @@ properties:
                         type: string
                         description: How to use ENTSO-E-based NTCs to constrain link energy capacity in the Calliope model.
                         enum: [min, equals, max]
+            model-year:
+                type: integer
+                description: Year to set the model time subset. Should be a year between `first_year` and `final_year`.
+                minimum: 2010
+                maximum: 2016
+
     scope:
         type: object
         description: Spatial and temporal scope bounding the models.
@@ -332,6 +338,19 @@ properties:
                         minimum: 2010
                         maximum: 2016
                         description: Final model year, which will be used as the upper bound (inclusive) to subset data during processing. To limit processing to only one year, set `final-year` to the same value as `first-year` .
+
+    test-scenarios:
+        type: object
+        description: scenarios combining model overrides and scenarios, to be run independently in the workflow test suite.
+        patternProperties:
+            ^[a-zA-Z]+.*$:
+                type: array
+                description: List of model override or scenario names (or none)
+                items:
+                    uniqueItems: true
+                    type: string
+
+
     quality-control:
         type: object
         description: Parameters controlling the data preprocessing steps.
