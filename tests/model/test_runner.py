@@ -7,7 +7,10 @@ import calliope
 import pandas as pd
 
 
-def run_test(path_to_test_dir, path_to_output, path_to_example_model, paths_to_cf_timeseries, config, scenarios):
+def run_test(
+    path_to_test_dir, path_to_output, path_to_example_model, paths_to_cf_timeseries,
+    config, scenarios, subset_time
+):
     exit_code = pytest.main(
         [
             path_to_test_dir,
@@ -20,14 +23,15 @@ def run_test(path_to_test_dir, path_to_output, path_to_example_model, paths_to_c
                 path_to_example_model=path_to_example_model,
                 paths_to_cf_timeseries=paths_to_cf_timeseries,
                 config=config,
-                scenarios=scenarios
+                scenarios=scenarios,
+                subset_time=subset_time
             )
         ]
     )
     sys.exit(exit_code)
 
 
-def _create_config_plugin(path_to_example_model, paths_to_cf_timeseries, config, scenarios):
+def _create_config_plugin(path_to_example_model, paths_to_cf_timeseries, config, scenarios, subset_time):
     """Creates fixtures from Snakemake configuration."""
 
     class SnakemakeConfigPlugin():
@@ -40,15 +44,20 @@ def _create_config_plugin(path_to_example_model, paths_to_cf_timeseries, config,
         def scaling_factors(self, config):
             return config["scaling-factors"]
 
-        @pytest.fixture(scope="session", params=scenarios)
+        @pytest.fixture(scope="session")
+        def override_dict(self):
+            return {"model.subset_time": subset_time}
+
+        @pytest.fixture(scope="session", params=list(scenarios.keys()))
         def scenario(self, request):
             return request.param
 
         @pytest.fixture(scope="session")
-        def model(self, config, scenario):
+        def model(self, scenario, override_dict):
             return calliope.Model(
                 path_to_example_model,
-                scenario=",".join(config["test-scenarios"][scenario])
+                scenario=",".join(scenarios[scenario]),
+                override_dict=override_dict
             )
 
         @pytest.fixture(scope="session")
@@ -109,5 +118,6 @@ if __name__ == "__main__":
         paths_to_cf_timeseries=snakemake.input.capacity_factor_timeseries,
         config=snakemake.params.config,
         scenarios=snakemake.params.scenarios,
+        subset_time=snakemake.params.subset_time,
         path_to_output=snakemake.output[0]
     )
