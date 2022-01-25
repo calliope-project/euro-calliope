@@ -93,3 +93,37 @@ rule wind_solar_techs_at_locations_template:
     script: "../scripts/template_techs_and_locations.py"
 
 
+rule transmission_entsoe_tyndp_template:
+    message: "Create YAML file of national-scale links with ENTSO-E TYNDP net-transfer capacities"
+    input:
+        script = script_dir + "transmission/template_transmission_entsoe_tyndp.py",
+        template = locations_template_dir + "transmission/transmission-electricity-entsoe.yaml",
+        locations = rules.locations_template.output.csv,
+        entsoe_tyndp = "build/data/national/TYNDP-2020-Scenario-Datafile.xlsx"
+    params:
+        scenario = config["parameters"]["entsoe-tyndp"]["scenario"],
+        grid = config["parameters"]["entsoe-tyndp"]["grid"],
+        ntc_limit = config["parameters"]["entsoe-tyndp"]["ntc_limit"],
+        energy_cap_limit = config["parameters"]["entsoe-tyndp"]["energy_cap_limit"],
+        year = config["parameters"]["entsoe-tyndp"]["projection-year"],
+        scaling_factor = config["scaling-factors"]["power"]
+    output: "build/model/techs_and_locations/{resolution}/transmission/transmission-electricity-entsoe.yaml"
+    wildcard_constraints: resolution = "national"
+    conda: "../envs/default.yaml"
+    script: "../scripts/transmission/template_transmission_entsoe_tyndp.py"
+
+
+rule link_locations_with_transmission_techs_template:
+    message: "Link {wildcards.resolution} direct neighbours and neighbours with sea connections with transmission techs from template."
+    input:
+        script = script_dir + "transmission/template_transmission.py",
+        template = locations_template_dir + "transmission/transmission-electricity.yaml",
+        units = rules.units.output[0]
+    params:
+        scaling_factors = config["scaling-factors"],
+        sea_connections = lambda wildcards: config["sea-connections"][wildcards.resolution]
+    output: "build/model/techs_and_locations/{resolution}/transmission/transmission-electricity.yaml"
+    conda: "../envs/geo.yaml"
+    script: "../scripts/transmission/template_transmission.py"
+
+

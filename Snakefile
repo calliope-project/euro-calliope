@@ -146,37 +146,6 @@ rule entsoe_tyndp_xlsx:
     shell: "unzip -o {input} 'TYNDP-2020-Scenario-Datafile.xlsx' -d build/data/national"
 
 
-rule entsoe_tyndp_links:
-    message: "Create YAML file of national-scale links with ENTSO-E TYNDP net-transfer capacities"
-    input:
-        script = script_dir + "link_entsoe_tyndp.py",
-        units = rules.units_without_shape.output[0],
-        entsoe_tyndp = rules.entsoe_tyndp_xlsx.output[0]
-    params:
-        scenario = config["parameters"]["entsoe-tyndp"]["scenario"],
-        grid = config["parameters"]["entsoe-tyndp"]["grid"],
-        ntc_limit = config["parameters"]["entsoe-tyndp"]["ntc_limit"],
-        energy_cap_limit = config["parameters"]["entsoe-tyndp"]["energy_cap_limit"],
-        year = config["parameters"]["entsoe-tyndp"]["projection-year"],
-        scaling_factor = config["scaling-factors"]["power"]
-    output: "build/model/{resolution}/entsoe-tyndp-links.yaml"
-    wildcard_constraints: resolution = "national"
-    conda: "envs/default.yaml"
-    script: "scripts/link_entsoe_tyndp.py"
-
-
-rule link_neighbours:
-    message: "Create links between all direct neighbours on {wildcards.resolution} resolution."
-    input:
-        script = script_dir + "link_neighbours.py",
-        units = rules.units.output[0]
-    params:
-        sea_connections = lambda wildcards: config["sea-connections"][wildcards.resolution]
-    output: "build/model/{resolution}/link-all-neighbours.yaml"
-    conda: "envs/geo.yaml"
-    script: "scripts/link_neighbours.py"
-
-
 rule build_metadata:
     message: "Generate build metadata."
     input:
