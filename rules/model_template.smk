@@ -1,9 +1,18 @@
 """ All scripts to produce Calliope model configuration YAML files """
+import glob
+from pathlib import Path
+
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 script_dir = f"{root_dir}scripts/"
 template_dir = f"{root_dir}templates/"
 locations_template_dir = f"{template_dir}techs_and_locations/"
 
+NON_MODEL_CONFIG_FILES = ["environment.yaml", "README.md"]
+
+MISSING_LOCATION_SPECIFIC_FILES = [
+    "build/model/techs_and_locations/continental/transmission/transmission-electricity-entsoe.yaml",
+    "build/model/techs_and_locations/regional/transmission/transmission-electricity-entsoe.yaml"
+]
 
 
 rule locations_template:
@@ -127,3 +136,46 @@ rule link_locations_with_transmission_techs_template:
     script: "../scripts/transmission/template_transmission.py"
 
 
+rule no_params_template:
+    message: "Create files from templates where no parameterisation is required."
+    input:
+        template = template_dir + "{template}",
+    output: "build/model/{template}"
+    wildcard_constraints:
+        template = "README.md|environment.yaml|interest-rate.yaml|scenarios.yaml"
+    conda: "../envs/shell.yaml"
+    shell: "cp {input.template} {output}"
+
+
+def config_files(other_model_files, resolution, missing_location_specific_files):
+    top_level_files = [
+        i.replace("templates/", "build/model/")
+        for i in glob.glob("templates/*.yaml")
+        if Path(i).name not in other_model_files
+    ]
+    locations_files = [
+        i.replace("templates/techs_and_locations/", f"build/model/techs_and_locations/{resolution}/")
+        for i in glob.glob("templates/techs_and_locations/**/*.yaml", recursive=True)
+    ]
+    locations_files = set(locations_files).difference(missing_location_specific_files)
+    return [*top_level_files, *locations_files]
+
+
+rule model_template:
+    message: "Generate top-level {wildcards.resolution} model configuration file from template"
+    input:
+        script = script_dir + "template_model.py",
+        template = template_dir + "example-model.yaml",
+        other_model_files = expand(
+            "build/model/{template}", template=NON_MODEL_CONFIG_FILES
+        ),
+        config_files = lambda wildcards: config_files(
+            NON_MODEL_CONFIG_FILES + ["example-model.yaml"],
+            wildcards.resolution,
+            MISSING_LOCATION_SPECIFIC_FILES
+        )
+    params:
+        model_year = config["parameters"]["model-year"]
+    conda: "../envs/default.yaml"
+    output: "build/model/example-model-{resolution}.yaml"
+    script: "../scripts/template_model.py"
