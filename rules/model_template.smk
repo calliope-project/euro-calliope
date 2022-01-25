@@ -32,3 +32,21 @@ rule simple_techs_and_locations_template:
     conda: "../envs/default.yaml"
     output: "build/model/techs_and_locations/{resolution}/{template}"
     script: "../scripts/template_techs_and_locations.py"
+
+
+rule bio_techs_and_locations_template:
+    message: "Create biofuel tech definition file from template."
+    input:
+        script = script_dir + "biofuels/template_bio.py",
+        template = locations_template_dir + "supply/supply-biofuel.yaml",
+        biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
+            scenario=config["parameters"]["jrc-biofuel"]["scenario"]
+        ),
+        locations = "build/data/{{resolution}}/biofuel/{scenario}/potential-mwh-per-year.csv".format(scenario=config["parameters"]["jrc-biofuel"]["scenario"])
+    params:
+        biofuel_efficiency = config["parameters"]["biofuel-efficiency"],
+        scaling_factors = config["scaling-factors"],
+    conda: "../envs/default.yaml"
+    output: "build/model/techs_and_locations/{resolution}/supply/supply-biofuel.yaml"
+    script: "../scripts/biofuels/template_bio.py"
+
