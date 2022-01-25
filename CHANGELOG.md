@@ -2,7 +2,25 @@
 
 ## 1.2.0 (unpublished)
 
-* **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality.
+### Added (models)
+
+..
+
+### Added (workflow)
+
+* **ADD** a default Snakemake profile to run on local machines in addition to the existing profile for Euler (#211).
+* **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality (#152).
+
+### Updated (models)
+
+..
+
+### Updated (workflow)
+
+* **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
+
+### Fixed (models)
+
 
 ## 1.1.0 (2021-12-22)
 

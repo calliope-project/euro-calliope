@@ -153,6 +153,8 @@ rule capacity_factors_hydro:
         ror = "build/model/{resolution}/capacityfactors-hydro-ror.csv",
         reservoir = "build/model/{resolution}/capacityfactors-hydro-reservoir-inflow.csv"
     conda: "envs/geo.yaml"
+    resources:
+        runtime = 100
     script: "scripts/capacityfactors_hydro.py"
 
 
@@ -314,4 +316,6 @@ rule test:
         config = config
     output: "build/logs/{resolution}/test-report.html"
     conda: "./envs/test.yaml"
+    resources:
+        runtime = 240
     script: "./tests/model/test_runner.py"

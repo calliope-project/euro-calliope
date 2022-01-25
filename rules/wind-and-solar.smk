@@ -56,6 +56,8 @@ rule capacity_factors_onshore_wind_and_solar:
         technology = "wind-onshore|rooftop-pv|open-field-pv|rooftop-pv-n|rooftop-pv-e-w|rooftop-pv-s-flat"
     output: "build/model/{resolution}/capacityfactors-{technology}.csv"
     conda: "../envs/geo.yaml"
+    resources:
+        runtime = 30
     script: "../scripts/capacityfactors.py"
 
 
@@ -75,4 +77,6 @@ rule capacity_factors_offshore:
         trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
     output: "build/model/{resolution}/capacityfactors-wind-offshore.csv"
     conda: "../envs/geo.yaml"
+    resources:
+        runtime = 30
     script: "../scripts/capacityfactors_offshore.py"

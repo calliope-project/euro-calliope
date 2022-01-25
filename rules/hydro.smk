@@ -39,6 +39,8 @@ rule download_runoff_data:
         protected("data/automatic/europe-cutout-{first_year}-{final_year}.nc")
     conda: "../envs/hydro.yaml"
     envmodules: "eth_proxy"
+    resources:
+        runtime = 240
     script: "../scripts/hydro/runoff.py"
 
 
@@ -122,6 +124,8 @@ rule inflow_m3:
         runoff = rules.download_runoff_data.output[0]
     output: "build/data/hydro-electricity-with-water-inflow-{first_year}-{final_year}.nc"
     conda: "../envs/hydro.yaml"
+    resources:
+        runtime = 100
     script: "../scripts/hydro/inflow_m3.py"
 
 
@@ -135,4 +139,7 @@ rule inflow_mwh:
         max_capacity_factor = config["capacity-factors"]["max"]
     output: "build/data/hydro-electricity-with-energy-inflow-{first_year}-{final_year}.nc"
     conda: "../envs/hydro.yaml"
+    resources:
+        runtime = 100,
+        memory = 40000
     script: "../scripts/hydro/inflow_mwh.py"

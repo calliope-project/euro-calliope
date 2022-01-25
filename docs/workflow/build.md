@@ -22,12 +22,12 @@ Using either one, you can create the environment:
         # using mamba
         mamba env create -f environment.yaml
         conda activate euro-calliope
-        snakemake --use-conda --list # test your installation
+        snakemake --profile profiles/default --list # test your installation
 
         # using conda
         conda env create -f environment.yaml
         conda activate euro-calliope
-        snakemake --use-conda --conda-frontend conda --list # test your installation
+        snakemake --profile profiles/default --conda-frontend conda --list # test your installation
 
 3. Install a Gurobi license on your computer ([academic license](https://www.gurobi.com/downloads/end-user-license-agreement-academic/) comes at no cost), or [choose a different solver](./customisation.md#manual).
 
@@ -39,12 +39,8 @@ By default, the entire model will be built in the `./build/model` folder when yo
 Execute the workflow like so:
 
 ```bash
-snakemake --use-conda --cores <N_CORES>
+snakemake --profile profiles/default
 ```
-
-`N_CORES` is the number of cores of your machine you want to use.
-It can be anything between `1` and `all`.
-Please have a look at [Snakemake's documentation](https://snakemake.readthedocs.io) for more information.
 
 ## Run
 

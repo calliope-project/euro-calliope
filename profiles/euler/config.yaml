@@ -1,0 +1,13 @@
+cluster: bsub -oo {resources.log-output} -W {resources.runtime} -n {resources.cores} -R "rusage[mem={resources.memory}]" -J {resources.job-name} <
+jobs: 999
+cluster-config: "config/euler/cluster-config.yaml"
+local-cores: 1
+latency-wait: 60
+use-envmodules: True
+use-conda: True
+default-resources:
+    runtime: 10
+    cores: 1
+    memory: 16000
+    log-output: "build/logs/{rule}.{wildcards}.log"
+    job-name: "{rule}.{wildcards}"
