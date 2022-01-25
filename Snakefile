@@ -86,8 +86,8 @@ rule capacity_factors_hydro:
     params:
         threshold = config["capacity-factors"]["min"]
     output:
-        ror = "build/model/{resolution}/capacityfactors-hydro-ror.csv",
-        reservoir = "build/model/{resolution}/capacityfactors-hydro-reservoir-inflow.csv"
+        ror = "build/model/timeseries_data/{resolution}/supply/capacityfactors-hydro-ror.csv",
+        reservoir = "build/model/timeseries_data/{resolution}/supply/capacityfactors-hydro-reservoir-inflow.csv"
     conda: "envs/geo.yaml"
     script: "scripts/capacityfactors_hydro.py"
 
@@ -124,7 +124,7 @@ rule electricity_load:
         national_load = rules.electricity_load_national.output[0]
     params:
         scaling_factor = config["scaling-factors"]["power"]
-    output: "build/model/{resolution}/electricity-demand.csv"
+    output: "build/model/timeseries_data/{resolution}/demand/electricity-demand.csv"
     conda: "envs/geo.yaml"
     script: "scripts/load.py"
 
@@ -164,33 +164,18 @@ rule build_metadata:
 rule model:
     message: "Generate euro-calliope with {wildcards.resolution} resolution."
     input:
-        "build/model/interest-rate.yaml",
-        "build/model/link-techs.yaml",
-        "build/model/tech-costs.yaml",
-        "build/model/renewable-techs.yaml",
-        "build/model/storage-techs.yaml",
-        "build/model/demand-techs.yaml",
-        "build/model/environment.yaml",
-        "build/model/README.md",
-        rules.locations.output,
+        "build/model/example-model-{resolution}.yaml",
         rules.electricity_load.output,
-        rules.link_neighbours.output,
         rules.capacity_factors_hydro.output,
         rules.hydro_capacities.output,
-        rules.directional_rooftop_pv.output,
-        rules.load_shedding.output,
         expand(
-            "build/model/{{resolution}}/capacityfactors-{technology}.csv",
+            "build/model/timeseries_data/{{resolution}}/supply/capacityfactors-{technology}.csv",
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
         ),
-        lambda wildcards: rules.entsoe_tyndp_links.output[0] if wildcards.resolution == "national" else [],
-        example_model = template_dir + "example-model.yaml"
     output:
         log = "build/logs/{resolution}/model.done",
-        example_model = "build/model/{resolution}/example-model.yaml"
     shell:
         """
-        cp {input.example_model} {output.example_model}
         touch {output.log}
         """
 
@@ -212,7 +197,7 @@ rule test:
         model = test_dir + "resources/{resolution}/model.yaml",
         example_model = "build/model/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
-            "build/model/{{resolution}}/capacityfactors-{technology}.csv",
+            "build/model/timeseries_data/{{resolution}}/supply/capacityfactors-{technology}.csv",
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES + ["hydro-ror", "hydro-reservoir-inflow"]
         )
     params:
