@@ -21,32 +21,32 @@ import pycountry
 
 
 def national_load(
-    path_to_raw_load, year, data_quality_config, path_to_output, countries
+    path_to_raw_load, first_year, final_year, data_quality_config, path_to_output, countries
 ):
     """Extracts national load time series for all countries in a specified year."""
 
-    load = clean_load_data(path_to_raw_load, year, data_quality_config, countries)
+    load = clean_load_data(path_to_raw_load, first_year, final_year, data_quality_config, countries)
     load.to_csv(path_to_output, header=True)
 
 
-def clean_load_data(path_to_raw_load, year, data_quality_config, countries):
+def clean_load_data(path_to_raw_load, first_year, final_year, data_quality_config, countries):
     data_sources = data_quality_config["data-source-priority-order"]
     raw_load = read_load_profiles(path_to_raw_load, data_sources)
     filtered_load = filter_countries(raw_load, countries)
     filtered_load = filter_outliers(filtered_load, data_quality_config)
     gap_filled_load = pd.concat(
         fill_gaps_per_source(filtered_load, year, data_quality_config, source)
-        for source in data_sources
-    )
+        for source in data_sources for year in range(first_year, final_year + 1)
+    ).sort_index()
     return get_source_choice_per_country(
-        filtered_load.loc[str(year)],
+        filtered_load.loc[slice(str(first_year), str(final_year))],
         gap_filled_load,
         data_sources
     )
 
 
 def read_load_profiles(path_to_raw_load, entsoe_priority):
-    """Reads national load data and handles outliers."""
+    """Reads national load data."""
     data = pd.read_csv(path_to_raw_load, parse_dates=["utc_timestamp"])
     load_by_attribute = (
         data
@@ -59,6 +59,7 @@ def read_load_profiles(path_to_raw_load, entsoe_priority):
 
 
 def filter_countries(load, countries):
+    """Filters data to configured workflow spatial scope and renames country codes to ISO3."""
     # UKM == United Kingdom of Great Britain and Northern Ireland.
     # Other subsets of the UK exist in the data, with UKM being the only one to cover the whole country.
     load.rename(columns={"GB_UKM": "GB"}, inplace=True)
@@ -90,10 +91,17 @@ def fill_gaps_per_source(all_load, model_year, data_quality_config, source):
     """For each valid data source, fills in all NaNs by interpolation or with data from other years"""
     source_specific_load = all_load.xs(source, level="attribute")
     source_specific_load = _interpolate_gaps(source_specific_load, data_quality_config["max-interpolate-timesteps"])
-    source_specific_model_year_load = source_specific_load.loc[str(model_year)]
-    source_specific_model_year_load = _fill_gaps_from_other_years(
-        source_specific_model_year_load, source_specific_load, data_quality_config, source, model_year
-    )
+    # If there is some data in given year, fill in the rest from other years
+    if model_year in source_specific_load.index.year.unique():
+        source_specific_model_year_load = source_specific_load.loc[str(model_year)]
+        source_specific_model_year_load = _fill_gaps_from_other_years(
+            source_specific_model_year_load, source_specific_load, data_quality_config, source, model_year
+        )
+    # If there is no data in given year, return a series of NaNs spanning the whole year
+    else:
+        source_specific_model_year_load = source_specific_load.reindex(
+            pd.date_range(f"{model_year}-01-01", f"{model_year}-12-31", freq="H", tz="UTC")
+        )
 
     return (
         source_specific_model_year_load
@@ -114,7 +122,7 @@ def _fill_gaps_from_other_years(model_year_load, all_load, data_quality_config, 
 
         model_year_load.loc[:, country] = updated_country_series
         print(
-            f"Using data source `{source}`, {country} has {N_missing_timesteps} missing load value(s). "
+            f"Using data source `{source}`, {country} has {N_missing_timesteps} missing load value(s) in {model_year}. "
             f"A working dataset was constructed from year(s) {', '.join(fill_years)} "
             f"with {updated_country_series.isnull().sum()} remaining empty data points."
         )
@@ -216,13 +224,14 @@ def get_source_choice_per_country(raw_load, gap_filled_load, entsoe_priority):
 
     if new_load.isnull().any().any():
         bad_index_values = new_load.isnull().stack()
-        raise AssertionError(
-            "Gap filling thresholds do not allow for a complete load dataset to be produced. "
-            f"Remaining empty data: {bad_index_values[bad_index_values].index.to_list()}"
-        )
+        error_msg = "Gap filling thresholds do not allow for a complete load dataset to be produced. "
+        if bad_index_values[bad_index_values].size < 100:
+                error_msg = error_msg + f"Remaining empty data: {bad_index_values[bad_index_values].index.to_list()}"
+        raise AssertionError(error_msg)
+
     else:
         print(
-            "Gap filling methods lead to the following relative differences between input and output data\n"
+            "Gap filling methods lead to the following relative increase in output load compared to input data\n"
             f"{new_load.sum() / raw_load_for_comparison.sum()}"
         )
     return new_load
@@ -243,7 +252,8 @@ def _select_load_by_source_priority(load, source_priority):
 if __name__ == "__main__":
     national_load(
         path_to_raw_load=snakemake.input.load,
-        year=snakemake.params.year,
+        first_year=snakemake.params.first_year,
+        final_year=snakemake.params.final_year,
         data_quality_config=snakemake.params.data_quality_config,
         countries=snakemake.params.countries,
         path_to_output=snakemake.output[0]

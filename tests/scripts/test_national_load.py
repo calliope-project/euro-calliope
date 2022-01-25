@@ -143,7 +143,7 @@ class TestLoadDummyData:
             countries = ["ALB", "DEU"]
             year = 2016
 
-            return clean_load_data(path_to_raw_load, year, data_quality_config, countries)
+            return clean_load_data(path_to_raw_load, year, year, data_quality_config, countries)
         return _load
 
     def test_success_with_working_data_quality_config(self, load):

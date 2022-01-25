@@ -2,6 +2,22 @@
 
 ## 1.2.0 (unpublished)
 
+### Added (models)
+
+..
+
+### Added (workflow)
+
+* **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality.
+
+### Updated (models)
+
+..
+
+### Updated (workflow)
+
+..
+
 ### Fixed (models)
 
 * **FIX** spatial proxy of `landscape-care-residues` biofuel in the default configuration. National potentials were spatially allocated to sub-national regions based on `population` rather than `forest` land use. As the potential of `landscape-care-residues` is low, this change has only a minor impact on the model. Continentally, only 3.5% of the total biofuel potential is of this type. Nationally, only three countries have a share of slightly above 10%: Bosnia and Herzegovina, Albania, and Norway. National potentials are unaffected by this change.
