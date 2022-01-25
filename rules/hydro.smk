@@ -38,6 +38,7 @@ rule download_runoff_data:
     output:
         protected("data/automatic/europe-cutout-{first_year}-{final_year}.nc")
     conda: "../envs/hydro.yaml"
+    envmodules: "eth_proxy"
     script: "../scripts/hydro/runoff.py"
 
 
