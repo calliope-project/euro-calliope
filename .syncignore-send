@@ -9,3 +9,4 @@ __pycache__
 build
 data/automatic
 notebooks
+gurobi.log
