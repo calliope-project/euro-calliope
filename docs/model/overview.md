@@ -5,29 +5,27 @@ No matter whether you have downloaded Euro-Calliope's pre-builts or you have bui
 ## File structure
 
 By default, Euro-Calliope is a set of three models on different spatial resolutions: continental, national, and regional.
-All files that depend on the spatial resolution are within subfolders named by the resolution.
-All files in the root directory are independent of the spatial resolution.
+All files required to run each resolution-specific model are within subfolders named by the resolution.
+All files in the root directory are independent of the model configuration or data; they are not necessary to run a model.
+Within each resolution-specific model directory, there is a subdirectory for technology definitions (stored in human-readable YAML files) and a subdirectory for timeseries data (stored in CSV files)
 
 ```
-├── {resolution}                           <- For each spatial resolution an individual folder.
-│   ├── capacityfactors-{technology}.csv   <- Timeseries of capacityfactors of all renewables.
-│   ├── directional-rooftop.yaml           <- Override discriminating rooftop PV by orientation.
-│   ├── electricity-demand.csv             <- Timeseries of electricity demand on each node.
-│   ├── example-model.yaml                 <- Calliope model definition.
-│   ├── link-all-neighbours.yaml           <- Connects neighbouring locations with transmission.
-│   ├── entsoe-tyndp-links.yaml            <- Connects regions according to ENTSO-E; exists only if resolution = "national".
-│   ├── load-shedding.yaml                 <- Override adding option to shed load.
-│   ├── locations.csv                      <- Map from Calliope location id to name of location.
-│   └── locations.yaml                     <- Defines all locations and their max capacities.
-├── build-metadata.yaml                    <- Metadata of the build process.
-├── demand-techs.yaml                      <- Definition of demand technologies.
-├── environment.yaml                       <- Conda file defining an environment to run the model in.
-├── interest-rate.yaml                     <- Interest rates of all capacities.
-├── link-techs.yaml                        <- Definition of link technologies.
-├── README.md                              <- Basic documentation (pre-builts only).
-├── tech-costs.yaml                        <- Definition of cost data.
-├── renewable-techs.yaml                   <- Definition of supply technologies.
-└── storage-techs.yaml                     <- Definition of storage technologies.
+├── {resolution}                                            <- An individual folder for each spatial resolution.
+│   ├── timeseries                                          <- All timeseries data CSV files.
+|   |   |── supply
+|   |   |   └── capacityfactors-{technology}.csv            <- Timeseries of capacityfactors of all renewables.
+|   |   └── demand
+|   |   |   └── electricity-demand.csv                      <- Timeseries of electricity demand on each node.
+|   ├── techs                                               <- All technology definition YAML files.
+|   |   |── {technology-class}                              <- Calliope base technology classes (one of `supply`, `demand`, `storage`, `transmission`).
+|   |   |   └── {technology-class}-{technology-group}.csv   <- Definition of a technology (or group of technologies) relevant to the base technology, and the allocation of that technology to nodes in the model.
+│   ├── example-model.yaml                                  <- Calliope model definition.
+|   ├── interest-rate.yaml                                  <- Interest rates of all capacity investments.
+|   ├── scenarios.yaml                                      <- scenario names which can be used to override the base model configuration.
+│   └── locations.yaml                                      <- Defines all nodes in the model, including the coordinates defining their centroids.
+├── build-metadata.yaml                                     <- Metadata of the build process.
+├── environment.yaml                                        <- Conda file defining an environment to run the model in.
+└── README.md                                               <- Basic documentation (pre-builts only).
 ```
 
 ## Units of quantities
