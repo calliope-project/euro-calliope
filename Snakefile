@@ -16,7 +16,7 @@ include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
 include: "./rules/sync.smk"
-include: "./rules/model_template.smk"
+include: "./rules/model-template.smk"
 localrules: all, download_raw_load, model, clean
 localrules: download_entsoe_tyndp_zip
 wildcard_constraints:
