@@ -3,7 +3,9 @@ from eurocalliopelib.parametrise_template import parametrise_template
 
 
 def construct_model(path_to_template, path_to_output, config_files, resolution, model_year):
-    config_files = [file.replace("build/model", ".") for file in config_files]
+    config_files = sorted([
+        file.replace(f"build/models/{resolution}", ".") for file in config_files
+    ])
 
     return parametrise_template(
         path_to_template, path_to_output,

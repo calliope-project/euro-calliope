@@ -68,7 +68,7 @@ rule capacity_factors_onshore_wind_and_solar:
         trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
     wildcard_constraints:
         technology = "wind-onshore|rooftop-pv|open-field-pv|rooftop-pv-n|rooftop-pv-e-w|rooftop-pv-s-flat"
-    output: "build/model/timeseries_data/{resolution}/supply/capacityfactors-{technology}.csv"
+    output: "build/models/{resolution}/timeseries/supply/capacityfactors-{technology}.csv"
     conda: "../envs/geo.yaml"
     script: "../scripts/capacityfactors.py"
 
@@ -87,6 +87,6 @@ rule capacity_factors_offshore:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
         trim_ts = config["capacity-factors"]["trim-ninja-timeseries"]
-    output: "build/model/timeseries_data/{resolution}/supply/capacityfactors-wind-offshore.csv"
+    output: "build/models/{resolution}/timeseries/supply/capacityfactors-wind-offshore.csv"
     conda: "../envs/geo.yaml"
     script: "../scripts/capacityfactors_offshore.py"

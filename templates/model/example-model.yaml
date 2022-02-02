@@ -5,7 +5,7 @@ import:
 model:
     name: 'Example model'
     calliope_version: 0.6.7
-    timeseries_data_path: ./timeseries_data/{{ resolution }}
+    timeseries_data_path: ./timeseries
     subset_time: ['{{ model_year }}-01-01', '{{ model_year }}-01-01']
 run:
     solver: gurobi

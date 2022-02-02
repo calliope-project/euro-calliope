@@ -46,7 +46,7 @@ rule all:
         "build/logs/continental/model.done",
         "build/logs/national/model.done",
         "build/logs/regional/model.done",
-        "build/model/build-metadata.yaml"
+        "build/models/build-metadata.yaml"
 
 
 rule all_tests:
@@ -58,7 +58,7 @@ rule all_tests:
         "build/logs/continental/test-report.html",
         "build/logs/national/test-report.html",
         "build/logs/regional/test-report.html",
-        "build/model/build-metadata.yaml"
+        "build/models/build-metadata.yaml"
 
 
 
@@ -86,8 +86,8 @@ rule capacity_factors_hydro:
     params:
         threshold = config["capacity-factors"]["min"]
     output:
-        ror = "build/model/timeseries_data/{resolution}/supply/capacityfactors-hydro-ror.csv",
-        reservoir = "build/model/timeseries_data/{resolution}/supply/capacityfactors-hydro-reservoir-inflow.csv"
+        ror = "build/models/{resolution}/timeseries/supply/capacityfactors-hydro-ror.csv",
+        reservoir = "build/models/{resolution}/timeseries/supply/capacityfactors-hydro-reservoir-inflow.csv"
     conda: "envs/geo.yaml"
     script: "scripts/capacityfactors_hydro.py"
 
@@ -124,7 +124,7 @@ rule electricity_load:
         national_load = rules.electricity_load_national.output[0]
     params:
         scaling_factor = config["scaling-factors"]["power"]
-    output: "build/model/timeseries_data/{resolution}/demand/electricity-demand.csv"
+    output: "build/models/{resolution}/timeseries/demand/electricity-demand.csv"
     conda: "envs/geo.yaml"
     script: "scripts/load.py"
 
@@ -156,7 +156,7 @@ rule build_metadata:
     params:
         config = config,
         version = __version__
-    output: "build/model/build-metadata.yaml"
+    output: "build/models/build-metadata.yaml"
     conda: "envs/default.yaml"
     script: "scripts/metadata.py"
 
@@ -164,12 +164,12 @@ rule build_metadata:
 rule model:
     message: "Generate euro-calliope with {wildcards.resolution} resolution."
     input:
-        "build/model/example-model-{resolution}.yaml",
+        "build/models/{resolution}/example-model.yaml",
         rules.electricity_load.output,
         rules.capacity_factors_hydro.output,
         rules.hydro_capacities.output,
         expand(
-            "build/model/timeseries_data/{{resolution}}/supply/capacityfactors-{technology}.csv",
+            "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
         ),
     output:
@@ -194,9 +194,9 @@ rule test:
         "build/logs/{resolution}/model.done",
         test_dir = model_test_dir,
         tests = map(str, Path(model_test_dir).glob("**/test_*.py")),
-        example_model = "build/model/example-model-{resolution}.yaml",
+        example_model = "build/models/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
-            "build/model/timeseries_data/{{resolution}}/supply/capacityfactors-{technology}.csv",
+            "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES + ["hydro-ror", "hydro-reservoir-inflow"]
         )
     params:
