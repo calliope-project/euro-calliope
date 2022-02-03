@@ -13,7 +13,8 @@ def parametrise_template(path_to_template, path_to_output_yaml, **kwargs):
     path_to_template = Path(path_to_template)
     env = jinja2.Environment(
         loader=jinja2.FileSystemLoader(path_to_template.parent),
-        lstrip_blocks=True, trim_blocks=True
+        lstrip_blocks=True, trim_blocks=True, keep_trailing_newline=True,
+        undefined=jinja2.StrictUndefined  # This ensures that missing pandas index elements raise an exception instead of silently returning None
     )
     env.filters['unit'] = filters.unit
     rendered =env.get_template(path_to_template.name).render(**kwargs)
