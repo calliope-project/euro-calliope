@@ -139,7 +139,7 @@ rule inflow_mwh:
 rule hydro_capacities:
     message: "Determine hydro capacities on {wildcards.resolution} resolution."
     input:
-        script = script_dir + "hydro_capacities.py",
+        script = script_dir + "hydro/hydro_capacities.py",
         locations = rules.units.output[0],
         plants = rules.preprocess_hydro_stations.output[0]
     output: "build/data/{resolution}/hydro-capacities-mw.csv"
@@ -150,7 +150,7 @@ rule hydro_capacities:
 rule capacity_factors_hydro:
     message: "Generate capacityfactor time series for hydro electricity on {wildcards.resolution} resolution."
     input:
-        script = script_dir + "capacityfactors_hydro.py",
+        script = script_dir + "hydro/capacityfactors_hydro.py",
         capacities = rules.hydro_capacities.output[0],
         stations = "build/data/hydro-electricity-with-energy-inflow-{first_year}-{final_year}.nc".format(
             first_year = config["scope"]["temporal"]["first-year"],
