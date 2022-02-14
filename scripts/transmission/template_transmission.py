@@ -2,9 +2,10 @@
 import geopandas as gpd
 import shapely
 import networkx as nx
+import pandas as pd
 
 from eurocalliopelib.geo import EPSG3035
-from eurocalliopelib.parametrise_template import parametrise_template
+from eurocalliopelib.template import parametrise_template
 
 K_EDGE_CONNECTION = 1 # every component of the graph is connect with at least this amount of edges
 
@@ -16,7 +17,15 @@ def construct_techs_and_links(path_to_units, path_to_output, scaling_factors, se
         graph.add_edges_from([(loc1, loc2) for loc1, loc2 in sea_connections])
 
     assert nx.is_connected(graph), "There are electrical islands in the network graph."
-    return parametrise_template(path_to_template, path_to_output, graph=graph, scaling_factors=scaling_factors)
+
+    links = pd.Series(index=graph.edges, data=None)
+
+    return parametrise_template(
+        path_to_template, path_to_output,
+        links=links,
+        scaling_factors=scaling_factors,
+        link_comment="# All direct neighbours are linked (+ explicitly defined under-sea connections)"
+        )
 
 
 def _create_graph_with_land_connections(path_to_units):

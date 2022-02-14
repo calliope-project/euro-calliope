@@ -20,9 +20,15 @@ techs:
             energy_cap_per_distance: {{ 0.9 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW/m") }}
             om_annual_investment_fraction: 0.015
 
+{% if link_comment is defined %}
+{{ link_comment }}
+{% endif %}
+
 links:
-    {% for location1, location2 in graph.edges %}
-    {{ location1 | replace(".", "-") }},{{ location2 | replace(".", "-") }}:
-        techs:
-            ac_transmission:
+    {% for link in links.index %}
+    {{ link[0] }},{{ link[1] }}:
+        techs.ac_transmission:
+        {% if energy_cap_limit is defined %}
+            constraints.energy_cap_{{ energy_cap_limit }}: {{ links.loc[link] * scaling_factors.power }}  # {{ (1 / scaling_factors.power) | unit("MW") }}
+        {% endif %}
     {% endfor %}

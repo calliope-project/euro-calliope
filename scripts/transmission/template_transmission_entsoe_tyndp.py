@@ -1,27 +1,31 @@
 import pandas as pd
 
-from eurocalliopelib.parametrise_template import parametrise_template
+from eurocalliopelib.template import parametrise_template
 from eurocalliopelib import utils
 
 
 def construct_links(
     path_to_locations, path_to_template, path_to_entsoe_tyndp, scenario, grid, year, ntc_limit,
-    scaling_factor, energy_cap_limit, path_to_output
+    scaling_factors, energy_cap_limit, path_to_output
 ):
     locations = pd.read_csv(path_to_locations, index_col="id")
     tyndp_scenarios = pd.read_excel(path_to_entsoe_tyndp, sheet_name="Line", index_col=0)
     ntcs = _entsoe_ntcs(locations, tyndp_scenarios, scenario, grid, year, ntc_limit)
-
+    link_comment = f"""
+# {ntc_limit.title()} net transfer capacity between countries according to the
+# following ENTSO-E ten-year network development plan 2020 scenario:
+# Scenario: {scenario.title()}
+# Case: {grid.title()} Grid
+# Year: {year}
+# Climate Year: 2007
+    """
     parametrise_template(
         path_to_template,
         path_to_output,
-        ntcs=ntcs,
-        scaling_factor=scaling_factor,
-        energy_cap_limit=energy_cap_limit,
-        scenario=scenario,
-        grid=grid,
-        year=year,
-        ntc_limit=ntc_limit,
+        links=ntcs,
+        scaling_factors=scaling_factors,
+        link_comment=link_comment,
+        energy_cap_limit=energy_cap_limit
     )
 
 
@@ -80,7 +84,7 @@ if __name__ == "__main__":
             grid=snakemake.params.grid,
             year=snakemake.params.year,
             ntc_limit=snakemake.params.ntc_limit,
-            scaling_factor=snakemake.params.scaling_factor,
+            scaling_factors=snakemake.params.scaling_factors,
             energy_cap_limit=snakemake.params.energy_cap_limit,
             path_to_output=snakemake.output[0]
         )

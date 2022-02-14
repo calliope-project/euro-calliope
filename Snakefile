@@ -19,6 +19,7 @@ include: "./rules/shapes.smk"
 include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
+include: "./rules/transmission.smk"
 include: "./rules/demand.smk"
 include: "./rules/sync.smk"
 localrules: all, clean
