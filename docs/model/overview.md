@@ -15,17 +15,17 @@ Within each resolution-specific model directory, there is a subdirectory for tec
 |   |   |── supply
 |   |   |   └── capacityfactors-{technology}.csv            <- Timeseries of capacityfactors of all renewables.
 |   |   └── demand
-|   |   |   └── electricity-demand.csv                      <- Timeseries of electricity demand on each node.
+|   |   |   └── electricity.csv                             <- Timeseries of electricity demand on each node.
 |   ├── techs                                               <- All technology definition YAML files.
 |   |   |── {technology-class}                              <- Calliope base technology classes (one of `supply`, `demand`, `storage`, `transmission`).
-|   |   |   └── {technology-class}-{technology-group}.csv   <- Definition of a technology (or group of technologies) relevant to the base technology, and the allocation of that technology to nodes in the model.
+|   |   |   └── {technology-group}.csv                      <- Definition of a technology (or group of technologies) relevant to the base technology, and the allocation of that technology to nodes in the model.
 │   ├── example-model.yaml                                  <- Calliope model definition.
 |   ├── interest-rate.yaml                                  <- Interest rates of all capacity investments.
-|   ├── scenarios.yaml                                      <- scenario names which can be used to override the base model configuration.
+|   ├── scenarios.yaml                                      <- Scenario names which can be used to override the base model configuration.
 │   └── locations.yaml                                      <- Defines all nodes in the model, including the coordinates defining their centroids.
 ├── build-metadata.yaml                                     <- Metadata of the build process.
 ├── environment.yaml                                        <- Conda file defining an environment to run the model in.
-└── README.md                                               <- Basic documentation (pre-builts only).
+└── README.md                                               <- Basic documentation.
 ```
 
 ## Units of quantities
