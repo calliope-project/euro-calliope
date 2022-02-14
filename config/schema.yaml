@@ -244,45 +244,52 @@ properties:
                         type: string
                         description: How to use ENTSO-E-based NTCs to constrain link energy capacity in the Calliope model.
                         enum: [min, equals, max]
-            model-year:
-                type: integer
-                description: Year to set the model time subset. Should be a year between `first_year` and `final_year`.
-                minimum: 2010
-                maximum: 2016
 
-            test:
+    test:
+        type: object
+        description: Resolution-specific parameters for running the model tests
+        properties:
+            scenarios:
                 type: object
-                description: Resolution-specific parameters for running the model tests
-                properties:
-                    scenarios:
+                propertyNames: {"$ref": "#/properties/shapes/propertyNames"}
+                additionalProperties: false
+                description: scenarios combining model overrides and scenarios, to be run independently in the workflow test suite.
+                patternProperties:
+                    ^[a-zA-Z]+.*$:
                         type: object
-                        propertyNames: {"$ref": "#/properties/shapes/propertyNames"}
-                        additionalProperties: false
-                        description: scenarios combining model overrides and scenarios, to be run independently in the workflow test suite.
-                        patternProperties:
-                            ^[a-zA-Z]+.*$:
-                                type: object
-                                description: Name of scenario
-                                patternProperties:
-                                    ^[a-zA-Z]+.*$:
-                                        type: array
-                                        description: List of model override or scenario names (can be empty)
-                                        items:
-                                            uniqueItems: true
-                                            type: string
-                    subset_time:
-                        type: object
-                        propertyNames: {"$ref": "#/properties/shapes/propertyNames"}
-                        additionalProperties: false
-                        description: scenarios combining model overrides and scenarios, to be run independently in the workflow test suite.
+                        description: Name of scenario
                         patternProperties:
                             ^[a-zA-Z]+.*$:
                                 type: array
-                                description: List of model override or scenario names (or none)
+                                description: List of model override or scenario names (can be empty)
                                 items:
-                                    minItems: 2
-                                    maxItems: 2
+                                    uniqueItems: true
                                     type: string
+            overrides:
+                type: object
+                propertyNames: {"$ref": "#/properties/shapes/propertyNames"}
+                additionalProperties: false
+                description: custom overrides to apply in the tests only.
+                patternProperties:
+                    ^[a-zA-Z]+.*$:
+                        type: object
+                        description: Name of override
+                        patternProperties:
+                            ^[a-zA-Z]+.*$:
+                                type: object
+            subset_time:
+                type: object
+                propertyNames: {"$ref": "#/properties/shapes/propertyNames"}
+                additionalProperties: false
+                description: scenarios combining model overrides and scenarios, to be run independently in the workflow test suite.
+                patternProperties:
+                    ^[a-zA-Z]+.*$:
+                        type: array
+                        description: List of model override or scenario names (or none)
+                        items:
+                            minItems: 2
+                            maxItems: 2
+                            type: string
 
     scope:
         type: object

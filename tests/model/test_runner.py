@@ -9,7 +9,7 @@ import pandas as pd
 
 def run_test(
     path_to_test_dir, path_to_output, path_to_example_model, paths_to_cf_timeseries,
-    config, scenarios, subset_time
+    config, override_dict, scenarios, subset_time
 ):
     exit_code = pytest.main(
         [
@@ -23,6 +23,7 @@ def run_test(
                 path_to_example_model=path_to_example_model,
                 paths_to_cf_timeseries=paths_to_cf_timeseries,
                 config=config,
+                override_dict=override_dict,
                 scenarios=scenarios,
                 subset_time=subset_time
             )
@@ -31,7 +32,9 @@ def run_test(
     sys.exit(exit_code)
 
 
-def _create_config_plugin(path_to_example_model, paths_to_cf_timeseries, config, scenarios, subset_time):
+def _create_config_plugin(
+    path_to_example_model, paths_to_cf_timeseries, config, override_dict, scenarios, subset_time
+):
     """Creates fixtures from Snakemake configuration."""
 
     class SnakemakeConfigPlugin():
@@ -46,7 +49,7 @@ def _create_config_plugin(path_to_example_model, paths_to_cf_timeseries, config,
 
         @pytest.fixture(scope="session")
         def override_dict(self):
-            return {"model.subset_time": subset_time}
+            return {"model.subset_time": subset_time, "overrides": override_dict}
 
         @pytest.fixture(scope="session", params=list(scenarios.keys()))
         def scenario(self, request):
@@ -117,6 +120,7 @@ if __name__ == "__main__":
         path_to_example_model=snakemake.input.example_model,
         paths_to_cf_timeseries=snakemake.input.capacity_factor_timeseries,
         config=snakemake.params.config,
+        override_dict=snakemake.params.override_dict,
         scenarios=snakemake.params.scenarios,
         subset_time=snakemake.params.subset_time,
         path_to_output=snakemake.output[0]

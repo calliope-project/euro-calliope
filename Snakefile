@@ -169,8 +169,9 @@ rule test:
         )
     params:
         config = config,
-        scenarios = lambda wildcards: config["parameters"]["test"]["scenarios"][wildcards.resolution],
-        subset_time = lambda wildcards: config["parameters"]["test"]["subset_time"][wildcards.resolution],
+        override_dict = lambda wildcards: config["test"]["overrides"][wildcards.resolution],
+        scenarios = lambda wildcards: config["test"]["scenarios"][wildcards.resolution],
+        subset_time = lambda wildcards: config["test"]["subset_time"][wildcards.resolution],
     output: "build/logs/{resolution}/test-report.html"
     conda: "./envs/test.yaml"
     script: "./tests/model/test_runner.py"

@@ -4,7 +4,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from scripts.national_load import (
+from scripts.demand.national_load import (
     filter_outliers,
     _interpolate_gaps,
     _fill_29th_feb,

@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 import jinja2
 
-from eurocalliopelib import parametrise_template
+from eurocalliopelib.template import parametrise_template
 
 TEMPLATE_NO_PARAMS = """
 foo:
@@ -20,8 +20,14 @@ foo:
 
 TEMPLATE_PARAMS = """
 foo:
-    bar: {{ foobar }}
-    baz: {{ foobaz }}
+    bar: {{ param1 }}
+    baz: {{ param2 }}
+"""
+
+TEMPLATE_PARAMS_EXPECTED = """
+foo:
+    bar: {param1}
+    baz: {param2}
 """
 
 TEMPLATE_SCALING_FACTOR_IN_PARAMS = """
@@ -30,9 +36,20 @@ foo:
     baz: {{ scaling_factors.specific_costs }}
 """
 
+TEMPLATE_SCALING_FACTOR_IN_PARAMS_EXPECTED = """
+foo:
+    bar: 0.5
+    baz: 4.0
+"""
+
 TEMPLATE_LOCATIONS_IN_PARAMS = """
 foo:
     bar: {{ locations.loc['A-B', 'foo'] }}
+"""
+
+TEMPLATE_LOCATIONS_IN_PARAMS_EXPECTED = """
+foo:
+    bar: 1.0
 """
 
 TEMPLATE_WRONG_LOCATIONS_IN_PARAMS = """
@@ -45,6 +62,10 @@ foo:
     {% for idx, data in locations.iterrows() %}
     {{ idx }}: {{ data.foo }}
     {% endfor %}
+"""
+TEMPLATE_LOCATIONS_ITERATE_EXPECTED = """
+foo:
+    A-B: 1.0
 """
 
 
@@ -78,17 +99,11 @@ def locations():
     })
 
 
-def format_template_manually(template, mapping):
-    for template_val, replacement_val in mapping.items():
-        template = template.replace("{{ " + template_val + " }}", str(replacement_val))
-    return template
-
-
 def test_template_no_params(template_to_file_obj, out_file_obj):
     template_obj = template_to_file_obj(TEMPLATE_NO_PARAMS)
-    parametrise_template.parametrise_template(template_obj, str(out_file_obj))
+    parametrise_template(template_obj, str(out_file_obj))
 
-    assert filecmp.cmp(template_obj, out_file_obj)
+    filecmp.cmp(template_obj, out_file_obj)
 
 
 def test_template_line_strip(template_to_file_obj, out_file_obj):
@@ -96,60 +111,54 @@ def test_template_line_strip(template_to_file_obj, out_file_obj):
     Jinja args are set to trim the template to remove empty lines where there are
     jinja2 commands (e.g. a for loop).
     """
-    template_obj_extra_line = template_to_file_obj(TEMPLATE_LINE_TO_STRIP)
-    template_obj_no_extra_line = template_to_file_obj(TEMPLATE_NO_PARAMS)
-    parametrise_template.parametrise_template(template_obj_extra_line, str(out_file_obj))
+    not_expected = template_to_file_obj(TEMPLATE_LINE_TO_STRIP)
+    expected = template_to_file_obj(TEMPLATE_NO_PARAMS)
+    parametrise_template(not_expected, str(out_file_obj))
 
-    assert not filecmp.cmp(template_obj_extra_line, out_file_obj)
-    assert filecmp.cmp(template_obj_no_extra_line, out_file_obj)
+    not filecmp.cmp(not_expected, out_file_obj)
+    filecmp.cmp(expected, out_file_obj)
 
 
-@pytest.mark.parametrize(("foobar", "foobaz"), [(1, 2), ("a", "b")])
-def test_template_params(template_to_file_obj, out_file_obj, foobar, foobaz):
+@pytest.mark.parametrize(("param1", "param2"), [(1, 2), ("a", "b")])
+def test_template_params(template_to_file_obj, out_file_obj, param1, param2):
     template_obj = template_to_file_obj(TEMPLATE_PARAMS)
+    expected = TEMPLATE_PARAMS_EXPECTED.format(param1=param1, param2=param2)
 
-    parametrise_template.parametrise_template(
+    parametrise_template(
         template_obj, out_file_obj,
-        foobar=foobar, foobaz=foobaz
+        param1=param1, param2=param2
     )
-    expected_result = format_template_manually(
-        TEMPLATE_PARAMS, {"foobar": foobar, "foobaz": foobaz}
-    )
-    assert expected_result == out_file_obj.read()
+    assert expected == out_file_obj.read()
 
 
 def test_template_scaling_factors(template_to_file_obj, out_file_obj, scaling_factors):
     template_obj = template_to_file_obj(TEMPLATE_SCALING_FACTOR_IN_PARAMS)
+    expected = TEMPLATE_SCALING_FACTOR_IN_PARAMS_EXPECTED
 
-    parametrise_template.parametrise_template(
+    parametrise_template(
         template_obj, out_file_obj,
         scaling_factors=scaling_factors
     )
-    expected_result = format_template_manually(
-        TEMPLATE_SCALING_FACTOR_IN_PARAMS,
-        {"scaling_factors.power": 0.5, "scaling_factors.specific_costs": 4.0}
-    )
-    assert expected_result == out_file_obj.read()
+
+    assert expected == out_file_obj.read()
 
 
 def test_template_locations(template_to_file_obj, out_file_obj, locations):
     template_obj = template_to_file_obj(TEMPLATE_LOCATIONS_IN_PARAMS)
+    expected = TEMPLATE_LOCATIONS_IN_PARAMS_EXPECTED
 
-    parametrise_template.parametrise_template(
+    parametrise_template(
         template_obj, out_file_obj,
         locations=locations
     )
-    expected_result = format_template_manually(
-        TEMPLATE_LOCATIONS_IN_PARAMS,
-        {"locations.loc['A-B', 'foo']": 1.0}
-    )
-    assert expected_result == out_file_obj.read()
+
+    assert expected == out_file_obj.read()
 
 
 def test_template_wrong_locations(template_to_file_obj, out_file_obj, locations):
     template_obj = template_to_file_obj(TEMPLATE_WRONG_LOCATIONS_IN_PARAMS)
     with pytest.raises(jinja2.exceptions.UndefinedError, match=r".*('A.B', 'foo')"):
-        parametrise_template.parametrise_template(
+        parametrise_template(
             template_obj, out_file_obj,
             locations=locations
         )
@@ -157,9 +166,11 @@ def test_template_wrong_locations(template_to_file_obj, out_file_obj, locations)
 
 def test_template_locations_iterate(template_to_file_obj, out_file_obj, locations):
     template_obj = template_to_file_obj(TEMPLATE_LOCATIONS_ITERATE)
+    expected = TEMPLATE_LOCATIONS_ITERATE_EXPECTED
 
-    parametrise_template.parametrise_template(
+    parametrise_template(
         template_obj, out_file_obj,
         locations=locations
     )
-    assert "A-B: 1.0" in out_file_obj.read()
+
+    assert expected == out_file_obj.read()
