@@ -2,16 +2,19 @@
 
 ## 1.2.0 (unpublished)
 
+### Added (models)
+
+* **ADD** Top level model configuration file `scenarios.yaml` which can act as the focal point to consolidate all available overrides in the model.
+
 ### Added (workflow)
 
 * **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality.
-* **ADD** Top level model configuration file `scenarios.yaml` which can act as the focal point to consolidate all available overrides in the model.
 
 ### Updated (models)
 
 * **UPDATED** Final model configuration and data files are restructured to:
     * make each spatial resolution model self-contained (i.e., no shared files between resolutions);
-    * split technology definitions into self-explanatory files and into subdirectories named after Calliope abstract technology groups (e.g., `supply/supply-wind-and-solar.yaml` for wind and solar power supply technologies);
+    * split technology definitions into self-explanatory files and into subdirectories named after Calliope abstract technology groups (e.g., `supply/wind-offshore.yaml` for offshore wind supply technology). This enables technologies to be added to or removed from the model by simply changing the model configuration file import list.;
     * keep technology definitions and their allocations to locations in the model in the same file; and
     * separate tech config YAML files from data CSV files. The former are found in the `techs` subdirectory, while the latter are in `timeseries`.
 
