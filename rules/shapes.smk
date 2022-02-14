@@ -14,8 +14,6 @@ SCHEMA_UNITS = {
 
 localrules: download_raw_gadm_administrative_borders, raw_gadm_administrative_borders, download_raw_nuts_units
 localrules: download_eez
-root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
-script_dir = f"{root_dir}scripts/"
 
 
 rule download_raw_gadm_administrative_borders:
@@ -130,3 +128,16 @@ rule eez:
         | fio filter "f.properties.territory1 in [{params.countries}]"\
         | fio collect > {output}
         """
+
+
+rule locations_template:
+    message: "Generate locations configuration file for {wildcards.resolution} resolution from template."
+    input:
+        script = script_dir + "shapes/template_locations.py",
+        template = model_template_dir + "locations.yaml",
+        shapes = rules.units.output[0]
+    output:
+        yaml = "build/models/{resolution}/locations.yaml",
+        csv = "build/models/{resolution}/locations.csv"
+    conda: "../envs/geo.yaml"
+    script: "../scripts/shapes/template_locations.py"

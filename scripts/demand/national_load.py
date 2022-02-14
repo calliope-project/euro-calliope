@@ -39,7 +39,7 @@ def clean_load_data(path_to_raw_load, first_year, final_year, data_quality_confi
         for source in data_sources for year in range(first_year, final_year + 1)
     ).sort_index()
     return get_source_choice_per_country(
-        filtered_load.loc[slice(str(first_year), str(final_year))],
+        filtered_load.loc[slice(f"{first_year}-01-01 00:00", f"{final_year}-12-31 23:00")],
         gap_filled_load,
         data_sources
     )

@@ -2,8 +2,6 @@
 
 localrules: download_basins_database, download_stations_database
 localrules: download_hydro_generation_data, download_pumped_hydro_data, basins_database, stations_database
-root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
-script_dir = f"{root_dir}scripts/"
 
 
 rule download_hydro_generation_data:
@@ -136,3 +134,50 @@ rule inflow_mwh:
     output: "build/data/hydro-electricity-with-energy-inflow-{first_year}-{final_year}.nc"
     conda: "../envs/hydro.yaml"
     script: "../scripts/hydro/inflow_mwh.py"
+
+
+rule hydro_capacities:
+    message: "Determine hydro capacities on {wildcards.resolution} resolution."
+    input:
+        script = script_dir + "hydro_capacities.py",
+        locations = rules.units.output[0],
+        plants = rules.preprocess_hydro_stations.output[0]
+    output: "build/data/{resolution}/hydro-capacities-mw.csv"
+    conda: "../envs/geo.yaml"
+    script: "../scripts/hydro/hydro_capacities.py"
+
+
+rule capacity_factors_hydro:
+    message: "Generate capacityfactor time series for hydro electricity on {wildcards.resolution} resolution."
+    input:
+        script = script_dir + "capacityfactors_hydro.py",
+        capacities = rules.hydro_capacities.output[0],
+        stations = "build/data/hydro-electricity-with-energy-inflow-{first_year}-{final_year}.nc".format(
+            first_year = config["scope"]["temporal"]["first-year"],
+            final_year = config["scope"]["temporal"]["final-year"]
+        ),
+        locations = rules.units.output[0]
+    params:
+        threshold = config["capacity-factors"]["min"]
+    output:
+        ror = "build/models/{resolution}/timeseries/supply/capacityfactors-hydro-ror.csv",
+        reservoir = "build/models/{resolution}/timeseries/supply/capacityfactors-hydro-reservoir-inflow.csv"
+    conda: "../envs/geo.yaml"
+    script: "../scripts/hydro/capacityfactors_hydro.py"
+
+
+rule hydro_storage_techs_at_locations_template:
+    message: "Allocate hydro {wildcards.hydro_tech_type} techs to {wildcards.resolution} locations from template."
+    input:
+        script = script_dir + "template_techs.py",
+        template = techs_template_dir + "{hydro_tech_type}/hydro.yaml",
+        locations = rules.hydro_capacities.output[0],
+        timeseries_data = rules.capacity_factors_hydro.output,
+    params:
+        capacity_factors = config["capacity-factors"]["average"],
+        scaling_factors = config["scaling-factors"],
+    wildcard_constraints:
+        hydro_tech_type = "storage|supply"
+    conda: "../envs/default.yaml"
+    output: "build/models/{resolution}/techs/{hydro_tech_type}/hydro.yaml"
+    script: "../scripts/template_techs.py"

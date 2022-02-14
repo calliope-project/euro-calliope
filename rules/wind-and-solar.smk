@@ -2,8 +2,10 @@
 
 localrules: download_potentials, download_capacity_factors_wind_and_solar
 
-root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
-script_dir = f"{root_dir}scripts/"
+ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
+    "wind-onshore", "wind-offshore", "open-field-pv",
+    "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat"
+]
 
 
 rule download_potentials:
@@ -45,7 +47,7 @@ rule area_to_capacity_limits:
         units = rules.units_without_shape.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
     params:
-        max_power_density = config["parameters"]["maximum-installable-power-density"],
+        max_power_densities = config["parameters"]["maximum-installable-power-density"],
         roof_shares = config["parameters"]["roof-share"],
     output: "build/data/{resolution}/wind-and-solar-capacity-limits.csv"
     conda: "../envs/default.yaml"
@@ -90,3 +92,24 @@ rule capacity_factors_offshore:
     output: "build/models/{resolution}/timeseries/supply/capacityfactors-wind-offshore.csv"
     conda: "../envs/geo.yaml"
     script: "../scripts/capacityfactors_offshore.py"
+
+
+rule wind_solar_techs_at_locations_template:
+    message: "Create {wildcards.resolution} wind & solar tech definition file from template."
+    input:
+        script = script_dir + "template_techs.py",
+        template = techs_template_dir + "{template}",
+        locations = rules.area_to_capacity_limits.output[0],
+        timeseries_data = expand(
+            "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
+            technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
+        ),
+    params:
+        capacity_factors = config["capacity-factors"]["average"],
+        scaling_factors = config["scaling-factors"],
+        max_power_densities = config["parameters"]["maximum-installable-power-density"]
+    conda: "../envs/default.yaml"
+    wildcard_constraints:
+        template = "supply/open-field-solar-and-wind-onshore.yaml|supply/rooftop-solar.yaml|supply/wind-offshore.yaml"
+    output: "build/models/{resolution}/techs/{template}"
+    script: "../scripts/template_techs.py"

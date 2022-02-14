@@ -1,7 +1,7 @@
 """Creates Calliope location files."""
 import geopandas as gpd
 
-from eurocalliopelib.parametrise_template import parametrise_template
+from eurocalliopelib.template import parametrise_template
 from eurocalliopelib.geo import WGS84, EPSG3035
 
 

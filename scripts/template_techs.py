@@ -3,7 +3,7 @@ Creates Calliope tech files, including allocation to locations and overrides, wh
 """
 import pandas as pd
 
-from eurocalliopelib.parametrise_template import parametrise_template
+from eurocalliopelib.template import parametrise_template
 
 
 def construct_techs_and_locations(path_to_template, path_to_output, path_to_locations, params):

@@ -1,6 +1,6 @@
 import pandas as pd
 
-from eurocalliopelib.parametrise_template import parametrise_template
+from eurocalliopelib.template import parametrise_template
 
 
 def construct_techs_and_locations(
