@@ -26,18 +26,6 @@ techs:
             om_annual: {{3370000 * 0.03 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 3% of CAPEX
             om_prod: {{5 * scaling_factors.specific_costs}} #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs:
-        hydro_run_of_river:
-            constraints:
-                energy_cap_max: {{ location.installed_capacity_hror_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-        hydro_reservoir:
-            constraints:
-                energy_cap_max: {{ location.installed_capacity_hdam_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-                storage_cap_max: {{ location.storage_capacity_hdam_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
-    {% endfor %}
-
 overrides:
     no-hydro-supply-fixed-cost:
         # Only assign costs to O&M and variable costs
@@ -75,3 +63,15 @@ overrides:
                         energy_cap_equals: {{ location.installed_capacity_hdam_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
                         storage_cap_equals: {{ location.storage_capacity_hdam_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
             {% endfor %}
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.techs:
+        hydro_run_of_river:
+            constraints:
+                energy_cap_max: {{ location.installed_capacity_hror_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+        hydro_reservoir:
+            constraints:
+                energy_cap_max: {{ location.installed_capacity_hdam_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                storage_cap_max: {{ location.storage_capacity_hdam_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+    {% endfor %}

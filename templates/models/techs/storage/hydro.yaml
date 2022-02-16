@@ -15,15 +15,6 @@ techs:
             om_annual: {{ 7213 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}, 8 $2015
             om_prod: {{ 1 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 1 $2015, rounded to 1€ for numeric range
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs:
-        pumped_hydro:
-            constraints:
-                energy_cap_max: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-                storage_cap_max: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
-    {% endfor %}
-
 overrides:
     no-hydro-storage-fixed-cost:
         # Only assign costs to O&M and variable costs
@@ -39,3 +30,12 @@ overrides:
                         energy_cap_equals: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
                         storage_cap_equals: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
             {% endfor %}
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.techs:
+        pumped_hydro:
+            constraints:
+                energy_cap_max: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                storage_cap_max: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+    {% endfor %}

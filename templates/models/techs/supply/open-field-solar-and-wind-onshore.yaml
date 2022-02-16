@@ -45,18 +45,6 @@ techs:
             resource_area_per_energy_cap: {{ (1 / max_power_densities["onshore-wind"]) * scaling_factors.area / scaling_factors.power }} # {{ (scaling_factors.power / scaling_factors.area) | unit("km^2/MW") }} from [@EuropeanEnvironmentAgency:2009]
             resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}:
-        available_area: {{ location.eligibility_onshore_wind_and_pv_km2 * scaling_factors.area }}  # {{ (1 / scaling_factors.area) | unit("km2") }} usable by onshore wind or open field pv
-        techs:
-            open_field_pv:
-            wind_onshore_competing:
-            wind_onshore_monopoly:
-                constraints:
-                    energy_cap_max: {{ location.eligibility_onshore_wind_monopoly_mw * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-    {% endfor %}
-
 overrides:
     dea-renewable-cost-pv-open-field: # from [@DEA:2020]
         techs.open_field_pv: # Sheet 22 - Photovoltaics Large (last updated 2016)
@@ -73,3 +61,15 @@ overrides:
                 energy_cap: {{ 963000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
                 om_annual: {{ (11340 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
                 om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}:
+        available_area: {{ location.eligibility_onshore_wind_and_pv_km2 * scaling_factors.area }}  # {{ (1 / scaling_factors.area) | unit("km2") }} usable by onshore wind or open field pv
+        techs:
+            open_field_pv:
+            wind_onshore_competing:
+            wind_onshore_monopoly:
+                constraints:
+                    energy_cap_max: {{ location.eligibility_onshore_wind_monopoly_mw * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+    {% endfor %}
