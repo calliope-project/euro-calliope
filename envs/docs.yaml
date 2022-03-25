@@ -5,7 +5,7 @@ channels:
 dependencies:
     - Python=3.8
     - mkdocs=1.2.2
-    - jinja=3.0.3
+    - jinja2=3.0.3
     - graphviz=2.48.0
     - pydot=1.4.2
     - pycountry=18.12.8
