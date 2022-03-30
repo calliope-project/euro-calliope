@@ -16,7 +16,7 @@
 
 ### Updated (workflow)
 
-..
+* **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 
 ### Fixed (models)
 
