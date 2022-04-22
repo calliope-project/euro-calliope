@@ -21,9 +21,19 @@
 ### Updated (workflow)
 
 * **UPDATED** YAML templates and parametrisation restructured:
-    * parametrisation moved to eurocalliopelib;
-    * rules to parametrise split into smaller technology-specific rules, to ensure inputs are directly relevant to the files being parametrised.
+    * Parametrisation moved to eurocalliopelib.
+    * Rules to parametrise split into smaller technology-specific rules, to ensure inputs are directly relevant to the files being parametrised.
     * YAML templates restructured to match structure of final model (see `Updated (models) above`);
+
+* **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
+
+### Fixed (models)
+
+* **FIX** spatial proxy of `landscape-care-residues` biofuel in the default configuration. National potentials were spatially allocated to sub-national regions based on `population` rather than `forest` land use. As the potential of `landscape-care-residues` is low, this change has only a minor impact on the model. Continentally, only 3.5% of the total biofuel potential is of this type. Nationally, only three countries have a share of slightly above 10%: Bosnia and Herzegovina, Albania, and Norway. National potentials are unaffected by this change.
+
+### Fixed (documentation)
+
+* **FIX** links in the documention to always point to the most recent version of the pre-builts (#218).
 
 ## 1.1.0 (2021-12-22)
 
