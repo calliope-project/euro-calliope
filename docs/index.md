@@ -1,7 +1,7 @@
-# Euro-Calliope
+# Euro-Calliope v1.2.0.dev
 
 [![article DOI](https://img.shields.io/badge/article-10.1016/j.joule.2020.07.018-blue)](https://doi.org/10.1016/j.joule.2020.07.018)
-[![pre-built models DOI](https://img.shields.io/badge/prebuilts-10.5281%2Fzenodo.3949553-blue)](https://doi.org/10.5281/zenodo.3949553)
+[![pre-built models DOI](https://img.shields.io/badge/prebuilts-10.5281%2Fzenodo.3949552-blue)](https://doi.org/10.5281/zenodo.3949552)
 [![workflow DOI](https://img.shields.io/badge/workflow-10.5281/zenodo.3949793-blue)](https://doi.org/10.5281/zenodo.3949793)
 
 Models of the European electricity system for _Calliope_.
