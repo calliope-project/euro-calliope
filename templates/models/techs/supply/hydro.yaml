@@ -5,7 +5,7 @@ techs:
             parent: supply
             carrier: electricity
         constraints:
-            resource: file=supply/capacityfactors-hydro-ror.csv
+            resource: file=supply/capacityfactors-hydro-run-of-river.csv
             resource_unit: energy_per_cap
             lifetime: 60
         costs.monetary:
@@ -18,7 +18,7 @@ techs:
             parent: supply_plus
             carrier: electricity
         constraints:
-            resource: file=supply/capacityfactors-hydro-reservoir-inflow.csv
+            resource: file=supply/capacityfactors-hydro-reservoir.csv
             resource_unit: energy_per_cap
             lifetime: 60
         costs.monetary:

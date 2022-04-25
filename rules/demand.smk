@@ -38,17 +38,3 @@ rule electricity_load:
     output: "build/models/{resolution}/timeseries/demand/electricity.csv"
     conda: "../envs/geo.yaml"
     script: "../scripts/demand/load.py"
-
-
-rule electricity_demand_techs_and_locations_template:
-    message: "Create {wildcards.resolution} tech definition file from template."
-    input:
-        script = script_dir + "template_techs.py",
-        template = techs_template_dir + "demand/electricity.yaml",
-        locations = rules.locations_template.output.csv,
-        timeseries_data = rules.electricity_load.output
-    params:
-        scaling_factors = config["scaling-factors"],
-    conda: "../envs/default.yaml"
-    output: "build/models/{resolution}/techs/demand/electricity.yaml"
-    script: "../scripts/template_techs.py"

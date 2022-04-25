@@ -142,7 +142,9 @@ rule hydro_capacities:
         script = script_dir + "hydro/hydro_capacities.py",
         locations = rules.units.output[0],
         plants = rules.preprocess_hydro_stations.output[0]
-    output: "build/data/{resolution}/hydro-capacities-mw.csv"
+    output:
+        supply = "build/data/{resolution}/supply/hydro.csv",
+        storage = "build/data/{resolution}/storage/hydro.csv"
     conda: "../envs/geo.yaml"
     script: "../scripts/hydro/hydro_capacities.py"
 
@@ -160,24 +162,7 @@ rule capacity_factors_hydro:
     params:
         threshold = config["capacity-factors"]["min"]
     output:
-        ror = "build/models/{resolution}/timeseries/supply/capacityfactors-hydro-ror.csv",
-        reservoir = "build/models/{resolution}/timeseries/supply/capacityfactors-hydro-reservoir-inflow.csv"
+        ror = "build/models/{resolution}/timeseries/supply/capacityfactors-hydro-run-of-river.csv",
+        reservoir = "build/models/{resolution}/timeseries/supply/capacityfactors-hydro-reservoir.csv"
     conda: "../envs/geo.yaml"
     script: "../scripts/hydro/capacityfactors_hydro.py"
-
-
-rule hydro_storage_techs_at_locations_template:
-    message: "Allocate hydro {wildcards.hydro_tech_type} techs to {wildcards.resolution} locations from template."
-    input:
-        script = script_dir + "template_techs.py",
-        template = techs_template_dir + "{hydro_tech_type}/hydro.yaml",
-        locations = rules.hydro_capacities.output[0],
-        timeseries_data = rules.capacity_factors_hydro.output,
-    params:
-        capacity_factors = config["capacity-factors"]["average"],
-        scaling_factors = config["scaling-factors"],
-    wildcard_constraints:
-        hydro_tech_type = "storage|supply"
-    conda: "../envs/default.yaml"
-    output: "build/models/{resolution}/techs/{hydro_tech_type}/hydro.yaml"
-    script: "../scripts/template_techs.py"

@@ -26,6 +26,16 @@ localrules: all, clean
 wildcard_constraints:
         resolution = "continental|national|regional"
 
+ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > dummy_tech_locations_template
+ruleorder: bio_techs_and_locations_template > techs_and_locations_template
+
+ALL_CF_TIMESERIES = [
+    "wind-onshore", "wind-offshore", "open-field-pv",
+    "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat", "hydro-run-of-river",
+    "hydro-reservoir"
+]
+ALL_DEMAND_TIMESERIES = ["electricity"]
+
 onstart:
     shell("mkdir -p build/logs")
 onsuccess:
@@ -59,18 +69,28 @@ rule all_tests:
         "build/models/build-metadata.yaml"
 
 
-rule simple_techs_and_locations_template:
-    message: "Create {wildcards.resolution} tech definition file `{wildcards.template}` from template."
+rule dummy_tech_locations_template:
+    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."
+    input: rules.locations_template.output.csv
+    output: "build/data/{resolution}/{tech_group}/{tech}.csv"
+    conda: "envs/shell.yaml"
+    shell: "cp {input} {output}"
+
+
+rule techs_and_locations_template:
+    message: "Create {wildcards.resolution} definition file for the {wildcards.tech_group} tech `{wildcards.tech}`."
     input:
         script = script_dir + "template_techs.py",
-        template = techs_template_dir + "{template}",
-        locations = rules.locations_template.output.csv
+        template = techs_template_dir + "{tech_group}/{tech}.yaml",
+        locations = "build/data/{resolution}/{tech_group}/{tech}.csv"
     params:
         scaling_factors = config["scaling-factors"],
+        capacity_factors = config["capacity-factors"]["average"],
+        max_power_densities = config["parameters"]["maximum-installable-power-density"]
     wildcard_constraints:
-        template = "supply/load-shedding.yaml|storage/electricity.yaml"
+        tech_group = "(?!transmission).*"  # i.e. all but transmission
     conda: "envs/default.yaml"
-    output: "build/models/{resolution}/techs/{template}"
+    output: "build/models/{resolution}/techs/{tech_group}/{tech}.yaml"
     script: "scripts/template_techs.py"
 
 
@@ -121,12 +141,21 @@ rule model_template:
                 "techs/supply/wind-offshore.yaml",
             ]
         ),
+        capacityfactor_timeseries_data = expand(
+            "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
+            technology=ALL_CF_TIMESERIES
+        ),
+        demand_timeseries_data = expand(
+            "build/models/{{resolution}}/timeseries/demand/{energy_carrier}.csv",
+            energy_carrier=ALL_DEMAND_TIMESERIES
+        ),
         optional_input_files = lambda wildcards: expand(
             f"build/models/{wildcards.resolution}/{{input_file}}",
             input_file=[
                 "techs/transmission/electricity-linked-neighbours.yaml",
             ] + ["techs/transmission/electricity-entsoe.yaml" for i in [None] if wildcards.resolution == "national"]
         )
+
     params:
         year = config["scope"]["temporal"]["first-year"]
     conda: "envs/default.yaml"
@@ -165,7 +194,7 @@ rule test:
         example_model = "build/models/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
-            technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES + ["hydro-ror", "hydro-reservoir-inflow"]
+            technology=ALL_CF_TIMESERIES
         )
     params:
         config = config,

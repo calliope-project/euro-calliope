@@ -49,7 +49,10 @@ rule area_to_capacity_limits:
     params:
         max_power_densities = config["parameters"]["maximum-installable-power-density"],
         roof_shares = config["parameters"]["roof-share"],
-    output: "build/data/{resolution}/wind-and-solar-capacity-limits.csv"
+    output:
+        rooftop = "build/data/{resolution}/supply/rooftop-solar.csv",
+        offshore = "build/data/{resolution}/supply/wind-offshore.csv",
+        onshore_and_open_field = "build/data/{resolution}/supply/open-field-solar-and-wind-onshore.csv"
     conda: "../envs/default.yaml"
     script: "../scripts/wind-and-solar/capacity_limits.py"
 
@@ -92,24 +95,3 @@ rule capacity_factors_offshore:
     output: "build/models/{resolution}/timeseries/supply/capacityfactors-wind-offshore.csv"
     conda: "../envs/geo.yaml"
     script: "../scripts/wind-and-solar/capacityfactors_offshore.py"
-
-
-rule wind_solar_techs_at_locations_template:
-    message: "Create {wildcards.resolution} wind & solar tech definition file from template."
-    input:
-        script = script_dir + "template_techs.py",
-        template = techs_template_dir + "{template}",
-        locations = rules.area_to_capacity_limits.output[0],
-        timeseries_data = expand(
-            "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
-            technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
-        ),
-    params:
-        capacity_factors = config["capacity-factors"]["average"],
-        scaling_factors = config["scaling-factors"],
-        max_power_densities = config["parameters"]["maximum-installable-power-density"]
-    conda: "../envs/default.yaml"
-    wildcard_constraints:
-        template = "supply/open-field-solar-and-wind-onshore.yaml|supply/rooftop-solar.yaml|supply/wind-offshore.yaml"
-    output: "build/models/{resolution}/techs/{template}"
-    script: "../scripts/template_techs.py"
