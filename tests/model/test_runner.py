@@ -77,8 +77,12 @@ def _create_config_plugin(
             return request.param
 
         @pytest.fixture(scope="session")
-        def optimised_example_model(self):
-            model = calliope.Model(path_to_example_model)
+        def optimised_example_model(self, override_dict):
+            model = calliope.Model(
+                path_to_example_model,
+                override_dict=override_dict,
+                scenario="default"
+            )
             model.run()
             return model
 
