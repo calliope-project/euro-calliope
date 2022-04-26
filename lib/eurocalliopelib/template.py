@@ -28,7 +28,8 @@ def _update_kwargs(**kwargs):
         kwargs["scaling_factors"]["specific_costs"] = (
             kwargs["scaling_factors"]["monetary"] / kwargs["scaling_factors"]["power"]
         )
-    if "locations" in kwargs.keys():
-        kwargs["locations"] = kwargs["locations"].rename(index=lambda x: x.replace(".", "-"))
+    for config_key in ["locations", "links"]:  # we cannot allow keys with "." in them
+        if config_key in kwargs.keys():
+            kwargs[config_key] = kwargs[config_key].rename(index=lambda x: x.replace(".", "-"))
 
     return kwargs

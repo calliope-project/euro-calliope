@@ -47,7 +47,12 @@ foo:
     bar: {{ locations.loc['A-B', 'foo'] }}
 """
 
-TEMPLATE_LOCATIONS_IN_PARAMS_EXPECTED = """
+TEMPLATE_LINKS_IN_PARAMS = """
+foo:
+    bar: {{ links.loc['A-B,C-D', 'foo'] }}
+"""
+
+TEMPLATE_LOCATIONS_LINKS_IN_PARAMS_EXPECTED = """
 foo:
     bar: 1.0
 """
@@ -98,6 +103,12 @@ def locations():
         "foo": {"A.B": 1.0}
     })
 
+@pytest.fixture(scope="module")
+def links():
+    return pd.DataFrame({
+        "foo": {"A.B,C.D": 1.0}
+    })
+
 
 def test_template_no_params(template_to_file_obj, out_file_obj):
     template_obj = template_to_file_obj(TEMPLATE_NO_PARAMS)
@@ -145,11 +156,23 @@ def test_template_scaling_factors(template_to_file_obj, out_file_obj, scaling_fa
 
 def test_template_locations(template_to_file_obj, out_file_obj, locations):
     template_obj = template_to_file_obj(TEMPLATE_LOCATIONS_IN_PARAMS)
-    expected = TEMPLATE_LOCATIONS_IN_PARAMS_EXPECTED
+    expected = TEMPLATE_LOCATIONS_LINKS_IN_PARAMS_EXPECTED
 
     parametrise_template(
         template_obj, out_file_obj,
         locations=locations
+    )
+
+    assert expected == out_file_obj.read()
+
+
+def test_template_links(template_to_file_obj, out_file_obj, links):
+    template_obj = template_to_file_obj(TEMPLATE_LINKS_IN_PARAMS)
+    expected = TEMPLATE_LOCATIONS_LINKS_IN_PARAMS_EXPECTED
+
+    parametrise_template(
+        template_obj, out_file_obj,
+        links=links
     )
 
     assert expected == out_file_obj.read()
