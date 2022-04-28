@@ -81,7 +81,7 @@ def _create_config_plugin(
             model = calliope.Model(
                 path_to_example_model,
                 override_dict=override_dict,
-                scenario="default"
+                scenario=",".join(scenarios["default"])
             )
             model.run()
             return model

@@ -146,7 +146,7 @@ test:
             alternative-cost: ["dea-renewable-cost", "schroeder-hydro-cost"]
             shed-load: ["load-shedding"]
         regional:
-            default: ["connect_all_neighbours"]
+            default: ["connect_all_neighbours", "run_barrier_no_crossover"]
             all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
                             "dea-renewable-cost", "schroeder-hydro-cost", "freeze-hydro-capacities", "load-shedding"]
     overrides:
@@ -162,6 +162,8 @@ test:
             connect_all_neighbours:
                 import:
                     - 'build/models/regional/techs/transmission/electricity-linked-neighbours.yaml'
+            run_barrier_no_crossover:
+                run.solver_options: {Method: 2, Crossover: 0}
     subset_time:
         continental: ['2016-01-01', '2016-01-02']
         national: ['2016-01-01', '2016-01-01']
