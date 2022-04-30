@@ -21,12 +21,13 @@ include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
 include: "./rules/transmission.smk"
 include: "./rules/demand.smk"
+include: "./rules/nuclear.smk"
 include: "./rules/sync.smk"
 localrules: all, clean
 wildcard_constraints:
         resolution = "continental|national|regional"
 
-ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > dummy_tech_locations_template
+ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
 ruleorder: bio_techs_and_locations_template > techs_and_locations_template
 
 ALL_CF_TIMESERIES = [
@@ -139,6 +140,7 @@ rule model_template:
                 "techs/supply/open-field-solar-and-wind-onshore.yaml",
                 "techs/supply/rooftop-solar.yaml",
                 "techs/supply/wind-offshore.yaml",
+                "techs/supply/nuclear.yaml",
             ]
         ),
         capacityfactor_timeseries_data = expand(

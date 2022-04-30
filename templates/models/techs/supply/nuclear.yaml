@@ -1,0 +1,28 @@
+techs:
+    nuclear:  # for sources, see https://github.com/calliope-project/euro-calliope-2.0/issues/3
+        essentials:
+            name: Nuclear power
+            carrier: electricity
+            parent: supply
+        constraints:
+            energy_eff: 0.4
+            lifetime: 50
+            energy_cap_min_use: 0.8  # based on annual average capacity factors in France being approximately 0.75 - 0.85
+        costs:
+            monetary:
+                energy_cap: {{ 3.672e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
+                om_annual: {{ 76116 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
+                om_prod:  {{ 1.75 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}
+                om_con:  {{ 8.25 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.techs:
+        nuclear:
+            constraints:
+                {% for sense in ["min", "max", "equals"] %}
+                    {% if "installed_capacity_nuclear_" + sense + "_MW" in location %}
+                    energy_cap_{{ sense }}: {{ location["installed_capacity_nuclear_" + sense + "_MW"] * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                    {% endif %}
+                {% endfor %}
+    {% endfor %}

@@ -12,6 +12,7 @@ data-sources:
     nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
     potentials: https://zenodo.org/record/5112963/files/possibility-for-electricity-autarky.zip
     entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
+    jrc-ppdb: https://zenodo.org/record/3574566/files/JRC-PPDB-OPEN.ver1.0.zip
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch
@@ -126,6 +127,29 @@ parameters:
         projection-year: 2040
         ntc_limit: max
         energy_cap_limit: equals
+    nuclear:
+        scenario: "2050"
+        national_capacities:
+            "2030":
+                Bulgaria: {min: 2000, max: 2000}  # https://cnpp.iaea.org/countryprofiles/Bulgaria/Bulgaria.htm
+                Czech Republic: {min: 3373, max: 5873}  # https://cnpp.iaea.org/countryprofiles/CzechRepublic/CzechRepublic.htm, According to the State Energy Policy of the Czech Republic (see www.mpo.cz/dokument155315.html), the primary objectives include: (1) supporting and accelerating the process of negotiating, preparing and implementing new nuclear units at existing NPP sites with a total output of up to 2500 MW or annual production of approximately 20 TWh by 2030–2035;
+                Spain: {min: 3000, max: 3000}  # https://world-nuclear.org/information-library/country-profiles/countries-o-s/spain.aspx
+                Finland: {min: 4352, max: 4960}  # https://tem.fi/documents/1410877/2769658/Government+report+on+the+National+Energy+and+Climate+Strategy+for+2030/0bb2a7be-d3c2-4149-a4c2-78449ceb1976/Government+repo$
+                France: {min: 63130, max: 63130}  # https://cnpp.iaea.org/countryprofiles/France/France.htm, today's capacity
+                United Kingdom: {min: 4200, max: 4200}  # https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/789655/Nuclear_electricity_in_the_UK.pdf, currently in operation or in construction
+                Hungary: {min: 2400, max: 2400}  # https://ec.europa.eu/energy/sites/ener/files/documents/ec_courtesy_translation_hu_necp.pdfm Pursuant to the intergovernmental agreement between Hungary and the Russian Federation, two new nuclear power plant units will be built in Hungary by 2030, each with a capacity of 1200MW (Paks 2).
+                Romania: {min: 1975, max: 2650}  # http://www.enpg.ro/wp-content/uploads/2018/12/NECP-Romania-EPG-Analysis.pdf, According to the Energy Strategy 2016-2030, the nuclear power capacity would be 2.65 GW in 2030, based on the operation of four 650 MW CANDU reactors, while the NECP draft envisages for 2030 only 1.975 MW, corresponding to the operation of three reactors.
+                Slovakia: {min: 2717, max: 2717}  # https://www.world-nuclear.org/information-library/country-profiles/countries-o-s/slovakia.aspx
+            "2050":
+                Bulgaria: {min: 0, max: 3200}  # https://www.world-nuclear.org/information-library/country-profiles/countries-a-f/bulgaria.aspx
+                Czech Republic: {min: 6230, max: 7860}  # https://ec.europa.eu/energy/sites/ener/files/documents/ec_courtesy_translation_cz_necp_0.pdf, Based on increase in the share of electricity generation coming from nuclear by 2040
+                Finland: {min: 0, max: 2750}  # https://tem.fi/documents/1410877/2769658/Government+report+on+the+National+Energy+and+Climate+Strategy+for+2030/0bb2a7be-d3c2-4149-a4c2-78449ceb1976/Government+report+$
+                France: {min: 0, max: 51000}  # https://www.rte-france.com/actualites/futurs-energetiques-neutralite-carbone-2050-principaux-enseignements, Depends on which scenario the country takes (page 17, main results).
+                United Kingdom: {min: 8900, max: 8900}  # https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/789655/Nuclear_electricity_in_the_UK.pdf
+                Hungary: {min: 2400, max: 2400}  # https://ec.europa.eu/energy/sites/ener/files/documents/ec_courtesy_translation_hu_necp.pdf, assuming no new capacity 2030 -> 2050
+                Romania: {min: 650, max: 2650}  # http://www.enpg.ro/wp-content/uploads/2018/12/NECP-Romania-EPG-Analysis.pdf, 4 CANDU reactors, 650MW each, with 4th going online in 2031. Depends on when the other 3 go online (i.e. are they decommissioned by 2050?)
+                Slovakia: {min: 940, max: 3340}  # https://www.world-nuclear.org/information-library/country-profiles/countries-o-s/slovakia.aspx, Depends on if 2.4 GW of planned capacity is realised.
+
 
 test:
     scenarios:
