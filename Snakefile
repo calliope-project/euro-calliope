@@ -29,12 +29,12 @@ wildcard_constraints:
 ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > dummy_tech_locations_template
 ruleorder: bio_techs_and_locations_template > techs_and_locations_template
 
-ALL_CF_TIMESERIES = [
+ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
     "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat", "hydro-run-of-river",
     "hydro-reservoir"
 ]
-ALL_DEMAND_TIMESERIES = ["electricity"]
+ALL_DEMAND_CARRIERS = ["electricity"]
 
 onstart:
     shell("mkdir -p build/logs")
@@ -143,11 +143,11 @@ rule model_template:
         ),
         capacityfactor_timeseries_data = expand(
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
-            technology=ALL_CF_TIMESERIES
+            technology=ALL_CF_TECHNOLOGIES
         ),
         demand_timeseries_data = expand(
             "build/models/{{resolution}}/timeseries/demand/{energy_carrier}.csv",
-            energy_carrier=ALL_DEMAND_TIMESERIES
+            energy_carrier=ALL_DEMAND_CARRIERS
         ),
         optional_input_files = lambda wildcards: expand(
             f"build/models/{wildcards.resolution}/{{input_file}}",
@@ -194,7 +194,7 @@ rule test:
         example_model = "build/models/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
-            technology=ALL_CF_TIMESERIES
+            technology=ALL_CF_TECHNOLOGIES
         )
     params:
         config = config,
