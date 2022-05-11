@@ -197,10 +197,7 @@ rule test:
             technology=ALL_CF_TECHNOLOGIES
         )
     params:
-        config = config,
-        override_dict = lambda wildcards: config["test"]["overrides"][wildcards.resolution],
-        scenarios = lambda wildcards: config["test"]["scenarios"][wildcards.resolution],
-        subset_time = lambda wildcards: config["test"]["subset_time"][wildcards.resolution],
+        config = config
     output: "build/logs/{resolution}/test-report.html"
     conda: "./envs/test.yaml"
     script: "./tests/model/test_runner.py"

@@ -1,0 +1,47 @@
+$schema: http://json-schema.org/draft-07/schema#
+description: Below you can find a complete enumeration of all test configuration parameters of Euro-Calliope's workflow including short descriptions and datatypes.
+    test-model:
+        type: object
+        description: Resolution-specific parameters for running the model tests
+        properties:
+            scenarios:
+                type: object
+                propertyNames: {"$ref": "#/properties/shapes/propertyNames"}
+                additionalProperties: false
+                description: scenarios combining model overrides and scenarios, to be run independently in the workflow test suite.
+                patternProperties:
+                    ^[a-zA-Z]+.*$:
+                        type: object
+                        description: Name of scenario
+                        patternProperties:
+                            ^[a-zA-Z]+.*$:
+                                type: array
+                                description: List of model override or scenario names (can be empty)
+                                items:
+                                    uniqueItems: true
+                                    type: string
+            overrides:
+                type: object
+                propertyNames: {"$ref": "#/properties/shapes/propertyNames"}
+                additionalProperties: false
+                description: custom overrides to apply in the tests only.
+                patternProperties:
+                    ^[a-zA-Z]+.*$:
+                        type: object
+                        description: Name of override
+                        patternProperties:
+                            ^[a-zA-Z]+.*$:
+                                type: object
+            subset_time:
+                type: object
+                propertyNames: {"$ref": "#/properties/shapes/propertyNames"}
+                additionalProperties: false
+                description: scenarios combining model overrides and scenarios, to be run independently in the workflow test suite.
+                patternProperties:
+                    ^[a-zA-Z]+.*$:
+                        type: array
+                        description: List of model override or scenario names (or none)
+                        items:
+                            minItems: 2
+                            maxItems: 2
+                            type: string
