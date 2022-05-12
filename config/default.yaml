@@ -151,48 +151,6 @@ parameters:
                 Slovakia: {min: 940, max: 3340}  # https://www.world-nuclear.org/information-library/country-profiles/countries-o-s/slovakia.aspx, Depends on if 2.4 GW of planned capacity is realised.
 
 
-test:
-    scenarios:
-        continental:
-            default: []
-            directional-pv: ["directional-rooftop-pv"]
-            e-to-p-ratios: ["exclusive-energy-to-power-ratios"]
-            frozen-hydro: ["freeze-hydro-capacities", "no-hydro-fixed-cost"]
-            alternative-cost: ["dea-renewable-cost", "schroeder-hydro-cost"]
-            shed-load: ["load-shedding"]
-        national:
-            default: []
-            connected_neighbours: ["connect_all_neighbours"]
-            connected_entsoe_tyndp: ["connect_entsoe_tyndp"]
-            directional-pv: ["directional-rooftop-pv"]
-            e-to-p-ratios: ["exclusive-energy-to-power-ratios"]
-            frozen-hydro: ["freeze-hydro-capacities", "no-hydro-fixed-cost"]
-            alternative-cost: ["dea-renewable-cost", "schroeder-hydro-cost"]
-            shed-load: ["load-shedding"]
-        regional:
-            default: ["connect_all_neighbours", "run_barrier_no_crossover"]
-            all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
-                            "dea-renewable-cost", "schroeder-hydro-cost", "freeze-hydro-capacities", "load-shedding"]
-    overrides:
-        continental: {}
-        national:
-            connect_all_neighbours:
-                import:
-                    - 'build/models/national/techs/transmission/electricity-linked-neighbours.yaml'
-            connect_entsoe_tyndp:
-                import:
-                    - 'build/models/national/techs/transmission/electricity-entsoe.yaml'
-        regional:
-            connect_all_neighbours:
-                import:
-                    - 'build/models/regional/techs/transmission/electricity-linked-neighbours.yaml'
-            run_barrier_no_crossover:
-                run.solver_options: {Method: 2, Crossover: 0}
-    subset_time:
-        continental: ['2016-01-01', '2016-01-02']
-        national: ['2016-01-01', '2016-01-01']
-        regional: ['2016-01-01 00:00', '2016-01-01 04:00']
-
 quality-control:
     load:
         outlier-data-thresholds:

@@ -1,6 +1,7 @@
 from pathlib import Path
 import sys
 import yaml
+import os
 
 import pytest
 import calliope
@@ -9,8 +10,15 @@ import pandas as pd
 
 def run_test(
     path_to_test_dir, path_to_output, path_to_example_model, paths_to_cf_timeseries,
-    config, override_dict, scenarios, subset_time
+    config, resolution
 ):
+    with open(os.path.join(path_to_test_dir, "..", "resources", "test.yaml")) as f:
+        test_config = yaml.safe_load(f)
+
+    override_dict = test_config["test-model"]["overrides"][resolution]
+    scenarios = test_config["test-model"]["scenarios"][resolution]
+    subset_time = test_config["test-model"]["subset_time"][resolution]
+
     exit_code = pytest.main(
         [
             path_to_test_dir,
@@ -124,8 +132,6 @@ if __name__ == "__main__":
         path_to_example_model=snakemake.input.example_model,
         paths_to_cf_timeseries=snakemake.input.capacity_factor_timeseries,
         config=snakemake.params.config,
-        override_dict=snakemake.params.override_dict,
-        scenarios=snakemake.params.scenarios,
-        subset_time=snakemake.params.subset_time,
+        resolution=snakemake.wildcards.resolution,
         path_to_output=snakemake.output[0]
     )

@@ -7,7 +7,7 @@ No matter whether you have downloaded Euro-Calliope's pre-builts or you have bui
 By default, Euro-Calliope is a set of three models on different spatial resolutions: continental, national, and regional.
 All files required to run each resolution-specific model are within subfolders named by the resolution.
 All files in the root directory are independent of the model configuration or data; they are not necessary to run a model.
-Within each resolution-specific model directory, there is a subdirectory for technology definitions (stored in human-readable YAML files) and a subdirectory for timeseries data (stored in CSV files)
+Within each resolution-specific model directory, there is a subdirectory for technology definitions (stored in human-readable YAML files) and a subdirectory for timeseries data (stored in CSV files).
 
 ```
 ├── {resolution}                                            <- An individual folder for each spatial resolution.
@@ -19,7 +19,7 @@ Within each resolution-specific model directory, there is a subdirectory for tec
 |   ├── techs                                               <- All technology definition YAML files.
 |   |   |── {technology-class}                              <- Calliope base technology classes (one of `supply`, `demand`, `storage`, `transmission`).
 |   |   |   └── {technology-group}.csv                      <- Definition of a technology (or group of technologies) relevant to the base technology, and the allocation of that technology to nodes in the model.
-│   ├── example-model.yaml                                  <- Calliope model definition.
+│   ├── example-model.yaml                                  <- Calliope example model definition. Only the technology definition YAML files imported here (under the "import" key) will be available in the model. By default no transmission technology definition files are imported.
 |   ├── interest-rate.yaml                                  <- Interest rates of all capacity investments.
 |   ├── scenarios.yaml                                      <- Scenario names which can be used to override the base model configuration.
 │   └── locations.yaml                                      <- Defines all nodes in the model, including the coordinates defining their centroids.

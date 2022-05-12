@@ -30,12 +30,12 @@ wildcard_constraints:
 ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
 ruleorder: bio_techs_and_locations_template > techs_and_locations_template
 
-ALL_CF_TIMESERIES = [
+ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
     "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat", "hydro-run-of-river",
     "hydro-reservoir"
 ]
-ALL_DEMAND_TIMESERIES = ["electricity"]
+ALL_DEMAND_CARRIERS = ["electricity"]
 
 onstart:
     shell("mkdir -p build/logs")
@@ -70,7 +70,7 @@ rule all_tests:
         "build/models/build-metadata.yaml"
 
 
-rule dummy_tech_locations_template:
+rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_template` with a locational CSV linked to each technology that has no location-specific data to define.
     message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."
     input: rules.locations_template.output.csv
     output: "build/data/{resolution}/{tech_group}/{tech}.csv"
@@ -145,11 +145,11 @@ rule model_template:
         ),
         capacityfactor_timeseries_data = expand(
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
-            technology=ALL_CF_TIMESERIES
+            technology=ALL_CF_TECHNOLOGIES
         ),
         demand_timeseries_data = expand(
             "build/models/{{resolution}}/timeseries/demand/{energy_carrier}.csv",
-            energy_carrier=ALL_DEMAND_TIMESERIES
+            energy_carrier=ALL_DEMAND_CARRIERS
         ),
         optional_input_files = lambda wildcards: expand(
             f"build/models/{wildcards.resolution}/{{input_file}}",
@@ -196,13 +196,10 @@ rule test:
         example_model = "build/models/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
-            technology=ALL_CF_TIMESERIES
+            technology=ALL_CF_TECHNOLOGIES
         )
     params:
-        config = config,
-        override_dict = lambda wildcards: config["test"]["overrides"][wildcards.resolution],
-        scenarios = lambda wildcards: config["test"]["scenarios"][wildcards.resolution],
-        subset_time = lambda wildcards: config["test"]["subset_time"][wildcards.resolution],
+        config = config
     output: "build/logs/{resolution}/test-report.html"
     conda: "./envs/test.yaml"
     script: "./tests/model/test_runner.py"
