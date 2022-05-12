@@ -1,0 +1,4 @@
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.coordinates: {lat: {{ location.centroid.y }}, lon: {{ location.centroid.x }}}  # {{ location["name"] }}
+    {% endfor %}

@@ -41,7 +41,7 @@ Calliope [overrides](https://calliope.readthedocs.io/en/v0.6.7/user/building.htm
 An override named `dea-renewable-cost` can be used for example in this way:
 
 ```bash
-calliope run build/model/continental/example-model.yaml --scenario=dea-renewable-cost
+calliope run build/models/continental/example-model.yaml --scenario=dea-renewable-cost
 ```
 
 You can define your own overrides to manipulate any model component.

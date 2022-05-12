@@ -4,17 +4,26 @@
 
 ### Added (models)
 
-..
+* **ADD** top level model configuration file `scenarios.yaml` which can act as the focal point to consolidate all available overrides in the model (#209).
 
 ### Added (workflow)
 
-* **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality.
+* **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality (#152).
 
 ### Updated (models)
 
-..
+* **UPDATED** Final model configuration and data files structure (#145) to:
+    * make each spatial resolution model self-contained (i.e., no shared files between resolutions);
+    * split technology definitions into self-explanatory files and into subdirectories named after Calliope abstract technology groups (e.g., `supply/wind-offshore.yaml` for offshore wind supply technology). This enables technologies to be added to or removed from the model by simply changing the model configuration file import list.;
+    * keep technology definitions and their allocations to locations in the model in the same file; and
+    * separate tech config YAML files from data CSV files. The former are found in the `techs` subdirectory, while the latter are in `timeseries`.
 
 ### Updated (workflow)
+
+* **UPDATED** YAML templates and parametrisation restructured:
+    * Parametrisation moved to eurocalliopelib.
+    * Rules to parametrise split into smaller technology-specific rules, to ensure inputs are directly relevant to the files being parametrised.
+    * YAML templates restructured to match structure of final model (see `Updated (models) above`);
 
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 

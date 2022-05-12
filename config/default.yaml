@@ -126,6 +126,7 @@ parameters:
         projection-year: 2040
         ntc_limit: max
         energy_cap_limit: equals
+
 quality-control:
     load:
         outlier-data-thresholds:

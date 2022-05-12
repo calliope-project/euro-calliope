@@ -1,45 +1,32 @@
 import pandas as pd
-import jinja2
 
-from eurocalliopelib import filters, utils
+from eurocalliopelib.template import parametrise_template
+from eurocalliopelib import utils
 
-TEMPLATE = """
-# {{ ntc_limit.title() }} net transfer capacity between countries according to the
-# following ENTSO-E ten-year network development plan 2020 scenario:
-# Scenario: {{ scenario.title() }}
-# Case: {{ grid.title() }} Grid
-# Year: {{ year }}
-# Climate Year: 2007
 
-links:
-    {% for link in ntcs.index %}
-    {{ link[0] }},{{ link[1] }}:
-        techs.ac_transmission.constraints:
-            energy_cap_{{ energy_cap_limit }}: {{ ntcs.loc[link] * scaling_factor }}  # {{ (1 / scaling_factor) | unit("MW") }}
-    {% endfor %}
-"""
-
-def link_tyndp(
-    path_to_locations, path_to_entsoe_tyndp, scenario, grid, year, ntc_limit,
-    scaling_factor, energy_cap_limit, path_to_result
+def construct_links(
+    path_to_locations, path_to_template, path_to_entsoe_tyndp, scenario, grid, year, ntc_limit,
+    scaling_factors, energy_cap_limit, path_to_output
 ):
     locations = pd.read_csv(path_to_locations, index_col="id")
     tyndp_scenarios = pd.read_excel(path_to_entsoe_tyndp, sheet_name="Line", index_col=0)
     ntcs = _entsoe_ntcs(locations, tyndp_scenarios, scenario, grid, year, ntc_limit)
-
-    env = jinja2.Environment()
-    env.filters['unit'] = filters.unit
-    links = env.from_string(TEMPLATE).render(
-        ntcs=ntcs,
-        scaling_factor=scaling_factor,
-        energy_cap_limit=energy_cap_limit,
-        scenario=scenario,
-        grid=grid,
-        year=year,
-        ntc_limit=ntc_limit,
+    link_comment = f"""
+# {ntc_limit.title()} net transfer capacity between countries according to the
+# following ENTSO-E ten-year network development plan 2020 scenario:
+# Scenario: {scenario.title()}
+# Case: {grid.title()} Grid
+# Year: {year}
+# Climate Year: 2007
+    """
+    parametrise_template(
+        path_to_template,
+        path_to_output,
+        links=ntcs,
+        scaling_factors=scaling_factors,
+        link_comment=link_comment,
+        energy_cap_limit=energy_cap_limit
     )
-    with open(path_to_result, "w") as result_file:
-        result_file.write(links)
 
 
 def _entsoe_ntcs(locations, tyndp_scenarios, scenario, grid, year, ntc_limit):
@@ -89,14 +76,15 @@ def _split_links_in_index(df):
 
 if __name__ == "__main__":
     if snakemake.wildcards.resolution == "national":
-        link_tyndp(
-            path_to_locations=snakemake.input.units,
+        construct_links(
+            path_to_locations=snakemake.input.locations,
+            path_to_template=snakemake.input.template,
             path_to_entsoe_tyndp=snakemake.input.entsoe_tyndp,
             scenario=snakemake.params.scenario,
             grid=snakemake.params.grid,
             year=snakemake.params.year,
             ntc_limit=snakemake.params.ntc_limit,
-            scaling_factor=snakemake.params.scaling_factor,
+            scaling_factors=snakemake.params.scaling_factors,
             energy_cap_limit=snakemake.params.energy_cap_limit,
-            path_to_result=snakemake.output[0]
+            path_to_output=snakemake.output[0]
         )

@@ -244,6 +244,7 @@ properties:
                         type: string
                         description: How to use ENTSO-E-based NTCs to constrain link energy capacity in the Calliope model.
                         enum: [min, equals, max]
+
     scope:
         type: object
         description: Spatial and temporal scope bounding the models.
@@ -331,7 +332,8 @@ properties:
                         type: integer
                         minimum: 2010
                         maximum: 2016
-                        description: Final model year, which will be used as the upper bound (inclusive) to subset data during processing. To limit processing to only one year, set `final-year` to the same value as `first-year` .
+                        description: Final model year, which will be used as the upper bound (inclusive) to subset data during processing. To limit processing to only one year, set `final-year` to the same value as `first-year`.
+
     quality-control:
         type: object
         description: Parameters controlling the data preprocessing steps.
