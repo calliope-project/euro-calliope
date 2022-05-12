@@ -5,8 +5,8 @@ import pycountry
 
 
 def regionalise_nuclear_capacity(
-    path_to_power_plant_database, path_to_units,
-    nuclear_scenario_config, path_to_output
+    path_to_power_plant_database: str, path_to_units: str,
+    nuclear_capacity_scenario: str, path_to_output: str
 ):
     """
     Use current geolocations of nuclear capacity in Europe to assign nuclear
@@ -17,10 +17,10 @@ def regionalise_nuclear_capacity(
             location of JRC powerplant database "OPEN_UNITS" CSV file
         path_to_units (str):
             location of euro-calliope regions geojson/shapefile
-        nuclear_scenario_config (dict):
-            nuclear scenario name and (if scenario != 'current')
+        nuclear_capacity_scenario (str):
+            nuclear scenario name or (if scenario != 'current') path to scenario file with
             minimum and maximum capacities of future nuclear capacity per country in MW
-            (e.g. {'scenario: 'future_capacity', 'national_capacities': {'future_capacity': {'France': {'min': 1000, 'max': 5000}}}})
+            (must include column headers [country, min, max])
         path_to_output (str):
             location of output CSV file containing nuclear capacities
             (either exact - 'equals' - or 'min' and 'max') per Euro-Calliope region.
@@ -41,19 +41,24 @@ def regionalise_nuclear_capacity(
         .groupby(["id", "country_code"]).sum()
         .capacity_g  # Generating unit capacity, net (MW)
     )
-    scenario = nuclear_scenario_config["scenario"]
-    if scenario == "current":
+
+    if nuclear_capacity_scenario == "current":
         capacity_per_region = (
             capacity_current_per_region
             .to_frame("installed_capacity_nuclear_equals_MW")
         )
     else:
-        nuclear_regional_proportion = capacity_current_per_region.div(
-            capacity_current_per_region.sum(level='country_code')
+        # ASSUME: future capacity is distributed to subnational regions based on a
+        # linear scaling from the current distribution of capacity
+        nuclear_scenario_df = pd.read_csv(nuclear_capacity_scenario, index_col="country")[["min", "max"]]
+        nuclear_regional_proportion = (
+            capacity_current_per_region
+            .groupby("country_code")
+            .transform(lambda x: x / x.sum())
         )
+
         future_capacity = (
-            pd.DataFrame(nuclear_scenario_config["national_capacities"][scenario])
-            .transpose()
+            nuclear_scenario_df
             .rename(index=_iso3, columns=lambda x: f"installed_capacity_nuclear_{x}_MW")
             .rename_axis(index="country_code")
         )
@@ -74,6 +79,6 @@ if __name__ == "__main__":
     regionalise_nuclear_capacity(
         path_to_power_plant_database=snakemake.input.power_plant_database,
         path_to_units=snakemake.input.units,
-        nuclear_scenario_config=snakemake.params.nuclear_scenario_config,
+        nuclear_capacity_scenario=snakemake.params.nuclear_capacity_scenario,
         path_to_output=snakemake.output[0]
     )

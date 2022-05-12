@@ -1,19 +1,23 @@
+# There is ambiguity in the costs and operating characteristics for nuclear power plants in the literature.
+# The values we use here are based on averaging data from [Wealer:2019,IEA:2020,Barkatullah:2017].
+# Another available source not used here is [BEIS:2016]. It has similar values,
+# but tends towards being more optimistic in some areas (longer technology lifetime, higher average capacity factor, lower O&M costs)
+# and less optimistic in others (higher investment and annual O&M cost range)
 techs:
-    nuclear:  # for sources, see https://github.com/calliope-project/euro-calliope-2.0/issues/3
+    nuclear:
         essentials:
             name: Nuclear power
             carrier: electricity
             parent: supply
         constraints:
             energy_eff: 0.4
-            lifetime: 50
-            energy_cap_min_use: 0.8  # based on annual average capacity factors in France being approximately 0.75 - 0.85
+            lifetime: 50  # average of 40 [Wealer:2019] and 60 [IEA:2020]
+            energy_cap_min_use: 0.8  # average of 0.75 [Wealer:2019] and 0.85 [IEA:2020]
         costs:
             monetary:
-                energy_cap: {{ 3.672e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
+                energy_cap: {{ 3672000 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
                 om_annual: {{ 76116 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
-                om_prod:  {{ 1.75 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}
-                om_con:  {{ 8.25 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}
+                om_prod:  {{ 10 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }} | ASSUME: fuel costs given by [IEA:2020,Barkatullah:2017] are per MWh electricity produced, not MWh available energy in the input fuel.
 
 locations:
     {% for id, location in locations.iterrows() %}

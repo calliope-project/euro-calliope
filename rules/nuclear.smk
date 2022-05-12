@@ -18,14 +18,13 @@ rule jrc_power_plant_database:
 
 
 rule nuclear_regional_capacity:
-    message: "Calculate proportion of future planned nuclear capacity will be installed in each"
-             " {wildcards.resolution} region, based on location of existing capacity"
+    message: "Use current geolocations of nuclear capacity in Europe to assign nuclear capacity to {wildcards.resolution} regions."
     input:
         script = script_dir + "nuclear/regional_capacity.py",
         power_plant_database = rules.jrc_power_plant_database.output[0],
         units = rules.units.output[0]
     params:
-        nuclear_scenario_config = config["parameters"]["nuclear"],
+        nuclear_capacity_scenario = config["parameters"]["nuclear-capacity-scenario"],
     conda: "../envs/geo.yaml"
     output: "build/data/{resolution}/supply/nuclear.csv"
     script: "../scripts/nuclear/regional_capacity.py"

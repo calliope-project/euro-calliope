@@ -252,6 +252,10 @@ properties:
                         type: string
                         description: How to use ENTSO-E-based NTCs to constrain link energy capacity in the Calliope model.
                         enum: [min, equals, max]
+            nuclear-capacity-scenario:
+                type: string
+                description: Nuclear technology capacity scenario. "current" will use today's capacities based on the JRC power plant database (PPDB). All other scenario names should point to a configuration CSV file specifying minimum and maximum capacities per country in MW with non-zero capacities (columns=[country, min, max]).
+                pattern: ^(current)|(\w+.csv)$
 
     scope:
         type: object
