@@ -18,7 +18,7 @@ TECHNOLOGIES = {
         (DEFAULT_TECHNOLOGIES | DIRECTIONAL_PV | set(["load_shedding"])) - set(["roof_mounted_pv"])
     ),
 }
-
+OPTIONAL_LOCATIONAL_TECHNOLOGIES = ["nuclear"]
 
 @pytest.fixture(scope="function")
 def technologies(scenario):
@@ -39,6 +39,10 @@ def test_technologies_are_available(energy_cap, location, technologies):
             assert pd.notna(
                 energy_cap.where(energy_cap.techs.str.find(technology) > -1).sum(min_count=1).item()
             )
+        elif technology in OPTIONAL_LOCATIONAL_TECHNOLOGIES:
+            # don't check the capacity values at each location,
+            # since we can't be certain that the technology exists at any specific location
+            assert (technology in energy_cap.techs)
         else:
             assert (
                 (technology in energy_cap.techs)
