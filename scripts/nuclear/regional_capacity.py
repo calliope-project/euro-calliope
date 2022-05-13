@@ -71,7 +71,7 @@ def regionalise_nuclear_capacity(
             future_capacity
             .mul(nuclear_regional_proportion, level='country_code', axis=0)
         )
-        print(capacity_per_region, future_capacity)
+
         # Check that we haven't lost any capacity on regionalisation
         assert capacity_per_region.sum(level="country_code").equals(future_capacity)
 
