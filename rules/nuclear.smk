@@ -25,6 +25,7 @@ rule nuclear_regional_capacity:
         units = rules.units.output[0]
     params:
         nuclear_capacity_scenario = config["parameters"]["nuclear-capacity-scenario"],
+        countries = config["scope"]["spatial"]["countries"]
     conda: "../envs/geo.yaml"
     output: "build/data/{resolution}/supply/nuclear.csv"
     script: "../scripts/nuclear/regional_capacity.py"
