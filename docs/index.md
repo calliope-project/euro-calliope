@@ -16,7 +16,7 @@ You can configure, adapt, and extend both models and routines in many ways to bu
 Euro-Calliope models the European electricity system with each location representing an administrative unit.
 It is built on three spatial resolutions: on the continental level as a single location, on the national level with 34 locations, and on the regional level with 497 locations.
 At each location, renewable generation capacities (wind, solar, bioenergy) and balancing capacities (battery, hydrogen) can be built.
-In addition, hydro electricity and pumped hydro storage capacities can be built up to the extent to which they exist today.
+In addition, hydro electricity and pumped hydro storage capacities can be built up to the extent to which they exist today, and nuclear capacity can be built in certain countries.
 All capacities are used to satisfy electricity demand on all locations where demand is based on historic data.
 Locations are connected through transmission lines of either unrestricted capacity or projections.
 Using [Calliope](https://www.callio.pe), the model is formulated as a linear optimisation problem with total monetary cost of all capacities as the minimisation objective.
