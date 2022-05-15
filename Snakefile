@@ -23,6 +23,8 @@ include: "./rules/transmission.smk"
 include: "./rules/demand.smk"
 include: "./rules/nuclear.smk"
 include: "./rules/sync.smk"
+include: "./rules/jrc-idees.smk"
+include: "./rules/eurostat.smk"
 localrules: all, clean
 wildcard_constraints:
         resolution = "continental|national|regional"
@@ -197,7 +199,8 @@ rule test:
         capacity_factor_timeseries = expand(
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_CF_TECHNOLOGIES
-        )
+        ),
+        path_to_annual_energy_balances="build/data/annual-energy-balances.csv"
     params:
         config = config
     output: "build/logs/{resolution}/test-report.html"
