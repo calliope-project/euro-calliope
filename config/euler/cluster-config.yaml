@@ -5,6 +5,19 @@ __default__:
     output: "build/logs/{rule}.{wildcards}.log"
     name: "{rule}.{wildcards}"
 test:
-    runtime: 15
+    runtime: 240
     cores: 1
     memory: 16000
+download_runoff_data:
+    runtime: 240
+inflow_m3:
+    runtime: 100
+inflow_mwh:
+    runtime: 100
+    memory: 40000
+capacity_factors_hydro:
+    runtime: 100
+capacity_factors_offshore:
+    runtime: 30
+capacity_factors_onshore_wind_and_solar:
+    runtime: 30

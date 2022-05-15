@@ -26,12 +26,15 @@ setup(
         'docs': [
             "pydot",
             "graphviz",
-            "mkdocs"
+            "mkdocs",
+            "jsonschema2md"
         ]
     },
     entry_points={
         'mkdocs.plugins': [
             'dag = eurocalliopelib.docs.dag:DAGPlugin',
+            'schema = eurocalliopelib.docs.schema:SchemaPlugin',
+            'add-file = eurocalliopelib.docs.addfile:AddFilePlugin'
         ]
     },
     classifiers=[

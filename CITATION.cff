@@ -1,8 +1,8 @@
 cff-version: 1.1.0
-message: If you use Euro-Calliope in an academic publication, please cite the Joule research article listed in `references` below.
-date-released: 2020-07-17
+message: "If you use Euro-Calliope in an academic publication, please cite: Tröndle, T., Lilliestam, J., Marelli, S., &#38; Pfenninger, S. (2020). Trade-offs between geographic scale, cost, and infrastructure requirements for fully renewable electricity in Europe. <i>Joule</i>, <i>4</i>(9), 1929–1948. https://doi.org/10.1016/j.joule.2020.07.018"
+date-released: 2021-12-22
 title: Euro-Calliope
-version: 1.1.0.dev
+version: 1.2.0.dev
 doi: 10.5281/zenodo.3949793
 authors:
   - family-names: Tröndle

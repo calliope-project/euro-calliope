@@ -1,6 +1,11 @@
 name: Tests of YAML configuration and schema
 
-on: [push, pull_request]
+on:
+    push:
+        branches:
+            - main
+            - develop
+    pull_request:
 
 jobs:
     validate:
@@ -22,3 +27,7 @@ jobs:
               run: python ./tests/validate_schema.py ./config/schema.yaml --config ./config/minimal.yaml
             - name: Validate schema itself
               run: python ./tests/validate_schema.py ./config/schema.yaml
+            - name: Validate test config
+              run: python ./tests/validate_schema.py ./tests/resources/schema.yaml --config ./tests/resources/test.yaml
+            - name: Validate test schema itself
+              run: python ./tests/validate_schema.py ./tests/resources/schema.yaml

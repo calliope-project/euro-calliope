@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
-from rasterio.transform import from_origin
 from shapely.geometry import Point
 from geopandas.tools import overlay
 
@@ -14,7 +13,7 @@ WGS84 = f"EPSG:{WGS84_EPSG}"
 EPSG3035 = "EPSG:3035"
 
 
-def area_weighted_time_series(shapes, spatiotemporal):
+def area_weighted_time_series(shapes, spatiotemporal, gridcell_overlap_threshold):
     """Forms area weighted time series for collections of shapes.
 
     Inputs:
@@ -31,7 +30,9 @@ def area_weighted_time_series(shapes, spatiotemporal):
     return pd.DataFrame(
         index=spatiotemporal.timestep.to_index(),
         data={
-            shape_id: weighted_time_series(weights_and_values.sel(shape_id=shape_id))
+            shape_id: weighted_time_series(
+                weights_and_values.sel(shape_id=shape_id), gridcell_overlap_threshold
+            )
             for shape_id in shapes.shape_id
         }
     )
@@ -76,12 +77,19 @@ def weights_between_shape_and_xy(shapes, stacked_spatiotemporal):
     return weights
 
 
-def weighted_time_series(weights_and_values):
-    ds = (
+def weighted_time_series(weights_and_values, gridcell_overlap_threshold):
+    ds = (  # drop all locations with weight == 0 or value == np.nan
         weights_and_values
         .where(weights_and_values.weight > 0)
-        .dropna(subset=["weight"], dim="xy") # drop all locations with weight == 0
+        .dropna(subset=["weight", "value"], dim="xy", how="any")
     )
+    assert ds.weight.sum() >= gridcell_overlap_threshold, ds.weight.sum()
+    if ds.weight.sum().round(5) != 1:
+        print(
+            f"Weight of shape_id {ds.shape_id.item()} only adds up to {ds.weight.sum().item()}. "
+            "Scaling to a sum of 1."
+        )
+        ds["weight"] = ds.weight / ds.weight.sum()
     return (ds * ds.weight).value.sum("xy", skipna=False)
 
 

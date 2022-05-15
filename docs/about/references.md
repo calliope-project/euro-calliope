@@ -34,9 +34,8 @@ JRC. (2014). <i>ETRI 2014 -- Energy Technology Reference Indicator projections f
 
 European Environment Agency. (2009). <i>Europe’s onshore and offshore wind energy potential</i> [Publication]. [https://www.eea.europa.eu/publications/europes-onshore-and-offshore-wind-energy-potential](https://www.eea.europa.eu/publications/europes-onshore-and-offshore-wind-energy-potential)
 
-### @RuizCastello:2015
-
-Ruiz Castello, P., Sgobbi, A., Nijs, W., Thiel, C., Dalla Longa, F., Kober, T., Elbersen, B., &#38; Hengeveld, G. (2015). <i>The JRC-EU-TIMES model. Bioenergy potentials for EU and neighbouring countries.</i> [https://ec.europa.eu/jrc/en/publication/eur-scientific-and-technical-research-reports/jrc-eu-times-model-bioenergy-potentials-eu-and-neighbouring-countries](https://ec.europa.eu/jrc/en/publication/eur-scientific-and-technical-research-reports/jrc-eu-times-model-bioenergy-potentials-eu-and-neighbouring-countries)
+### @Ruiz:2019
+Ruiz, P., Nijs, W., Tarvydas, D., Sgobbi, A., Zucker, A., Pilli, R., Jonsson, R., Camia, A., Thiel, C., Hoyer-Klick, C., Dalla Longa, F., Kober, T., Badger, J., Volker, P., Elbersen, B. S., Brosowski, A., &#38; Thrän, D. (2019). ENSPRESO - an open, EU-28 wide, transparent and coherent database of wind, solar and biomass energy potentials. <i>Energy Strategy Reviews</i>, <i>26</i>, 100379. [https://doi.org/10.1016/j.esr.2019.100379](https://doi.org/10.1016/j.esr.2019.100379)
 
 ### @schroeder:2013
 
@@ -45,3 +44,19 @@ Schröder, A., Kunz, F., Meiss, J., Mendelevitch, R., &#38; Von Hirschhausen, C.
 ### @DEA:2020
 
 Danish Energy Agency. (2020). <i>Technology Data for Generation of Electricity and District Heating.</i> [https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and](https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and)
+
+### @Wealer:2019
+
+Wealer, B., Bauer, S., Göke, L., von Hirschhausen, C. and Kemfert, C. (2019). <i>Economics of Nuclear Power Plant Investment: Monte Carlo Simulations of Generation III/III+ Investment Projects</i>. [https://www.diw.de/documents/publikationen/73/diw_01.c.698579.de/dp1833.pdf](https://www.diw.de/documents/publikationen/73/diw_01.c.698579.de/dp1833.pdf)
+
+### @IEA:2020
+
+International Energy Agency. (2020). <i>World Energy Model Documentation: 2020 version</i> [https://iea.blob.core.windows.net/assets/55b96d4d-e9f0-46a1-9965-590ef37c1ff6/WEM_Documentation_WEO2020.pdf](https://iea.blob.core.windows.net/assets/55b96d4d-e9f0-46a1-9965-590ef37c1ff6/WEM_Documentation_WEO2020.pdf)
+
+### @Barkatullah:2017
+
+Barkatullah, N. and Ahmad, A. (2017). <i>Current status and emerging trends in financing nuclear power projects.</i>Energy Strategy Reviews, 18, pp. 127–140. [doi:10.1016/j.esr.2017.09.015](https://doi.org/10.1016/j.esr.2017.09.015)
+
+### @BEIS:2016
+
+Department for Business, Energy and Industrial Strategy (2016). <i>Electricity Generation Costs 2016</i>. [https://www.gov.uk/government/publications/beis-electricity-generation-costs-november-2016][https://www.gov.uk/government/publications/beis-electricity-generation-costs-november-2016]

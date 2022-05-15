@@ -2,11 +2,10 @@
 snakemake:
     max-threads: 4
 data-sources:
-    biofuel-potentials: data/euro-calliope-datasets/biofuels/potentials/{feedstock}.csv
-    biofuel-costs: data/euro-calliope-datasets/biofuels/costs/{feedstock}.csv
+    biofuel-potentials-and-costs: https://cidportal.jrc.ec.europa.eu/ftp/jrc-opendata/ENSPRESO/ENSPRESO_BIOMASS.xlsx
     eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
-    irena-generation: data/euro-calliope-datasets/irena/hydro-generation-europe.csv
-    national-phs-storage-capacities: data/euro-calliope-datasets/pumped-hydro/storage-capacities-gwh.csv
+    hydro-generation: https://zenodo.org/record/5797549/files/hydro-generation.csv?download=1
+    national-phs-storage-capacities: https://zenodo.org/record/5797549/files/pumped-hydro-storage-capacities-gwh.csv?download=1
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
     data-repository: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/{dataset}
     energy-balance-category-names: data/euro-calliope-datasets/energy-balance/category-names.csv
@@ -28,6 +27,8 @@ data-sources:
         energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/gesamtenergiestatistik.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvNzUxOQ==.html
         industry-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/teilstatistiken.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODc4OA==.html
         gva: https://www.bfs.admin.ch/bfsstatic/dam/assets/10647597/master
+    entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
+    jrc-ppdb: https://zenodo.org/record/3574566/files/JRC-PPDB-OPEN.ver1.0.zip
 
 root-directory: .
 cluster-sync:
@@ -49,7 +50,6 @@ capacity-factors:
         offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
         ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
     trim-ninja-timeseries: True
-year: 2016
 crs: "EPSG:4326"
 parameters:
     maximum-installable-power-density:
@@ -63,10 +63,79 @@ parameters:
         S: 0.1821
         W: 0.1681
         flat: 0.3020
-    jrc-biofuel: # from [@RuizCastello:2015]
-        scenario: "medium"
-        potential-year: "2020"
-        cost-year: "2030"
+    jrc-biofuel: # from [@Ruiz:2019]
+        scenario: medium
+        potential-year: 2020
+        cost-year: 2020
+        feedstocks: # ASSUME no energy crop feedstocks available.
+            bioethanol-sugar-beet:
+                include: false
+                id: MINBIOCRP21
+                proxy: farmland
+            rapeseeds:
+                include: false
+                id: MINBIORPS1
+                proxy: farmland
+            oil-crops:
+                include: false
+                id: MINBIOLIQ1
+                proxy: farmland
+            starchy-crops:
+                include: false
+                id: MINBIOCRP11
+                proxy: farmland
+            grassy-crops:
+                include: false
+                id: MINBIOCRP31
+                proxy: farmland
+            willow:
+                include: false
+                id: MINBIOCRP41
+                proxy: forest
+            poplar:
+                include: false
+                id: MINBIOCRP41a
+                proxy: forest
+            manure:
+                include: true
+                id: MINBIOGAS1
+                proxy: farmland
+            primary-agricultural-residues:
+                include: true
+                id: MINBIOAGRW1
+                proxy: farmland
+            roundwood-fuelwood:
+                include: true
+                id: MINBIOWOO
+                proxy: forest
+            roundwood-chips:
+                include: true
+                id: MINBIOWOOa
+                proxy: forest
+            forestry-energy-residues:
+                include: true
+                id: MINBIOFRSR1
+                proxy: forest
+            secondary-forestry-residues-woodchips:
+                include: true
+                id: MINBIOWOOW1
+                proxy: forest
+            secondary-forestry-residues-sawdust:
+                include: true
+                id: MINBIOWOOW1a
+                proxy: forest
+            landscape-care-residues:
+                include: true
+                id: MINBIOFRSR1a
+                proxy: forest
+            municipal-waste:
+                include: true
+                id: MINBIOMUN1
+                proxy: population
+            sludge:
+                include: true
+                id: MINBIOSLU1
+                proxy: population
     biofuel-efficiency: 0.45
     wind-and-solar-potential-scenario: technical-potential
     entsoe-tyndp:
@@ -75,6 +144,8 @@ parameters:
         projection-year: 2040
         ntc_limit: max
         energy_cap_limit: equals
+    nuclear-capacity-scenario: current
+
 quality-control:
     load:
         outlier-data-thresholds:
@@ -89,6 +160,8 @@ quality-control:
     hydro:
         scale-phs-according-to-geth-et-al: false
         station-nearest-basin-max-km: 1
+    capacity-factor-gridcell-overlap-threshold: 0.97 # Ceuta y Melilla has smallest overlap
+
 sea-connections:
     continental: []
     national: # Source: https://www.entsoe.eu/data/map/
@@ -148,46 +221,50 @@ sea-connections:
         - [EST.7_1, EST.2_1] # Lääne and Hiiu
         - [EST.7_1, EST.12_1] # Lääne and Saare
 scope:
-    countries:
-        - "Austria"
-        - "Belgium"
-        - "Bulgaria"
-        - "Croatia"
-        - "Cyprus"
-        - "Czech Republic"
-        - "Denmark"
-        - "Estonia"
-        - "Finland"
-        - "France"
-        - "Germany"
-        - "Greece"
-        - "Hungary"
-        - "Ireland"
-        - "Italy"
-        - "Latvia"
-        - "Lithuania"
-        - "Luxembourg"
-        - "Netherlands"
-        - "Poland"
-        - "Portugal"
-        - "Romania"
-        - "Slovakia"
-        - "Slovenia"
-        - "Spain"
-        - "Sweden"
-        - "United Kingdom"
-        - "Albania"
-        - "Bosnia and Herzegovina"
-        - "Macedonia, Republic of"
-        - "Montenegro"
-        - "Norway"
-        - "Serbia"
-        - "Switzerland"
-    bounds:
-        x_min: -15.8
-        x_max: 37
-        y_min: 30
-        y_max: 75
+    spatial:
+        countries:
+            - "Austria"
+            - "Belgium"
+            - "Bulgaria"
+            - "Croatia"
+            - "Cyprus"
+            - "Czech Republic"
+            - "Denmark"
+            - "Estonia"
+            - "Finland"
+            - "France"
+            - "Germany"
+            - "Greece"
+            - "Hungary"
+            - "Ireland"
+            - "Italy"
+            - "Latvia"
+            - "Lithuania"
+            - "Luxembourg"
+            - "Netherlands"
+            - "Poland"
+            - "Portugal"
+            - "Romania"
+            - "Slovakia"
+            - "Slovenia"
+            - "Spain"
+            - "Sweden"
+            - "United Kingdom"
+            - "Albania"
+            - "Bosnia and Herzegovina"
+            - "Macedonia, Republic of"
+            - "Montenegro"
+            - "Norway"
+            - "Serbia"
+            - "Switzerland"
+        bounds:
+            x_min: -15.8
+            x_max: 37
+            y_min: 30
+            y_max: 75
+    temporal:
+        first-year: 2016
+        final-year: 2016
 shapes: # This config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
     continental:
         Austria: nuts0

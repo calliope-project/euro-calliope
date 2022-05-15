@@ -12,11 +12,8 @@ SCHEMA_UNITS = {
     "geometry": "MultiPolygon"
 }
 
-configfile: "config/default.yaml"
 localrules: download_raw_gadm_administrative_borders, raw_gadm_administrative_borders, download_raw_nuts_units
 localrules: download_eez
-root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
-script_dir = f"{root_dir}scripts/"
 
 
 rule download_raw_gadm_administrative_borders:
@@ -41,16 +38,16 @@ rule administrative_borders_gadm:
         script = script_dir + "shapes/gadm.py",
         countries = [f"build/data/raw-gadm/gadm36_{country_code}.gpkg"
                      for country_code in [pycountry.countries.lookup(country).alpha_3
-                                          for country in config['scope']['countries']]
+                                          for country in config["scope"]["spatial"]["countries"]]
                     ]
     params:
         max_layer_depth = 2,
         crs = config["crs"],
         schema = SCHEMA_UNITS,
-        x_min = config["scope"]["bounds"]["x_min"],
-        x_max = config["scope"]["bounds"]["x_max"],
-        y_min = config["scope"]["bounds"]["y_min"],
-        y_max = config["scope"]["bounds"]["y_max"]
+        x_min = config["scope"]["spatial"]["bounds"]["x_min"],
+        x_max = config["scope"]["spatial"]["bounds"]["x_max"],
+        y_min = config["scope"]["spatial"]["bounds"]["y_min"],
+        y_max = config["scope"]["spatial"]["bounds"]["y_max"]
     output: "build/data/administrative-borders-gadm.gpkg"
     conda: "../envs/geo.yaml"
     script: "../scripts/shapes/gadm.py"
@@ -72,11 +69,11 @@ rule administrative_borders_nuts:
     params:
         crs = config["crs"],
         schema = SCHEMA_UNITS,
-        x_min = config["scope"]["bounds"]["x_min"],
-        x_max = config["scope"]["bounds"]["x_max"],
-        y_min = config["scope"]["bounds"]["y_min"],
-        y_max = config["scope"]["bounds"]["y_max"],
-        all_countries = config["scope"]["countries"]
+        x_min = config["scope"]["spatial"]["bounds"]["x_min"],
+        x_max = config["scope"]["spatial"]["bounds"]["x_max"],
+        y_min = config["scope"]["spatial"]["bounds"]["y_min"],
+        y_max = config["scope"]["spatial"]["bounds"]["y_max"],
+        all_countries = config["scope"]["spatial"]["countries"]
     output: "build/data/administrative-borders-nuts.gpkg"
     shadow: "minimal"
     conda: "../envs/geo.yaml"
@@ -90,7 +87,7 @@ rule units:
         nuts = rules.administrative_borders_nuts.output[0],
         gadm = rules.administrative_borders_gadm.output[0]
     params:
-        all_countries = config["scope"]["countries"],
+        all_countries = config["scope"]["spatial"]["countries"],
         layer_configs = config["shapes"]
     output:
         "build/data/{resolution}/units.geojson"
@@ -121,8 +118,8 @@ rule eez:
     input: rules.download_eez.output[0]
     output: "build/data/eez.geojson"
     params:
-        bounds="{x_min},{y_min},{x_max},{y_max}".format(**config["scope"]["bounds"]),
-        countries=",".join(["'{}'".format(country) for country in config["scope"]["countries"]]),
+        bounds="{x_min},{y_min},{x_max},{y_max}".format(**config["scope"]["spatial"]["bounds"]),
+        countries=",".join(["'{}'".format(country) for country in config["scope"]["spatial"]["countries"]]),
     conda: "../envs/geo.yaml"
     shadow: "minimal"
     shell:
@@ -131,3 +128,16 @@ rule eez:
         | fio filter "f.properties.territory1 in [{params.countries}]"\
         | fio collect > {output}
         """
+
+
+rule locations_template:
+    message: "Generate locations configuration file for {wildcards.resolution} resolution from template."
+    input:
+        script = script_dir + "shapes/template_locations.py",
+        template = model_template_dir + "locations.yaml",
+        shapes = rules.units.output[0]
+    output:
+        yaml = "build/models/{resolution}/locations.yaml",
+        csv = "build/models/{resolution}/locations.csv"
+    conda: "../envs/geo.yaml"
+    script: "../scripts/shapes/template_locations.py"
