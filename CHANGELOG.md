@@ -21,12 +21,14 @@
 
 ### Updated (workflow)
 
-* **UPDATED** YAML templates and parametrisation restructured:
+* **UPDATE** YAML templates and parametrisation restructured:
     * Parametrisation moved to eurocalliopelib.
     * Rules to parametrise split into smaller technology-specific rules, to ensure inputs are directly relevant to the files being parametrised.
     * YAML templates restructured to match structure of final model (see `Updated (models) above`);
 
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
+
+* **UPDATE** source of fraction of shared coast for offshore wind capacity factor distribution from a fixed shape download to an internal rule which can handle ad hoc shapes (partial #238).
 
 ### Fixed (models)
 
