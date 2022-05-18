@@ -7,7 +7,7 @@ You have the following three options:
 
 1. [Manual changes](./customisation.md#manual-changes)
 2. [Importing modules](./customisation.md#importing-modules)
-3. [Overrides](./customisation.md#overrides)
+3. [Overrides and scenarios](./customisation.md#overrides-and-scenarios)
 4. [Rebuild model](./customisation.md#rebuild)
 
 ## Manual changes
@@ -30,7 +30,7 @@ Only by including `techs/supply/hydro.yaml` in the list of imports in `example-m
 By default, the example model definition imports all modules except electricity transmission, so you can simply remove any modules from the list of imports if you do not want to consider that technology / technology group in your study.
 
 The modules are in the `techs` subdirectory of each spatial resolution (e.g. `national/techs/...`).
-Here, we describe each module in terms of the technologies they contain (`calliope name`:`full name`) and the overrides they make available.
+Here, we describe each module in terms of the technologies they contain (`calliope name`:`full name`) and the overrides they make available (`calliope name`: `override description`) .
 
 {% for module_name, module_contents in modules.items() %}
 <details>
@@ -55,19 +55,9 @@ Here, we describe each module in terms of the technologies they contain (`callio
 {% endif %}
 </details>
 {% endfor %}
+<br>
 
-
-### Transmission links
-
-Transmission links between locations in your model depend on the imported model file and are not included in the model definition by default.
-Therefore, when you run the default model definition all locations are isolated (modelling full autarky).
-
-For the national and regional resolutions with more than one location, you can import `./{resolution}/link-all-neighbours.yaml` which includes links between all neighbouring regions and a selection of pre-defined sub-sea links, but has no capacity limits.
-
-At the national resolution, transmission links can be set based on an ENTSO-E ten-year development plan 2020 scenario (`national/entsoe-tyndp-links.yaml`).
-The ENTSO-E links define all existing and planned international connections, including their predicted net transfer capacities (NTCs).
-
-## Overrides
+## Overrides and scenarios
 
 Calliope [overrides](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#scenarios-and-overrides) enable models to be easily manipulated.
 An override named `freeze-hydro-supply-capacities` can be used for example in this way:
@@ -87,8 +77,6 @@ For instance, `freeze-hydro-supply-capacities` and `freeze-hydro-storage-capacit
 
 You can also define your own overrides to manipulate any model component.
 We recommend you add these overrides into the model definition YAML file, to ensure they are easy to trace.
-
-## Scenarios
 
 In Calliope, [scenarios](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#scenarios-and-overrides) are groups of overrides and/or other scenarios.
 In Euro-Calliope, it can be helpful to define scenarios to help group similar overrides together.

@@ -20,8 +20,8 @@ class TechModulePlugin(BasePlugin):
     )
 
     def on_serve(self, server, config, builder):
-        path_to_tech_modules = Path.cwd() / self.config["path_to_tech_modules"]
-        server.watch(path_to_tech_modules)
+        path_to_tech_module_contents = Path.cwd() / self.config["path_to_tech_module_contents"]
+        server.watch(path_to_tech_module_contents)
         return server
 
     def on_files(self, files, config, **kwargs):
