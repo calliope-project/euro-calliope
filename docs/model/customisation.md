@@ -14,23 +14,27 @@ You have the following three options:
 
 With the Calliope model in your hands, you will be able to change any model parameter, any technology specifics, and the model definition to your liking.
 This kind of customisation can be useful to get to know the model and its parameters.
-To create reliable results, we do not advice to make any manual changes to anything but the model definition as this may impact traceability of your results.
-For the model definition (as in `./{resolution}/example-model.yaml`) we encourage you to do manual changes.
+To create reliable results, we do advise making manual changes only to the model definition (`./{resolution}/example-model.yaml`) as this makes it possible to trace those changes later.
 A typical customisation here would be to change the solver from `gurobi` to an open-source solver, e.g. `cbc` (see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/user/config_defaults.html#run-configuration)).
-We consider all Euro-Calliope model components but the model definition as a toolbox from which you can choose to define your model -- see the [Import customisation option](./customisation.md#imports).
+We consider all Euro-Calliope model subcomponents (everything other than the model definition itself) as a toolbox from which you can choose to define your model -- see the [Import customisation option](./customisation.md#imports).
 
 ## Imports
 
-The `example-model.yaml` definition file in each resolution sub-directory (e.g. `national/example-model.yaml`) specifies a list of other files to bring together to describe the model.
+The `example-model.yaml` definition file in each resolution sub-directory (e.g. `national/example-model.yaml`) specifies a list of other files to bring together to describe the model (under the `import` key).
 This list can be changed by the modeller to select a combination of different files (see also [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#files-that-define-a-model)).
+These files represent "modules" of the model definition and contain everything necessary for a given technology or technology group to exist.
+For instance, `techs/supply/hydro.yaml` defines two technologies (under the `techs` key) which will convert river flows into electricity.
+It also places that technology in every relevant modelled location (under the `locations` key), along with any location-specific information that is needed; in this case, the maximum capacity of hydropower in that location.
+Finally, there are potential overrides defined, which is an additional layer of customisation described further in the [overrides section](./customisation.md#overrides).
+Only by including `techs/supply/hydro.yaml` in the list of imports in `example-model.yaml` will the defined hydropower technologies exist in the built Calliope model.
+By default, the example model definition imports all modules except electricity transmission, so you can simply remove any modules from the list of imports if you do not want to consider that technology / technology group in your study.
 
 ### Transmission links
 
-Transmission links between locations in your model depend on the imported model file.
-When you do not import any file, all locations are isolated (modelling full autarky).
+Transmission links between locations in your model depend on the imported model file and are not included in the model definition by default.
+Therefore, when you run the default model definition all locations are isolated (modelling full autarky).
 
 For the national and regional resolutions with more than one location, you can import `./{resolution}/link-all-neighbours.yaml` which includes links between all neighbouring regions and a selection of pre-defined sub-sea links, but has no capacity limits.
-This file is imported in the example models and the pre-builts.
 
 At the national resolution, transmission links can be set based on an ENTSO-E ten-year development plan 2020 scenario (`national/entsoe-tyndp-links.yaml`).
 The ENTSO-E links define all existing and planned international connections, including their predicted net transfer capacities (NTCs).
@@ -38,21 +42,32 @@ The ENTSO-E links define all existing and planned international connections, inc
 ## Overrides
 
 Calliope [overrides](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#scenarios-and-overrides) enable models to be easily manipulated.
-An override named `dea-renewable-cost` can be used for example in this way:
+An override named `freeze-hydro-supply-capacities` can be used for example in this way:
 
 ```bash
-calliope run build/models/continental/example-model.yaml --scenario=dea-renewable-cost
+calliope run build/models/continental/example-model.yaml --scenario=freeze-hydro-supply-capacities
 ```
 
-You can define your own overrides to manipulate any model component.
-The following overrides are built into Euro-Calliope.
+```python
+import calliope
+model = calliope.Model("build/models/continental/example-model.yaml", scenario="freeze-hydro-supply-capacities")
+model.run()
+```
 
+Overrides can also be chained, enabling multiple scenarios to built up from multiple overrides.
+For instance, `freeze-hydro-supply-capacities` and `freeze-hydro-storage-capacities` can be combined to `freeze-hydro-supply-capacities,freeze-hydro-storage-capacities`.
+
+You can also define your own overrides to manipulate any model component.
+We recommend you add these overrides into the model definition YAML file, to ensure they are easy to trace.
+
+The following overrides are built into Euro-Calliope.
 ### Cost
 
 By default, Euro-Calliope uses cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014.
-The `dea-renewable-cost` override allows to use the projections from the Danish Energy Agency instead for solar PV and wind power and `schroeder-hydro-cost` provides another source for the hydropower assumptions.
-Using the override `no-hydro-fixed-cost` allows to only consider variable and O&M costs for hydropower.
-This may make sense especially in combination with the `freeze-hydro-capacities` override (see below).
+The `dea-renewable-cost-{technology}` overrides allow the projections from the Danish Energy Agency to be used instead for solar PV and wind power. To load all these costs, you will need to chain all the costs for the loaded modules (see the [scenarios section](./customisation.md#scenarios)).
+`schroeder-hydro-cost` provides another source for the hydropower assumptions.
+Using the override `no-hydro-{technology_group}-fixed-cost` sets installation costs of hydropower to zero, leading the model to only consider variable and O&M costs.
+This may make sense especially in combination with the `freeze-hydro-{technology_group}-capacities` overrides (see below).
 
 ### directional-rooftop-pv
 
@@ -76,7 +91,7 @@ Constraining hydrogen storage as well ensures it does not directly compete with 
 ### freeze-hydro-capacities
 
 By default, Euro-Calliope allows capacities of run-of-river hydro, reservoir hydro, and pumped storage hydro capacities up to today's levels.
-Alternatively, it's possible to freeze these capacities to today's levels using the `freeze-hydro-capacities` override.
+Alternatively, it's possible to freeze these capacities to today's levels using the `freeze-hydro-storage-capacities` and `freeze-hydro-supply-capacities` override.
 
 ### load-shedding
 
@@ -84,11 +99,44 @@ The `load-shedding` override adds an option to shed load at each location.
 You can use this to model blackouts, brownouts, or controlled shedding of load as a form of demand response.
 
 In Euro-Calliope, we model load shedding not as actual reduction of demand but as an unconstrained supply of electricity.
-This supply has high variable cost (see `tech-cost.yaml` parameter file) and no fixed cost.
+This supply has high variable cost (see the `load-shedding.yaml` module) and no fixed cost.
 Due to its high cost, it will only be used when no other, less costly, option is available.
 
 Calliope provides a built-in mechanism that is similar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#allowing-for-unmet-demand).
 The benefit of using the `load-shedding` override over Calliope's built-in mechanism is that it is more targeted towards modelling shedding of electrical load and provides more flexibility -- for example in terms of the cost of shed load.
+
+## Scenarios
+
+In Calliope, [scenarios](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#scenarios-and-overrides) are groups of overrides and/or other scenarios.
+In Euro-Calliope, it can be helpful to define scenarios to help group similar overrides together.
+For instance, cost overrides from the Danish Energy Agency are defined in various files, since they are loaded in alongside the technologies they affect (the option to override offshore wind costs only exists when you load the `techs/supply/wind-offshore.yaml` module).
+You can pre-define scenarios in your model definition file, such as:
+
+```yaml
+scenarios:
+    dea-renewable-cost: [dea-renewable-cost-pv-open-field, dea-renewable-cost-wind-onshore, dea-renewable-cost-wind-offshore, dea-renewable-cost-pv-roof-mounted]
+```
+
+Then you can load in the scenario into calliope as follows:
+
+```bash
+calliope run build/models/continental/example-model.yaml --scenario=dea-renewable-cost
+```
+
+In the above example, if you choose not to load the offshore wind module into your model, then the scenario you define would become:
+
+```yaml
+scenarios:
+    dea-renewable-cost: [dea-renewable-cost-pv-open-field, dea-renewable-cost-wind-onshore, dea-renewable-cost-pv-roof-mounted]
+```
+
+Similar overrides which you may wish to group together are:
+
+```yaml
+freeze-hydro-capacities: [freeze-hydro-supply-capacities, freeze-hydro-storage-capacities]
+dea-renewable-cost: [dea-renewable-cost-pv-open-field, dea-renewable-cost-wind-onshore, dea-renewable-cost-wind-offshore, dea-renewable-cost-pv-roof-mounted]
+no-hydro-fixed-cost: [no-hydro-supply-fixed-cost, no-hydro-storage-fixed-cost]
+```
 
 ## Rebuild
 

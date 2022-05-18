@@ -1,4 +1,0 @@
-scenarios:
-    freeze-hydro-capacities: [freeze-hydro-supply-capacities, freeze-hydro-storage-capacities]
-    dea-renewable-cost: [dea-renewable-cost-pv-open-field, dea-renewable-cost-wind-onshore, dea-renewable-cost-wind-offshore, dea-renewable-cost-pv-roof-mounted]
-    no-hydro-fixed-cost: [no-hydro-supply-fixed-cost, no-hydro-storage-fixed-cost]
