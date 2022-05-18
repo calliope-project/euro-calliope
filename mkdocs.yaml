@@ -39,4 +39,10 @@ plugins:
     - add-file:
         path_to_file: ./CHANGELOG.md
         path_to_src_dir: .
+    - add-list-of-tech-modules:
+        path_to_src_dir: ./build/.docs
+        path_to_tech_module_contents: ./docs/templates/tech-modules.yaml
+        path_to_md_template_to_fill: ./docs/templates/customisation.md
+        path_to_md_relative_to_site: ./model/customisation.md
+
 extra_css: [./css/extras.css]

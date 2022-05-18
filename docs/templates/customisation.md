@@ -6,7 +6,7 @@ To make them fit-for-purpose, Euro-Calliope models can be configured, adapted, a
 You have the following three options:
 
 1. [Manual changes](./customisation.md#manual-changes)
-2. [Imports](./customisation.md#file-imports)
+2. [Importing modules](./customisation.md#importing-modules)
 3. [Overrides](./customisation.md#overrides)
 4. [Rebuild model](./customisation.md#rebuild)
 
@@ -14,11 +14,11 @@ You have the following three options:
 
 With the Calliope model in your hands, you will be able to change any model parameter, any technology specifics, and the model definition to your liking.
 This kind of customisation can be useful to get to know the model and its parameters.
-To create reliable results, we do advise making manual changes only to the model definition (`./{resolution}/example-model.yaml`) as this makes it possible to trace those changes later.
+To create reliable results, we do advise making manual changes only to the model definition (`example-model.yaml`) as this makes it possible to trace those changes later.
 A typical customisation here would be to change the solver from `gurobi` to an open-source solver, e.g. `cbc` (see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/user/config_defaults.html#run-configuration)).
 We consider all Euro-Calliope model subcomponents (everything other than the model definition itself) as a toolbox from which you can choose to define your model -- see the [Import customisation option](./customisation.md#imports).
 
-## Imports
+## Importing modules
 
 The `example-model.yaml` definition file in each resolution sub-directory (e.g. `national/example-model.yaml`) specifies a list of other files to bring together to describe the model (under the `import` key).
 This list can be changed by the modeller to select a combination of different files (see also [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#files-that-define-a-model)).
@@ -28,6 +28,34 @@ It also places that technology in every relevant modelled location (under the `l
 Finally, there are potential overrides defined, which is an additional layer of customisation described further in the [overrides section](./customisation.md#overrides).
 Only by including `techs/supply/hydro.yaml` in the list of imports in `example-model.yaml` will the defined hydropower technologies exist in the built Calliope model.
 By default, the example model definition imports all modules except electricity transmission, so you can simply remove any modules from the list of imports if you do not want to consider that technology / technology group in your study.
+
+The modules are in the `techs` subdirectory of each spatial resolution (e.g. `national/techs/...`).
+Here, we describe each module in terms of the technologies they contain (`calliope name`:`full name`) and the overrides they make available.
+
+{% for module_name, module_contents in modules.items() %}
+<details>
+<summary><code>{{ module_name }}</code></summary>
+<details>
+<summary><i>Technologies</i></summary>
+<ul>
+{% for tech, tech_name in module_contents.techs.items() %}
+<li><b>{{ tech }}</b>: {{ tech_name }}</li>
+{% endfor %}
+</ul>
+</details>
+{% if module_contents.overrides is defined %}
+<details>
+<summary><i>Overrides</i></summary>
+<ul>
+{% for override_name, override in module_contents.overrides.items() %}
+<li><b>{{ override_name }}</b>: {{ override }}</li>
+{% endfor %}
+</ul>
+</details>
+{% endif %}
+</details>
+{% endfor %}
+
 
 ### Transmission links
 
@@ -59,51 +87,6 @@ For instance, `freeze-hydro-supply-capacities` and `freeze-hydro-storage-capacit
 
 You can also define your own overrides to manipulate any model component.
 We recommend you add these overrides into the model definition YAML file, to ensure they are easy to trace.
-
-The following overrides are built into Euro-Calliope.
-### Cost
-
-By default, Euro-Calliope uses cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014.
-The `dea-renewable-cost-{technology}` overrides allow the projections from the Danish Energy Agency to be used instead for solar PV and wind power. To load all these costs, you will need to chain all the costs for the loaded modules (see the [scenarios section](./customisation.md#scenarios)).
-`schroeder-hydro-cost` provides another source for the hydropower assumptions.
-Using the override `no-hydro-{technology_group}-fixed-cost` sets installation costs of hydropower to zero, leading the model to only consider variable and O&M costs.
-This may make sense especially in combination with the `freeze-hydro-{technology_group}-capacities` overrides (see below).
-
-### directional-rooftop-pv
-
-By default, Euro-Calliope contains a single technology for rooftop PV.
-This technology comprises the total rooftop PV potential in each location, in particular including east-, west-, and north-facing rooftops.
-While this allows to fully exploit the potential of rooftop PV, it leads to less than optimal capacity factors as long as the potential is not fully exploited.
-That is because in reality, one would likely first exploit all south-facing rooftops, then east- and west-facing rooftops, and only then -- if at all -- north-facing rooftops. By default, Euro-Calliope cannot model that.
-
-When using the `directional-rooftop-pv` override, there are three instead of just one technologies for rooftop PV.
-The three technologies comprise (1) south-facing PV (on either south-facing or flat rooftops), (2) east- and west-facing PV, and (3) north-facing PV.
-This leads to higher capacity factors of rooftop PV as long as the potential of rooftop PV is not fully exploited.
-However, this also increases the complexity of the model.
-
-### exclusive-energy-to-power-ratios
-
-Adding the `exclusive-energy-to-power-ratios` override constrains the energy to power ratios of battery and hydrogen storage in a way that they do not overlap (in Calliope terms: energy="storage capacity", power="energy capacity").
-Battery storage is constrained to a ratio of ≤4h while hydrogen is constrained to a ratio of ≥4h.
-The ratio is derived from typical values of commercial lithium-ion batteries available today (2021).
-Constraining hydrogen storage as well ensures it does not directly compete with battery storage, but is used instead for durations of fours hours and longer.
-
-### freeze-hydro-capacities
-
-By default, Euro-Calliope allows capacities of run-of-river hydro, reservoir hydro, and pumped storage hydro capacities up to today's levels.
-Alternatively, it's possible to freeze these capacities to today's levels using the `freeze-hydro-storage-capacities` and `freeze-hydro-supply-capacities` override.
-
-### load-shedding
-
-The `load-shedding` override adds an option to shed load at each location.
-You can use this to model blackouts, brownouts, or controlled shedding of load as a form of demand response.
-
-In Euro-Calliope, we model load shedding not as actual reduction of demand but as an unconstrained supply of electricity.
-This supply has high variable cost (see the `load-shedding.yaml` module) and no fixed cost.
-Due to its high cost, it will only be used when no other, less costly, option is available.
-
-Calliope provides a built-in mechanism that is similar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#allowing-for-unmet-demand).
-The benefit of using the `load-shedding` override over Calliope's built-in mechanism is that it is more targeted towards modelling shedding of electrical load and provides more flexibility -- for example in terms of the cost of shed load.
 
 ## Scenarios
 
