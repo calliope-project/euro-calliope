@@ -52,8 +52,8 @@ onerror:
 rule all:
     message: "Generate euro-calliope pre-built models and run tests."
     input:
-        "build/logs/continental/test-report.html",
-        "build/logs/national/test-report.html",
+        "build/logs/continental/test.success",
+        "build/logs/national/test.success",
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",
@@ -66,9 +66,9 @@ rule all_tests:
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",
-        "build/logs/continental/test-report.html",
-        "build/logs/national/test-report.html",
-        "build/logs/regional/test-report.html",
+        "build/logs/continental/test.success",
+        "build/logs/national/test.success",
+        "build/logs/regional/test.success",
         "build/models/build-metadata.yaml"
 
 
@@ -203,6 +203,7 @@ rule test:
         path_to_annual_energy_balances="build/data/annual-energy-balances.csv"
     params:
         config = config
-    output: "build/logs/{resolution}/test-report.html"
+    log: "build/logs/{resolution}/test-report.html"
+    output: "build/logs/{resolution}/test.success"
     conda: "./envs/test.yaml"
     script: "./tests/model/test_runner.py"

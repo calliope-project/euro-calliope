@@ -59,4 +59,4 @@ Barkatullah, N. and Ahmad, A. (2017). <i>Current status and emerging trends in f
 
 ### @BEIS:2016
 
-Department for Business, Energy and Industrial Strategy (2016). <i>Electricity Generation Costs 2016</i>. [https://www.gov.uk/government/publications/beis-electricity-generation-costs-november-2016][https://www.gov.uk/government/publications/beis-electricity-generation-costs-november-2016]
+Department for Business, Energy and Industrial Strategy (2016). <i>Electricity Generation Costs 2016</i>. [https://www.gov.uk/government/publications/beis-electricity-generation-costs-november-2016](https://www.gov.uk/government/publications/beis-electricity-generation-costs-november-2016)
