@@ -42,7 +42,7 @@ While they may be unusual, these units lead to a numerical model that is well su
 The units are tuned so as to work best for models with a time resolution of a few hours and a duration of one year.
 For other types of problems, or other solution algorithms, the units may need to be changed to avoid numerical issues within the solver.
 
-When you run the workflow, you can easily change the units and scale all values using the `scaling-factor` configuration parameters, see [Configuration](./customisation.md#configuration).
+When you run the workflow, you can easily change the units and scale all values using the `scaling-factor` configuration parameters, see [Configuration](../workflow/customisation.md#configuration).
 The base units on which the scaling factors are applied are `1 MW`, `1 MWh`, `EUR`, and `km2`.
 So for example, the default unit for energy (100 GWh) is derived by scaling the base unit (1 MWh) with a scaling factor of `0.00001`.
 

@@ -32,30 +32,147 @@ By default, the example model definition imports all modules except electricity 
 The modules are in the `techs` subdirectory of each spatial resolution (e.g. `national/techs/...`).
 Here, we describe each module in terms of the technologies they contain (`calliope name`:`full name`) and the overrides they make available (`calliope name`: `override description`) .
 
-{% for module_name, module_contents in modules.items() %}
-<details>
-<summary><code>{{ module_name }}</code></summary>
-<details>
-<summary><i>Technologies</i></summary>
-<ul>
-{% for tech, tech_name in module_contents.techs.items() %}
-<li><b>{{ tech }}</b>: {{ tech_name }}</li>
-{% endfor %}
-</ul>
-</details>
-{% if module_contents.overrides is defined %}
-<details>
-<summary><i>Overrides</i></summary>
-<ul>
-{% for override_name, override in module_contents.overrides.items() %}
-<li><b>{{ override_name }}</b>: {{ override }}</li>
-{% endfor %}
-</ul>
-</details>
-{% endif %}
-</details>
-{% endfor %}
-<br>
+
+
+??? note "demand/electricity.yaml"
+
+    === "Technologies"
+
+        **demand_elec**: Electricity demand
+
+??? note "storage/electricity.yaml"
+
+    === "Technologies"
+
+        **battery**: Battery storage
+
+        **hydrogen**: Hydrogen power storage
+
+    === "Overrides"
+
+        **exclusive-energy-to-power-ratios**: Constrain the energy to power ratios of battery and hydrogen storage in a way that they do not overlap (in Calliope terms, energy="storage capacity", power="energy capacity").
+          Battery storage is constrained to a ratio of ≤4h while hydrogen is constrained to a ratio of ≥4h.
+          The ratio is derived from typical values of commercial lithium-ion batteries available today (2021).
+          Constraining hydrogen storage as well ensures it does not directly compete with battery storage, but is used instead for durations of fours hours and longer.
+
+
+??? note "storage/hydro.yaml"
+
+    === "Technologies"
+
+        **pumped_hydro**: Pumped hydro power storage
+
+    === "Overrides"
+
+        **no-hydro-storage-fixed-cost**: Set installation costs of pumped hydro storage to zero.
+
+        **freeze-hydro-storage-capacities**: Force discharge and storage capacities of hydropower to today's levels instead of using today's level as the maximum (you may also want to apply "no-hydro-storage-fixed-cost").
+
+??? note "supply/biofuel.yaml"
+
+    === "Technologies"
+
+        **biofuel**: Biofuel
+
+??? note "supply/hydro.yaml"
+
+    === "Technologies"
+
+        **hydro_reservoir**: Hydro electricity with a reservoir.
+
+        **hydro_run_of_river**: Run of river hydro electricity
+
+    === "Overrides"
+
+        **no-hydro-supply-fixed-cost**: Set installation costs of hydropower supply technologies to zero.
+
+        **schroeder-hydro-cost**: Override hydropower supply cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014 with those from Schröder et al. (2013).
+
+        **freeze-hydro-supply-capacities**: Force discharge and storage capacities of hydropower to today's levels instead of using today's level as the maximum (you may also want to apply "no-hydro-supply-fixed-cost").
+
+??? note "supply/load-shedding.yaml"
+
+    === "Technologies"
+
+        **load_shedding**: Load shedding as last resort
+
+    === "Overrides"
+
+        **load-shedding**: Add an option to shed load at each location.
+          You can use this to model blackouts, brownouts, or controlled shedding of load as a form of demand response.
+          In Euro-Calliope, we model load shedding not as actual reduction of demand but as an unconstrained supply of electricity.
+          This supply has high variable cost (see the load-shedding.yaml module) and no fixed cost.
+          Due to its high cost, it will only be used when no other, less costly, option is available.
+
+
+??? note "supply/nuclear.yaml"
+
+    === "Technologies"
+
+        **nuclear**: Nuclear power
+
+??? note "supply/open-field-solar-and-wind-onshore.yaml"
+
+    === "Technologies"
+
+        **open_field_pv**: Open field PV
+
+        **wind_onshore_competing**: Onshore wind competing with open field PV on land
+
+        **wind_onshore_monopoly**: Onshore wind without land competition
+
+    === "Overrides"
+
+        **dea-renewable-cost-pv-open-field**: Override open field PV cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014 with those from the Danish Energy Agency.
+
+        **dea-renewable-cost-wind-onshore**: Override onshore wind cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014 with those from the Danish Energy Agency.
+
+??? note "supply/rooftop-solar.yaml"
+
+    === "Technologies"
+
+        **roof_mounted_pv**: Roof mounted PV
+
+    === "Overrides"
+
+        **dea-renewable-cost-pv-roof-mounted**: Override cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014 with those from the Danish Energy Agency
+
+        **directional-rooftop-pv**: By default, Euro-Calliope contains a single technology for rooftop PV.
+          This technology comprises the total rooftop PV potential in each location, in particular including east-, west-, and north-facing rooftops.
+          While this allows you the model fully exploit the potential of rooftop PV, it leads to less than optimal capacity factors as long as the potential is not fully exploited.
+          That is because in reality, one would likely first exploit all south-facing rooftops, then east- and west-facing rooftops, and only then -- if at all -- north-facing rooftops.
+          When using this override, there are three technologies instead of just one for rooftop PV.
+          The three technologies comprise (1) south-facing PV (on either south-facing or flat rooftops), (2) east- and west-facing PV, and (3) north-facing PV.
+          This leads to higher capacity factors of rooftop PV as long as the potential of rooftop PV is not fully exploited.
+          However, this also increases the complexity of the model.
+
+
+??? note "supply/wind-offshore.yaml"
+
+    === "Technologies"
+
+        **wind_offshore**: Offshore wind
+
+    === "Overrides"
+
+        **dea-renewable-cost-wind-offshore**: Override offshore wind cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014 with those from the Danish Energy Agency.
+
+??? note "transmission/electricity-entsoe.yaml"
+
+    === "Technologies"
+
+        **ac_transmission**: High voltage AC transmission line
+
+        **free_transmission**: Local power transmission
+
+??? note "transmission/electricity-linked-neighbours.yaml"
+
+    === "Technologies"
+
+        **ac_transmission**: High voltage AC transmission line
+
+        **free_transmission**: Local power transmission
+
 
 ## Overrides and scenarios
 
