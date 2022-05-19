@@ -107,10 +107,6 @@ def _create_config_plugin(snakemake, override_dict, scenarios, subset_time):
             assert len(selected) == 1
             return selected[0]
 
-        @pytest.fixture(scope="module", params=snakemake.input.path_to_annual_energy_balances)
-        def annual_energy_balances(self, request):
-            return pd.read_csv(request.param, index_col=0, parse_dates=True)
-
     return SnakemakeConfigPlugin()
 
 

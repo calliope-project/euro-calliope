@@ -199,8 +199,7 @@ rule test:
         capacity_factor_timeseries = expand(
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_CF_TECHNOLOGIES
-        ),
-        path_to_annual_energy_balances="build/data/annual-energy-balances.csv"
+        )
     params:
         config = config
     log: "build/logs/{resolution}/test-report.html"
