@@ -12,6 +12,7 @@ def generate_annual_energy_balance_nc(
     path_to_carrier_names,
     path_to_ch_excel,
     path_to_ch_industry_excel,
+    countries,
     path_to_result,
 ):
     """
@@ -35,16 +36,20 @@ def generate_annual_energy_balance_nc(
 
     country_code_mapping = valid_countries_to_alpha3(da.country_code)
     da = utils.rename_and_groupby(da, country_code_mapping, dim="country_code")
+
     da = utils.tj_to_twh(da).drop_vars("unit").assign_attrs({"unit": "twh"})
 
     # Add CH energy use (only covers a subset of sectors and carriers, but should be enough)
     ch_energy_use_da = add_ch_energy_balance(path_to_ch_excel, path_to_ch_industry_excel)
 
     all_da = (
-        utils.merge_da([da, ch_energy_use_da])
+        utils.merge_da([da, ch_energy_use_da], "annual_energy_balances")
         .sel(year=YEARS)
-        .rename("annual_energy_balances")
     )
+
+    # Ensure we have at least the countries in the model scope defined.
+    # All the others are worth keeping to do data gap filling later on in the workflow.
+    assert all(utils.convert_country_code(country) in da.country_code.to_index() for country in countries)
 
     all_da.to_netcdf(path_to_result)
 
@@ -263,7 +268,8 @@ def get_ch_industry_energy_balance(path_to_excel):
         .apply(utils.to_numeric)
         .apply(utils.tj_to_twh)
         .rename_axis(index=["carrier_code", "year"], columns="cat_code")
-        # ASSUME: we take the 'new' 2013 values, rather than the 'old' ones.
+        # ASSUME: we take the 'new' 2013 values from this dataset, rather than the 'old' ones
+        # since they likely account for some correction in the underlying statistical analysis.
         .drop(["2013alt", "2013 alt"], level="year")
         .rename({"2013neu": 2013, "2013 neu": 2013}, level="year")
         .dropna(subset=["TOTAL"])
@@ -307,5 +313,6 @@ if __name__ == "__main__":
         path_to_ch_industry_excel=snakemake.input.ch_industry_energy_balance,
         path_to_cat_names=snakemake.input.cat_names,
         path_to_carrier_names=snakemake.input.carrier_names,
+        countries=snakemake.params.countries,
         path_to_result=snakemake.output[0],
     )
