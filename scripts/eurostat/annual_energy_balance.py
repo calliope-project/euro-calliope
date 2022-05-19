@@ -34,7 +34,7 @@ def generate_annual_energy_balance_nc(
         "unit": "TJ"
     }]
 
-    country_code_mapping = valid_countries_to_alpha3(da.country_code)
+    country_code_mapping = utils.convert_valid_countries(da.country_code.values)
     da = utils.rename_and_groupby(da, country_code_mapping, dim="country_code")
 
     da = utils.tj_to_twh(da).drop_vars("unit").assign_attrs({"unit": "twh"})
@@ -293,17 +293,6 @@ def get_ch_industry_energy_balance(path_to_excel):
     da = df_twh.stack().to_xarray()
 
     return da.assign_attrs({"unit": "twh"})
-
-
-def valid_countries_to_alpha3(country_codes):
-    mapped_codes = {}
-    for country_code in country_codes.values:
-        try:
-            mapped_codes[country_code] = utils.convert_country_code(country_code)
-        except LookupError:
-            print(f"Skipping country/region {country_code} in annual energy balances")
-            continue
-    return mapped_codes
 
 
 if __name__ == "__main__":
