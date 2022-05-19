@@ -65,12 +65,18 @@ def process_jrc_transport_data(data_dir, dataset, out_path):
     ])
     if DATASET_PARAMS[dataset]["unit"] == "ktoe":
         processed_data = processed_data.apply(utils.ktoe_to_twh)
-        processed_data.index = processed_data.index.set_levels(['twh'], level='unit')
+        unit = "twh"
+    else:
+        unit = DATASET_PARAMS[dataset]["unit"]
 
-    processed_data.stack('year').to_csv(out_path)
+    processed_da = processed_data.stack().rename(f"jrc-idees-transport-{dataset}").to_xarray()
+    country_code_mapping = utils.convert_valid_countries(processed_da.country_code.values)
+    processed_da = utils.rename_and_groupby(processed_da, country_code_mapping, dim="country_code")
+
+    processed_da.assign_attrs(unit=unit).to_netcdf(out_path)
 
 
-def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, unit):
+def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, **kwargs):
     xls = pd.ExcelFile(file)
     style_df = StyleFrame.read_excel(xls, read_style=True, sheet_name=sheet_name)
     df = pd.read_excel(xls, sheet_name=sheet_name)
@@ -96,8 +102,8 @@ def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, unit):
 
     df = (
         df
-        .assign(country_code=column_names.split(' - ')[0], unit=unit)
-        .set_index(['country_code', 'unit'], append=True)
+        .assign(country_code=column_names.split(' - ')[0])
+        .set_index('country_code', append=True)
     )
     df.columns = df.columns.astype(int).rename('year')
 

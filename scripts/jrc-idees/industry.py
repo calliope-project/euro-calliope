@@ -31,11 +31,17 @@ def process_jrc_industry_data(data_dir, dataset, threads, out_path):
     data_filepaths = list(Path(data_dir).glob("*.xlsx"))
     if dataset == "energy":
         processed_data = process_energy(data_filepaths, threads)
+        unit = "twh"
     elif dataset == "production":
         processed_data = process_production(data_filepaths)
+        unit = "kt"
 
     processed_data.columns = processed_data.columns.rename("year").astype(int)
-    processed_data.stack().to_csv(out_path)
+    processed_da = processed_data.stack().rename("jrc-idees-industry-twh").to_xarray()
+    country_code_mapping = utils.convert_valid_countries(processed_da.country_code.values)
+    processed_da = utils.rename_and_groupby(processed_da, country_code_mapping, dim="country_code")
+
+    processed_da.assign_attrs(unit=unit).to_netcdf(out_path)
 
 
 def process_energy(data_filepaths, threads):
@@ -47,7 +53,6 @@ def process_energy(data_filepaths, threads):
 
     processed_data = pd.concat(demand_consumption).sort_index()
     processed_data = processed_data.apply(utils.ktoe_to_twh)
-    processed_data.index = processed_data.index.set_levels(['twh'], level='unit')
 
     return processed_data
 
@@ -86,7 +91,7 @@ def get_jrc_idees_energy_sheet(sheet_name, xls):
     df = assign_section_level_based_on_colour(style_df, df, column_names, last_index_of_data)
     df, total_to_check = slice_on_indent(style_df, df, column_names, last_index_of_data)
     df = rename_carriers(df)
-    df = assign_category_country_unit_information(df, column_names)
+    df = assign_category_country_information(df, column_names)
 
     # Check that we haven't lost some data
     assert np.allclose(
@@ -145,14 +150,13 @@ def rename_carriers(df):
     return df
 
 
-def assign_category_country_unit_information(df, column_names):
-    index = ['section', 'subsection', 'carrier_name', 'country_code', 'cat_name', 'unit']
+def assign_category_country_information(df, column_names):
+    index = ['section', 'subsection', 'carrier_name', 'country_code', 'cat_name']
     return (
         df
         .assign(
             cat_name=column_names.split(': ')[1].split(' / ')[0],
-            country_code=column_names.split(': ')[0],
-            unit='ktoe'
+            country_code=column_names.split(': ')[0]
         )
         .set_index(index)
         .drop([column_names, 'indent', 'end_use'], axis="columns")
@@ -173,10 +177,9 @@ def get_jrc_idees_production_sheet(sheet_name, xls):
         .assign(
             country_code=df.index.name.split(':')[0],
             cat_name=df.index.name.split(': ')[1],
-            unit='kt'
         )
         .rename_axis(index='produced_material')
-        .set_index(['country_code', 'cat_name', 'unit'], append=True)
+        .set_index(['country_code', 'cat_name'], append=True)
     )
 
 

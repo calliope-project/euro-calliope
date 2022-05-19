@@ -36,8 +36,13 @@ def process_jrc_tertiary_data(data_dir, out_path):
     data_filepaths = list(Path(data_dir).glob("*.xlsx"))
     processed_data = pd.concat([get_tertiary_sector_data(file) for file in data_filepaths])
     processed_data = processed_data.apply(utils.ktoe_to_twh)
-    processed_data.index = processed_data.index.set_levels(['twh'], level='unit')
-    processed_data.to_csv(out_path)
+
+    processed_da = processed_data.rename("jrc-idees-tertiary-twh").to_xarray()
+
+    country_code_mapping = utils.convert_valid_countries(processed_da.country_code.values)
+    processed_da = utils.rename_and_groupby(processed_da, country_code_mapping, dim="country_code")
+
+    processed_da.assign_attrs(unit="twh").to_netcdf(out_path)
 
 
 def get_tertiary_sector_data(file):
@@ -75,11 +80,10 @@ def clean_df(df, energy_type):
         .groupby([CARRIER_NAMES, END_USES], level=[0, 1]).sum()
         .assign(
             country_code=df.index.names[0].split(' - ')[0],
-            unit='ktoe',
             energy=energy_type
         )
-        .set_index(['country_code', 'unit', 'energy'], append=True)
-        .rename_axis(columns='year', index=['carrier_name', 'end_use', 'country_code', 'unit', 'energy'])
+        .set_index(['country_code', 'energy'], append=True)
+        .rename_axis(columns='year', index=['carrier_name', 'end_use', 'country_code', 'energy'])
     )
     return df
 
@@ -93,7 +97,7 @@ def add_electricity_use(df, df_summary):
         .rename_axis(index='year')
     )
     new_idx = pd.MultiIndex.from_product(
-        [["electricity"], ["end_use_electricity"], df.index.levels[2], df.index.levels[3], ["consumption", "demand"]],
+        [["electricity"], ["end_use_electricity"], df.index.levels[2], ["consumption", "demand"]],
         names=df.index.names
     )
     df = df.append(pd.concat([df_elec, df_elec], keys=new_idx, axis=1).T).sort_index()

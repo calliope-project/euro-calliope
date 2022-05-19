@@ -6,6 +6,7 @@ import os
 import pytest
 import calliope
 import pandas as pd
+import xarray as xr
 
 
 def run_test(snakemake):

@@ -1,12 +1,9 @@
-from string import digits
-
 import pandas as pd
-import numpy as np
-import xarray as xr
 
 from eurocalliopelib import utils
 
 idx = pd.IndexSlice
+YEARS = range(2000, 2019)
 
 
 def generate_annual_energy_balance_nc(
@@ -15,8 +12,8 @@ def generate_annual_energy_balance_nc(
     path_to_carrier_names,
     path_to_ch_excel,
     path_to_ch_industry_excel,
-    path_to_result,
     countries,
+    path_to_result,
 ):
     """
     Open a TSV file and reprocess it into a xarray dataset, including long names for
@@ -27,27 +24,37 @@ def generate_annual_energy_balance_nc(
     # Names for each consumption category/sub-category and carriers have been prepared by hand
     cat_names = pd.read_csv(path_to_cat_names, header=0, index_col=0)
     carrier_names = pd.read_csv(path_to_carrier_names, header=0, index_col=0)
-    country_codes = [utils.convert_country_code(i, output="alpha2_eurostat") for i in countries]
 
-    index_names = ["cat_code", "carrier_code", "unit", "country"]
-    df = utils.read_eurostat_tsv(path_to_input, index_names)
-    df = df.reorder_levels(index_names)
-    df = df.loc[
-        idx[cat_names.index, carrier_names.index, "TJ", country_codes], :
-    ].dropna(how="all")
+    index_names = ["cat_code", "carrier_code", "unit", "country_code"]
+    da = utils.read_eurostat_tsv(path_to_input, index_names).stack().to_xarray()
 
-    tdf = df.stack()
+    da = da.loc[{
+        "cat_code": cat_names.index.intersection(da.cat_code),
+        "carrier_code": carrier_names.index.intersection(da.carrier_code),
+        "unit": "TJ"
+    }]
+
+    country_code_mapping = utils.convert_valid_countries(da.country_code.values)
+    da = utils.rename_and_groupby(da, country_code_mapping, dim="country_code")
+
+    da = utils.tj_to_twh(da).drop_vars("unit").assign_attrs({"unit": "twh"})
 
     # Add CH energy use (only covers a subset of sectors and carriers, but should be enough)
-    ch_energy_use_tdf = add_ch_energy_balance(
-        path_to_ch_excel, path_to_ch_industry_excel, index_levels=tdf.index.names
+    ch_energy_use_da = add_ch_energy_balance(path_to_ch_excel, path_to_ch_industry_excel)
+
+    all_da = (
+        utils.merge_da([da, ch_energy_use_da], "annual_energy_balances")
+        .sel(year=YEARS)
     )
-    tdf = pd.concat([tdf, ch_energy_use_tdf]).sort_index(axis=0)
 
-    tdf.to_csv(path_to_result)
+    # Ensure we have at least the countries in the model scope defined.
+    # All the others are worth keeping to do data gap filling later on in the workflow.
+    assert all(utils.convert_country_code(country) in da.country_code.to_index() for country in countries)
+
+    all_da.to_netcdf(path_to_result)
 
 
-def add_ch_energy_balance(path_to_ch_excel, path_to_ch_industry_excel, index_levels):
+def add_ch_energy_balance(path_to_ch_excel, path_to_ch_industry_excel):
     """
     Process Swiss data into a tidy dataframe that matches the structure of the annual energy balances.
     """
@@ -67,22 +74,16 @@ def add_ch_energy_balance(path_to_ch_excel, path_to_ch_industry_excel, index_lev
     )
     ch_transport_energy_use = get_ch_transport_energy_balance(path_to_ch_excel)
 
-    ch_energy_use_tdf = pd.concat(
-        [
-            utils.add_idx_level(i, country="CH", unit="TJ")
-            .reorder_levels(index_levels)
-            for i in [
-                ch_hh_energy_use,
-                ch_ind_energy_use,
-                ch_ser_energy_use,
-                ch_waste_energy_use,
-                ch_industry_subsector_energy_use,
-                ch_transport_energy_use,
-            ]
-        ]
-    )
+    ch_energy_use_da = utils.merge_da([
+        ch_hh_energy_use,
+        ch_ind_energy_use,
+        ch_ser_energy_use,
+        ch_waste_energy_use,
+        ch_industry_subsector_energy_use,
+        ch_transport_energy_use,
+    ])
 
-    return ch_energy_use_tdf
+    return ch_energy_use_da.expand_dims(country_code=["CHE"])
 
 
 def get_ch_energy_balance_sheet(path_to_excel, sheet, skipfooter, cat_code):
@@ -108,7 +109,7 @@ def get_ch_energy_balance_sheet(path_to_excel, sheet, skipfooter, cat_code):
         "Total\n= %": "TOTAL",
     }
     # Footnote labels lead to some strings randomly ending in numbers; we remove them here
-    _df = (
+    df = (
         pd.read_excel(
             path_to_excel,
             skiprows=6,
@@ -122,22 +123,27 @@ def get_ch_energy_balance_sheet(path_to_excel, sheet, skipfooter, cat_code):
         # ignore the column giving subset of oil use which is light oil
         .iloc[:, [i for i in range(10) if i != 1]]
     )
-    _df.columns = (
-        _df.columns.get_level_values(0)
-        .str.translate(utils.remove_digits())
+    df.columns = (
+        df
+        .columns
+        .get_level_values(0)
+        .str
+        .translate(utils.remove_digits())
         .map(ch_energy_carriers)
         .rename("carrier_code")
     )
-    _df.index.rename("year", inplace=True)
+    df.index.rename("year", inplace=True)
 
-    _df = (
-        utils.add_idx_level(_df, cat_code=cat_code)
+    df_twh = (
+        df
         .apply(utils.to_numeric)
-        .astype(float)
+        .apply(utils.tj_to_twh)
         .stack()
     )
 
-    return _df
+    da = df_twh.to_xarray().expand_dims(cat_code=[cat_code]).assign_attrs({"unit": "twh"})
+
+    return da
 
 
 def get_ch_waste_consumption(path_to_excel):
@@ -154,14 +160,17 @@ def get_ch_waste_consumption(path_to_excel):
         header=[0, 1],
         skipfooter=8,
     )[("Consommation d'énergie (GWh)", "Ordures")]
-    waste_stream_tdf = (
-        utils.add_idx_level(
-            waste_stream_gwh.rename_axis(index="year"),
-            carrier_code="W6100_6220", cat_code="TI_EHG_E"
-        )
-        .apply(utils.gwh_to_tj)
+    waste_stream_twh = (
+        waste_stream_gwh
+        .rename_axis(index="year")
+        .apply(utils.gwh_to_twh)
     )
-    return waste_stream_tdf
+    waste_stream_da = (
+        waste_stream_twh
+        .to_xarray()
+        .expand_dims(carrier_code=["W6100_6220"], cat_code=["TI_EHG_E"])
+    )
+    return waste_stream_da.assign_attrs({"unit": "twh"})
 
 
 def get_ch_transport_energy_balance(path_to_excel):
@@ -171,23 +180,15 @@ def get_ch_transport_energy_balance(path_to_excel):
     ASSUME: electricity for rail.
     ASSUME: kerosene for aviation.
     """
-    carriers = {
-        "Elektrizität": "E7000",
-        "Gas übriger Vekehr": "G3000",
-        "Übrige erneuerbare Energien": "R5220B",
-        "davon Benzin": "O4652XR5210B",
-        "davon Diesel": "O4671XR5220B",
-        "davon Flugtreibstoffe": "O4000XBIO",
+    carriers_categories = {
+        "Elektrizität": ("E7000", "FC_TRA_RAIL_E"),
+        "Gas übriger Vekehr": ("G3000", "FC_TRA_ROAD_E"),
+        "Übrige erneuerbare Energien": ("R5220B", "FC_TRA_ROAD_E"),
+        "davon Benzin": ("O4652XR5210B", "FC_TRA_ROAD_E"),
+        "davon Diesel": ("O4671XR5220B", "FC_TRA_ROAD_E"),
+        "davon Flugtreibstoffe": ("O4000XBIO", "INTAVI"),
     }
-    categories = {
-        "O4652XR5210B": "FC_TRA_ROAD_E",
-        "O4671XR5220B": "FC_TRA_ROAD_E",
-        "R5220B": "FC_TRA_ROAD_E",
-        "G3000": "FC_TRA_ROAD_E",
-        "E7000": "FC_TRA_RAIL_E",
-        "O4000XBIO": "INTAVI",
-    }
-    _df = pd.read_excel(
+    df = pd.read_excel(
         path_to_excel,
         skiprows=6,
         skipfooter=12,
@@ -198,22 +199,25 @@ def get_ch_transport_energy_balance(path_to_excel):
     # Footnote labels lead to some strings randomly ending in numbers; we remove them here
     # carrier names span across two column levels, which we merge with fillna
     carrier_name_func = (
-        lambda x: _df.columns.to_frame()
+        lambda x: df.columns.to_frame()
         .iloc[:, x]
         .str.translate(utils.remove_digits())
-        .map(carriers)
+        .map(carriers_categories)
     )
-    _df.columns = carrier_name_func(0).fillna(carrier_name_func(1)).values
+    df.columns = carrier_name_func(0).fillna(carrier_name_func(1)).values
 
-    _df = (
-        _df.groupby(axis=1, level=0)
-        .sum()
+    df_twh = (
+        df
+        .groupby(axis=1, level=0).sum()
         .apply(utils.to_numeric)
-        .rename_axis(index="year", columns="carrier_code")
+        .apply(utils.tj_to_twh)
+        .rename_axis(index="year")
     )
-    _df = utils.add_idx_level(_df.T, cat_code=_df.columns.map(categories)).stack()
+    df_twh.columns = pd.MultiIndex.from_tuples(df_twh.columns).rename(["carrier_code", "cat_code"])
 
-    return _df
+    da = df_twh.stack(["carrier_code", "cat_code"]).to_xarray()
+
+    return da.assign_attrs({"unit": "twh"})
 
 
 def get_ch_industry_energy_balance(path_to_excel):
@@ -258,22 +262,37 @@ def get_ch_industry_energy_balance(path_to_excel):
     df.index = df.index.map(df["Unnamed: 0"].where(df.TOTAL.isnull()).ffill()).map(
         ch_carriers
     )
-    df = (
-        df.apply(utils.to_numeric)
+    df_twh = (
+        df
         .set_index("Unnamed: 0", append=True)
+        .apply(utils.to_numeric)
+        .apply(utils.tj_to_twh)
         .rename_axis(index=["carrier_code", "year"], columns="cat_code")
+        # ASSUME: we take the 'new' 2013 values from this dataset, rather than the 'old' ones
+        # since they likely account for some correction in the underlying statistical analysis.
+        .drop(["2013alt", "2013 alt"], level="year")
+        .rename({"2013neu": 2013, "2013 neu": 2013}, level="year")
         .dropna(subset=["TOTAL"])
     )
-    df.columns = (
-        df.columns.str.extract("(\d+)", expand=False)
+    df_twh.columns = (
+        df_twh
+        .columns
+        .str
+        .extract("(\d+)", expand=False)
         .fillna(0)
         .astype(int)
         .map(ch_subsectors)
     )
     # combine any data that now has the same cat_code or carrier_code by using groupby
-    df = df.groupby(axis=1, level="cat_code").sum().groupby(level=["carrier_code", "year"]).sum()
+    df_twh = (
+        df_twh
+        .groupby(axis=1, level="cat_code").sum()
+        .groupby(level=["carrier_code", "year"]).sum()
+    )
 
-    return df.stack()
+    da = df_twh.stack().to_xarray()
+
+    return da.assign_attrs({"unit": "twh"})
 
 
 if __name__ == "__main__":
