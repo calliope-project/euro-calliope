@@ -16,7 +16,7 @@ With the Calliope model in your hands, you will be able to change any model para
 This kind of customisation can be useful to get to know the model and its parameters.
 To create reliable results, we do advise making manual changes only to the model definition (`example-model.yaml`) as this makes it possible to trace those changes later.
 A typical customisation here would be to change the solver from `gurobi` to an open-source solver, e.g. `cbc` (see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/user/config_defaults.html#run-configuration)).
-We consider all Euro-Calliope model subcomponents (everything other than the model definition itself) as a toolbox from which you can choose to define your model -- see the [Import customisation option](./customisation.md#imports).
+We consider all Euro-Calliope model subcomponents (everything other than the model definition itself) as a toolbox from which you can choose to define your model -- see the [Import customisation option](./customisation.md#importing-modules).
 
 ## Importing modules
 
@@ -25,7 +25,7 @@ This list can be changed by the modeller to select a combination of different fi
 These files represent "modules" of the model definition and contain everything necessary for a given technology or technology group to exist.
 For instance, `techs/supply/hydro.yaml` defines two technologies (under the `techs` key) which will convert river flows into electricity.
 It also places that technology in every relevant modelled location (under the `locations` key), along with any location-specific information that is needed; in this case, the maximum capacity of hydropower in that location.
-Finally, there are potential overrides defined, which is an additional layer of customisation described further in the [overrides section](./customisation.md#overrides).
+Finally, there are potential overrides defined, which is an additional layer of customisation described further in the [overrides section](./customisation.md#overrides-and-scenarios).
 Only by including `techs/supply/hydro.yaml` in the list of imports in `example-model.yaml` will the defined hydropower technologies exist in the built Calliope model.
 By default, the example model definition imports all modules except electricity transmission, so you can simply remove any modules from the list of imports if you do not want to consider that technology / technology group in your study.
 
