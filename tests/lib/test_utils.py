@@ -106,7 +106,7 @@ class TestRenameAndGroupby:
     )
     @pytest.mark.parametrize("da", ["single_index", "multi_index"], indirect=True)
     def test_rename_groupby(self, rename_dict, expected, da):
-        new_da = rename_and_groupby(da, rename_dict, keep_non_renamed=False, dropna=False, dim="foo")
+        new_da = rename_and_groupby(da, rename_dict, keep_non_renamed=False, dropna=False, dim_name="foo")
 
         assert new_da.coords["foo"].to_index().symmetric_difference(expected.keys()).empty
         for dim_item, da_data in expected.items():
@@ -128,7 +128,7 @@ class TestRenameAndGroupby:
     )
     @pytest.mark.parametrize("da", ["single_index", "multi_index"], indirect=True)
     def test_rename_groupby_keep_renamed(self, rename_dict, expected, da):
-        new_da = rename_and_groupby(da, rename_dict, keep_non_renamed=True, dim="foo")
+        new_da = rename_and_groupby(da, rename_dict, keep_non_renamed=True, dim_name="foo")
 
         assert new_da.coords["foo"].to_index().symmetric_difference(expected.keys()).empty
         for dim_item, da_data in expected.items():
@@ -149,7 +149,7 @@ class TestRenameAndGroupby:
         ]
     )
     def test_rename_groupby_dropna(self, da_with_nan, rename_dict, expected):
-        new_da = rename_and_groupby(da_with_nan, rename_dict, dim="foo", dropna=True)
+        new_da = rename_and_groupby(da_with_nan, rename_dict, dim_name="foo", dropna=True)
 
         assert new_da.coords["foo"].to_index().symmetric_difference(expected.keys()).empty
         for dim_item, da_data in expected.items():
@@ -170,7 +170,7 @@ class TestRenameAndGroupby:
         ]
     )
     def test_rename_groupby_no_dropna(self, da_with_nan, rename_dict, expected):
-        new_da = rename_and_groupby(da_with_nan, rename_dict, dim="foo", dropna=False)
+        new_da = rename_and_groupby(da_with_nan, rename_dict, dim_name="foo", dropna=False)
 
         assert new_da.coords["foo"].to_index().symmetric_difference(expected.keys()).empty
         for dim_item, da_data in expected.items():
@@ -180,7 +180,7 @@ class TestRenameAndGroupby:
     def test_rename_dim(self, da):
         rename_dict = {"A": "A1", "B": "B1", "C": "C1", "D": "D1", "E": "E1"}
         expected = {"A1": 1, "B1": 2, "C1": 3, "D1": 4, "E1": 5}
-        new_da = rename_and_groupby(da, rename_dict, dim="foo", new_dim_name="baz", dropna=False)
+        new_da = rename_and_groupby(da, rename_dict, dim_name="foo", new_dim_name="baz", dropna=False)
 
         assert "baz" in new_da.coords
         assert "foo" not in new_da.coords

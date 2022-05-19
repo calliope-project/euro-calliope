@@ -69,7 +69,7 @@ def convert_valid_countries(country_codes: list, output: str = "alpha3") -> dict
 def rename_and_groupby(
     da: xr.DataArray,
     rename_dict: dict,
-    dim: str,
+    dim_name: str,
     new_dim_name: str = None,
     dropna: bool = False,
     keep_non_renamed: bool = False,
@@ -83,27 +83,27 @@ def rename_and_groupby(
 
     Args:
         da (xr.DataArray):
-            Input dataarray with the dimension "dim".
+            Input dataarray with the dimension "dim_name".
         rename_dict (dict):
-            Dictionary to map items in the dimension "dim" to new names ({"old_item_name": "new_item_name"}).
-        dim (str):
+            Dictionary to map items in the dimension "dim_name" to new names ({"old_item_name": "new_item_name"}).
+        dim_name (str):
             Dimension on which to rename items.
         new_dim_name (str, optional): Defaults to None.
-            If not None, rename the dimension "dim" to the given string.
+            If not None, rename the dimension "dim_name" to the given string.
         dropna (bool, optional): Defaults to False.
-            If True, drop any items in "dim" after renaming/grouping which have all NaN values along all other dimensions.
+            If True, drop any items in "dim_name" after renaming/grouping which have all NaN values along all other dimensions.
         keep_non_renamed (bool, optional): Defaults to False.
-            If False, any item in "dim" that is not referred to in "rename_dict" will be removed from that dimension in the returned array.
+            If False, any item in "dim_name" that is not referred to in "rename_dict" will be removed from that dimension in the returned array.
     Returns:
-        (xr.DataArray): Same as "da" but with the items in "dim" renamed and possibly a. grouped, b. "dim" itself renamed.
+        (xr.DataArray): Same as "da" but with the items in "dim_name" renamed and possibly a. grouped, b. "dim_name" itself renamed.
     """
-    rename_series = pd.Series(rename_dict).rename_axis(index=dim)
+    rename_series = pd.Series(rename_dict).rename_axis(index=dim_name)
     if keep_non_renamed is True:
-        existing_dim_items = da[dim].to_series()
+        existing_dim_items = da[dim_name].to_series()
         rename_series = rename_series.reindex(existing_dim_items).fillna(existing_dim_items)
 
     if new_dim_name is None:
-        new_dim_name = f"_{dim}"  # placeholder that we'll revert
+        new_dim_name = f"_{dim_name}"  # placeholder that we'll revert
         revert_dim_name = True
     else:
         revert_dim_name = False
@@ -111,13 +111,13 @@ def rename_and_groupby(
     rename_da = xr.DataArray(rename_series.rename(new_dim_name))
     da = (
         da
-        .reindex({dim: rename_da[dim]})
+        .reindex({dim_name: rename_da[dim_name]})
         .groupby(rename_da)
-        .sum(dim, skipna=True, min_count=1, keep_attrs=True)
+        .sum(dim_name, skipna=True, min_count=1, keep_attrs=True)
     )
     if revert_dim_name:
-        da = da.rename({new_dim_name: dim})
-        new_dim_name = dim
+        da = da.rename({new_dim_name: dim_name})
+        new_dim_name = dim_name
     if dropna:
         da = da.dropna(new_dim_name, how="all")
     return da
