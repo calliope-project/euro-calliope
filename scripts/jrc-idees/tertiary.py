@@ -9,7 +9,7 @@ idx = pd.IndexSlice
 
 END_USES = {
     'Space heating': 'space_heating',
-    'Space cooling': 'end_use_electricity',
+    'Space cooling': 'cooling',
     'Hot water': 'water_heating',
     'Catering': 'cooking'
 }
@@ -41,9 +41,10 @@ def process_jrc_tertiary_data(data_dir, out_path):
 
 
 def get_tertiary_sector_data(file):
-    df_consumption = pd.read_excel(file, sheet_name='SER_hh_fec', index_col=0)
-    df_demand = pd.read_excel(file, sheet_name='SER_hh_tes', index_col=0)
-    df_summary = pd.read_excel(file, sheet_name='SER_summary', index_col=0)
+    xls = pd.ExcelFile(file)
+    df_consumption = pd.read_excel(xls, sheet_name='SER_hh_fec', index_col=0)
+    df_demand = pd.read_excel(xls, sheet_name='SER_hh_tes', index_col=0)
+    df_summary = pd.read_excel(xls, sheet_name='SER_summary', index_col=0)
 
     df_consumption = clean_df(df_consumption, 'consumption')
     df_demand = clean_df(df_demand, 'demand')
@@ -91,7 +92,11 @@ def add_electricity_use(df, df_summary):
         .loc['Specific electricity uses']
         .rename_axis(index='year')
     )
-    df.loc[('electricity', 'end_use_electricity')].update(df.loc[('electricity', 'end_use_electricity'), :].add(df_elec, axis=1))
+    new_idx = pd.MultiIndex.from_product(
+        [["electricity"], ["end_use_electricity"], df.index.levels[2], df.index.levels[3], ["consumption", "demand"]],
+        names=df.index.names
+    )
+    df = df.append(pd.concat([df_elec, df_elec], keys=new_idx, axis=1).T).sort_index()
     return df
 
 

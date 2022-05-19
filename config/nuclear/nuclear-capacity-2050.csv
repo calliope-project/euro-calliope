@@ -1,0 +1,9 @@
+﻿country,min,max,source,comment
+Bulgaria,0,3200,https://www.world-nuclear.org/information-library/country-profiles/countries-a-f/bulgaria.aspx,
+Czech Republic,6230,7860,https://ec.europa.eu/energy/sites/ener/files/documents/ec_courtesy_translation_cz_necp_0.pdf, Based on increase in the share of electricity generation coming from nuclear by 2040
+Finland,0,2750,https://tem.fi/documents/1410877/2769658/Government+report+on+the+National+Energy+and+Climate+Strategy+for+2030/0bb2a7be-d3c2-4149-a4c2-78449ceb1976/Government+report+$,
+France,0,51000,https://www.rte-france.com/actualites/futurs-energetiques-neutralite-carbone-2050-principaux-enseignements," Depends on which scenario the country takes (page 17, main results)."
+United Kingdom,8900,8900,https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/789655/Nuclear_electricity_in_the_UK.pdf,
+Hungary,2400,2400,https://ec.europa.eu/energy/sites/ener/files/documents/ec_courtesy_translation_hu_necp.pdf, assuming no new capacity 2030 -> 2050
+Romania,650,2650,"http://www.enpg.ro/wp-content/uploads/2018/12/NECP-Romania-EPG-Analysis.pdf, 4 CANDU reactors, 650MW each, with 4th going online in 2031. Depends on when the other 3 go online (i.e. are they decommissioned by 2050?)",
+Slovakia,940,3340,https://www.world-nuclear.org/information-library/country-profiles/countries-o-s/slovakia.aspx, Depends on if 2.4 GW of planned capacity is realised.

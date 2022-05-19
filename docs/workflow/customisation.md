@@ -9,6 +9,7 @@ Beyond [customisation options of the models](../model/customisation.md), the wor
 
 You can configure many aspects in the build process by changing configuration parameter values.
 You can, for example, change the temporal and spatial scope of the data and model, change data sources, and change the way raw data is preprocessed.
+[We list and describe all configuration parameters in this documentation.](./schema.md)
 
 The configuration builds on Snakemake's configuration mechanism and consists of two parts: a default configuration `./config/default.yaml` and a schema declaring all configuration parameters `./config/schema.yaml`.
 To override configuration parameters, you can add another configuration file with just your updates or change parameter values on the command line when calling `snakemake`.

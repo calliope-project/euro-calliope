@@ -50,11 +50,11 @@ Please have a look at [Snakemake's documentation](https://snakemake.readthedocs.
 
 The build step creates all individual components of Euro-Calliope, like technologies and time series.
 These can be combined to eventually build a final model to run simulations with.
-For an example of such a model, see `./build/model/{resolution}/example-model.yaml`.
+For an example of such a model, see `./build/models/{resolution}/example-model.yaml`.
 It is a complete Calliope model and can be used like any other, for example like so:
 
 ```bash
-calliope run ./build/model/national/example-model.yaml
+calliope run ./build/models/national/example-model.yaml
 ```
 
 For more information on how to use Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/).
