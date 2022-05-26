@@ -38,3 +38,12 @@ rule ch_annual_building_end_use_energy_balance:
     output: "build/data/ch-stats/building-heat-energy-balance.nc"
     script: "../scripts/ch-stats/building_heat.py"
 
+
+rule ch_gross_added_value:
+    message: "Process Swiss gross added value spreadsheets"
+    input:
+        script = script_dir + "ch-stats/gross_added_value.py",
+        ch_gva_excel = "data/automatic/ch-gva.xlsx"
+    conda: "../envs/default.yaml"
+    output: "build/data/ch-stats/gross_added_value.csv"
+    script: "../scripts/ch-stats/gross_added_value.py"

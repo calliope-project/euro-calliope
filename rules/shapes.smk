@@ -12,7 +12,7 @@ SCHEMA_UNITS = {
     "geometry": "MultiPolygon"
 }
 
-localrules: download_raw_gadm_administrative_borders, raw_gadm_administrative_borders, download_raw_nuts_units
+localrules: download_raw_gadm_administrative_borders, raw_gadm_administrative_borders, download_raw_nuts_units_zip, download_raw_nuts_units_geojson
 localrules: download_eez
 
 
@@ -53,10 +53,18 @@ rule administrative_borders_gadm:
     script: "../scripts/shapes/gadm.py"
 
 
-rule download_raw_nuts_units:
+rule download_raw_nuts_units_zip:
     message: "Download units as zip."
     params: url = config["data-sources"]["nuts"]
     output: protected("data/automatic/raw-nuts-units.zip")
+    conda: "../envs/shell.yaml"
+    shell: "curl -sLo {output} '{params.url}'"
+
+
+rule download_raw_nuts_units_geojson:
+    message: "Download NUTS{wildcards.nuts_year} units as geojson."
+    params: url = lambda wildcards: config["data-sources"]["nuts-geojson"].format(year=wildcards.nuts_year)
+    output: protected("data/automatic/raw-nuts-units-{nuts_year}.geojson")
     conda: "../envs/shell.yaml"
     shell: "curl -sLo {output} '{params.url}'"
 
@@ -65,7 +73,7 @@ rule administrative_borders_nuts:
     message: "Normalise NUTS administrative borders."
     input:
         script = script_dir + "shapes/nuts.py",
-        zipped = rules.download_raw_nuts_units.output[0]
+        zipped = rules.download_raw_nuts_units_zip.output[0]
     params:
         crs = config["crs"],
         schema = SCHEMA_UNITS,
@@ -141,3 +149,64 @@ rule locations_template:
         csv = "build/models/{resolution}/locations.csv"
     conda: "../envs/geo.yaml"
     script: "../scripts/shapes/template_locations.py"
+
+
+rule dwelling_density_shapes:
+    message: "Create map of multi-family and single-family homes at the highest available spatial resolution"
+    input:
+        script = script_dir + "shapes/dwelling_map.py",
+        dwellings = "data/automatic/eurostat-cens_11dwob_r3.tsv.gz",
+        shapes = f"data/automatic/raw-nuts-units-{config['parameters']['eurostat-dataset-nuts-year']['cens_11dwob_r3']}.geojson",
+    params:
+        nuts_level = 3,
+        crs = "EPSG:3035"
+    conda: "../envs/geo.yaml"
+    output: "build/data/shapes/dwellings-map.geojson"
+    script: "../scripts/shapes/dwelling_map.py"
+
+
+rule gross_added_value_shapes:
+    message: "Create map of commercial sector gross added value at the highest available resolution"
+    input:
+        script = script_dir + "shapes/gva_map.py",
+        eu_gva = "data/automatic/eurostat-nama_10r_3gva.tsv.gz",
+        ch_gva = "build/data/ch-stats/gross_added_value.csv",
+        shapes = f"data/automatic/raw-nuts-units-{config['parameters']['eurostat-dataset-nuts-year']['nama_10r_3gva']}.geojson",
+    params:
+        nuts_level = 3,
+        crs = "EPSG:3035"
+    conda: "../envs/geo.yaml"
+    output: "build/data/shapes/gva-map.geojson"
+    script: "../scripts/shapes/gva_map.py"
+
+
+rule industry_employment_shapes:
+    message: "Create map of {wildcards.industry_subsector} industry subsector employee numbers at the highest available resolution"
+    input:
+        script = script_dir + "shapes/employees_map.py",
+        eu_business_statistics = "data/automatic/eurostat-sbs_r_nuts06_r2.tsv.gz",
+        shapes = f"data/automatic/raw-nuts-units-{config['parameters']['eurostat-dataset-nuts-year']['sbs_r_nuts06_r2']}.geojson",
+    params:
+        nuts_level = 2,
+        crs = "EPSG:3035"
+    conda: "../envs/geo.yaml"
+    wildcard_constraints:
+        industry_subsector = "FC_IND_MQ_E|FC_IND_FBT_E|FC_IND_NFM_E|FC_IND_TL_E|FC_IND_WP_E|FC_IND_PPP_E|FC_IND_CPC_E|FC_IND_NSP_E|FC_IND_NMM_E|FC_IND_IS_E|FC_IND_MAC_E|FC_IND_TE_E|FC_IND_CON_E"
+    output: "build/data/shapes/{industry_subsector}-employees-map.geojson"
+    script: "../scripts/shapes/employees_map.py"
+
+
+rule industry_freight_shapes:
+    message: "Create map of {wildcards.industry_subsector} industry subsector freight loading quantity at the highest available resolution"
+    input:
+        script = script_dir + "shapes/freight_map.py",
+        eu_freight = "data/automatic/eurostat-road_go_na_rl3g.tsv.gz",
+        shapes = f"data/automatic/raw-nuts-units-{config['parameters']['eurostat-dataset-nuts-year']['road_go_na_rl3g']}.geojson",
+    params:
+        nuts_level = 3,
+        crs = "EPSG:3035"
+    conda: "../envs/geo.yaml"
+    wildcard_constraints:
+        industry_subsector = "FC_IND_MQ_E|FC_IND_FBT_E|FC_IND_TL_E|FC_IND_WP_E|FC_IND_MAC_E|FC_IND_TE_E|FC_IND_NSP_E"
+    output: "build/data/shapes/{industry_subsector}-freight-map.geojson"
+    script: "../scripts/shapes/freight_map.py"

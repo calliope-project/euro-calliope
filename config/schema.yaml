@@ -93,6 +93,10 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of geospatial NUTS data.
+            nuts-geojson:
+                type: string
+                pattern: ^(https?|http?):\/\/.+{year}.*\.geojson$
+                description: Web address of direct downlod of geospatial NUTS data as a GeoJSON for a given NUTS year.
             potentials:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
@@ -328,6 +332,13 @@ properties:
                                     ^[a-zA-Z-_]+.*$:
                                         type: number
                                         minimum: 0
+            eurostat-dataset-nuts-year:
+                type: object
+                description: NUTS geospatial data version to use for subnational resolution Eurostat statistical data.
+                patternProperties:
+                    \w+:
+                        type: number
+                        enum: [2006, 2010, 2013, 2016, 2021]
 
     scope:
         type: object
