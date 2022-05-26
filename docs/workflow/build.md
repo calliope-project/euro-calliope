@@ -20,12 +20,12 @@ We recommend `mamba`, as it's a faster drop-in replacement for `conda`.
 Using either one, you can create the environment:
 
         # using mamba
-        mamba env create -f environment.yaml
+        mamba env create -f environment.yaml --no-default-packages
         conda activate euro-calliope
         snakemake --profile profiles/default --list # test your installation
 
         # using conda
-        conda env create -f environment.yaml
+        conda env create -f environment.yaml --no-default-packages
         conda activate euro-calliope
         snakemake --profile profiles/default --conda-frontend conda --list # test your installation
 
