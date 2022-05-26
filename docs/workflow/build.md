@@ -27,7 +27,7 @@ Using either one, you can create the environment:
         # using conda
         conda env create -f environment.yaml --no-default-packages
         conda activate euro-calliope
-        snakemake --profile profiles/default --conda-frontend conda --list # test your installation
+        snakemake --profile profiles/conda --list # test your installation
 
 3. Install a Gurobi license on your computer ([academic license](https://www.gurobi.com/downloads/end-user-license-agreement-academic/) comes at no cost), or [choose a different solver](./customisation.md#manual).
 
