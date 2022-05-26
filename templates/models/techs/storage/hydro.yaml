@@ -1,0 +1,41 @@
+techs:
+    pumped_hydro:  # from [@schmidt:2019] Table S4
+        essentials:
+            name: 'Pumped hydro power storage'
+            parent: storage
+            carrier: electricity
+        constraints:
+            energy_cap_max: inf
+            storage_cap_max: inf
+            energy_eff: 0.8832 # 0.78 round-trip
+            lifetime: 55
+        costs.monetary:
+            storage_cap: {{ 72133 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 80 $2015
+            energy_cap: {{ 1017973 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}, 1129 $2015
+            om_annual: {{ 7213 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}, 8 $2015
+            om_prod: {{ 1 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 1 $2015, rounded to 1€ for numeric range
+
+overrides:
+    no-hydro-storage-fixed-cost:
+        # Only assign costs to O&M and variable costs
+        techs.pumped_hydro.costs.monetary:
+            storage_cap: 0
+            energy_cap: 0
+    freeze-hydro-storage-capacities:
+        locations:
+            {% for id, location in locations.iterrows() %}
+            {{ id }}.techs:
+                pumped_hydro:
+                    constraints:
+                        energy_cap_equals: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                        storage_cap_equals: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+            {% endfor %}
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.techs:
+        pumped_hydro:
+            constraints:
+                energy_cap_max: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+                storage_cap_max: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+    {% endfor %}

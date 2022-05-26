@@ -2,7 +2,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from scripts.link_entsoe_tyndp import _split_links_in_index
+from scripts.transmission.template_transmission_entsoe_tyndp import _split_links_in_index
 
 @pytest.fixture
 def sliced_df():

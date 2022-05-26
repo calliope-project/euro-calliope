@@ -4,23 +4,40 @@
 
 ### Added (models)
 
-..
+* **ADD** top level model configuration file `scenarios.yaml` which can act as the focal point to consolidate all available overrides in the model (#209).
+* **ADD** nuclear power plant technology with capacity limits. Capacity limits can be equals to today or be bound by a minimum and maximum capacity to represent an available range in future. In either case, capacities are allocated at a subnational resolution based on linear scaling from current capacity geolocations, using the JRC power plant database (#78).
 
 ### Added (workflow)
 
 * **ADD** a default Snakemake profile to run on local machines in addition to the existing profile for Euler (#211).
 * **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality (#152).
+* **ADD** nuclear technology capacity allocation workflow which uses the configuration parameter `nuclear-capacity-scenario` to select whether today's capacities define limits in the model definition ("current") or whether ranges set bounds on future capacity (by linking to a configuration CSV file) (#78).
 
 ### Updated (models)
 
-..
+* **UPDATED** Final model configuration and data files structure (#145) to:
+    * make each spatial resolution model self-contained (i.e., no shared files between resolutions);
+    * split technology definitions into self-explanatory files and into subdirectories named after Calliope abstract technology groups (e.g., `supply/wind-offshore.yaml` for offshore wind supply technology). This enables technologies to be added to or removed from the model by simply changing the model configuration file import list.;
+    * keep technology definitions and their allocations to locations in the model in the same file; and
+    * separate tech config YAML files from data CSV files. The former are found in the `techs` subdirectory, while the latter are in `timeseries`.
 
 ### Updated (workflow)
 
+* **UPDATED** YAML templates and parametrisation restructured:
+    * Parametrisation moved to eurocalliopelib.
+    * Rules to parametrise split into smaller technology-specific rules, to ensure inputs are directly relevant to the files being parametrised.
+    * YAML templates restructured to match structure of final model (see `Updated (models) above`);
+
+* **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
 
 ### Fixed (models)
 
+* **FIX** spatial proxy of `landscape-care-residues` biofuel in the default configuration. National potentials were spatially allocated to sub-national regions based on `population` rather than `forest` land use. As the potential of `landscape-care-residues` is low, this change has only a minor impact on the model. Continentally, only 3.5% of the total biofuel potential is of this type. Nationally, only three countries have a share of slightly above 10%: Bosnia and Herzegovina, Albania, and Norway. National potentials are unaffected by this change.
+
+### Fixed (documentation)
+
+* **FIX** links in the documention to always point to the most recent version of the pre-builts (#218).
 
 ## 1.1.0 (2021-12-22)
 

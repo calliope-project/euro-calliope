@@ -114,6 +114,7 @@ Be aware that you can publish a release only if you are a maintainer of the GitH
         * [./lib/setup.py](./lib/setup.py)
         * [./lib/eurocalliopelib/__init__.py](./lib/eurocalliopelib/__init__.py)
         * [./templates/README.md](./templates/README.md)
+        * [./docs/index.md](./docs/index.md)
     2. Verify consistent versions of Snakemake and Calliope.
     Their versions are spread over the entire repository (including urls in the documentation).
     Use search and replace to make sure all versions are consistent.

@@ -2,8 +2,6 @@
 
 localrules: download_basins_database, download_stations_database
 localrules: download_hydro_generation_data, download_pumped_hydro_data, basins_database, stations_database
-root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
-script_dir = f"{root_dir}scripts/"
 
 
 rule download_hydro_generation_data:
@@ -143,3 +141,35 @@ rule inflow_mwh:
         runtime = 100,
         memory = 40000
     script: "../scripts/hydro/inflow_mwh.py"
+
+
+rule hydro_capacities:
+    message: "Determine hydro capacities on {wildcards.resolution} resolution."
+    input:
+        script = script_dir + "hydro/hydro_capacities.py",
+        locations = rules.units.output[0],
+        plants = rules.preprocess_hydro_stations.output[0]
+    output:
+        supply = "build/data/{resolution}/supply/hydro.csv",
+        storage = "build/data/{resolution}/storage/hydro.csv"
+    conda: "../envs/geo.yaml"
+    script: "../scripts/hydro/hydro_capacities.py"
+
+
+rule capacity_factors_hydro:
+    message: "Generate capacityfactor time series for hydro electricity on {wildcards.resolution} resolution."
+    input:
+        script = script_dir + "hydro/capacityfactors_hydro.py",
+        capacities = rules.hydro_capacities.output[0],
+        stations = "build/data/hydro-electricity-with-energy-inflow-{first_year}-{final_year}.nc".format(
+            first_year = config["scope"]["temporal"]["first-year"],
+            final_year = config["scope"]["temporal"]["final-year"]
+        ),
+        locations = rules.units.output[0]
+    params:
+        threshold = config["capacity-factors"]["min"]
+    output:
+        ror = "build/models/{resolution}/timeseries/supply/capacityfactors-hydro-run-of-river.csv",
+        reservoir = "build/models/{resolution}/timeseries/supply/capacityfactors-hydro-reservoir.csv"
+    conda: "../envs/geo.yaml"
+    script: "../scripts/hydro/capacityfactors_hydro.py"

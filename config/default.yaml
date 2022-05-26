@@ -12,6 +12,7 @@ data-sources:
     nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
     potentials: https://zenodo.org/record/5112963/files/possibility-for-electricity-autarky.zip
     entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
+    jrc-ppdb: https://zenodo.org/record/3574566/files/JRC-PPDB-OPEN.ver1.0.zip
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch
@@ -109,7 +110,7 @@ parameters:
             landscape-care-residues:
                 include: true
                 id: MINBIOFRSR1a
-                proxy: population
+                proxy: forest
             municipal-waste:
                 include: true
                 id: MINBIOMUN1
@@ -126,6 +127,8 @@ parameters:
         projection-year: 2040
         ntc_limit: max
         energy_cap_limit: equals
+    nuclear-capacity-scenario: current
+
 quality-control:
     load:
         outlier-data-thresholds:

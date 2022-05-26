@@ -3,30 +3,39 @@ from pathlib import Path
 
 from snakemake.utils import validate
 
-ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
-    "wind-onshore", "wind-offshore", "open-field-pv",
-    "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat"
-]
-
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
+
+root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
+__version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
+script_dir = f"{root_dir}scripts/"
+test_dir = f"{root_dir}tests/"
+model_test_dir = f"{test_dir}model"
+template_dir = f"{root_dir}templates/"
+model_template_dir = f"{template_dir}models/"
+techs_template_dir = f"{model_template_dir}techs/"
 
 include: "./rules/shapes.smk"
 include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
+include: "./rules/transmission.smk"
+include: "./rules/demand.smk"
+include: "./rules/nuclear.smk"
 include: "./rules/sync.smk"
-localrules: all, download_raw_load, model, clean, parameterise_template
-localrules: download_entsoe_tyndp_zip
+localrules: all, clean
 wildcard_constraints:
         resolution = "continental|national|regional"
 
-root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
-__version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
-script_dir = f"{root_dir}scripts/"
-template_dir = f"{root_dir}templates/"
-test_dir = f"{root_dir}tests/"
-model_test_dir = f"{test_dir}model"
+ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
+ruleorder: bio_techs_and_locations_template > techs_and_locations_template
+
+ALL_CF_TECHNOLOGIES = [
+    "wind-onshore", "wind-offshore", "open-field-pv",
+    "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat", "hydro-run-of-river",
+    "hydro-reservoir"
+]
+ALL_DEMAND_CARRIERS = ["electricity"]
 
 onstart:
     shell("mkdir -p build/logs")
@@ -41,255 +50,133 @@ onerror:
 rule all:
     message: "Generate euro-calliope pre-built models and run tests."
     input:
-        "build/logs/continental/test-report.html",
-        "build/logs/national/test-report.html",
-        "build/logs/continental/model.done",
-        "build/logs/national/model.done",
-        "build/logs/regional/model.done",
-        "build/model/build-metadata.yaml"
+        "build/logs/continental/test.success",
+        "build/logs/national/test.success",
+        "build/models/continental/example-model.yaml",
+        "build/models/national/example-model.yaml",
+        "build/models/regional/example-model.yaml",
+        "build/models/build-metadata.yaml"
 
 
 rule all_tests:
     message: "Generate euro-calliope pre-built models and run all tests."
     input:
-        "build/logs/continental/model.done",
-        "build/logs/national/model.done",
-        "build/logs/regional/model.done",
-        "build/logs/continental/test-report.html",
-        "build/logs/national/test-report.html",
-        "build/logs/regional/test-report.html",
-        "build/model/build-metadata.yaml"
+        "build/models/continental/example-model.yaml",
+        "build/models/national/example-model.yaml",
+        "build/models/regional/example-model.yaml",
+        "build/logs/continental/test.success",
+        "build/logs/national/test.success",
+        "build/logs/regional/test.success",
+        "build/models/build-metadata.yaml"
 
 
-rule parameterise_template:
-    message: "Apply config parameters to file {wildcards.template} from templates."
+rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_template` with a locational CSV linked to each technology that has no location-specific data to define.
+    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."
+    input: rules.locations_template.output.csv
+    output: "build/data/{resolution}/{tech_group}/{tech}.csv"
+    conda: "envs/shell.yaml"
+    shell: "cp {input} {output}"
+
+
+rule techs_and_locations_template:
+    message: "Create {wildcards.resolution} definition file for the {wildcards.tech_group} tech `{wildcards.tech}`."
     input:
-        script = script_dir + "parameterise_templates.py",
-        template = template_dir + "{template}",
-        biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
-            scenario=config["parameters"]["jrc-biofuel"]["scenario"]
-        )
+        script = script_dir + "template_techs.py",
+        template = techs_template_dir + "{tech_group}/{tech}.yaml",
+        locations = "build/data/{resolution}/{tech_group}/{tech}.csv"
     params:
         scaling_factors = config["scaling-factors"],
         capacity_factors = config["capacity-factors"]["average"],
-        max_power_density = config["parameters"]["maximum-installable-power-density"],
-        biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
-    output: "build/model/{template}"
+        max_power_densities = config["parameters"]["maximum-installable-power-density"]
     wildcard_constraints:
-        template = "link-techs.yaml|storage-techs.yaml|demand-techs.yaml|renewable-techs.yaml|README.md|environment.yaml|interest-rate.yaml|tech-costs.yaml"
+        tech_group = "(?!transmission).*"  # i.e. all but transmission
     conda: "envs/default.yaml"
-    script: "scripts/parameterise_templates.py"
+    output: "build/models/{resolution}/techs/{tech_group}/{tech}.yaml"
+    script: "scripts/template_techs.py"
 
 
-rule hydro_capacities:
-    message: "Determine hydro capacities on {wildcards.resolution} resolution."
+rule no_params_model_template:
+    message: "Create {wildcards.resolution} configuration files from templates where no parameterisation is required."
     input:
-        script = script_dir + "hydro_capacities.py",
-        locations = rules.units.output[0],
-        plants = rules.preprocess_hydro_stations.output[0]
-    output: "build/data/{resolution}/hydro-capacities-mw.csv"
-    conda: "envs/geo.yaml"
-    script: "scripts/hydro_capacities.py"
+        template = model_template_dir + "{template}",
+    output: "build/models/{resolution}/{template}"
+    wildcard_constraints:
+        template = "interest-rate.yaml|scenarios.yaml"
+    conda: "envs/shell.yaml"
+    shell: "cp {input.template} {output}"
 
 
-rule locations:
-    message: "Generate locations for {wildcards.resolution} resolution."
+rule no_params_template:
+    message: "Create non-model files from templates where no parameterisation is required."
     input:
-        script = script_dir + "locations.py",
-        shapes = rules.units.output[0],
-        land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
-        hydro_capacities = rules.hydro_capacities.output[0],
-        biofuel = "build/data/{{resolution}}/biofuel/{scenario}/potential-mwh-per-year.csv".format(scenario=config["parameters"]["jrc-biofuel"]["scenario"])
-    params:
-        flat_roof_share = config["parameters"]["roof-share"]["flat"],
-        maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],
-        scaling_factors = config["scaling-factors"],
-        biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
-    output:
-        yaml = "build/model/{resolution}/locations.yaml",
-        csv = "build/model/{resolution}/locations.csv"
-    conda: "envs/geo.yaml"
-    script: "scripts/locations.py"
+        template = template_dir + "{template}",
+    output: "build/models/{template}"
+    wildcard_constraints:
+        template = "[^/]*"
+    conda: "envs/shell.yaml"
+    shell: "cp {input.template} {output}"
 
 
-rule directional_rooftop_pv:
-    message: "Generate override for directional rooftop PV in {wildcards.resolution} resolution."
+rule model_template:
+    message: "Generate top-level {wildcards.resolution} model configuration file from template"
     input:
-        script = script_dir + "directional_rooftop.py",
-        units = rules.units_without_shape.output[0],
-        land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
-    params:
-        roof_shares = config["parameters"]["roof-share"],
-        maximum_installable_power_density = config["parameters"]["maximum-installable-power-density"],
-        scaling_factors = config["scaling-factors"],
-    output: "build/model/{resolution}/directional-rooftop.yaml"
-    conda: "envs/default.yaml"
-    script: "scripts/directional_rooftop.py"
-
-
-rule load_shedding:
-    message: "Generate override allowing load shedding."
-    input:
-        script = script_dir + "load_shedding.py",
-        units = rules.units_without_shape.output[0]
-    output: "build/model/{resolution}/load-shedding.yaml"
-    conda: "envs/default.yaml"
-    script: "scripts/load_shedding.py"
-
-
-rule capacity_factors_hydro:
-    message: "Generate capacityfactor time series for hydro electricity on {wildcards.resolution} resolution."
-    input:
-        script = script_dir + "capacityfactors_hydro.py",
-        capacities = rules.hydro_capacities.output[0],
-        stations = "build/data/hydro-electricity-with-energy-inflow-{first_year}-{final_year}.nc".format(
-            first_year = config["scope"]["temporal"]["first-year"],
-            final_year = config["scope"]["temporal"]["final-year"]
+        script = script_dir + "template_model.py",
+        template = model_template_dir + "example-model.yaml",
+        non_model_files = expand(
+            "build/models/{template}", template=["environment.yaml", "README.md"]
         ),
-        locations = rules.units.output[0]
+        input_files = expand(
+            "build/models/{{resolution}}/{input_file}",
+            input_file=[
+                "interest-rate.yaml",
+                "locations.yaml",
+                "scenarios.yaml",
+                "techs/demand/electricity.yaml",
+                "techs/storage/electricity.yaml",
+                "techs/storage/hydro.yaml",
+                "techs/supply/biofuel.yaml",
+                "techs/supply/hydro.yaml",
+                "techs/supply/load-shedding.yaml",
+                "techs/supply/open-field-solar-and-wind-onshore.yaml",
+                "techs/supply/rooftop-solar.yaml",
+                "techs/supply/wind-offshore.yaml",
+                "techs/supply/nuclear.yaml",
+            ]
+        ),
+        capacityfactor_timeseries_data = expand(
+            "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
+            technology=ALL_CF_TECHNOLOGIES
+        ),
+        demand_timeseries_data = expand(
+            "build/models/{{resolution}}/timeseries/demand/{energy_carrier}.csv",
+            energy_carrier=ALL_DEMAND_CARRIERS
+        ),
+        optional_input_files = lambda wildcards: expand(
+            f"build/models/{wildcards.resolution}/{{input_file}}",
+            input_file=[
+                "techs/transmission/electricity-linked-neighbours.yaml",
+            ] + ["techs/transmission/electricity-entsoe.yaml" for i in [None] if wildcards.resolution == "national"]
+        )
     params:
-        threshold = config["capacity-factors"]["min"]
-    output:
-        ror = "build/model/{resolution}/capacityfactors-hydro-ror.csv",
-        reservoir = "build/model/{resolution}/capacityfactors-hydro-reservoir-inflow.csv"
-    conda: "envs/geo.yaml"
-    resources:
-        runtime = 100
-    script: "scripts/capacityfactors_hydro.py"
-
-
-rule download_raw_load:
-    message: "Download raw load."
-    params: url = config["data-sources"]["load"]
-    output: protected("data/automatic/raw-load-data.csv")
-    conda: "envs/shell.yaml"
-    shell: "curl -sLo {output} '{params.url}'"
-
-
-rule electricity_load_national:
-    message: "Preprocess raw electricity load data and retrieve load time series per country."
-    input:
-        script = script_dir + "national_load.py",
-        load = rules.download_raw_load.output[0]
-    params:
-        first_year = config["scope"]["temporal"]["first-year"],
-        final_year = config["scope"]["temporal"]["final-year"],
-        data_quality_config = config["quality-control"]["load"],
-        countries = config["scope"]["spatial"]["countries"]
-    output: "build/data/electricity-demand-national.csv"
+        year = config["scope"]["temporal"]["first-year"]
     conda: "envs/default.yaml"
-    script: "scripts/national_load.py"
-
-
-rule electricity_load:
-    message: "Generate electricity load time series for every location on {wildcards.resolution} resolution."
-    input:
-        script = script_dir + "load.py",
-        units = rules.units.output[0],
-        demand_per_unit = rules.potentials.output.demand,
-        national_load = rules.electricity_load_national.output[0]
-    params:
-        scaling_factor = config["scaling-factors"]["power"]
-    output: "build/model/{resolution}/electricity-demand.csv"
-    conda: "envs/geo.yaml"
-    script: "scripts/load.py"
-
-
-rule download_entsoe_tyndp_zip:
-    message: "Download ENTSO-E ten-year network development plan (TYNDP) 2020 scenario dataset"
-    params: url = config["data-sources"]["entsoe-tyndp"]
-    output: protected("data/automatic/raw-entsoe-tyndp.xlsx.zip")
-    conda: "envs/shell.yaml"
-    shell: "curl -sLo {output} '{params.url}'"
-
-
-rule entsoe_tyndp_xlsx:
-    message: "Unzip ENTSO-E TYNDP 2020 scenario dataset."
-    input: rules.download_entsoe_tyndp_zip.output[0]
-    shadow: "minimal"
-    output: "build/data/national/TYNDP-2020-Scenario-Datafile.xlsx",
-    conda: "envs/shell.yaml"
-    shell: "unzip -o {input} 'TYNDP-2020-Scenario-Datafile.xlsx' -d build/data/national"
-
-
-rule entsoe_tyndp_links:
-    message: "Create YAML file of national-scale links with ENTSO-E TYNDP net-transfer capacities"
-    input:
-        script = script_dir + "link_entsoe_tyndp.py",
-        units = rules.units_without_shape.output[0],
-        entsoe_tyndp = rules.entsoe_tyndp_xlsx.output[0]
-    params:
-        scenario = config["parameters"]["entsoe-tyndp"]["scenario"],
-        grid = config["parameters"]["entsoe-tyndp"]["grid"],
-        ntc_limit = config["parameters"]["entsoe-tyndp"]["ntc_limit"],
-        energy_cap_limit = config["parameters"]["entsoe-tyndp"]["energy_cap_limit"],
-        year = config["parameters"]["entsoe-tyndp"]["projection-year"],
-        scaling_factor = config["scaling-factors"]["power"]
-    output: "build/model/{resolution}/entsoe-tyndp-links.yaml"
-    wildcard_constraints: resolution = "national"
-    conda: "envs/default.yaml"
-    script: "scripts/link_entsoe_tyndp.py"
-
-
-rule link_neighbours:
-    message: "Create links between all direct neighbours on {wildcards.resolution} resolution."
-    input:
-        script = script_dir + "link_neighbours.py",
-        units = rules.units.output[0]
-    params:
-        sea_connections = lambda wildcards: config["sea-connections"][wildcards.resolution]
-    output: "build/model/{resolution}/link-all-neighbours.yaml"
-    conda: "envs/geo.yaml"
-    script: "scripts/link_neighbours.py"
+    output: "build/models/{resolution}/example-model.yaml"
+    script: "scripts/template_model.py"
 
 
 rule build_metadata:
     message: "Generate build metadata."
     input:
         script_dir + "metadata.py",
-        "build/logs/continental/model.done",
-        "build/logs/national/model.done",
-        "build/logs/regional/model.done",
+        "build/models/continental/example-model.yaml",
+        "build/models/national/example-model.yaml",
+        "build/models/regional/example-model.yaml",
     params:
         config = config,
         version = __version__
-    output: "build/model/build-metadata.yaml"
+    output: "build/models/build-metadata.yaml"
     conda: "envs/default.yaml"
     script: "scripts/metadata.py"
-
-
-rule model:
-    message: "Generate euro-calliope with {wildcards.resolution} resolution."
-    input:
-        "build/model/interest-rate.yaml",
-        "build/model/link-techs.yaml",
-        "build/model/tech-costs.yaml",
-        "build/model/renewable-techs.yaml",
-        "build/model/storage-techs.yaml",
-        "build/model/demand-techs.yaml",
-        "build/model/environment.yaml",
-        "build/model/README.md",
-        rules.locations.output,
-        rules.electricity_load.output,
-        rules.link_neighbours.output,
-        rules.capacity_factors_hydro.output,
-        rules.hydro_capacities.output,
-        rules.directional_rooftop_pv.output,
-        rules.load_shedding.output,
-        expand(
-            "build/model/{{resolution}}/capacityfactors-{technology}.csv",
-            technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES
-        ),
-        lambda wildcards: rules.entsoe_tyndp_links.output[0] if wildcards.resolution == "national" else [],
-        example_model = template_dir + "example-model.yaml"
-    output:
-        log = "build/logs/{resolution}/model.done",
-        example_model = "build/model/{resolution}/example-model.yaml"
-    shell:
-        """
-        cp {input.example_model} {output.example_model}
-        touch {output.log}
-        """
 
 
 rule clean: # removes all generated results
@@ -303,18 +190,17 @@ rule clean: # removes all generated results
 rule test:
     message: "Run tests"
     input:
-        "build/logs/{resolution}/model.done",
         test_dir = model_test_dir,
         tests = map(str, Path(model_test_dir).glob("**/test_*.py")),
-        model = test_dir + "resources/{resolution}/model.yaml",
-        example_model = "build/model/{resolution}/example-model.yaml",
+        example_model = "build/models/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(
-            "build/model/{{resolution}}/capacityfactors-{technology}.csv",
-            technology=ALL_WIND_AND_SOLAR_TECHNOLOGIES + ["hydro-ror", "hydro-reservoir-inflow"]
+            "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
+            technology=ALL_CF_TECHNOLOGIES
         )
     params:
         config = config
-    output: "build/logs/{resolution}/test-report.html"
+    log: "build/logs/{resolution}/test-report.html"
+    output: "build/logs/{resolution}/test.success"
     conda: "./envs/test.yaml"
     resources:
         runtime = 240

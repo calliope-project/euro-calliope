@@ -2,9 +2,6 @@
 
 localrules: download_biofuel_potentials_and_costs
 
-root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
-script_dir = f"{root_dir}scripts/"
-
 
 rule download_biofuel_potentials_and_costs:
     message: "Download raw biofuel potential and cost data."
@@ -56,3 +53,20 @@ rule biofuels:
     wildcard_constraints:
         scenario = "low|medium|high"
     script: "../scripts/biofuels/allocate.py"
+
+
+rule bio_techs_and_locations_template:
+    message: "Create biofuel tech definition file from template."
+    input:
+        script = script_dir + "biofuels/template_bio.py",
+        template = techs_template_dir + "supply/biofuel.yaml",
+        biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
+            scenario=config["parameters"]["jrc-biofuel"]["scenario"]
+        ),
+        locations = "build/data/{{resolution}}/biofuel/{scenario}/potential-mwh-per-year.csv".format(scenario=config["parameters"]["jrc-biofuel"]["scenario"])
+    params:
+        biofuel_efficiency = config["parameters"]["biofuel-efficiency"],
+        scaling_factors = config["scaling-factors"],
+    conda: "../envs/default.yaml"
+    output: "build/models/{resolution}/techs/supply/biofuel.yaml"
+    script: "../scripts/biofuels/template_bio.py"

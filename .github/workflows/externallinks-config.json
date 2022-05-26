@@ -7,6 +7,6 @@
         "pattern": "schema.md"
       }
     ],
-    "timeout": "20s",
+    "timeout": "30s",
     "retryOn429": true
 }

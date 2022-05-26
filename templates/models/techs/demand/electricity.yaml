@@ -5,4 +5,9 @@ techs:
             parent: demand
             carrier: electricity
         constraints:
-            resource: file=electricity-demand.csv
+            resource: file=demand/electricity.csv
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.techs.demand_elec:
+    {% endfor %}
