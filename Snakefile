@@ -25,6 +25,9 @@ include: "./rules/nuclear.smk"
 include: "./rules/sync.smk"
 include: "./rules/jrc-idees.smk"
 include: "./rules/eurostat.smk"
+include: "./rules/ch-stats.smk"
+include: "./rules/heat.smk"
+
 localrules: all, clean
 wildcard_constraints:
         resolution = "continental|national|regional"

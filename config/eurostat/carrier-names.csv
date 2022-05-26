@@ -1,4 +1,4 @@
-carrier_code,carrier_name,hh_carrier_name,com_carrier_name,ind_carrier_name,oth_carrier_name
+carrier_code,carrier_name,household_carrier_name,commercial_carrier_name,industry_carrier_name,other_carrier_name
 TOTAL,TOTAL,,,,
 FF,Fossil fuels,,,,
 C0000X0350-0370,Solid fossil fuels,solid_fossil,solid_fossil,solid_fossil,solid_fossil
@@ -12,7 +12,7 @@ C0312,Gas coke,,,,
 C0320,Patent fuel,,,,
 C0330,Brown coal briquettes,,,,
 C0340,Coal tar,,,,
-C0350-0370,Manufactured gases,,gas,manufactured_gas,gas
+C0350-0370,Manufactured gases,,gas,gas,gas
 C0350,Coke oven gas,,,,
 C0360,Gas works gas,,,,
 C0371,Blast furnace gas,,,,
@@ -20,8 +20,8 @@ C0379,Other recovered gases,,,,
 P1000,Peat and peat products,solid_fossil,solid_fossil,solid_fossil,solid_fossil
 P1100,Peat,,,,
 P1200,Peat products,,,,
-S2000,Oil shale and oil sands,solid_fossil,oil,oil,oil
-G3000,Natural gas,gas,gas,natural_gas,gas
+S2000,Oil shale and oil sands,oil,oil,oil,oil
+G3000,Natural gas,gas,gas,gas,gas
 O4000XBIO,Oil and petroleum products (excluding biofuel portion),oil,oil,oil,
 O4100_TOT,Crude oil,,,,
 O4200,Natural gas liquids,,,,
@@ -49,20 +49,20 @@ RA000,Renewables and biofuels,,,,
 RA100,Hydro,,renewable_heat,renewable_heat,renewable_heat
 RA200,Geothermal,,renewable_heat,renewable_heat,renewable_heat
 RA300,Wind,,renewable_heat,renewable_heat,renewable_heat
-RA410,Solar thermal,solar_thermal,renewable_heat,renewable_heat,renewable_heat
+RA410,Solar thermal,renewable_heat,renewable_heat,renewable_heat,renewable_heat
 RA420,Solar photovoltaic,,renewable_heat,renewable_heat,renewable_heat
 RA500,Tide_wave_ocean,,renewable_heat,renewable_heat,renewable_heat
 RA600,Ambient heat (heat pumps),ambient_heat,ambient_heat,ambient_heat,ambient_heat
 R5110-5150_W6000RI,Primary solid biofuels,biofuel,biofuel,biofuel,biofuel
 R5160,Charcoal,,biofuel,biofuel,biofuel
-R5210P,Pure biogasoline,,oil,oil,oil
-R5210B,Blended biogasoline,,oil,oil,oil
-R5220P,Pure biodiesels,,oil,oil,oil
-R5220B,Blended biodiesels,,oil,oil,oil
-R5230P,Pure bio jet kerosene,,oil,oil,oil
-R5230B,Blended bio jet kerosene,,oil,oil,oil
+R5210P,Pure biogasoline,oil,oil,oil,
+R5210B,Blended biogasoline,oil,oil,oil,
+R5220P,Pure biodiesels,oil,oil,oil,
+R5220B,Blended biodiesels,oil,oil,oil,
+R5230P,Pure bio jet kerosene,,,,
+R5230B,Blended bio jet kerosene,,,,
 R5290,Other liquid biofuels,,oil,oil,oil
-R5300,Biogases,gas,gas,natural_gas,gas
+R5300,Biogases,gas,gas,gas,gas
 W6100,Industrial waste (non-renewable),,,,
 W6210,Renewable municipal waste,,biofuel,biofuel,biofuel
 W6220,Non-renewable municipal waste,,,,
@@ -71,5 +71,5 @@ N900H,Nuclear heat,,heat,heat,heat
 E7000,Electricity,electricity,electricity,electricity,
 H8000,Heat,heat,heat,heat,heat
 BIOE,Bioenergy,,,,
-O4000,,oil,,,
-SFF_P1000_S2000,,solid_fossil,,,solid_fossil
+O4000,,oil,oil,,
+SFF_P1000_S2000,,solid_fossil,solid_fossil,,solid_fossil

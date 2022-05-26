@@ -284,6 +284,24 @@ properties:
                 type: string
                 description: Nuclear technology capacity scenario. "current" will use today's capacities based on the JRC power plant database (PPDB). All other scenario names should point to a configuration CSV file specifying minimum and maximum capacities per country in MW with non-zero capacities (columns=[country, min, max]).
                 pattern: ^(current)|(\w+.csv)$
+            heat:
+                type: object
+                description: Parameters to control how heat demand and supply is processed
+                properties:
+                    supply-to-demand-efficiencies:
+                        type: object
+                        description: Efficiencies for converting statistical data on energy supply to end-use demand for heat. Not all energy carrier efficiencies need to be defined, only those that are not 100% (all others will be assumed 100%)
+                        propertyNames:
+                            enum: [space-heat, water-heat, cooking]
+                        additionalProperties: false
+                        patternProperties:
+                            ^[a-zA-Z-_]+.*$:
+                                type: object
+                                description: Efficiency as a fraction for each energy carrier with an efficiency != 1 (energy carriers can be any of those in config/eurostat/carrier-names.csv)
+                                patternProperties:
+                                    ^[a-zA-Z-_]+.*$:
+                                        type: number
+                                        minimum: 0
 
     scope:
         type: object

@@ -45,13 +45,17 @@ Schröder, A., Kunz, F., Meiss, J., Mendelevitch, R., &#38; Von Hirschhausen, C.
 
 Danish Energy Agency. (2020). <i>Technology Data for Generation of Electricity and District Heating.</i> [https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and](https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and)
 
+### @DEA:2016
+
+Danish Energy Agency. (2016). <i>Technology Data for Heating installations.</i> [https://ens.dk/sites/ens.dk/files/Analyser/technology_data_catalogue_for_individual_heating_installations.pdf](https://ens.dk/sites/ens.dk/files/Analyser/technology_data_catalogue_for_individual_heating_installations.pdf)
+
 ### @Wealer:2019
 
 Wealer, B., Bauer, S., Göke, L., von Hirschhausen, C. and Kemfert, C. (2019). <i>Economics of Nuclear Power Plant Investment: Monte Carlo Simulations of Generation III/III+ Investment Projects</i>. [https://www.diw.de/documents/publikationen/73/diw_01.c.698579.de/dp1833.pdf](https://www.diw.de/documents/publikationen/73/diw_01.c.698579.de/dp1833.pdf)
 
 ### @IEA:2020
 
-International Energy Agency. (2020). <i>World Energy Model Documentation: 2020 version</i> [https://iea.blob.core.windows.net/assets/55b96d4d-e9f0-46a1-9965-590ef37c1ff6/WEM_Documentation_WEO2020.pdf](https://iea.blob.core.windows.net/assets/55b96d4d-e9f0-46a1-9965-590ef37c1ff6/WEM_Documentation_WEO2020.pdf)
+International Energy Agency. (2020). <i>World Energy Model Documentation: 2020 version</i>. [https://iea.blob.core.windows.net/assets/55b96d4d-e9f0-46a1-9965-590ef37c1ff6/WEM_Documentation_WEO2020.pdf](https://iea.blob.core.windows.net/assets/55b96d4d-e9f0-46a1-9965-590ef37c1ff6/WEM_Documentation_WEO2020.pdf)
 
 ### @Barkatullah:2017
 
@@ -60,3 +64,27 @@ Barkatullah, N. and Ahmad, A. (2017). <i>Current status and emerging trends in f
 ### @BEIS:2016
 
 Department for Business, Energy and Industrial Strategy (2016). <i>Electricity Generation Costs 2016</i>. [https://www.gov.uk/government/publications/beis-electricity-generation-costs-november-2016](https://www.gov.uk/government/publications/beis-electricity-generation-costs-november-2016)
+
+### @Qu:2014
+
+Qu, M., Abdelaziz, O., Yin, H. (2014). <i>New configurations of a heat recovery absorption heat pump integrated with a natural gas boiler for boiler efficiency improvement</i>. Energy Conversion and Management 87, 175–184. [DOI:10.1016/j.enconman.2014.06.083](https://doi.org/10.1016/j.enconman.2014.06.083)
+
+### @martin:2014
+
+Martin, J.A., Boateng, A.A. (2014). <i>Combustion performance of pyrolysis oil/ethanol blends in a residential-scale oil-fired boiler</i>. Fuel 133, 34–44. [DOI:10.1016/j.fuel.2014.05.005](https://doi.org/10.1016/j.fuel.2014.05.005)
+
+### @mermoud:2015
+
+Mermoud, F., Haroutunian, A., Faessler, J., Lachal, B.M. (2015). <i>Impact of load variations on wood boiler efficiency and emissions: in-situ monitoring of two boilers (2 MW and 0.65 MW) supplying a district heating system</i>. Archives des Sciences 68, 27–38. [https://archive-ouverte.unige.ch/unige:83435](https://archive-ouverte.unige.ch/unige:83435)
+
+### @Chandrasekaran:2013
+
+Chandrasekaran, S.R., Hopke, P.K., Newtown, M., Hurlbut, A. (2013). <i>Residential-Scale Biomass Boiler Emissions and Efficiency Characterization for Several Fuels</i>. Energy Fuels 27, 4840–4849. [DOI:10.1021/ef400891r](https://doi.org/10.1021/ef400891r)
+
+### @Ramanathan:1994
+
+Ramanathan, R., Ganesh, L.S. (1994). <i>A multi-objective analysis of cooking-energy alternatives</i>. Energy 19, 469–478. [DOI:10.1016/0360-5442(94)90125-2](https://doi.org/10.1016/0360-5442(94)90125-2)
+
+### @Karunanithy:2016
+
+Karunanithy, C., Shafer, K. (2016). <i>Heat transfer characteristics and cooking efficiency of different sauce pans on various cooktops</i>. Applied Thermal Engineering 93, 1202–1215. [DOI:10.1016/j.applthermaleng.2015.10.061](https://doi.org/10.1016/j.applthermaleng.2015.10.061)

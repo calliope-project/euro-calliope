@@ -58,7 +58,7 @@ def read_and_filter_and_map_names(path_to_raw_data, sheet_name, feedstocks):
     df = df.where(df[COL_NAME_COUNTRY] != "KS").dropna(subset=[COL_NAME_COUNTRY])
     df[COL_NAME_SCENARIO] = df[COL_NAME_SCENARIO].map(SCENARIO_NAME_MAP)
     df[COL_NAME_FEEDSTOCK] = df[COL_NAME_FEEDSTOCK].map(feedstocks)
-    df[COL_NAME_COUNTRY] = df[COL_NAME_COUNTRY].map(utils.eu_country_code_to_iso3)
+    df[COL_NAME_COUNTRY] = df[COL_NAME_COUNTRY].map(utils.convert_country_code)
     df.rename(columns=COL_NAME_MAP, inplace=True)
     df["value"] = pd.to_numeric(df.value, errors='coerce')
     return df

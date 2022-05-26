@@ -71,7 +71,7 @@ def process_jrc_transport_data(data_dir, dataset, out_path):
 
     processed_da = processed_data.stack().rename(f"jrc-idees-transport-{dataset}").to_xarray()
     country_code_mapping = utils.convert_valid_countries(processed_da.country_code.values)
-    processed_da = utils.rename_and_groupby(processed_da, country_code_mapping, dim="country_code")
+    processed_da = utils.rename_and_groupby(processed_da, country_code_mapping, dim_name="country_code")
 
     processed_da.assign_attrs(unit=unit).to_netcdf(out_path)
 

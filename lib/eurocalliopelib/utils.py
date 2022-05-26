@@ -183,35 +183,7 @@ def ktoe_to_twh(array):
     return array * 1.163e-2
 
 
-def add_idx_level(data, **level_info):
-    """
-    Add a new index level or multiple levels to a Pandas dataset (Series or DataFrame).
-
-    Parameters
-    ----------
-    data : pd.Series or pd.DataFrame
-        data to which Index level is added
-    level_info :
-        kwargs where keys are the level names, and values are the level values.
-    """
-    new_data = data.copy()
-    if isinstance(new_data, pd.Series):
-        if new_data.name in level_info.keys():
-            raise KeyError(
-                "Cannot add index level of the same name as the pandas Series"
-            )
-        new_data = new_data.to_frame()
-    new_data = (
-        new_data
-        .assign(**level_info)
-        .set_index([i for i in level_info.keys()], append=True)
-        .squeeze(axis=1)
-    )
-
-    return new_data
-
-
-def read_eurostat_tsv(path_to_tsv, index_names, slice_idx=None, slice_lvl=None):
+def read_eurostat_tsv(path_to_tsv, slice_idx=None, slice_lvl=None):
     """
 
     Read a typical tab-delimited file from EUROSTAT. These have a specific structure
@@ -222,19 +194,24 @@ def read_eurostat_tsv(path_to_tsv, index_names, slice_idx=None, slice_lvl=None):
     Parameters
     ---------
     path_to_tsv: str
-    index_names : array
-        names to which the index levels correspond. Must be the same length as
-        the number of expected index levels.
     slice_idx : str, optional
         Index level value to slice on, if required to remove potentially function-breaking data. Requires `slice_lvl` to also be defined.
     slice_lvl : str, optional
         Index level name to slice on, if required to remove potentially function-breaking data. Requires `slice_idx` to also be defined.
     """
     df = pd.read_csv(path_to_tsv, delimiter='\t', index_col=0)
+    index_names = df.index.name.split("\\")[0].split(",")
+    column_name = df.index.name.split("\\")[1]
     df.index = df.index.str.split(',', expand=True).rename(index_names)
+    df.columns = df.columns.rename(column_name)
+    if df.columns.name == "time":
+        df.columns = df.columns.astype(int)
+    else:
+        df.columns = df.columns.str.strip()
+
     if slice_idx is not None:
         df = df.xs(slice_idx, level=slice_lvl)
-    df.columns = df.columns.astype(int).rename("year")
+
     return df.apply(to_numeric)
 
 
@@ -244,17 +221,3 @@ def remove_digits():
     string endings
     """
     return str.maketrans("", "", digits)
-
-
-def eu_country_code_to_iso3(eu_country_code):
-    """Converts EU country code to ISO 3166 alpha 3.
-    The European Union uses its own country codes, which often but not always match ISO 3166.
-    """
-    assert len(eu_country_code) == 2, "EU country codes are of length 2, yours is '{}'.".format(eu_country_code)
-    if eu_country_code.lower() == "el":
-        iso2 = "gr"
-    elif eu_country_code.lower() == "uk":
-        iso2 = "gb"
-    else:
-        iso2 = eu_country_code
-    return pycountry.countries.lookup(iso2).alpha_3

@@ -22,18 +22,22 @@ nrg_bal,siec,unit,geo\\time	2019	2018	2017
 AFC,BIOE,GWH,AL	3211.056	3129.617c	-
 AFC,BIOE,TW,AL	3211.056	3129	0
     """
-    INDEX_LVLS = ["A", "B", "C", "D"]
+    FILE_WITH_STRING_COLS = """
+nrg_bal,siec,unit,time\\geo	A 	B	C
+AFC,BIOE,GWH,2010	3211.056	3129.617c	-
+AFC,BIOE,TW,2010	3211.056	3129	0
+    """
 
     @pytest.fixture
     def df(self):
         def _get_df(file):
             filepath = io.StringIO(file)
-            return read_eurostat_tsv(filepath, self.INDEX_LVLS)
+            return read_eurostat_tsv(filepath)
         return _get_df
 
     @pytest.mark.parametrize("file", [FILE_NUMERIC, FILE_WITH_STRINGS])
     def test_eurostat_tsv_index_levels(self, df, file):
-        assert df(file).index.names == self.INDEX_LVLS
+        assert df(file).index.names == ["nrg_bal", "siec", "unit", "geo"]
 
     @pytest.mark.parametrize("file", [FILE_NUMERIC, FILE_WITH_STRINGS])
     def test_eurostat_tsv_index_values(self, df, file):
@@ -43,7 +47,7 @@ AFC,BIOE,TW,AL	3211.056	3129	0
 
     @pytest.mark.parametrize("file", [FILE_NUMERIC, FILE_WITH_STRINGS])
     def test_eurostat_tsv_column_name(self, df, file):
-        assert df(file).columns.name == "year"
+        assert df(file).columns.name == "time"
 
     @pytest.mark.parametrize("file", [FILE_NUMERIC, FILE_WITH_STRINGS])
     def test_eurostat_tsv_column_values(self, df, file):
@@ -61,10 +65,13 @@ AFC,BIOE,TW,AL	3211.056	3129	0
     def test_eurostat_tsv_slice_index(self, file):
         filepath = io.StringIO(file)
         df = read_eurostat_tsv(
-            filepath, self.INDEX_LVLS, slice_lvl="C", slice_idx="TW"
+            filepath, slice_lvl="unit", slice_idx="TW"
         )
         assert df.index.difference([("AFC", "BIOE", "AL")]).empty
         assert np.allclose(df.values, [[3211.056, 3129, 0]])
+
+    def test_eurostat_tsv_cols_as_str(self, df):
+        assert df(self.FILE_WITH_STRING_COLS).columns.difference(["A", "B", "C"]).empty
 
 
 class TestRenameAndGroupby:

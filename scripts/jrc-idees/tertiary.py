@@ -8,9 +8,9 @@ from eurocalliopelib import utils
 idx = pd.IndexSlice
 
 END_USES = {
-    'Space heating': 'space_heating',
+    'Space heating': 'space_heat',
     'Space cooling': 'cooling',
-    'Hot water': 'water_heating',
+    'Hot water': 'water_heat',
     'Catering': 'cooking'
 }
 CARRIER_NAMES = {
@@ -40,7 +40,7 @@ def process_jrc_tertiary_data(data_dir, out_path):
     processed_da = processed_data.rename("jrc-idees-tertiary-twh").to_xarray()
 
     country_code_mapping = utils.convert_valid_countries(processed_da.country_code.values)
-    processed_da = utils.rename_and_groupby(processed_da, country_code_mapping, dim="country_code")
+    processed_da = utils.rename_and_groupby(processed_da, country_code_mapping, dim_name="country_code")
 
     processed_da.assign_attrs(unit="twh").to_netcdf(out_path)
 

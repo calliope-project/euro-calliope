@@ -39,7 +39,7 @@ def process_jrc_industry_data(data_dir, dataset, threads, out_path):
     processed_data.columns = processed_data.columns.rename("year").astype(int)
     processed_da = processed_data.stack().rename("jrc-idees-industry-twh").to_xarray()
     country_code_mapping = utils.convert_valid_countries(processed_da.country_code.values)
-    processed_da = utils.rename_and_groupby(processed_da, country_code_mapping, dim="country_code")
+    processed_da = utils.rename_and_groupby(processed_da, country_code_mapping, dim_name="country_code")
 
     processed_da.assign_attrs(unit=unit).to_netcdf(out_path)
 
