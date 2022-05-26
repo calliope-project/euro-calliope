@@ -171,5 +171,7 @@ rule capacity_factors_hydro:
     output:
         ror = "build/models/{resolution}/timeseries/supply/capacityfactors-hydro-run-of-river.csv",
         reservoir = "build/models/{resolution}/timeseries/supply/capacityfactors-hydro-reservoir.csv"
+    resources:
+        runtime = 100
     conda: "../envs/geo.yaml"
     script: "../scripts/hydro/capacityfactors_hydro.py"
