@@ -15,8 +15,8 @@ rule annual_energy_balances:
         eurostat_energy_balance = "data/automatic/eurostat-nrg_bal_c.tsv.gz",
     output: "build/data/eurostat/annual-energy-balances.nc"
     params:
-        cat_names = config["mapping-keys"]["eurostat"]["category-names"],
-        carrier_names = config["mapping-keys"]["eurostat"]["carrier-names"]
+        cat_names = config["statistical-code-mapping"]["eurostat"]["category-names"],
+        carrier_names = config["statistical-code-mapping"]["eurostat"]["carrier-names"]
     conda: "../envs/default.yaml"
     script: "../scripts/eurostat/annual_energy_balance.py"
 
@@ -36,14 +36,24 @@ rule sectoral_annual_energy_balances:
     input:
         script = script_dir + "eurostat/blend_and_rename_per_sector.py",
         eurostat_energy_balances="build/data/eurostat/annual-energy-balances.nc",
-        ch_energy_balances=(
-            lambda wildcards:
-            "build/data/ch-stats/industry-energy-balance.nc" if wildcards.building_sector == "industry"
-            else "build/data/ch-stats/annual-energy-balances.nc"
-        )
+        ch_energy_balances="build/data/ch-stats/annual-energy-balances.nc"
     params:
-        carrier_names = config["mapping-keys"]["eurostat"]["carrier-names"],
-        category_names = config["mapping-keys"]["eurostat"]["category-names"]
+        carrier_names = config["statistical-code-mapping"]["eurostat"]["carrier-names"],
+        category_names = config["statistical-code-mapping"]["eurostat"]["category-names"]
+    wildcard_constraints:
+        building_sector = "commercial|household"
     conda: "../envs/default.yaml"
     output: "build/data/eurostat/annual-{building_sector}-energy-balances.nc"
     script: "../scripts/eurostat/blend_and_rename_per_sector.py"
+
+
+use rule sectoral_annual_energy_balances as industry_subsector_annual_energy_balances with:
+    input:
+        script = script_dir + "eurostat/blend_and_rename_per_sector.py",
+        eurostat_energy_balances="build/data/eurostat/annual-energy-balances.nc",
+        ch_energy_balances="build/data/ch-stats/industry-energy-balance.nc"
+    params:
+        carrier_names = config["statistical-code-mapping"]["eurostat"]["carrier-names"],
+        category_names = config["statistical-code-mapping"]["industry-eurostat-to-jrc-idees"]
+    wildcard_constraints:
+        building_sector = "industry"

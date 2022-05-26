@@ -52,10 +52,9 @@ def sectoral_energy_balances(
     sectoral_energy_balance.to_netcdf(path_to_output)
 
 
-def eurostat_industry_subsectors_to_jrc_names(all_energy_balances, path_to_category_names):
-    category_name_mapping = pd.read_csv(path_to_category_names, index_col=0)
+def eurostat_industry_subsectors_to_jrc_names(all_energy_balances, category_name_mapping):
     return utils.rename_and_groupby(
-        all_energy_balances, category_name_mapping.loc[:, "jrc_idees"].dropna().to_dict(),
+        all_energy_balances, category_name_mapping,
         dim_name="cat_code", new_dim_name="cat_name"
     )
 

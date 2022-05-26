@@ -32,7 +32,7 @@ rule household_heat_supply_by_end_use:
         eurostat_household_building_heat="build/data/eurostat/household-building-heat-end-use-energy-balances.nc"
     params:
         countries = config["scope"]["spatial"]["countries"],
-        carrier_names = config["mapping-keys"]["eurostat"]["carrier-names"]
+        carrier_names = config["statistical-code-mapping"]["eurostat"]["carrier-names"]
     conda: "../envs/default.yaml"
     output: "build/data/heat/annual-household-heat-energy-supply.nc"
     script: "../scripts/heat/annual_household_heat_energy_supply.py"

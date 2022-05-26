@@ -140,6 +140,32 @@ properties:
             monetary:
                 type: number
                 description: "Applied to all quantities of monetary cost (base: EUR)."
+    statistical-code-mapping:
+        type: object
+        description: Translations between statistical dataset codes and readable names.
+        properties:
+            eurostat:
+                type: object
+                description: Translations between Eurostat energy balance codes and readable names.
+                properties:
+                    category-names:
+                        type: string
+                        pattern: ^[\w\-\/].+.csv$
+                        description: Translations of energy production/consumption categories (a.k.a sectors and subsectors) given in Eurostat energy balances.
+                    carrier-names:
+                        type: string
+                        pattern: ^[\w\-\/].+.csv$
+                        description: Translations of energy carrier codes given in Eurostat energy balances.
+            industry-eurostat-to-jrc-idees:
+                type: object
+                description: Mapping from Eurostat industry subsector codes and JRC-IDEES subsector names
+                propertyNames:
+                    enum: [FC_IND_IS_E, FC_IND_CPC_E, FC_IND_NFM_E, FC_IND_NMM_E, FC_IND_TE_E, FC_IND_MAC_E, FC_IND_MQ_E, FC_IND_FBT_E, FC_IND_PPP_E, FC_IND_WP_E, FC_IND_CON_E, FC_IND_TL_E, FC_IND_NSP_E]
+                additionalProperties: false
+                patternProperties:
+                    \w+:
+                        type: string
+                        description: JRC-IDEES subsector name
     parameters:
         type: object
         description: Parameter values of the models.

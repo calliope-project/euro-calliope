@@ -10,7 +10,7 @@ data-sources:
     data-repository: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/{dataset}
     entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
     eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
-    eurostat-base-url: https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/{dataset}.tsv.gz
+    eurostat-base-url: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/eurostat/{dataset}.tsv.gz
     gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
     hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
     hydro-stations: https://zenodo.org/record/5119541/files/energy-modelling-toolkit/hydro-power-database-v09.zip?download=1
@@ -47,10 +47,25 @@ capacity-factors:
         offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
         ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
     trim-ninja-timeseries: True
-mapping-keys:
+statistical-code-mapping:
     eurostat:
         category-names: config/eurostat/category-names.csv
         carrier-names: config/eurostat/carrier-names.csv
+    industry-eurostat-to-jrc-idees:
+            FC_IND_IS_E: Iron and steel
+            FC_IND_CPC_E: Chemicals Industry
+            FC_IND_NFM_E: Non Ferrous Metals
+            FC_IND_NMM_E: Non-metallic mineral products
+            FC_IND_TE_E: Transport Equipment
+            FC_IND_MAC_E: Machinery Equipment
+            FC_IND_MQ_E: Other Industrial Sectors
+            FC_IND_FBT_E: Food, beverages and tobacco
+            FC_IND_PPP_E: Pulp, paper and printing
+            FC_IND_WP_E: Wood and wood products
+            FC_IND_CON_E: Other Industrial Sectors
+            FC_IND_TL_E: Textiles and leather
+            FC_IND_NSP_E: Other Industrial Sectors
+
 crs: "EPSG:4326"
 parameters:
     maximum-installable-power-density:
