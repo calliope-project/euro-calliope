@@ -13,7 +13,7 @@ SCHEMA_UNITS = {
 }
 
 localrules: download_raw_gadm_administrative_borders, raw_gadm_administrative_borders, download_raw_nuts_units_zip, download_raw_nuts_units_geojson
-localrules: download_eez
+localrules: download_eez, download_industry_sites_zip
 
 
 rule download_raw_gadm_administrative_borders:
@@ -210,3 +210,37 @@ rule industry_freight_shapes:
         industry_subsector = "FC_IND_MQ_E|FC_IND_FBT_E|FC_IND_TL_E|FC_IND_WP_E|FC_IND_MAC_E|FC_IND_TE_E|FC_IND_NSP_E"
     output: "build/data/shapes/{industry_subsector}-freight-map.geojson"
     script: "../scripts/shapes/freight_map.py"
+
+
+rule download_industry_sites_zip:
+    message: "Download database pinpointing industry sites that are registered in the EU-ETS"
+    params: url = config["data-sources"]["industry-sites"]
+    output:
+        protected("data/automatic/industry-sites.zip")
+    conda: "../envs/shell.yaml"
+    shell:
+        "curl -sLo {output} '{params.url}'"
+
+
+rule industry_sites:
+    message: "Unzip industry sites."
+    input: rules.download_industry_sites_zip.output[0]
+    output: "build/data/shapes/Industrial_Database.csv"
+    conda: "../envs/shell.yaml"
+    shell: """
+        unzip -j {input} "**/Industrial_Database.csv" -d build/data/shapes/
+    """
+
+
+rule industry_sites_points:
+    message: "Geospatialise industry sites database"
+    input:
+        script = script_dir + "shapes/industry_emissions_map.py",
+        industry_sites = rules.industry_sites.output[0]
+    params:
+        crs = "EPSG:3035"
+    output: "build/data/shapes/{industry_subsector}-emissions-map.geojson"
+    wildcard_constraints:
+        industry_subsector = "FC_IND_IS_E|FC_IND_NMM_E|FC_IND_PPP_E|FC_IND_NFM_E|FC_IND_CPC_E|FC_IND_NSP_E"
+    conda: "../envs/geo.yaml"
+    script: "../scripts/shapes/industry_emissions_map.py"

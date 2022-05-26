@@ -109,6 +109,10 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of JRC power plant database.
+            industry-stations:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of geospatial database of large industry sites that are part of the European Emissions Trading Scheme (EU-ETS).
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.

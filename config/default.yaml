@@ -27,6 +27,7 @@ data-sources:
         gva: https://www.bfs.admin.ch/bfsstatic/dam/assets/10647597/master
     entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
     jrc-ppdb: https://zenodo.org/record/3574566/files/JRC-PPDB-OPEN.ver1.0.zip
+    industry-sites: https://zenodo.org/record/4687147/files/industrial_sites_Industrial_Database-1.0.zip?download=1
 
 root-directory: .
 cluster-sync:
