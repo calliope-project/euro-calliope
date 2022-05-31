@@ -157,7 +157,6 @@ rule model_template:
                 "techs/transmission/electricity-linked-neighbours.yaml",
             ] + ["techs/transmission/electricity-entsoe.yaml" for i in [None] if wildcards.resolution == "national"]
         )
-
     params:
         year = config["scope"]["temporal"]["first-year"]
     conda: "envs/default.yaml"
@@ -203,4 +202,6 @@ rule test:
     log: "build/logs/{resolution}/test-report.html"
     output: "build/logs/{resolution}/test.success"
     conda: "./envs/test.yaml"
+    resources:
+        runtime = 240
     script: "./tests/model/test_runner.py"

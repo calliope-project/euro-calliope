@@ -9,8 +9,11 @@
 
 ### Added (workflow)
 
+* **ADD** a default Snakemake profile to run on local machines in addition to the existing profile for Euler (#211).
+* **ADD** a Snakemake profile to run using conda instead of mamba (#211).
 * **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality (#152).
 * **ADD** nuclear technology capacity allocation workflow which uses the configuration parameter `nuclear-capacity-scenario` to select whether today's capacities define limits in the model definition ("current") or whether ranges set bounds on future capacity (by linking to a configuration CSV file) (#78).
+
 ### Updated (models)
 
 * **UPDATED** Final model configuration and data files structure (#145) to:
@@ -27,6 +30,7 @@
     * YAML templates restructured to match structure of final model (see `Updated (models) above`);
 
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
+* **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
 
 ### Fixed (models)
 
