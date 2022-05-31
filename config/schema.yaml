@@ -152,18 +152,10 @@ properties:
         type: object
         description: Translations between statistical dataset codes and readable names.
         properties:
-            eurostat:
-                type: object
-                description: Translations between Eurostat energy balance codes and readable names.
-                properties:
-                    category-names:
-                        type: string
-                        pattern: ^[\w\-\/].+.csv$
-                        description: Translations of energy production/consumption categories (a.k.a sectors and subsectors) given in Eurostat energy balances.
-                    carrier-names:
-                        type: string
-                        pattern: ^[\w\-\/].+.csv$
-                        description: Translations of energy carrier codes given in Eurostat energy balances.
+            eurostat-to-sectoral-carrier-names:
+                type: string
+                pattern: ^[\w\-\/].+.csv$
+                description: Translations of energy carrier codes given in Eurostat energy balances.
             industry-eurostat-to-jrc-idees:
                 type: object
                 description: Mapping from Eurostat industry subsector codes and JRC-IDEES subsector names
@@ -174,6 +166,17 @@ properties:
                     \w+:
                         type: string
                         description: JRC-IDEES subsector name
+            eurostat-to-sectors:
+                type: object
+                description: Mapping from Euro-Calliope sector to energy production/consumption category codes (a.k.a sectors and subsectors) given in Eurostat energy balances.
+                patternProperties:
+                    ^[\w\-]+$:
+                        type: array
+                        description: Eurostat category codes.
+                        uniqueItems: true
+                        minItems: 1
+                        items:
+                            type: string
     parameters:
         type: object
         description: Parameter values of the models.
@@ -290,6 +293,15 @@ properties:
                 type: string
                 description: Scenario defining the amount of surfaces eligible for solar and wind power from [@Trondle:2019].
                 enum: ["technical-potential", "technical-social-potential"]
+            transport:
+                type: object
+                description: Parameters to apply when processing transport sector demand and supply
+                properties:
+                    future-vehicle-efficiency-percentile:
+                        type: number
+                        description: Percentile of distribution described by all countries' current vehicle energy efficiency (energy consumed per distance travelled) to use to define future efficiency. A lower percentile indicates a higher efficiency (lower energy consumed per distance travelled).
+                        minimum: 0
+                        maximum: 1
             entsoe-tyndp:
                 type: object
                 description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/
@@ -498,6 +510,37 @@ properties:
                 description: Set the lower threshold of per-region land area covered by gridcells containing capacity factor timeseries data. Not all land area is covered by data because there are sometimes small islands linked to a region which are missed by the onshore wind / PV datasets. These islands are usually very small, consitituting less than 0.01% of a region.
                 minimum: 0
                 maximum: 1
+            jrc-idees:
+                type: object
+                description: Method for filling in missing spatial and temporal data in JRC-IDEES when combining with Eurostat data.
+                properties:
+                    country-gap-filling:
+                        type: object
+                        description: Groups of countries whose data will be averaged and applied to fill missing countries.
+                        patternProperties:
+                            ^[\w\-]+$:
+                                type: object
+                                properties:
+                                    countries_with_data:
+                                        type: array
+                                        uniqueItems: true
+                                        minItems: 1
+                                        description: Countries whose JRC-IDEES data will be averaged over.
+                                        items:
+                                            type: string
+                                            description: ISO alpha-3 country code
+                                    countries_without_data:
+                                        type: array
+                                        uniqueItems: true
+                                        minItems: 1
+                                        description: Countries missing in JRC-IDEES who will take on the averaged data.
+                                        items:
+                                            type: string
+                                            description: ISO alpha-3 country code
+                        year-gap-filling-method:
+                            type: string
+                            description: Method for extending JRC-IDEES data from spanning the years 2000 - 2015 (inclusive) to cover also the years 2016 - 2018 (inclusive). "average" will apply the mean of all years with data and apply to each year without data. "nearest" and "linear" will extrapolate the data using the given method.
+                            enum: [average, nearest, linear]
 
     capacity_factors:
         type: object

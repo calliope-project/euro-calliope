@@ -47,3 +47,13 @@ rule ch_gross_added_value:
     conda: "../envs/default.yaml"
     output: "build/data/ch-stats/gross_added_value.csv"
     script: "../scripts/ch-stats/gross_added_value.py"
+
+
+rule ch_annual_transport_energy_balance:
+    message: "Process Swiss energy balance spreadsheets for transport data"
+    input:
+        script = script_dir + "ch-stats/transport.py",
+        ch_energy_balance_excel = "data/automatic/ch-energy-balance.xlsx"
+    conda: "../envs/default.yaml"
+    output: "build/data/ch-stats/transport-energy-balance.nc"
+    script: "../scripts/ch-stats/transport.py"

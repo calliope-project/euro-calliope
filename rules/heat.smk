@@ -6,7 +6,8 @@ rule commercial_heat_supply_by_end_use:
         annual_energy_balances="build/data/eurostat/annual-{building_sector}-energy-balances.nc",
         jrc_idees_sector_energy_supply="build/data/jrc-idees/tertiary/processed-energy.nc"
     params:
-        countries = config["scope"]["spatial"]["countries"]
+        countries = config["scope"]["spatial"]["countries"],
+        gap_filling_methods = config["quality-control"]["jrc-idees"]
     wildcard_constraints:
         building_sector = "commercial"
     conda: "../envs/default.yaml"
@@ -32,7 +33,7 @@ rule household_heat_supply_by_end_use:
         eurostat_household_building_heat="build/data/eurostat/household-building-heat-end-use-energy-balances.nc"
     params:
         countries = config["scope"]["spatial"]["countries"],
-        carrier_names = config["statistical-code-mapping"]["eurostat"]["carrier-names"]
+        carrier_names = config["statistical-code-mapping"]["eurostat-to-sectoral-carrier-names"]
     conda: "../envs/default.yaml"
     output: "build/data/heat/annual-household-heat-energy-supply.nc"
     script: "../scripts/heat/annual_household_heat_energy_supply.py"

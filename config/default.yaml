@@ -50,9 +50,7 @@ capacity-factors:
         ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
     trim-ninja-timeseries: True
 statistical-code-mapping:
-    eurostat:
-        category-names: config/eurostat/category-names.csv
-        carrier-names: config/eurostat/carrier-names.csv
+    eurostat-to-sectoral-carrier-names: config/eurostat/carrier-names.csv
     industry-eurostat-to-jrc-idees:
         FC_IND_IS_E: Iron and steel
         FC_IND_CPC_E: Chemicals Industry
@@ -67,6 +65,24 @@ statistical-code-mapping:
         FC_IND_CON_E: Other Industrial Sectors
         FC_IND_TL_E: Textiles and leather
         FC_IND_NSP_E: Other Industrial Sectors
+    eurostat-to-sectors:
+        household: [FC_OTH_HH_E]
+        commercial: [FC_OTH_CP_E]
+        other-commercial: [FC_OTH_AF_E, FC_OTH_FISH_E, FC_OTH_NSP_E]  # ASSUME: 'not elsewhere specified', agriculture, and fisheries non-oil use goes to commercial buildings
+        aviation: [FC_TRA_DAVI_E, INTAVI]
+        other-aviation: [FC_OTH_NSP_E]  # ASSUME: 'not elsewhere specified' (military) kerosene/jet-fuel use goes to aviation demand
+        marine: [INTMARB, FC_TRA_DNAVI_E]
+        other-marine: [FC_OTH_FISH_E]  # ASSUME: fisheries oil use goes to marine demand
+        road-transport: [FC_TRA_ROAD_E]
+        other-road-transport: [FC_OTH_AF_E, FC_OTH_NSP_E]  # ASSUME: agriculture oil use and most 'not elsewhere specified' (military) oil use goes to 'road' transport demand
+        rail: [FC_TRA_RAIL_E]
+    road-transport-modes:
+        hdv: Heavy duty vehicles
+        ldv: Light duty vehicles
+        bus: Motor coaches, buses and trolley buses
+        car: Passenger cars
+        motorcycle: Powered 2-wheelers
+
 
 crs: "EPSG:4326"
 parameters:
@@ -156,6 +172,8 @@ parameters:
                 proxy: population
     biofuel-efficiency: 0.45
     wind-and-solar-potential-scenario: technical-potential
+    transport:
+        future-vehicle-efficiency-percentile: 0.25
     entsoe-tyndp:
         scenario: National Trends
         grid: Reference
@@ -186,6 +204,25 @@ parameters:
         road_go_na_rl3g: 2006
         sbs_r_nuts06_r2: 2006
         nama_10r_3gva: 2016
+    transport:
+        road-transport-efficiency:  # ASSUME: 25th percentile of efficiencies across all countries from JRC-IDEES | gwh_per_mio_km
+            hdv:
+                diesel: 5.238294192
+            ldv:
+                diesel: 0.877494837
+                electricity: 0.483839202
+                petrol: 0.852245332  # ASSUME: includes plug-in hybrid electric
+            bus:
+                diesel: 6.108756677
+                electricity: 3.287320955
+                petrol: 1.802790607  # ASSUME: includes plug-in hybrid electric
+            car:
+                diesel: 0.642772676
+                electricity: 0.32565922
+                petrol: 0.554840863  # ASSUME: includes plug-in hybrid electric
+            motorcycle:
+                petrol: 0.422431661
+
 
 quality-control:
     load:
@@ -202,6 +239,18 @@ quality-control:
         scale-phs-according-to-geth-et-al: false
         station-nearest-basin-max-km: 1
     capacity-factor-gridcell-overlap-threshold: 0.97 # Ceuta y Melilla has smallest overlap
+    jrc-idees:
+        country-gap-filling:
+            balkans:
+                countries_with_data: ["BGR", "HRV", "HUN", "ROU", "GRC"]
+                countries_without_data: ["ALB", "BIH", "MNE", "MKD", "SRB"]
+            nordics:
+                countries_with_data: ["SWE", "FIN", "DNK"]
+                countries_without_data: ["NOR", "ISL"]
+            alpine:
+                countries_with_data: ["AUT", "ITA", "DEU", "FRA"]
+                countries_without_data: ["CHE"]
+        year-gap-filling-method: average
 
 sea-connections:
     continental: []

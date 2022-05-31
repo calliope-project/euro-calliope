@@ -3,47 +3,67 @@ import pandas as pd
 
 from eurocalliopelib import utils
 
-EUROSTAT_SECTOR_MAPPING = {  # industry subsector name mappings come from `path_to_category_names`
-    "household": ["FC_OTH_HH_E"],
-    "commercial": ["FC_OTH_CP_E"],
-    "other": ["FC_OTH_AF_E", "FC_OTH_FISH_E", "FC_OTH_NSP_E"]
-}
 YEARS = slice(2000, 2018)
 
 
 def sectoral_energy_balances(
-    path_to_eurostat_energy_balances, path_to_ch_energy_balances, sector,
-    path_to_carrier_names, path_to_category_names, path_to_output
+    path_to_eurostat_energy_balances: str,
+    path_to_ch_energy_balances: str,
+    sector: str,
+    path_to_carrier_name_mapping: str,
+    category_name_mapping: dict,
+    path_to_output: str
 ):
+    """
+    Blend Swiss and Eurostat data on annual energy balances for a specific subsector.
+    At this stage we also merge some Eurostat subsectors together (namely "other" sectors)
+    according to user-defined allocations to Euro-Calliope sectors.
+    We also rename energy carriers from Eurostat codes to readable names.
+
+    Args:
+        path_to_eurostat_energy_balances (str):
+            Path to xarray dataarray containing the main Eurostat energy balances.
+        path_to_ch_energy_balances (str):
+            Path to xarray dataarray containing Swiss-specific energy balances
+            (can be sector-specific data only).
+        sector (str):
+            Name of Euro-Calliope "sector".
+        path_to_carrier_name_mapping (str):
+            Path to CSV file containing mapping from Eurostat carrier codes to readable name.
+            Must contain columns mapping codes to the sector of interest
+            (and, if merging with an "other" sector, the mapping for that sector).
+        category_name_mapping (dict):
+            If sector is not "industry":
+                Keys = Euro-Calliope sector, values = list of Eurostat sector (category)
+                codes over which energy balance data will be summed.
+            If sector is "industry":
+                Keys = Eurostat Industry subsector (category) code, values = JRC-IDEES subsector name.
+        path_to_output (str):
+            Path to output xarray dataarray to store the sector-specific, blended and renamed data.
+    """
+
     eurostat_energy_balances = xr.open_dataarray(path_to_eurostat_energy_balances)
     ch_energy_balances = xr.open_dataarray(path_to_ch_energy_balances)
     all_energy_balances = utils.merge_da([eurostat_energy_balances, ch_energy_balances], "annual_energy_balances")
 
-    carrier_name_mapping = pd.read_csv(path_to_carrier_names, index_col=0)
-    if sector == "commercial":
-        # ASSUME: building heat demand from "other" sectors (incl. military, fisheries, agriculture)
-        # is assigned to the commercial Euro-Calliope "sector"
-        commercial_energy_balance = rename_carriers(
-            slice_on_sector(all_energy_balances, "commercial"),
-            carrier_name_mapping, "commercial"
+    carrier_name_mapping = pd.read_csv(path_to_carrier_name_mapping, index_col=0)
+
+    if f"other-{sector}" in category_name_mapping.keys():
+        # ASSUME: energy demand in "other" sectors (incl. military, fisheries, agriculture)
+        # can be assigned to main Euro-Calliope "sectors" according to the type of demand
+        sectoral_energy_balance = add_other_sector_to_main_sector(
+            all_energy_balances, sector, f"other-{sector}", carrier_name_mapping, category_name_mapping
         )
-        other_energy_balance = rename_carriers(
-            slice_on_sector(all_energy_balances, "other"),
-            carrier_name_mapping, "other"
-        ).reindex_like(commercial_energy_balance).fillna(0)
-
-        sectoral_energy_balance = commercial_energy_balance + other_energy_balance
-
-        assert (sectoral_energy_balance.groupby("carrier_name").sum(...) >= commercial_energy_balance.groupby("carrier_name").sum(...)).all()
 
     elif sector == "industry":
         sectoral_energy_balance = rename_carriers(
-            eurostat_industry_subsectors_to_jrc_names(all_energy_balances, path_to_category_names),
+            eurostat_industry_subsectors_to_jrc_names(all_energy_balances, category_name_mapping),
             carrier_name_mapping, sector
         )
+
     else:
         sectoral_energy_balance = rename_carriers(
-            slice_on_sector(all_energy_balances, sector),
+            slice_on_sector(all_energy_balances, category_name_mapping[sector]),
             carrier_name_mapping, sector
         )
 
@@ -59,10 +79,10 @@ def eurostat_industry_subsectors_to_jrc_names(all_energy_balances, category_name
     )
 
 
-def slice_on_sector(all_energy_balances, sector):
+def slice_on_sector(all_energy_balances, category_name_mapping):
     return (
         all_energy_balances
-        .sel(cat_code=EUROSTAT_SECTOR_MAPPING[sector])
+        .sel(cat_code=category_name_mapping)
         .sum("cat_code", min_count=1, keep_attrs=True)
     )
 
@@ -76,13 +96,34 @@ def rename_carriers(sectoral_energy_balance, carrier_name_mapping, sector):
     return sectoral_energy_balance
 
 
+def add_other_sector_to_main_sector(
+    energy_balances, main_sector, other_sector, carrier_name_mapping, category_name_mapping
+):
+    main_energy_balance = rename_carriers(
+        slice_on_sector(energy_balances, category_name_mapping[main_sector]),
+        carrier_name_mapping, main_sector
+    )
+    other_energy_balance = rename_carriers(
+        slice_on_sector(energy_balances, category_name_mapping[other_sector]),
+        carrier_name_mapping, other_sector
+    ).reindex_like(main_energy_balance).fillna(0)
+
+    summed_energy_balance = main_energy_balance + other_energy_balance
+
+    assert (
+        summed_energy_balance.groupby("carrier_name").sum(...) >=
+        main_energy_balance.groupby("carrier_name").sum(...)
+    ).all()
+
+    return summed_energy_balance
+
 
 if __name__ == "__main__":
     sectoral_energy_balances(
         path_to_eurostat_energy_balances=snakemake.input.eurostat_energy_balances,
         path_to_ch_energy_balances=snakemake.input.ch_energy_balances,
-        sector=snakemake.wildcards.building_sector,
-        path_to_carrier_names=snakemake.params.carrier_names,
-        path_to_category_names=snakemake.params.category_names,
+        sector=snakemake.wildcards.sector,
+        path_to_carrier_name_mapping=snakemake.params.carrier_name_mapping,
+        category_name_mapping=snakemake.params.category_name_mapping,
         path_to_output=snakemake.output[0]
     )

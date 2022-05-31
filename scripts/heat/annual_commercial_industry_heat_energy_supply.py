@@ -3,20 +3,6 @@ import numpy as np
 
 from eurocalliopelib import utils
 
-GAP_FILLING_COUNTRIES = {
-    "balkans": {
-        "countries_with_data": ["BGR", "HRV", "HUN", "ROU", "GRC"],
-        "countries_without_data": ["ALB", "BIH", "MNE", "MKD", "SRB"]
-    },
-    "nordics": {
-        "countries_with_data": ["SWE", "FIN", "DNK"],
-        "countries_without_data": ["NOR", "ISL"]
-    },
-    "alpine": {
-        "countries_with_data": ["AUT", "ITA", "DEU", "FRA"],
-        "countries_without_data": ["CHE"]
-    }
-}
 
 JRC_INDUSTRY_CARRIER_NAMES = {
     "Biomass": "biofuel",
@@ -43,6 +29,7 @@ def commercial_energy_supply(
     path_to_annual_energy_balances: str,
     path_to_jrc_idees_sector_energy_supply: str,
     countries: str,
+    gap_filling_methods: dict,
     path_to_output: str
 ):
     """
@@ -59,6 +46,10 @@ def commercial_energy_supply(
         path_to_jrc_idees_sector_energy_supply (str):
             Path to xarray Dataarray containing JRC-IDEES commercial (a.k.a. tertiary)
             sector end-use consumption and demand.
+        countries (list):
+            List of configured countries to include in this instance of Euro-Calliope.
+        gap_filling_methods (dict):
+            Configuration of methods to fill missing spatial and temporal JRC-IDEES data.
         path_to_output (str):
             Path to output xarray Dataarray.
     """
@@ -72,9 +63,9 @@ def commercial_energy_supply(
     )
     country_codes = [utils.convert_country_code(country) for country in countries]
     # Map JRC end uses to annual commercial demand
-    mapped_end_uses = map_jrc_to_eurostat(energy_balance, jrc_end_use_energy_supply)
+    mapped_end_uses = map_jrc_to_eurostat(energy_balance, jrc_end_use_energy_supply, gap_filling_methods)
     # We run it through the wash again to fill in any gaps from freshly added countries
-    mapped_end_uses = map_jrc_to_eurostat(energy_balance, mapped_end_uses)
+    mapped_end_uses = map_jrc_to_eurostat(energy_balance, mapped_end_uses, gap_filling_methods)
 
     # ASSUME: all ambient heat in Eurostat is consumed by heat pumps in space heating.
     # JRC data only refers to heat pumps for heating in space heating, ommitting the
@@ -102,6 +93,7 @@ def industry_energy_supply(
     path_to_annual_energy_balances: str,
     path_to_jrc_idees_sector_energy_supply: str,
     countries: list,
+    gap_filling_methods: dict,
     path_to_output: str
 ):
     """
@@ -115,6 +107,10 @@ def industry_energy_supply(
         path_to_jrc_idees_sector_energy_supply (str):
             Path to xarray Dataarray containing JRC-IDEES industry subsector
             end-use consumption and demand.
+        countries (list):
+            List of configured countries to include in this instance of Euro-Calliope.
+        gap_filling_methods (dict):
+            Configuration of methods to fill missing spatial and temporal JRC-IDEES data.
         path_to_output (str):
             Path to output xarray Dataarray.
     """
@@ -142,9 +138,9 @@ def industry_energy_supply(
     ])
 
     # Map JRC end uses to annual industry demand.
-    mapped_end_uses = map_jrc_to_eurostat(energy_balance, jrc_end_use_energy_supply)
+    mapped_end_uses = map_jrc_to_eurostat(energy_balance, jrc_end_use_energy_supply, gap_filling_methods)
     # We run it through the wash again to fill in any gaps from freshly added countries
-    mapped_end_uses = map_jrc_to_eurostat(energy_balance, mapped_end_uses)
+    mapped_end_uses = map_jrc_to_eurostat(energy_balance, mapped_end_uses, gap_filling_methods)
 
     # ASSUME: all ambient heat in Eurostat is consumed by heat pumps in space heating.
     # JRC data only refers to heat pumps for heating in space heating, ommitting the
@@ -159,7 +155,7 @@ def industry_energy_supply(
     industry_end_use_energy_balance.sel(country_code=country_codes).to_netcdf(path_to_output)
 
 
-def map_jrc_to_eurostat(energy_balance, jrc_end_use):
+def map_jrc_to_eurostat(energy_balance, jrc_end_use, gap_filling_methods):
     """
     JRC-IDEES provides us with the distribution of supplied fuels to end uses in different sectors.
     These end uses include space heating, water heating, and cooking.
@@ -169,9 +165,10 @@ def map_jrc_to_eurostat(energy_balance, jrc_end_use):
     ASSUME: Total energy balances from Eurostat are more accurate than those from JRC-IDEES.
 
     Args:
-        energy_balance (xr.DataArray): pre-processed sectoral Eurostat energy balances
-        jrc_end_use (xr.DataArray): pre-processed sectoral JRC-IDEES end use energy consumption
-
+        energy_balance (xr.DataArray): pre-processed sectoral Eurostat energy balances,
+        jrc_end_use (xr.DataArray): pre-processed sectoral JRC-IDEES end use energy consumption.
+        gap_filling_methods (dict):
+            Configuration of methods to fill missing spatial and temporal JRC-IDEES data.
     Returns:
         xr.DataArray: Sector fuel consumption by end use.
     """
@@ -195,14 +192,19 @@ def map_jrc_to_eurostat(energy_balance, jrc_end_use):
     )
     # ASSUME: Missing years (namely 2016-2018) have the same percentage contribution
     # as the average across all other years
-    missing_years = energy_balance.year.to_index().difference(jrc_end_use.year.to_index())
-    for yr in missing_years:
-        missing_year_filler = jrc_end_use_fraction.mean("year").expand_dims(year=[yr])
+    jrc_end_use_fraction = jrc_end_use_fraction.reindex(year=energy_balance.year)
+    if gap_filling_methods["year-gap-filling-method"] == "average":
+        missing_year_filler = jrc_end_use_fraction.mean("year")
         missing_year_filler = missing_year_filler / missing_year_filler.sum("end_use")
-        jrc_end_use_fraction = utils.merge_da([jrc_end_use_fraction, missing_year_filler])
+        jrc_end_use_fraction = jrc_end_use_fraction.fillna(missing_year_filler)
+    else:
+        interpolation_method = gap_filling_methods["year-gap-filling-method"]
+        jrc_end_use_fraction = jrc_end_use_fraction.interpolate_na(
+            "year", method=interpolation_method, fill_value="extrapolate"
+        )
 
     # ASSUME: missing countries have the same percentage contribution as their neighbours
-    for country_group_mappings in GAP_FILLING_COUNTRIES.values():
+    for country_group_mappings in gap_filling_methods["country-gap-filling"].values():
         country_averages = (
             jrc_end_use_fraction
             .sel(country_code=country_group_mappings["countries_with_data"])
@@ -241,6 +243,7 @@ if __name__ == "__main__":
             path_to_annual_energy_balances=snakemake.input.annual_energy_balances,
             path_to_jrc_idees_sector_energy_supply=snakemake.input.jrc_idees_sector_energy_supply,
             countries=snakemake.params.countries,
+            gap_filling_methods=snakemake.params.gap_filling_methods,
             path_to_output=snakemake.output[0],
         )
     if snakemake.wildcards.building_sector == "industry":
@@ -248,5 +251,6 @@ if __name__ == "__main__":
             path_to_annual_energy_balances=snakemake.input.annual_energy_balances,
             path_to_jrc_idees_sector_energy_supply=snakemake.input.jrc_idees_sector_energy_supply,
             countries=snakemake.params.countries,
+            gap_filling_methods=snakemake.params.gap_filling_methods,
             path_to_output=snakemake.output[0],
         )
