@@ -221,3 +221,49 @@ def remove_digits():
     string endings
     """
     return str.maketrans("", "", digits)
+
+
+def fill_spatio_temporal_data_gaps(
+    data_with_gaps: xr.DataArray, gap_filling_methods: dict, data_is_relative: bool = True
+) -> xr.DataArray:
+
+
+    def _temporal_gap_filling(data):
+        if gap_filling_methods["year-gap-filling-method"] == "average":
+            missing_year_filler = data.mean("year")
+            if data_is_relative:
+                missing_year_filler = missing_year_filler / missing_year_filler.sum("end_use")
+            data = data.fillna(missing_year_filler)
+        else:
+            interpolation_method = gap_filling_methods["year-gap-filling-method"]
+            data = data.interpolate_na(
+                "year", method=interpolation_method, fill_value="extrapolate"
+            )
+        return data
+
+    def _spatial_gap_filling(data):
+        # ASSUME: missing countries have the same percentage contribution as their neighbours
+        for country_group_mappings in gap_filling_methods["country-gap-filling"].values():
+            country_averages = (
+                data
+                .sel(country_code=country_group_mappings["countries_with_data"])
+                .mean("country_code")
+            )
+            if data_is_relative:
+                country_averages = country_averages / country_averages.sum("end_use")
+            for country in country_group_mappings["countries_without_data"]:
+                if country not in data.country_code:
+                    data = merge_da(
+                        [data, country_averages.expand_dims(country_code=[country])]
+                    )
+        return data
+
+    data_without_temporal_gaps = _temporal_gap_filling(data_with_gaps)
+    data_without_gaps = _spatial_gap_filling(data_without_temporal_gaps)
+
+    # Sometimes adding in new countries leads to new data gaps be be filled in
+    if data_without_gaps.isnull().any():
+        data_without_temporal_gaps = _temporal_gap_filling(data_without_gaps)
+        data_without_gaps = _temporal_gap_filling(data_without_temporal_gaps)
+
+    return data_without_gaps
