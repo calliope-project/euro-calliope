@@ -40,6 +40,10 @@
 
 * **FIX** links in the documention to always point to the most recent version of the pre-builts (#218).
 
+### Fixed (environments)
+
+* **FIX** incompatibility of Snakemake 6.1.1 and tabulate 0.9 by downgrading to tabulate 0.8.10. (#249).
+
 ## 1.1.0 (2021-12-22)
 
 This version is a minor update to v1.0. It comes with updated input data, updated dependencies, several convenience features, several optional overrides, and with massively extended documentation. You should not expect model results to deviate much from v1.0.
