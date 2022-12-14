@@ -21,6 +21,7 @@
     * split technology definitions into self-explanatory files and into subdirectories named after Calliope abstract technology groups (e.g., `supply/wind-offshore.yaml` for offshore wind supply technology). This enables technologies to be added to or removed from the model by simply changing the model configuration file import list.;
     * keep technology definitions and their allocations to locations in the model in the same file; and
     * separate tech config YAML files from data CSV files. The former are found in the `techs` subdirectory, while the latter are in `timeseries`.
+* **UPDATE** to most recent JRC Hydro-Power database v10 (#248).
 
 ### Updated (workflow)
 
@@ -31,7 +32,6 @@
 
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
-* **UPDATE** to most recent JRC Hydro-Power database v10 (#248).
 
 ### Fixed (models)
 
