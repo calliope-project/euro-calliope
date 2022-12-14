@@ -55,7 +55,13 @@ rule all:
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",
-        "build/models/build-metadata.yaml"
+        "build/models/build-metadata.yaml",
+        "build/models/regional/summary_of_potentials.nc",
+        "build/models/regional/summary_of_potentials.csv",
+        "build/models/national/summary_of_potentials.nc",
+        "build/models/national/summary_of_potentials.csv",
+        "build/models/continental/summary_of_potentials.nc",
+        "build/models/continental/summary_of_potentials.csv"
 
 
 rule all_tests:
@@ -67,7 +73,13 @@ rule all_tests:
         "build/logs/continental/test.success",
         "build/logs/national/test.success",
         "build/logs/regional/test.success",
-        "build/models/build-metadata.yaml"
+        "build/models/build-metadata.yaml",
+        "build/models/regional/summary_of_potentials.nc",
+        "build/models/regional/summary_of_potentials.csv",
+        "build/models/national/summary_of_potentials.nc",
+        "build/models/national/summary_of_potentials.csv",
+        "build/models/continental/summary_of_potentials.nc",
+        "build/models/continental/summary_of_potentials.csv"
 
 
 rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_template` with a locational CSV linked to each technology that has no location-specific data to define.
@@ -205,3 +217,17 @@ rule test:
     resources:
         runtime = 240
     script: "./tests/model/test_runner.py"
+
+rule summarize_potentials:
+    message: "Generates netcdf and csv file with potentials for each technology."
+    input: 
+        path_to_model = "build/models/{resolution}/example-model.yaml"
+    output:
+        netcdf = "build/models/{resolution}/summary_of_potentials.nc",
+        csv = "build/models/{resolution}/summary_of_potentials.csv"
+    params:
+        scaling_factors = config["scaling-factors"]
+    conda:
+        "./envs/test.yaml"
+    script:
+        "./scripts/summarize_potentials.py"
