@@ -5,7 +5,7 @@
 ### Added (models)
 
 * **ADD** top level model configuration file `scenarios.yaml` which can act as the focal point to consolidate all available overrides in the model (#209).
-* **ADD** nuclear power plant technology with capacity limits. Capacity limits can be equals to today or be bound by a minimum and maximum capacity to represent an available range in future. In either case, capacities are allocated at a subnational resolution based on linear scaling from current capacity geolocations, using the JRC power plant database (#78).
+* **ADD** nuclear power plant technology with capacity limits. Capacity limits can be equals to today or be bound by a minimum and maximum capacity to represent an available range in future. In either case, capacities are allocated at a subnational resolutions based on linear scaling from current capacity geolocations, using the JRC power plant database (#78).
 
 ### Added (workflow)
 
@@ -21,6 +21,7 @@
     * split technology definitions into self-explanatory files and into subdirectories named after Calliope abstract technology groups (e.g., `supply/wind-offshore.yaml` for offshore wind supply technology). This enables technologies to be added to or removed from the model by simply changing the model configuration file import list.;
     * keep technology definitions and their allocations to locations in the model in the same file; and
     * separate tech config YAML files from data CSV files. The former are found in the `techs` subdirectory, while the latter are in `timeseries`.
+* **UPDATE** to most recent JRC Hydro-Power database v10 (#248).
 
 ### Updated (workflow)
 
