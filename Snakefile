@@ -56,12 +56,12 @@ rule all:
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",
         "build/models/build-metadata.yaml",
-        "build/models/regional/summary_of_potentials.nc",
-        "build/models/regional/summary_of_potentials.csv",
-        "build/models/national/summary_of_potentials.nc",
-        "build/models/national/summary_of_potentials.csv",
-        "build/models/continental/summary_of_potentials.nc",
-        "build/models/continental/summary_of_potentials.csv"
+        "build/models/regional/summary-of-potentials.nc",
+        "build/models/regional/summary-of-potentials.csv",
+        "build/models/national/summary-of-potentials.nc",
+        "build/models/national/summary-of-potentials.csv",
+        "build/models/continental/summary-of-potentials.nc",
+        "build/models/continental/summary-of-potentials.csv"
 
 
 rule all_tests:
@@ -74,12 +74,12 @@ rule all_tests:
         "build/logs/national/test.success",
         "build/logs/regional/test.success",
         "build/models/build-metadata.yaml",
-        "build/models/regional/summary_of_potentials.nc",
-        "build/models/regional/summary_of_potentials.csv",
-        "build/models/national/summary_of_potentials.nc",
-        "build/models/national/summary_of_potentials.csv",
-        "build/models/continental/summary_of_potentials.nc",
-        "build/models/continental/summary_of_potentials.csv"
+        "build/models/regional/summary-of-potentials.nc",
+        "build/models/regional/summary-of-potentials.csv",
+        "build/models/national/summary-of-potentials.nc",
+        "build/models/national/summary-of-potentials.csv",
+        "build/models/continental/summary-of-potentials.nc",
+        "build/models/continental/summary-of-potentials.csv"
 
 
 rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_template` with a locational CSV linked to each technology that has no location-specific data to define.
@@ -223,8 +223,8 @@ rule summarize_potentials:
     input: 
         path_to_model = "build/models/{resolution}/example-model.yaml"
     output:
-        netcdf = "build/models/{resolution}/summary_of_potentials.nc",
-        csv = "build/models/{resolution}/summary_of_potentials.csv"
+        netcdf = "build/models/{resolution}/summary-of-potentials.nc",
+        csv = "build/models/{resolution}/summary-of-potentials.csv"
     params:
         scaling_factors = config["scaling-factors"]
     conda:
