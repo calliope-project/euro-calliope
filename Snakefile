@@ -218,9 +218,9 @@ rule test:
         runtime = 240
     script: "./tests/model/test_runner.py"
 
-rule summarize_potentials:
+rule summarise_potentials:
     message: "Generates netcdf and csv file with potentials for each technology."
-    input: 
+    input:
         path_to_model = "build/models/{resolution}/example-model.yaml"
     output:
         netcdf = "build/models/{resolution}/summary-of-potentials.nc",
@@ -230,4 +230,4 @@ rule summarize_potentials:
     conda:
         "./envs/test.yaml"
     script:
-        "./scripts/summarize_potentials.py"
+        "./scripts/summarise_potentials.py"

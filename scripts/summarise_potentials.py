@@ -1,4 +1,4 @@
-"""Generates .nc and .csv files (longform data) that summarize the potentials (= per-tech constriants) for each
+"""Generates .nc and .csv files (longform data) that summarise the potentials (= per-tech constriants) for each
 technology and each location."""
 
 import calliope
@@ -6,12 +6,12 @@ import numpy as np
 import xarray as xr
 
 
-def summarize_potentials(
+def summarise_potentials(
     path_to_model: str, path_to_output_csv: str, path_to_output_netcdf: str, sf: dict
 ) -> None:
 
     """
-    Generates .nc and .csv files (longform data) that summarize the potentials (= per-tech constriants) for each
+    Generates .nc and .csv files (longform data) that summarise the potentials (= per-tech constriants) for each
     technology and each location.
 
     CAVEAT: Techs that are defined but do not appear at at least one location
@@ -76,7 +76,7 @@ def summarize_potentials(
 
 
 if __name__ == "__main__":
-    summarize_potentials(
+    summarise_potentials(
         path_to_model=snakemake.input.path_to_model,
         path_to_output_csv=snakemake.output.csv,
         path_to_output_netcdf=snakemake.output.netcdf,
