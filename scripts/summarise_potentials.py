@@ -46,7 +46,7 @@ def summarise_potentials(
 
     summary = np.empty((len(list_of_techs), len(list_of_potentials), len(list_of_locs)))
     summary[:] = np.nan
-    units = np.empty((len(list_of_techs), len(list_of_potentials), len(list_of_locs)), dtype='<U32')
+    units = np.empty((len(list_of_potentials)), dtype='<U32')
     units[:] = np.nan
 
     summary = xr.DataArray(summary,
@@ -54,21 +54,20 @@ def summarise_potentials(
                            coords={"techs": list_of_techs,
                                    "potentials": list_of_potentials,
                                    "locs": list_of_locs,
-                                   "unit": (["techs", "potentials", "locs"], units)}
+                                   "unit": (["potentials"], units)}
                            )
 
     for potential in list_of_potentials:
         aux = model.get_formatted_array(potential)
+        summary.coords["unit"].loc[dict(potentials=potential)] = considered_potentials[potential]["unit"]
         for tech in list_of_techs:
             for loc in list_of_locs:
                 try:
                     summary.loc[dict(techs=tech, locs=loc, potentials=potential)] = aux.loc[
                         dict(techs=tech, locs=loc)] / considered_potentials[potential]["sf"]
-                    summary.coords["unit"].loc[
-                        dict(techs=tech, locs=loc, potentials=potential)] = considered_potentials[potential]["unit"]
                 except KeyError:
                     # If a technology "tech" is not installed in location "loc", or the potential "potential"
-                    # is not defined for "tech" at "loc", value and unit remain "NaN".
+                    # is not defined for "tech" at "loc", the value remains "NaN".
                     continue
 
     summary.to_netcdf(path_to_output_netcdf)
