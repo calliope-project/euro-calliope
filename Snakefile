@@ -15,6 +15,7 @@ template_dir = f"{root_dir}templates/"
 model_template_dir = f"{template_dir}models/"
 techs_template_dir = f"{model_template_dir}techs/"
 
+include: "./rules/industrial-emissions.smk" # remove later?
 include: "./rules/shapes.smk"
 include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
@@ -25,7 +26,9 @@ include: "./rules/nuclear.smk"
 include: "./rules/sync.smk"
 localrules: all, clean
 wildcard_constraints:
-        resolution = "continental|national|regional"
+    resolution = "continental|national|regional",
+    tech_group = "demand|supply|storage|transmission",
+    tech = "electricity|hydro|biofuel|load-shedding|nuclear|open-field-solar-and-wind-onshore|rooftop-solar|wind-offshore"
 
 ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
 ruleorder: bio_techs_and_locations_template > techs_and_locations_template

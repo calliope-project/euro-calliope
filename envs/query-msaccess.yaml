@@ -1,0 +1,6 @@
+name: query-msaccess
+channels:
+    - conda-forge
+dependencies:
+    - python=3.8
+    - pypyodbc=1.3.5
