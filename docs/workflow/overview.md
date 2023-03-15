@@ -53,6 +53,7 @@ When you have downloaded or cloned the workflow, you will have a set of files in
 * `docs`: Documentation of the model and the build process.
 * `envs`: Files defining the conda environments that are used to build the model.
 * `lib`: Library code in form of a Python package that is reused in many places of this repository.
+* `profiles`: Snakemake profiles used to control execution on different machines.
 * `rules`: Snakemake files defining the build process.
 * `scripts`: Scripts that preprocess data and build the model components.
 * `templates`: Templates of Calliope model files.

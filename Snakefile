@@ -50,12 +50,18 @@ onerror:
 rule all:
     message: "Generate euro-calliope pre-built models and run tests."
     input:
-        "build/logs/continental/test-report.html",
-        "build/logs/national/test-report.html",
+        "build/logs/continental/test.success",
+        "build/logs/national/test.success",
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",
-        "build/models/build-metadata.yaml"
+        "build/models/build-metadata.yaml",
+        "build/models/regional/summary-of-potentials.nc",
+        "build/models/regional/summary-of-potentials.csv",
+        "build/models/national/summary-of-potentials.nc",
+        "build/models/national/summary-of-potentials.csv",
+        "build/models/continental/summary-of-potentials.nc",
+        "build/models/continental/summary-of-potentials.csv"
 
 
 rule all_tests:
@@ -64,10 +70,16 @@ rule all_tests:
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",
-        "build/logs/continental/test-report.html",
-        "build/logs/national/test-report.html",
-        "build/logs/regional/test-report.html",
-        "build/models/build-metadata.yaml"
+        "build/logs/continental/test.success",
+        "build/logs/national/test.success",
+        "build/logs/regional/test.success",
+        "build/models/build-metadata.yaml",
+        "build/models/regional/summary-of-potentials.nc",
+        "build/models/regional/summary-of-potentials.csv",
+        "build/models/national/summary-of-potentials.nc",
+        "build/models/national/summary-of-potentials.csv",
+        "build/models/continental/summary-of-potentials.nc",
+        "build/models/continental/summary-of-potentials.csv"
 
 
 rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_template` with a locational CSV linked to each technology that has no location-specific data to define.
@@ -156,7 +168,6 @@ rule model_template:
                 "techs/transmission/electricity-linked-neighbours.yaml",
             ] + ["techs/transmission/electricity-entsoe.yaml" for i in [None] if wildcards.resolution == "national"]
         )
-
     params:
         year = config["scope"]["temporal"]["first-year"]
     conda: "envs/default.yaml"
@@ -199,6 +210,23 @@ rule test:
         )
     params:
         config = config
-    output: "build/logs/{resolution}/test-report.html"
+    log: "build/logs/{resolution}/test-report.html"
+    output: "build/logs/{resolution}/test.success"
     conda: "./envs/test.yaml"
+    resources:
+        runtime = 240
     script: "./tests/model/test_runner.py"
+
+rule summarise_potentials:
+    message: "Generates netcdf and csv file with potentials for each technology."
+    input:
+        path_to_model = "build/models/{resolution}/example-model.yaml"
+    output:
+        netcdf = "build/models/{resolution}/summary-of-potentials.nc",
+        csv = "build/models/{resolution}/summary-of-potentials.csv"
+    params:
+        scaling_factors = config["scaling-factors"]
+    conda:
+        "./envs/test.yaml"
+    script:
+        "./scripts/summarise_potentials.py"
