@@ -1,7 +1,8 @@
 """Rules to generate electricity demand time series."""
 import pycountry
 
-localrules: download_raw_load, download_population_count, unzip_population_count, download_national_energy_balances, unzip_national_energy_balances
+localrules: download_raw_load, download_population_count, unzip_population_count, download_national_energy_balances,
+    unzip_national_energy_balances
 
 
 rule download_raw_load:
@@ -53,38 +54,50 @@ rule add_population_share_to_units:
     script: "../scripts/demand/add_population_share_to_unit.py"
 
 
-rule download_national_energy_balances:
-    message: "Download national energy balances which include demand by industrial sector."
-    params: url = config["data-sources"]["national-energy-balances"]
-    output: protected("data/automatic/raw-energy-balances.zip")
+rule download_national_energy_balances_europe:
+    message: "Download national energy balances from EUROSTAT which include demand by industrial sector."
+    params: url = config["data-sources"]["national-energy-balances-europe"]
+    output: protected("data/automatic/raw-energy-balances-europe.zip")
     conda: "../envs/shell.yaml"
     shell: "curl -sLo {output} '{params.url}'"
 
 
-rule unzip_national_energy_balances:
-    message: "Unzip national energy balances which include demand by industrial sector."
-    input: rules.download_national_energy_balances.output
+rule unzip_national_energy_balances_europe:
+    message: "Unzip national energy balances from EUROSTAT which include demand by industrial sector."
+    input: rules.download_national_energy_balances_europe.output
     output:
         national_energy_balances = [f"build/data/energy-balances/{country_code}-Energy-balance-sheets-June-2021-edition.xlsb"
                                     for country_code in ['EL' if code == 'GR' else code for code in
                                                         ['UK' if code == 'GB' else code for code in
                                                         [pycountry.countries.lookup(country).alpha_2 for country in
-                                                        config["scope"]["spatial"]["countries"]]]]
-                                   ] # Since alpha 2 is not correct for GB (UK) and GR (EL).
+                                                        list(filter(lambda i: i!='Switzerland',
+                                                                    config["scope"]["spatial"]["countries"]))]]]
+                                   ] # Since alpha2 is not correct for GB (UK) and GR (EL) and Swiss data is missing.
     shadow: "minimal"
     conda: "../envs/shell.yaml"
     shell: "unzip {input} -d build/data/energy-balances"
 
 
+rule download_national_energy_balance_switzerland:
+    message: "Download national energy balances for Switzerland which include demand by industrial sector."
+    params: url = config["data-sources"]["national-energy-balance-switzerland"]
+    output: "build/data/energy-balances/CH-Energy-balance.xlsx"
+    conda: "../envs/shell.yaml"
+    shell: "curl -sLo {output} '{params.url}'"
+
+
 rule extract_ind_elec_demand:
-    message: "Extracts national electricity demand by sector from .xslb-energy balances to .csv."
+    message:
+        "Extracts national electricity demand by sector from energy balance spreadsheets for Europe and Switzerland."
     input:
-        national_energy_balances = rules.unzip_national_energy_balances.output
+        national_energy_balances_europe = rules.unzip_national_energy_balances_europe.output,
+        national_energy_balance_switzerland = rules.download_national_energy_balance_switzerland.output
     params:
         path_energy_balances_foldername = "build/data/energy-balances/",
-        path_energy_balances_filename = "-Energy-balance-sheets-June-2021-edition.xlsb",
+        path_energy_balances_europe_filename = "-Energy-balance-sheets-June-2021-edition.xlsb",
+        path_energy_balances_switzerland_filename = "-Energy-balance.xlsx",
         countries = config["scope"]["spatial"]["countries"],
-        year = "2019" # ASSUME ratio emissions of sector j in unit i / national emissions of sector j constant over years
+        year = "2019" # ASSUME ratio emissions of sector j in unit i / nat emissions of sector j constant over years
     output: "build/data/energy-balances/nat-ind-elec-demand.csv"
     conda: "../envs/default.yaml"
     script: "../scripts/demand/nat-ind-elec-demand.py"
@@ -119,26 +132,12 @@ rule electricity_load_national:
 rule electricity_load:
     message: "Generate electricity load time series for every location on {wildcards.resolution} resolution."
     input:
-        script = script_dir + "demand/load.py",
-        units = rules.units.output[0],
-        demand_per_unit = rules.potentials.output.demand,
-        national_load = rules.electricity_load_national.output[0]
-    params:
-        scaling_factor = config["scaling-factors"]["power"]
-    output: "build/models/{resolution}/timeseries/demand/electricity.csv"
-    conda: "../envs/geo.yaml"
-    script: "../scripts/demand/load.py"
-
-
-rule electricity_load_NEW:
-    message: "Generate electricity load time series for every location on {wildcards.resolution} resolution."
-    input:
         units_with_population_share = rules.add_population_share_to_units.output[0],
         units_share_of_nat_demand_per_sector = rules.compute_emission_fractions.output[0],
         nat_ind_elec_demand = rules.extract_ind_elec_demand.output[0],
         national_load = rules.electricity_load_national.output[0]
     params:
         scaling_factor_power = config["scaling-factors"]["power"]
-    output: "build/models/{resolution}/timeseries/demand/electricity_NEW.csv"
+    output: "build/models/{resolution}/timeseries/demand/electricity.csv"
     conda: "../envs/geo.yaml"
-    script: "../scripts/demand/load_NEW.py"
+    script: "../scripts/demand/load.py"

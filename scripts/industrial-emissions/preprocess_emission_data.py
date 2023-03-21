@@ -43,8 +43,8 @@ def preprocess_emission_data(path_ied_etsidentifiers: str,
             Installation_INSPIRE_ID, mainActivityCode (for Installation, as defined in EUs IED regulation). For
             matching of Facility_INSPIRE_ID and Installation_INSPIRE_ID.
         reportingYear_ETS (int):
-            Year for which ETS data is used. ReportingYear for IED data is set in the rule
-            manipulate_ied_etsidentifiers.
+            Year for which ETS data is used. ReportingYear for IED data is set in the rules
+            manipulate_ied_etsidentifiers and query_ied_data.
         path_ets_installation (str):
             Meta-information for ETS installations: Installation ID, Permit ID, E-PRTR ID, Lat/Lon, address, NACE
             activity code, i.a.
@@ -220,8 +220,8 @@ def preprocess_ets_data(reportingYear_ETS: int, path_ets_installation: str, path
 
     Parameters:
         reportingYear_ETS (int):
-            Year for which ETS data is used. ReportingYear for IED data is set in the rule
-            manipulate_ied_etsidentifiers.
+            Year for which ETS data is used. ReportingYear for IED data is set in the rules
+            manipulate_ied_etsidentifiers and query_ied_data.
         path_ets_installation (str):
             Meta-information for ETS installations: Installation ID, Permit ID, E-PRTR ID, Lat/Lon, address, NACE
             activity code, i.a.
@@ -328,7 +328,7 @@ def identify_matching_ets_ied(df_query1: pd.DataFrame, df_ets: pd.DataFrame) -> 
             geometry_ied = [Point(row["pointGeometryLon"], row["pointGeometryLat"])]
             points_df_ied = gpd.GeoDataFrame({'geometry': geometry_ied}, crs='EPSG:4326').to_crs('EPSG:3035')
             distance = points_df_ets.distance(points_df_ied)
-            if distance[0] < 2000:
+            if distance[0] < 10000:
                 verifLatLong = True
 
             # Verify matches based on postalCode:
@@ -630,7 +630,7 @@ def convert_activity_codes(df_master: pd.DataFrame,
     df_master = df_master.dropna(axis=0, subset=['pointGeometryLon'])
     df_master = df_master.dropna(axis=0, subset=['pointGeometryLat'])
     # Reset index
-    df_master.reset_index(drop=True)
+    df_master = df_master.reset_index(drop=True)
 
     return df_master
 

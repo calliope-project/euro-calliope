@@ -32,8 +32,10 @@ def compute_emission_fractions(path_industrial_emission_data_master: str,
     # Import emissions per installation
     # Import file that allows mapping between unit codes and country codes
     units = gpd.read_file(path_units).to_crs(WGS_84).set_index("id") # or any other of the unit...geojson files.
-    df_master = pd.read_csv(path_industrial_emission_data_master, index_col=0, sep=';', quotechar='"')
+    df_master = pd.read_csv(path_industrial_emission_data_master, index_col=0, sep=',', quotechar='"')
     mapping_unit_codes_nat_codes = pd.read_csv(path_mapping_unit_codes_nat_codes, index_col="id")
+
+    df_master = df_master.reset_index(drop=True) #ToDo: remove.
 
     # Add unit code based on unit boundaries and installation coordinates
     installation_coords = gpd.GeoDataFrame(
@@ -41,6 +43,7 @@ def compute_emission_fractions(path_industrial_emission_data_master: str,
         geometry=list(map(Point, zip(df_master.pointGeometryLon, df_master.pointGeometryLat))),
         index=df_master.index)
 
+    breakpoint()
     df_master["unitCode"] = gpd.sjoin(installation_coords, units, how="left")["index_right"]
     if (len(units.index) == 1) and (units.index[0] == "EUR"): # special case for continental level
         # In order for later aggregation over "countryCode" to work, replace countryCodes of all installations
@@ -48,8 +51,22 @@ def compute_emission_fractions(path_industrial_emission_data_master: str,
         # fall into the unit, since only selected countries can compose the continent) (i.e., installations that have
         # unitCode "EUR" not NaN)
         df_master.loc[df_master["unitCode"] == "EUR", "countryCode"] = "EUR"
-
     breakpoint()
+
+    # Drop installations that do not lie in any of the units (e.g., installations in Spanish/British/French.. oversea
+    # territories), installations in Iceland, installations very close to a curvy coastline (is smoothed in units
+    # geometries), etc. (This affects ca. 450/68000 installations in Europe):
+    df_master = df_master.dropna(subset=["unitCode"])
+    # Drop installations that are misplaced in neighboring country due to curvy boarder (unit code doesnt coincide with
+    # country code) (This effects ca 1 installation in Europe):
+    countryCodes_from_unitCodes = (
+        df_master
+        .unitCode
+        .apply(lambda x: mapping_unit_codes_nat_codes.loc[x, "country_code"])
+    )
+    df_master = df_master.drop(
+        df_master[countryCodes_from_unitCodes != df_master.countryCode].index)
+
     # - Fill all NaNs and "no_matchings" in the indicator columns of df_master with 0 (ASSUME that no
     # emissions/employees for installations that dont report).
     # - Note that Number of Employees is an optional reporting item in the IED dataset. Can still be used as size
@@ -74,10 +91,9 @@ def compute_emission_fractions(path_industrial_emission_data_master: str,
                      "TRIPHENYLTINANDCOMPOUNDS", "VINYLCHLORIDE", "XYLENES", "ZNANDCOMPOUNDS"]
     # ASSUME that no emissions/employees for installations that dont report:
     dfnan = pd.DataFrame(np.zeros((len(df_master.index), len(indicatorlist))), columns=indicatorlist)
-    df_master.fillna(dfnan)
+    df_master = df_master.fillna(dfnan)
     # ASSUME that no emissions/employees for installations that dont report:
     functionlist = [lambda x: x.replace("no_matching", 0).astype(float).sum()] * len(indicatorlist)
-    breakpoint()
     national_emissions_of_sector = (
         df_master
         .groupby(["activity_id_EUROSTAT", "countryCode"])
@@ -86,7 +102,6 @@ def compute_emission_fractions(path_industrial_emission_data_master: str,
         df_master
         .groupby(["activity_id_EUROSTAT", "unitCode"])
         .agg(dict(zip(indicatorlist, functionlist))))
-    breakpoint()
     # For each unit and sector, divide unit's emission by national emission
     fraction_unit_of_nat = unit_emissions_of_sector # to have same format
     for index, row in unit_emissions_of_sector.iterrows(): # index[0] holds activity_id_EEA, index[1] holds unitCode
@@ -97,7 +112,21 @@ def compute_emission_fractions(path_industrial_emission_data_master: str,
     # Fill nan that occur through dividing by zero (no national emissions of this pollutant)
     fraction_unit_of_nat = fraction_unit_of_nat.fillna(0)
 
+    breakpoint()
     fraction_unit_of_nat_agg = aggregate_fractions(fraction_unit_of_nat)
+
+    # Include missing sectors and units and assign 0 to as industrial emission fractions
+    ind_sector_list = ["FC_IND_CON_E", "FC_IND_CPC_E", "FC_IND_FBT_E", "FC_IND_IS_E", "FC_IND_MAC_E", "FC_IND_MQ_E",
+                       "FC_IND_NFM_E", "FC_IND_NMM_E", "FC_IND_NSP_E", "FC_IND_PPP_E", "FC_IND_TE_E", "FC_IND_TL_E",
+                       "FC_IND_WP_E", "FC_OTH_AF_E", "FC_OTH_CP_E", "FC_OTH_FISH_E", "FC_OTH_HH_E", "FC_OTH_NSP_E",
+                       "FC_TRA_DAVI_E", "FC_TRA_DNAVI_E", "FC_TRA_PIPE_E", "FC_TRA_RAIL_E", "FC_TRA_ROAD_E",
+                       "FC_TRA_NSP_E"]
+    fraction_unit_of_nat_agg = (
+        fraction_unit_of_nat_agg
+        + pd.DataFrame(np.zeros((len(ind_sector_list), len(units.index.tolist()))),
+                       index=ind_sector_list,
+                       columns=units.index.tolist()))
+    fraction_unit_of_nat_agg = fraction_unit_of_nat_agg.fillna(0)
 
     fraction_unit_of_nat_agg.to_csv(path_units_share_of_nat_demand_per_sector)
 

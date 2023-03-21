@@ -20,6 +20,7 @@ def manipulate_ied_etsidentifiers(path_ied_etsidentifiers: str,
     ID, permitID, eprtrID). The new, added column to the IED table "ETSIdentifiers" is called conv_ETSIdentifiers.
     Later, to establish a matching between IED and ETS installations, the IED installation's conv_ETSIdentifier will
     be compared to all entries in the ETS dataset columns ISO_id, permitID, eprtrID to identify potential matches.
+
     This script is based on the countries' reporting style of 2020 and needs to be redone, if IED data from a
     different year shall be used.
 
