@@ -35,23 +35,22 @@ def compute_emission_fractions(path_industrial_emission_data_master: str,
     df_master = pd.read_csv(path_industrial_emission_data_master, index_col=0, sep=',', quotechar='"')
     mapping_unit_codes_nat_codes = pd.read_csv(path_mapping_unit_codes_nat_codes, index_col="id")
 
-    df_master = df_master.reset_index(drop=True) #ToDo: remove.
-
     # Add unit code based on unit boundaries and installation coordinates
     installation_coords = gpd.GeoDataFrame(
         crs=WGS_84,
         geometry=list(map(Point, zip(df_master.pointGeometryLon, df_master.pointGeometryLat))),
         index=df_master.index)
 
-    breakpoint()
-    df_master["unitCode"] = gpd.sjoin(installation_coords, units, how="left")["index_right"]
+    installations_w_unitinfos = gpd.sjoin(installation_coords, units, how="left")
+    # Drop duplicates produced by spatial joint (installations in overlapping units). Keep first of them.
+    installations_w_unitinfos = installations_w_unitinfos.groupby(installations_w_unitinfos.index).first()
+    df_master["unitCode"] = installations_w_unitinfos["index_right"]
     if (len(units.index) == 1) and (units.index[0] == "EUR"): # special case for continental level
         # In order for later aggregation over "countryCode" to work, replace countryCodes of all installations
         # within the considered unit (Note that even if the unit is the continent, not all installations necessarily
         # fall into the unit, since only selected countries can compose the continent) (i.e., installations that have
         # unitCode "EUR" not NaN)
         df_master.loc[df_master["unitCode"] == "EUR", "countryCode"] = "EUR"
-    breakpoint()
 
     # Drop installations that do not lie in any of the units (e.g., installations in Spanish/British/French.. oversea
     # territories), installations in Iceland, installations very close to a curvy coastline (is smoothed in units
@@ -112,7 +111,6 @@ def compute_emission_fractions(path_industrial_emission_data_master: str,
     # Fill nan that occur through dividing by zero (no national emissions of this pollutant)
     fraction_unit_of_nat = fraction_unit_of_nat.fillna(0)
 
-    breakpoint()
     fraction_unit_of_nat_agg = aggregate_fractions(fraction_unit_of_nat)
 
     # Include missing sectors and units and assign 0 to as industrial emission fractions
