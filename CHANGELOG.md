@@ -23,6 +23,15 @@
     * keep technology definitions and their allocations to locations in the model in the same file; and
     * separate tech config YAML files from data CSV files. The former are found in the `techs` subdirectory, while the latter are in `timeseries`.
 * **UPDATE** to most recent JRC Hydro-Power database v10 (#248).
+* **UPDATED** Computation of electricity load timeseries:
+    * As before, the electricity load in each unit is computed as the sum of residential and industrial load in this unit, where the industrial load is now determined with higher accuracy.
+    * For this, the industrial load of each unit is computed as the sum of the loads for each industrial sector as defined in the EUROSTAT energy balances (iron and steel, chemical and petrochemical, construction, ...).
+    * The load curves of each industrial sector in each unit are obtained by uniformly distributing the yearly electricity demand of that industrial sector in the given unit.
+    * The yearly electricity demand of a given industrial sector in a given unit is computed as a fraction of the national electricity demand of this sector (from EUROSTAT energy balances), using the unit's share of national emissions in the given sector.
+    * A unit's and nation's emissions for a industrial sector are computed as sum of the emissions of all industrial installations in the unit/nation in this sector.
+    * The installations' emissions as well as their industrial activities are drawn from the European Emission Trading System Database (for CO2) and the Reporting under the Industrial Emissions Directive (for 76 other pollutants, amount of waste, number of employees).
+    * While currently only using CO2 emissions to estimate a unit's share of the national electricity demand in a given sector, the other pollutants and any other size indicators (a plant's sales, heat demand, production output, ...) can also be used.
+    * A .csv file with all European industrial installations and their respective locations, industrial activities, and emissions is included in the repository (ca. 68 000 installation, year of data: 2020), but can also be re-generated from the databases using the provided rules.
 
 ### Updated (workflow)
 

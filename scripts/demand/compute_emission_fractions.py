@@ -113,7 +113,7 @@ def compute_emission_fractions(path_industrial_emission_data_master: str,
 
     fraction_unit_of_nat_agg = aggregate_fractions(fraction_unit_of_nat)
 
-    # Include missing sectors and units and assign 0 to as industrial emission fractions
+    # Include missing sectors and units and assign them zeroes
     ind_sector_list = ["FC_IND_CON_E", "FC_IND_CPC_E", "FC_IND_FBT_E", "FC_IND_IS_E", "FC_IND_MAC_E", "FC_IND_MQ_E",
                        "FC_IND_NFM_E", "FC_IND_NMM_E", "FC_IND_NSP_E", "FC_IND_PPP_E", "FC_IND_TE_E", "FC_IND_TL_E",
                        "FC_IND_WP_E", "FC_OTH_AF_E", "FC_OTH_CP_E", "FC_OTH_FISH_E", "FC_OTH_HH_E", "FC_OTH_NSP_E",
@@ -141,7 +141,7 @@ def aggregate_fractions(fraction_unit_of_nat: pd.DataFrame) -> pd.DataFrame:
     """
 
     fraction_unit_of_nat_agg = pd.DataFrame()
-    for index, row in fraction_unit_of_nat.iterrows(): # index[0] holds activity_id_EEA, index[1] holds unitCode
+    for index, row in fraction_unit_of_nat.iterrows(): # index[0] holds industrial sector, index[1] holds unitCode
         # Aggregation method: Only use CO2 emissions reported to ETS
         fraction_unit_of_nat_agg.loc[index] = row["verified_ETS_sum"]
 
