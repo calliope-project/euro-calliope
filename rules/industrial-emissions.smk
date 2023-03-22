@@ -1,4 +1,12 @@
-"""Rules to compute a unit's shares of the national electricity demand in each industrial sector."""
+"""Build a dataset of industrial sites in Europe, including their industrial activity, location, and emissions. """
+
+configfile: "config/default.yaml"
+
+rule all:
+    message: "Build dataset of industrial sites in Europe."
+    input:
+        "data/industrial-emission-data-master.csv",
+        "data/industrial-emission-data-installation-detail.csv"
 
 
 rule download_ets_data:
