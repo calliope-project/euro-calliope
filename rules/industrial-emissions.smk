@@ -1,4 +1,4 @@
-"""Build a dataset of industrial sites in Europe, including their industrial activity, location, and emissions. """
+"""Build a dataset of industrial sites in Europe, including their industrial activity, location and emissions. """
 
 configfile: "config/default.yaml"
 
