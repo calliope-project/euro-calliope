@@ -150,8 +150,8 @@ def extract_from_balance_sheet_switzerland(country_code_alpha_3: str, df_ind_ele
     # within each end use category, i.e., "Verwendungszwecke" (Raumwärme, Prozesswärme, Mechanische Arbeit, etc.).
 
     # Group by EUROSTAT activity categories and rename
-    # ASSUMES that industrial demand is negligble (=0) in sectors that are not reported by Swiss BFE (i.e., FC_IND_TE_E
-    # (transport equipment), FC_IND_WP_E (wood products), FC_IND_MQ_E (mining and quarrying))
+    # ASSUMES that industrial demand is negligible (=0) in sectors that are not reported by Swiss BFE (i.e.,
+    # FC_IND_TE_E (transport equipment), FC_IND_WP_E (wood products), FC_IND_MQ_E (mining and quarrying))
     df_ind_final_elec_consumption_sector_PJ.loc["Glas, Keramik, Beton, Steine, Zement, Kalk, Ziegel"] = (
         df_ind_final_elec_consumption_sector_PJ.loc["Glas, Keramik, Beton, Steine"]
         + df_ind_final_elec_consumption_sector_PJ.loc["Zement, Kalk, Ziegel"])

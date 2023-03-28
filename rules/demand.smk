@@ -1,8 +1,9 @@
 """Rules to generate electricity demand time series."""
 import pycountry
 
-localrules: download_raw_load, download_population_count, unzip_population_count, download_national_energy_balances,
-    unzip_national_energy_balances
+localrules: download_raw_load, download_population_count, unzip_population_count,
+    download_national_energy_balances_europe, unzip_national_energy_balances_europe,
+    download_national_energy_balance_switzerland
 
 
 rule download_raw_load:
