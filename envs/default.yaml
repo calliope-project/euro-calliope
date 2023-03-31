@@ -13,3 +13,5 @@ dependencies:
     - pip=21.0.1
     - pip:
         - -e ../../lib
+        - pyxlsb==1.0.10
+        - openpyxl==3.1.2
