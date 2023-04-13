@@ -32,8 +32,6 @@ By default, the example model definition imports all modules except electricity 
 The modules are in the `techs` subdirectory of each spatial resolution (e.g. `national/techs/...`).
 Here, we describe each module in terms of the technologies they contain (`calliope name`:`full name`) and the overrides they make available (`calliope name`: `override description`) .
 
-
-
 ??? note "demand/electricity.yaml"
 
     === "Technologies"
@@ -166,7 +164,7 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
 ??? note "transmission/electricity-linked-neighbours.yaml"
 
-    === **"Technologies"
+    === "Technologies"
 
         **ac_transmission**: High voltage AC transmission line
 
