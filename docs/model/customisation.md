@@ -97,10 +97,10 @@ Here, we describe each module in terms of the technologies they contain (`callio
     === "Overrides"
 
         **load-shedding**: Add an option to shed load at each location.
-            You can use this to model blackouts, brownouts, or controlled shedding of load as a form of demand response.
-            In Euro-Calliope, we model load shedding not as actual reduction of demand but as an unconstrained supply of electricity.
-            This supply has high variable cost (see the load-shedding.yaml module) and no fixed cost.
-            Due to its high cost, it will only be used when no other, less costly, option is available.
+        You can use this to model blackouts, brownouts, or controlled shedding of load as a form of demand response.
+        In Euro-Calliope, we model load shedding not as actual reduction of demand but as an unconstrained supply of electricity.
+        This supply has high variable cost (see the load-shedding.yaml module) and no fixed cost.
+        Due to its high cost, it will only be used when no other, less costly, option is available.
 
 
 ??? note "supply/nuclear.yaml"
