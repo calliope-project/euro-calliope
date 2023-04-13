@@ -25,8 +25,9 @@ markdown_extensions:
     - admonition
     - attr_list
     - pymdownx.details
-    - pymdownx.superfences
     - pymdownx.tabbed
+    - pymdownx.superfences
+    - pymdownx.highlight
     - toc:
         permalink: "#"
 plugins:

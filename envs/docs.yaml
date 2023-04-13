@@ -9,7 +9,7 @@ dependencies:
     - graphviz=2.48.0
     - pydot=1.4.2
     - pycountry=18.12.8
-    - pymdown-extensions=9.3
+    - pymdown-extensions=9.9.2
     - snakemake-minimal=6.1.1
     - pip=21.0.1
     - pip:
