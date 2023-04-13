@@ -34,13 +34,13 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
 
 
-=== "demand/electricity.yaml"
+??? note "demand/electricity.yaml"
 
     === "Technologies"
 
         **demand_elec**: Electricity demand
 
-=== "storage/electricity.yaml"
+??? note "storage/electricity.yaml"
 
     === "Technologies"
 
@@ -56,7 +56,7 @@ Here, we describe each module in terms of the technologies they contain (`callio
         Constraining hydrogen storage as well ensures it does not directly compete with battery storage, but is used instead for durations of fours hours and longer.
 
 
-=== "storage/hydro.yaml"
+??? note "storage/hydro.yaml"
 
     === "Technologies"
 
@@ -68,13 +68,13 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         **freeze-hydro-storage-capacities**: Force discharge and storage capacities of hydropower to today's levels instead of using today's level as the maximum (you may also want to apply "no-hydro-storage-fixed-cost").
 
-=== "supply/biofuel.yaml"
+??? note "supply/biofuel.yaml"
 
     === "Technologies"
 
         **biofuel**: Biofuel
 
-=== "supply/hydro.yaml"
+??? note "supply/hydro.yaml"
 
     === "Technologies"
 
@@ -90,7 +90,7 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         **freeze-hydro-supply-capacities**: Force discharge and storage capacities of hydropower to today's levels instead of using today's level as the maximum (you may also want to apply "no-hydro-supply-fixed-cost").
 
-=== "supply/load-shedding.yaml"
+??? note "supply/load-shedding.yaml"
 
     === "Technologies"
 
@@ -105,13 +105,13 @@ Here, we describe each module in terms of the technologies they contain (`callio
             Due to its high cost, it will only be used when no other, less costly, option is available.
 
 
-=== "supply/nuclear.yaml"
+??? note "supply/nuclear.yaml"
 
     === "Technologies"
 
         **nuclear**: Nuclear power
 
-=== "supply/open-field-solar-and-wind-onshore.yaml"
+??? note "supply/open-field-solar-and-wind-onshore.yaml"
 
     === "Technologies"
 
@@ -127,7 +127,7 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         **dea-renewable-cost-wind-onshore**: Override onshore wind cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014 with those from the Danish Energy Agency.
 
-=== "supply/rooftop-solar.yaml"
+??? note "supply/rooftop-solar.yaml"
 
     === "Technologies"
 
@@ -146,7 +146,7 @@ Here, we describe each module in terms of the technologies they contain (`callio
         This leads to higher capacity factors of rooftop PV as long as the potential of rooftop PV is not fully exploited.
         However, this also increases the complexity of the model.
 
-=== "supply/wind-offshore.yaml"
+??? note "supply/wind-offshore.yaml"
 
     === "Technologies"
 
@@ -156,7 +156,7 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         **dea-renewable-cost-wind-offshore**: Override offshore wind cost and lifetime projections from the JRC Energy Technology Reference Indicator 2014 with those from the Danish Energy Agency.
 
-=== "transmission/electricity-entsoe.yaml"
+??? note "transmission/electricity-entsoe.yaml"
 
     === "Technologies"
 
@@ -164,9 +164,9 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         **free_transmission**: Local power transmission
 
-=== "transmission/electricity-linked-neighbours.yaml"
+??? note "transmission/electricity-linked-neighbours.yaml"
 
-    === "Technologies"
+    === **"Technologies"
 
         **ac_transmission**: High voltage AC transmission line
 
