@@ -13,4 +13,4 @@ dependencies:
     - pip=21.0.1
     - pip:
         - jsonschema2md==0.2.1
-        - -e ../lib[docs]
+        - -e ./lib[docs]

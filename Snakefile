@@ -1,7 +1,7 @@
 import glob
 from pathlib import Path
 
-from snakemake.utils import validate, min_version
+from snakemake.utils import validate, min_version, makedirs
 
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
@@ -36,6 +36,15 @@ ALL_CF_TECHNOLOGIES = [
     "hydro-reservoir"
 ]
 ALL_DEMAND_CARRIERS = ["electricity"]
+
+def ensure_lib_folder_is_linked():
+    link = Path(workflow.conda_prefix) / "lib"
+    if not link.exists():
+        print("Creating link from conda env dir to eurocalliopelib.")
+        makedirs(workflow.conda_prefix)
+        shell(f"ln -s {workflow.basedir}/lib {workflow.conda_prefix}/lib")
+
+ensure_lib_folder_is_linked()
 
 onstart:
     shell("mkdir -p build/logs")

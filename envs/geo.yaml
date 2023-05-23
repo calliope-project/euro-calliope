@@ -20,4 +20,4 @@ dependencies:
     - pycountry=18.12.8
     - pip=21.0.1
     - pip:
-        - -e ../../lib[geo]
+        - -e ./lib[geo]
