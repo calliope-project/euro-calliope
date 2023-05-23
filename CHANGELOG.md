@@ -16,6 +16,7 @@
 * **ADD** a Snakemake rule that generates a .csv and .nc file that provide an summary of the potentials (= per-tech constraints) for each technology and location (#250).
 * **ADD** ability to run on Apple silicon devices (#263).
     * Updated geo packages from gdal 3.2 -> 3.3.
+* **ADD** re-execution triggers based on config and env changes (#264).
 
 ### Updated (models)
 

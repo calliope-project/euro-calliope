@@ -14,7 +14,6 @@ rule download_raw_load:
 rule electricity_load_national:
     message: "Preprocess raw electricity load data and retrieve load time series per country."
     input:
-        script = script_dir + "demand/national_load.py",
         load = rules.download_raw_load.output[0]
     params:
         first_year = config["scope"]["temporal"]["first-year"],
@@ -29,7 +28,6 @@ rule electricity_load_national:
 rule electricity_load:
     message: "Generate electricity load time series for every location on {wildcards.resolution} resolution."
     input:
-        script = script_dir + "demand/load.py",
         units = rules.units.output[0],
         demand_per_unit = rules.potentials.output.demand,
         national_load = rules.electricity_load_national.output[0]

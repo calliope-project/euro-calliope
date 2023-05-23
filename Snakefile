@@ -1,14 +1,13 @@
 import glob
 from pathlib import Path
 
-from snakemake.utils import validate
+from snakemake.utils import validate, min_version
 
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
 
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
-script_dir = f"{root_dir}scripts/"
 test_dir = f"{root_dir}tests/"
 model_test_dir = f"{test_dir}model"
 template_dir = f"{root_dir}templates/"
@@ -23,6 +22,7 @@ include: "./rules/transmission.smk"
 include: "./rules/demand.smk"
 include: "./rules/nuclear.smk"
 include: "./rules/sync.smk"
+min_version("7.8")
 localrules: all, clean
 wildcard_constraints:
         resolution = "continental|national|regional"
@@ -93,7 +93,6 @@ rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_te
 rule techs_and_locations_template:
     message: "Create {wildcards.resolution} definition file for the {wildcards.tech_group} tech `{wildcards.tech}`."
     input:
-        script = script_dir + "template_techs.py",
         template = techs_template_dir + "{tech_group}/{tech}.yaml",
         locations = "build/data/{resolution}/{tech_group}/{tech}.csv"
     params:
@@ -132,7 +131,6 @@ rule no_params_template:
 rule model_template:
     message: "Generate top-level {wildcards.resolution} model configuration file from template"
     input:
-        script = script_dir + "template_model.py",
         template = model_template_dir + "example-model.yaml",
         non_model_files = expand(
             "build/models/{template}", template=["environment.yaml", "README.md"]
@@ -179,7 +177,6 @@ rule model_template:
 rule build_metadata:
     message: "Generate build metadata."
     input:
-        script_dir + "metadata.py",
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",

@@ -43,7 +43,6 @@ rule download_capacity_factors_wind_and_solar:
 rule area_to_capacity_limits:
     message: "Use technology densities to convert wind & solar {wildcards.resolution} available area to capacity limits."
     input:
-        script = script_dir + "wind-and-solar/capacity_limits.py",
         units = rules.units_without_shape.output[0],
         land_eligibility_km2 = rules.potentials.output.land_eligibility_km2,
     params:
@@ -61,7 +60,6 @@ rule capacity_factors_onshore_wind_and_solar:
     message: "Generate capacityfactor time series disaggregated by location on "
              "{wildcards.resolution} resolution for {wildcards.technology}."
     input:
-        script = script_dir + "wind-and-solar/capacityfactors.py",
         locations = rules.units.output[0],
         timeseries = ancient("data/automatic/capacityfactors/{technology}-timeseries.nc"),
         coordinates = ancient("data/automatic/capacityfactors/wind-onshore-timeseries.nc")
@@ -84,7 +82,6 @@ rule capacity_factors_offshore:
     message: "Generate capacityfactor time series disaggregated by location on "
              "{wildcards.resolution} resolution for wind-offshore."
     input:
-        script = script_dir + "wind-and-solar/capacityfactors_offshore.py",
         eez = rules.eez.output[0],
         shared_coast = rules.potentials.output.shared_coast,
         timeseries = ancient("data/automatic/capacityfactors/wind-offshore-timeseries.nc")
