@@ -218,6 +218,7 @@ rule test:
         runtime = 240
     script: "./tests/model/test_runner.py"
 
+
 rule summarise_potentials:
     message: "Generates netcdf and csv file with potentials for each technology."
     input:

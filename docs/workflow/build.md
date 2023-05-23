@@ -22,7 +22,7 @@ Using either one, you can create the environment:
         # using mamba
         mamba env create -f environment.yaml --no-default-packages
         conda activate euro-calliope
-        snakemake --profile profiles/default --list # test your installation
+        snakemake --list # test your installation
 
         # using conda
         conda env create -f environment.yaml --no-default-packages
@@ -39,7 +39,7 @@ By default, the entire model will be built in the `./build/model` folder when yo
 Execute the workflow like so:
 
 ```bash
-snakemake --profile profiles/default
+snakemake
 ```
 
 ## Run

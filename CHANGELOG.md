@@ -36,6 +36,7 @@
 
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
+* **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264).
 
 ### Fixed (models)
 
@@ -44,10 +45,6 @@
 ### Fixed (documentation)
 
 * **FIX** links in the documention to always point to the most recent version of the pre-builts (#218).
-
-### Fixed (environments)
-
-* **FIX** incompatibility of Snakemake 6.1.1 and tabulate 0.9 by downgrading to tabulate 0.8.10. (#249).
 
 ## 1.1.0 (2021-12-22)
 
