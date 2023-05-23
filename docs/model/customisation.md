@@ -16,13 +16,13 @@ With the Calliope model in your hands, you will be able to change any model para
 This kind of customisation can be useful to get to know the model and its parameters.
 To create reliable results, we do not advice to make any manual changes to anything but the model definition as this may impact traceability of your results.
 For the model definition (as in `./{resolution}/example-model.yaml`) we encourage you to do manual changes.
-A typical customisation here would be to change the solver from `gurobi` to an open-source solver, e.g. `cbc` (see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/user/config_defaults.html#run-configuration)).
+A typical customisation here would be to change the solver from `gurobi` to an open-source solver, e.g. `cbc` (see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.10/user/config_defaults.html#run-configuration)).
 We consider all Euro-Calliope model components but the model definition as a toolbox from which you can choose to define your model -- see the [Import customisation option](./customisation.md#imports).
 
 ## Imports
 
 The `example-model.yaml` definition file in each resolution sub-directory (e.g. `national/example-model.yaml`) specifies a list of other files to bring together to describe the model.
-This list can be changed by the modeller to select a combination of different files (see also [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#files-that-define-a-model)).
+This list can be changed by the modeller to select a combination of different files (see also [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.10/user/building.html#files-that-define-a-model)).
 
 ### Transmission links
 
@@ -37,7 +37,7 @@ The ENTSO-E links define all existing and planned international connections, inc
 
 ## Overrides
 
-Calliope [overrides](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#scenarios-and-overrides) enable models to be easily manipulated.
+Calliope [overrides](https://calliope.readthedocs.io/en/v0.6.10/user/building.html#scenarios-and-overrides) enable models to be easily manipulated.
 An override named `dea-renewable-cost` can be used for example in this way:
 
 ```bash
@@ -87,7 +87,7 @@ In Euro-Calliope, we model load shedding not as actual reduction of demand but a
 This supply has high variable cost (see `tech-cost.yaml` parameter file) and no fixed cost.
 Due to its high cost, it will only be used when no other, less costly, option is available.
 
-Calliope provides a built-in mechanism that is similar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/v0.6.7/user/building.html#allowing-for-unmet-demand).
+Calliope provides a built-in mechanism that is similar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/v0.6.10/user/building.html#allowing-for-unmet-demand).
 The benefit of using the `load-shedding` override over Calliope's built-in mechanism is that it is more targeted towards modelling shedding of electrical load and provides more flexibility -- for example in terms of the cost of shed load.
 
 ## Rebuild

@@ -11,23 +11,23 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        "numpy",
-        "scipy",
-        "pandas",
-        "xarray",
-        "pycountry==18.12.8"
+        # "numpy", # TODO readd after solving #262
+        # "scipy", # TODO readd after solving #262
+        # "pandas", # TODO readd after solving #262
+        # "xarray", # TODO readd after solving #262
+        # "pycountry==18.12.8" # TODO readd after solving #262
     ],
     extras_require={
         'geo': [
-            "geopandas",
-            "rasterio",
-            "rasterstats",
+            # "geopandas", # TODO readd after solving #262
+            # "rasterio", # TODO readd after solving #262
+            # "rasterstats", # TODO readd after solving #262
         ],
         'docs': [
-            "pydot",
-            "graphviz",
-            "mkdocs",
-            "jsonschema2md"
+            # "pydot", # TODO readd after solving #262
+            # "graphviz", # TODO readd after solving #262
+            # "mkdocs", # TODO readd after solving #262
+            # "jsonschema2md" # TODO readd after solving #262
         ]
     },
     entry_points={

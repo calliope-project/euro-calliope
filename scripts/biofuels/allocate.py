@@ -71,7 +71,8 @@ def biofuel_potential(path_to_national_potentials, path_to_national_costs, path_
         national_potentials = (
             national_potentials
             .rename(lambda x: "EUR", level="country_code")
-            .sum(level=["country_code", "feedstock"])
+            .groupby(level=["country_code", "feedstock"])
+            .sum()
         )
 
     total_potential = allocate_potentials(
