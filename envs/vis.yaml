@@ -8,10 +8,10 @@ dependencies:
     - pandas=1.2.3
     - pycountry=18.12.8
     - matplotlib=3.4.3
-    - gdal=3.2.1
-    - libgdal=3.2.1
-    - fiona=1.8.18
-    - rasterio=1.2.1
+    - gdal=3.3.1
+    - libgdal=3.3.1
+    - fiona=1.8.20
+    - rasterio=1.2.6
     - geos=3.9.1
     - geopandas=0.9.0
     - pycountry=18.12.8

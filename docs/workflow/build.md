@@ -53,7 +53,7 @@ It is a complete Calliope model and can be used like any other, for example like
 calliope run ./build/models/national/example-model.yaml
 ```
 
-For more information on how to use Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/).
+For more information on how to use Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.10/).
 
 ## Customise
 

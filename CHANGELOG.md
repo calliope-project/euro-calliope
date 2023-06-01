@@ -13,7 +13,9 @@
 * **ADD** a Snakemake profile to run using conda instead of mamba (#211).
 * **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality (#152).
 * **ADD** nuclear technology capacity allocation workflow which uses the configuration parameter `nuclear-capacity-scenario` to select whether today's capacities define limits in the model definition ("current") or whether ranges set bounds on future capacity (by linking to a configuration CSV file) (#78).
-* **ADD** a Snakemake rule that generates a .csv and .nc file that provide an summary of the potentials (= per-tech constraints) for each technology and location (#250). 
+* **ADD** a Snakemake rule that generates a .csv and .nc file that provide an summary of the potentials (= per-tech constraints) for each technology and location (#250).
+* **ADD** ability to run on Apple silicon devices (#263).
+    * Updated geo packages from gdal 3.2 -> 3.3.
 
 ### Updated (models)
 
@@ -23,6 +25,7 @@
     * keep technology definitions and their allocations to locations in the model in the same file; and
     * separate tech config YAML files from data CSV files. The former are found in the `techs` subdirectory, while the latter are in `timeseries`.
 * **UPDATE** to most recent JRC Hydro-Power database v10 (#248).
+* **UPDATE** Calliope version from 0.6.7 to [0.6.10](https://calliope.readthedocs.io/en/v0.6.10/history.html#id1) (#263).
 
 ### Updated (workflow)
 
