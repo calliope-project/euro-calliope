@@ -38,6 +38,8 @@ ALL_CF_TECHNOLOGIES = [
 ALL_DEMAND_CARRIERS = ["electricity"]
 
 def ensure_lib_folder_is_linked():
+    if not workflow.conda_prefix:
+        return
     link = Path(workflow.conda_prefix) / "lib"
     if not link.exists():
         print("Creating link from conda env dir to eurocalliopelib.")

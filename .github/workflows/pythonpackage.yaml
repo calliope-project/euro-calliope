@@ -22,7 +22,7 @@ jobs:
                 auto-update-conda: true
                 python-version: 3.8
                 activate-environment: test-eurocalliope
-                environment-file: test-requirements.yaml
+                environment-file: requirements-test.yaml
             - name: Test with pytest
               run: |
                 pytest

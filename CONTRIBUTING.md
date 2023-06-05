@@ -71,7 +71,7 @@ Here's how.
 First, create a test environment using mamba or conda:
 
 ```bash
-mamba env create -f test-requirements.yaml --no-default-packages # or replace mamba with conda
+mamba env create -f requirements-test.yaml --no-default-packages # or replace mamba with conda
 conda activate test-eurocalliope
 ```
 

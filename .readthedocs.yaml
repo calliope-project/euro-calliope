@@ -8,4 +8,4 @@ mkdocs:
   configuration: mkdocs.yaml
 
 conda:
-  environment: envs/docs.yaml
+  environment: requirements-docs.yaml
