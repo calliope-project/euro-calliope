@@ -12,4 +12,4 @@ dependencies:
     - jinja2=2.11.3
     - pip=21.0.1
     - pip:
-        - -e ../../lib
+        - -e ./lib

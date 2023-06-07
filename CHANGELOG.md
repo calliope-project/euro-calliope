@@ -13,6 +13,9 @@
 * **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality (#152).
 * **ADD** nuclear technology capacity allocation workflow which uses the configuration parameter `nuclear-capacity-scenario` to select whether today's capacities define limits in the model definition ("current") or whether ranges set bounds on future capacity (by linking to a configuration CSV file) (#78).
 * **ADD** a Snakemake rule that generates a .csv and .nc file that provide an summary of the potentials (= per-tech constraints) for each technology and location (#250).
+* **ADD** ability to run on Apple silicon devices (#263).
+    * Updated geo packages from gdal 3.2 -> 3.3.
+* **ADD** re-execution triggers based on config and env changes (#264).
 
 ### Updated (models)
 
@@ -22,6 +25,7 @@
     * keep technology definitions and their allocations to locations in the model in the same file; and
     * separate tech config YAML files from data CSV files. The former are found in the `techs` subdirectory, while the latter are in `timeseries`.
 * **UPDATE** to most recent JRC Hydro-Power database v10 (#248).
+* **UPDATE** Calliope version from 0.6.7 to [0.6.10](https://calliope.readthedocs.io/en/v0.6.10/history.html#id1) (#263).
 
 ### Updated (workflow)
 
@@ -32,6 +36,8 @@
 
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
+* **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264).
+* **UPDATE** default conda prefix directory including consistent handling of the path to eurocalliopelib (#264).
 
 ### Fixed (models)
 
@@ -40,10 +46,6 @@
 ### Fixed (documentation)
 
 * **FIX** links in the documention to always point to the most recent version of the pre-builts (#218).
-
-### Fixed (environments)
-
-* **FIX** incompatibility of Snakemake 6.1.1 and tabulate 0.9 by downgrading to tabulate 0.8.10. (#249).
 
 ## 1.1.0 (2021-12-22)
 

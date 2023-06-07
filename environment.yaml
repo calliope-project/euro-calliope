@@ -3,7 +3,8 @@ channels:
     - conda-forge
     - bioconda
 dependencies:
-    - python=3.8
+    - python=3.11
     - pycountry=18.12.8
-    - snakemake-minimal=6.1.1
-    - tabulate=0.8.10 # fixes incompatibility of tabulate 0.9 and snakemake 6.1.1. Should be fixed after snakemake 7.15.2
+    - snakemake-minimal=7.26.0
+variables:
+    SNAKEMAKE_PROFILE: ./profiles/default

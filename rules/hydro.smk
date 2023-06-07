@@ -26,8 +26,6 @@ rule download_pumped_hydro_data:
 
 rule download_runoff_data:
     message: "Create an atlite cutout of Europe consisting of ERA5 runoff data between the years {wildcards.first_year} and {wildcards.final_year}."
-    input:
-        script = script_dir + "hydro/runoff.py"
     params:
         x_min = config["scope"]["spatial"]["bounds"]["x_min"],
         x_max = config["scope"]["spatial"]["bounds"]["x_max"],
@@ -85,7 +83,6 @@ rule stations_database:
 rule preprocess_basins:
     message: "Preprocess basins."
     input:
-        script = script_dir + "hydro/preprocess_basins.py",
         basins = rules.basins_database.output[0]
     params:
         x_min = config["scope"]["spatial"]["bounds"]["x_min"],
@@ -100,7 +97,6 @@ rule preprocess_basins:
 rule preprocess_hydro_stations:
     message: "Preprocess hydro stations."
     input:
-        script = script_dir + "hydro/preprocess_hydro_stations.py",
         stations = rules.stations_database.output[0],
         basins = rules.preprocess_basins.output[0],
         phs_storage_capacities = rules.download_pumped_hydro_data.output[0]
@@ -116,7 +112,6 @@ rule preprocess_hydro_stations:
 rule inflow_m3:
     message: "Determine water inflow time series for all hydro electricity between the years {wildcards.first_year} and {wildcards.final_year}."
     input:
-        script = script_dir + "hydro/inflow_m3.py",
         stations = rules.preprocess_hydro_stations.output[0],
         basins = rules.preprocess_basins.output[0],
         runoff = rules.download_runoff_data.output[0]
@@ -130,7 +125,6 @@ rule inflow_m3:
 rule inflow_mwh:
     message: "Determine energy inflow time series for all hydro electricity between the years {wildcards.first_year} and {wildcards.final_year}."
     input:
-        script = script_dir + "hydro/inflow_mwh.py",
         stations = rules.inflow_m3.output[0],
         generation = rules.download_hydro_generation_data.output[0]
     params:
@@ -146,7 +140,6 @@ rule inflow_mwh:
 rule hydro_capacities:
     message: "Determine hydro capacities on {wildcards.resolution} resolution."
     input:
-        script = script_dir + "hydro/hydro_capacities.py",
         locations = rules.units.output[0],
         plants = rules.preprocess_hydro_stations.output[0]
     output:
@@ -159,7 +152,6 @@ rule hydro_capacities:
 rule capacity_factors_hydro:
     message: "Generate capacityfactor time series for hydro electricity on {wildcards.resolution} resolution."
     input:
-        script = script_dir + "hydro/capacityfactors_hydro.py",
         capacities = rules.hydro_capacities.output[0],
         stations = "build/data/hydro-electricity-with-energy-inflow-{first_year}-{final_year}.nc".format(
             first_year = config["scope"]["temporal"]["first-year"],

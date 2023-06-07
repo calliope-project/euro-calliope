@@ -4,6 +4,7 @@ local-cores: 1
 latency-wait: 60
 use-envmodules: True
 use-conda: True
+conda-prefix: ../envs/snakemake/euro-calliope/
 default-resources: [
     "runtime=10",
     "cores=1",

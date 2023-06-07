@@ -23,7 +23,6 @@ rule entsoe_tyndp_xlsx:
 rule transmission_entsoe_tyndp_template:
     message: "Create YAML file of national-scale links with ENTSO-E TYNDP net-transfer capacities"
     input:
-        script = script_dir + "transmission/template_transmission_entsoe_tyndp.py",
         template = techs_template_dir + "transmission/electricity-transmission.yaml",
         locations = rules.locations_template.output.csv,
         entsoe_tyndp = rules.entsoe_tyndp_xlsx.output[0]
@@ -43,7 +42,6 @@ rule transmission_entsoe_tyndp_template:
 rule link_locations_with_transmission_techs_template:
     message: "Link {wildcards.resolution} direct neighbours and neighbours with sea connections with transmission techs from template."
     input:
-        script = script_dir + "transmission/template_transmission.py",
         template = techs_template_dir + "transmission/electricity-transmission.yaml",
         units = rules.units.output[0]
     params:

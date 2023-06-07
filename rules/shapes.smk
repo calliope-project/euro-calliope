@@ -35,7 +35,6 @@ rule raw_gadm_administrative_borders:
 rule administrative_borders_gadm:
     message: "Merge administrative borders of all countries up to layer {params.max_layer_depth}."
     input:
-        script = script_dir + "shapes/gadm.py",
         countries = [f"build/data/raw-gadm/gadm36_{country_code}.gpkg"
                      for country_code in [pycountry.countries.lookup(country).alpha_3
                                           for country in config["scope"]["spatial"]["countries"]]
@@ -64,7 +63,6 @@ rule download_raw_nuts_units:
 rule administrative_borders_nuts:
     message: "Normalise NUTS administrative borders."
     input:
-        script = script_dir + "shapes/nuts.py",
         zipped = rules.download_raw_nuts_units.output[0]
     params:
         crs = config["crs"],
@@ -83,7 +81,6 @@ rule administrative_borders_nuts:
 rule units:
     message: "Form units of resolution {wildcards.resolution} by remixing NUTS and GADM."
     input:
-        script = script_dir + "shapes/units.py",
         nuts = rules.administrative_borders_nuts.output[0],
         gadm = rules.administrative_borders_gadm.output[0]
     params:
@@ -98,7 +95,6 @@ rule units:
 rule units_without_shape:
     message: "Dataset of units on resolution {wildcards.resolution} without geo information."
     input:
-        script = script_dir + "shapes/nogeo.py",
         units = rules.units.output[0]
     output: "build/data/{resolution}/units.csv"
     conda: "../envs/geo.yaml"
@@ -133,7 +129,6 @@ rule eez:
 rule locations_template:
     message: "Generate locations configuration file for {wildcards.resolution} resolution from template."
     input:
-        script = script_dir + "shapes/template_locations.py",
         template = model_template_dir + "locations.yaml",
         shapes = rules.units.output[0]
     output:

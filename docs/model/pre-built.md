@@ -3,7 +3,7 @@
 If you want an easy entry into using and exploring Euro-Calliope, our pre-built models provide the jump start you need.
 The pre-built models are ordinary Calliope models that you can use like any other.
 If you are unfamiliar with Calliope, we'll show you below how to run the model.
-After going through these first steps, we advise you to head over to [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/) to learn its basic usage.
+After going through these first steps, we advise you to head over to [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.10/) to learn its basic usage.
 
 ## Prepare
 

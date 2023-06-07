@@ -3,14 +3,11 @@
 # See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
 
 version: 2
-
-mkdocs:
-  configuration: mkdocs.yaml
-
-conda:
-  environment: envs/docs.yaml
-
 build:
-  os: ubuntu-22.04
+  os: ubuntu-22.04 # required
   tools:
     python: mambaforge-4.10
+mkdocs:
+  configuration: mkdocs.yaml
+conda:
+  environment: requirements-docs.yaml
