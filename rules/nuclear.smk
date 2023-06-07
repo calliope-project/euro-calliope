@@ -20,7 +20,6 @@ rule jrc_power_plant_database:
 rule nuclear_regional_capacity:
     message: "Use current geolocations of nuclear capacity in Europe to assign nuclear capacity to {wildcards.resolution} regions."
     input:
-        script = script_dir + "nuclear/regional_capacity.py",
         power_plant_database = rules.jrc_power_plant_database.output[0],
         units = rules.units.output[0]
     params:

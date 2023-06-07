@@ -47,8 +47,8 @@ The following subsections show you how to run the tests and how to write your ow
 Tests of models with continental and national resolution run automatically when you run the entire workflow. To run the tests of models with regional resolution too, do the following:
 
 ```bash
-snakemake --profile profiles/default # builds all models and runs continental and national tests
-snakemake --profile profiles/default all_tests # builds all models and runs continental, national, and regional tests
+snakemake # builds all models and runs continental and national tests
+snakemake all_tests # builds all models and runs continental, national, and regional tests
 ```
 
 ### Run the minimal workflow tests
@@ -57,7 +57,7 @@ As a developer, you may want to run the entire workflow often to spot errors ear
 For that, you can use a minimal test configuration that takes less time to run than the default configuration.
 
 ```bash
-snakemake --profile profiles/default --configfile="config/minimal.yaml" all_tests
+snakemake --configfile="config/minimal.yaml" all_tests
 ```
 
 Make sure to run this in a clean working directory.
@@ -71,7 +71,7 @@ Here's how.
 First, create a test environment using mamba or conda:
 
 ```bash
-mamba env create -f test-requirements.yaml --no-default-packages # or replace mamba with conda
+mamba env create -f requirements-test.yaml --no-default-packages # or replace mamba with conda
 conda activate test-eurocalliope
 ```
 
@@ -121,7 +121,7 @@ Be aware that you can publish a release only if you are a maintainer of the GitH
     3. Update the changelog and add the release date.
     4. Update the release date in [./CITATION.cff](./CITATION.cff).
     5. (If necessary) Update [./LICENSE.md](./LICENSE.md).
-    6. (If necessary) Update `docs/img/spatial-scope-and-resolutions.png` by running `snakemake --profile profiles/default -s rules/doc.smk docs/img/spatial-scope-and-resolutions.png`. Inspect the result visually. Check it in if it changed; check out the old version if it did not change. The figure will change when the spatial scope or resolution has changed.
+    6. (If necessary) Update `docs/img/spatial-scope-and-resolutions.png` by running `snakemake -s rules/doc.smk docs/img/spatial-scope-and-resolutions.png`. Inspect the result visually. Check it in if it changed; check out the old version if it did not change. The figure will change when the spatial scope or resolution has changed.
 2. Build the pre-builts and test everything using the `all_tests` rule. Make sure you start with a clean workflow folder: delete `./build` *and* `./data/automatic` should they exist.
 3. Commit, open a pull request onto `develop`, and merge the release branch into both `develop` and `main` after successful review.
 4. Add a `vX.Y.Z` release tag to `main`, push it, and add a release on GitHub.

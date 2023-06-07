@@ -20,15 +20,15 @@ We support this workflow through three Snakemake rules: `send`, `receive`, and `
 It works like the following.
 
 First, start local and make sure the `cluster-sync` configuration parameters fit your environment.
-Next, run `snakemake --profile profiles/default send` to send the entire repository to your cluster.
+Next, run `snakemake send` to send the entire repository to your cluster.
 On the cluster, execute the workflow with Snakemake ([see above](./build-remote.md#build-on-a-cluster)).
-After the workflow has finished, download results by locally running `snakemake --profile profiles/default receive`.
+After the workflow has finished, download results by locally running `snakemake receive`.
 By default, this will download results into `build/cluster`.
 
 This workflow works iteratively too.
-After analysing your cluster results locally, you may want to make changes locally, send these changes to the cluster (`snakemake --profile profiles/default send`), rerun on the cluster, and download updated results (`snakemake --profile profiles/default receive`).
+After analysing your cluster results locally, you may want to make changes locally, send these changes to the cluster (`snakemake send`), rerun on the cluster, and download updated results (`snakemake receive`).
 
-To remove cluster results on your local machine, run `snakemake --profile profiles/default clean_cluster_results`.
+To remove cluster results on your local machine, run `snakemake clean_cluster_results`.
 
 ## Be notified of build successes or fails
 

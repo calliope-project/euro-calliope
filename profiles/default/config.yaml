@@ -1,2 +1,4 @@
 use-conda: True
-cores: 1
+conda-frontend: mamba
+cores: 2
+conda-prefix: ../envs/snakemake/euro-calliope/
