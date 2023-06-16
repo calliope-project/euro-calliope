@@ -123,7 +123,7 @@ rule no_params_model_template:
         template = model_template_dir + "{template}",
     output: "build/models/{resolution}/{template}"
     wildcard_constraints:
-        template = "interest-rate.yaml|scenarios.yaml"
+        template = "interest-rate.yaml"
     conda: "envs/shell.yaml"
     shell: "cp {input.template} {output}"
 
@@ -151,7 +151,6 @@ rule model_template:
             input_file=[
                 "interest-rate.yaml",
                 "locations.yaml",
-                "scenarios.yaml",
                 "techs/demand/electricity.yaml",
                 "techs/storage/electricity.yaml",
                 "techs/storage/hydro.yaml",

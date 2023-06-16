@@ -24,6 +24,8 @@ site_dir: build/docs
 markdown_extensions:
     - admonition
     - attr_list
+    - pymdownx.details
+    - pymdownx.tabbed
     - toc:
         permalink: "#"
 plugins:
@@ -39,4 +41,5 @@ plugins:
     - add-file:
         path_to_file: ./CHANGELOG.md
         path_to_src_dir: .
+
 extra_css: [./css/extras.css]

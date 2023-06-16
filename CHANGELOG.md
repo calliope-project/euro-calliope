@@ -4,8 +4,7 @@
 
 ### Added (models)
 
-* **ADD** top level model configuration file `scenarios.yaml` which can act as the focal point to consolidate all available overrides in the model (#209).
-* **ADD** nuclear power plant technology with capacity limits. Capacity limits can be equals to today or be bound by a minimum and maximum capacity to represent an available range in future. In either case, capacities are allocated at a subnational resolutions based on linear scaling from current capacity geolocations, using the JRC power plant database (#78).
+* **ADD** nuclear power plant technology with capacity limits. Capacity limits can be equals to today or be bound by a minimum and maximum capacity to represent an available range in future. In either case, capacities are allocated at a subnational resolution based on linear scaling from current capacity geolocations, using the JRC power plant database (#78).
 
 ### Added (workflow)
 

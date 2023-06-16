@@ -4,8 +4,8 @@ test-model:
             default: []
             directional-pv: ["directional-rooftop-pv"]
             e-to-p-ratios: ["exclusive-energy-to-power-ratios"]
-            frozen-hydro: ["freeze-hydro-capacities", "no-hydro-fixed-cost"]
-            alternative-cost: ["dea-renewable-cost", "schroeder-hydro-cost"]
+            frozen-hydro: ["freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "no-hydro-supply-fixed-cost", "no-hydro-storage-fixed-cost"]
+            alternative-cost: ["dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost"]
             shed-load: ["load-shedding"]
         national:
             default: []
@@ -13,13 +13,13 @@ test-model:
             connected_entsoe_tyndp: ["connect_entsoe_tyndp"]
             directional-pv: ["directional-rooftop-pv"]
             e-to-p-ratios: ["exclusive-energy-to-power-ratios"]
-            frozen-hydro: ["freeze-hydro-capacities", "no-hydro-fixed-cost"]
-            alternative-cost: ["dea-renewable-cost", "schroeder-hydro-cost"]
+            frozen-hydro: ["freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "no-hydro-supply-fixed-cost", "no-hydro-storage-fixed-cost"]
+            alternative-cost: ["dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost"]
             shed-load: ["load-shedding"]
         regional:
             default: ["connect_all_neighbours", "run_barrier_no_crossover"]
             all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
-                            "dea-renewable-cost", "schroeder-hydro-cost", "freeze-hydro-capacities", "load-shedding"]
+                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding"]
     overrides:
         continental: {}
         national:
