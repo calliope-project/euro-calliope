@@ -10,6 +10,7 @@ def preprocess_basins(path_to_basins, bbox, path_to_output):
     basins.to_file(path_to_output, driver=DRIVER)
 
 
+# TODO: replace with shapely.make_valid (requires updating many geo.yaml env dependencies to udpate to shapely 1.8.2)
 def _buffer_if_necessary(shape):
     """Fix the basins shapes which are invalid.
 

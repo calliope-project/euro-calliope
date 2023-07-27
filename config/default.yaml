@@ -24,6 +24,8 @@ scaling-factors: # values are tuned for models with a few hours resolution and o
     power: 0.00001 # from MW(h) to 100 GW(h)
     area: 0.0001 # from km2 to 10,000 km2
     monetary: 0.000000001 # from EUR to 1 billion EUR
+snakemake:
+    max-threads: 4
 capacity-factors:
     min: 0.001
     max: 10 # 0.001 -> 10 leads to a numerical range of 1e5 (hourly resolution)
@@ -144,6 +146,7 @@ quality-control:
         scale-phs-according-to-geth-et-al: false
         station-nearest-basin-max-km: 1
     capacity-factor-gridcell-overlap-threshold: 0.97 # Ceuta y Melilla has smallest overlap
+    shared-coast-polygon-area-share-threshold: 0.01
 
 sea-connections:
     continental: []

@@ -112,6 +112,15 @@ properties:
             monetary:
                 type: number
                 description: "Applied to all quantities of monetary cost (base: EUR)."
+
+    snakemake:
+        type: object
+        description: Snakemake workflow configuration options.
+        properties:
+            max-threads:
+                type: number
+                description: Maximum number of threads that rules can utilise (this configuration option must be called from the rule option `threads` to take effect).
+                minimum: 0
     parameters:
         type: object
         description: Parameter values of the models.
@@ -411,7 +420,11 @@ properties:
                 description: Set the lower threshold of per-region land area covered by gridcells containing capacity factor timeseries data. Not all land area is covered by data because there are sometimes small islands linked to a region which are missed by the onshore wind / PV datasets. These islands are usually very small, consitituting less than 0.01% of a region.
                 minimum: 0
                 maximum: 1
-
+            shared-coast-polygon-area-share-threshold:
+                type: number
+                description: Set the fraction of a Euro-Calliope unit's area below which a component of the unit can be ignored (e.g. small islands) when assigning Exclusive Economic Zones to subnational Euro-Calliope units.
+                minimum: 0
+                maximum: 1
     capacity_factors:
         type: object
         description: Parameters related to average or time-dependent capacity factors of renewables.
