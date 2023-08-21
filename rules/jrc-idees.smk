@@ -35,15 +35,15 @@ rule jrc_idees_unzipped:
     shell: "unzip 'data/automatic/jrc-idees/*.zip' '*{params.sector_title_case}*' -d {output}"
 
 
-'''rule jrc_idees_transport_processed:
+rule jrc_idees_transport_processed:
     message: "Process {wildcards.dataset} transport data from JRC-IDEES to be used in understanding current and future transport demand"
     input:
         script = script_dir + "jrc-idees/transport.py",
         unprocessed_data = "build/data/jrc-idees/transport/unprocessed"
     output: "build/data/jrc-idees/transport/processed-{dataset}.nc"
     wildcard_constraints:
-        dataset = "((road-energy)|(road-distance)|(road-vehicles)"
+        dataset = "((road-energy)|(road-distance)|(road-vehicles))"
     conda: "../envs/default.yaml"
-    script: "../scripts/jrc-idees/transport.py"'''
+    script: "../scripts/jrc-idees/transport.py"
 
 

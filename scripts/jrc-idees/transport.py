@@ -26,19 +26,7 @@ DATASET_PARAMS = {
         "idx_start_str": "Stock of vehicles - in use",
         "idx_end_str": "New vehicle-registrations",
         "unit": "N. vehicles"
-    },
-    "rail-energy": {
-        "sheet_name": "TrRail_ene",
-        "idx_start_str": "Total energy consumption",
-        "idx_end_str": "Indicators",
-        "unit": "ktoe"
-    },
-    "rail-distance": {
-        "sheet_name": "TrRail_act",
-        "idx_start_str": "Vehicle-km (mio km)",
-        "idx_end_str": "Stock of vehicles",
-        "unit": "mio_km"
-    },
+    }
 }
 
 ROAD_CARRIERS = {
@@ -48,12 +36,6 @@ ROAD_CARRIERS = {
     'LPG engine': 'lpg',
     'Battery electric vehicles': 'electricity',
     'Plug-in hybrid electric': 'petrol'
-}
-
-RAIL_CARRIERS = {
-    'Diesel oil (incl. biofuels)': 'diesel',
-    'Electric': 'electricity',
-    'Diesel oil': 'diesel'
 }
 
 
@@ -97,8 +79,6 @@ def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, **kwargs)
         df = process_road_vehicles(df, column_names)
     elif sheet_name == 'TrRoad_ene':
         df = process_road_energy(df, column_names)
-    elif sheet_name == 'TrRail_ene' or sheet_name == 'TrRail_act':
-        df = process_rail(df, column_names)
 
     df = (
         df
@@ -114,24 +94,6 @@ def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, **kwargs)
     )
 
     return df
-
-
-def process_rail(df, column_names):
-    df['carrier'] = df.where(df.indent == 3).iloc[:, 0]
-    # ASSUME: All metro/tram/high speed rail is electrically powered (this is implicit when looking at the Excel sheet directly)
-    df.loc[df.vehicle_type == 'Metro and tram, urban light rail', 'carrier'] = 'electricity'
-    df.loc[df.vehicle_type == 'High speed passenger trains', 'carrier'] = 'electricity'
-
-    df['carrier'] = df['carrier'].replace(RAIL_CARRIERS).fillna(df.vehicle_type.replace(RAIL_CARRIERS))
-    df.loc[df.section == 'Freight transport', 'vehicle_type'] = 'Freight'
-
-    return (
-        df
-        .where((df.indent > 1) & (df.carrier.str.find('Conventional') == -1))
-        .dropna()
-        .set_index(['section', 'vehicle_type', 'carrier'])
-        .drop([column_names, 'indent'], axis=1)
-    )
 
 
 def process_road_vehicles(df, column_names):

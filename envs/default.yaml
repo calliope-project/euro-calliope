@@ -11,5 +11,8 @@ dependencies:
     - pycountry=18.12.8
     - jinja2=2.11.3
     - pip=21.0.1
+    - xarray=2022.3
+    - netCDF4
     - pip:
         - -e ./lib
+        - styleframe
