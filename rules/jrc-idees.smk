@@ -35,36 +35,15 @@ rule jrc_idees_unzipped:
     shell: "unzip 'data/automatic/jrc-idees/*.zip' '*{params.sector_title_case}*' -d {output}"
 
 
-rule jrc_idees_transport_processed:
+'''rule jrc_idees_transport_processed:
     message: "Process {wildcards.dataset} transport data from JRC-IDEES to be used in understanding current and future transport demand"
     input:
         script = script_dir + "jrc-idees/transport.py",
         unprocessed_data = "build/data/jrc-idees/transport/unprocessed"
     output: "build/data/jrc-idees/transport/processed-{dataset}.nc"
     wildcard_constraints:
-        dataset = "((road-energy)|(road-distance)|(road-vehicles)|(rail-energy)|(rail-distance))"
+        dataset = "((road-energy)|(road-distance)|(road-vehicles)"
     conda: "../envs/default.yaml"
-    script: "../scripts/jrc-idees/transport.py"
+    script: "../scripts/jrc-idees/transport.py"'''
 
 
-rule jrc_idees_industry_processed:
-    message: "Process {wildcards.dataset} industry data from JRC-IDEES to be used in understanding current and future industry demand"
-    input:
-        script = script_dir + "jrc-idees/industry.py",
-        unprocessed_data = "build/data/jrc-idees/industry/unprocessed"
-    output: "build/data/jrc-idees/industry/processed-{dataset}.nc"
-    wildcard_constraints:
-        dataset = "((energy)|(production))"
-    conda: "../envs/default.yaml"
-    threads: config["snakemake"]["max-threads"]
-    script: "../scripts/jrc-idees/industry.py"
-
-
-rule jrc_idees_tertiary_processed:
-    message: "Process tertiary sector energy data from JRC-IDEES to be used in understanding current and future tertiary sector demand"
-    input:
-        script = script_dir + "jrc-idees/tertiary.py",
-        unprocessed_data = "build/data/jrc-idees/tertiary/unprocessed"
-    output: "build/data/jrc-idees/tertiary/processed-energy.nc"
-    conda: "../envs/default.yaml"
-    script: "../scripts/jrc-idees/tertiary.py"

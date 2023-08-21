@@ -13,6 +13,7 @@ model_test_dir = f"{test_dir}model"
 template_dir = f"{root_dir}templates/"
 model_template_dir = f"{template_dir}models/"
 techs_template_dir = f"{model_template_dir}techs/"
+script_dir = f"{root_dir}scripts/"
 
 include: "./rules/shapes.smk"
 include: "./rules/wind-and-solar.smk"
@@ -22,13 +23,14 @@ include: "./rules/transmission.smk"
 include: "./rules/demand.smk"
 include: "./rules/nuclear.smk"
 include: "./rules/sync.smk"
+include: "./rules/jrc-idees.smk"
 min_version("7.8")
 localrules: all, clean
 wildcard_constraints:
         resolution = "continental|national|regional"
 
 ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
-ruleorder: bio_techs_and_locations_template > techs_and_locations_template
+ruleorder: bio_techs_and_locations_template > techs_and_locations_template > jrc_idees_zipped
 
 ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
