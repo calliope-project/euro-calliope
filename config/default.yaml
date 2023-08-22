@@ -14,6 +14,7 @@ data-sources:
     entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
     jrc-ppdb: https://zenodo.org/record/3574566/files/JRC-PPDB-OPEN.ver1.0.zip
     jrc-idees: https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/JRC-IDEES/JRC-IDEES-2015_v1/JRC-IDEES-2015_All_xlsx_{country_code}.zip
+    eurostat-base-url: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/eurostat/{dataset}.tsv.gz
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch
