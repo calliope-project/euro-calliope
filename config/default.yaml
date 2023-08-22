@@ -142,6 +142,8 @@ parameters:
                 proxy: population
     biofuel-efficiency: 0.45
     wind-and-solar-potential-scenario: technical-potential
+    transport:
+        future-vehicle-efficiency-percentile: 0.25
     entsoe-tyndp:
         scenario: National Trends
         grid: Reference
