@@ -39,6 +39,8 @@ capacity-factors:
         offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
         ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
     trim-ninja-timeseries: True
+
+# added for road-transport
 statistical-code-mapping:
     eurostat-to-sectoral-carrier-names: config/eurostat/carrier-names.csv
     eurostat-to-sectors:

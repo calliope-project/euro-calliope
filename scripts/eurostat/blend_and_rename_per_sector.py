@@ -48,17 +48,13 @@ def sectoral_energy_balances(
 
     carrier_name_mapping = pd.read_csv(path_to_carrier_name_mapping, index_col=0)
 
+    # TODO: since road-transport, has a other-road-transport, could only leave this case in,
+    #  but other case will be used in future
     if f"other-{sector}" in category_name_mapping.keys():
         # ASSUME: energy demand in "other" sectors (incl. military, fisheries, agriculture)
         # can be assigned to main Euro-Calliope "sectors" according to the type of demand
         sectoral_energy_balance = add_other_sector_to_main_sector(
             all_energy_balances, sector, f"other-{sector}", carrier_name_mapping, category_name_mapping
-        )
-
-    elif sector == "industry":
-        sectoral_energy_balance = rename_carriers(
-            eurostat_industry_subsectors_to_jrc_names(all_energy_balances, category_name_mapping),
-            carrier_name_mapping, sector
         )
 
     else:
@@ -70,13 +66,6 @@ def sectoral_energy_balances(
     sectoral_energy_balance = sectoral_energy_balance.sel(year=YEARS)
 
     sectoral_energy_balance.to_netcdf(path_to_output)
-
-
-def eurostat_industry_subsectors_to_jrc_names(all_energy_balances, category_name_mapping):
-    return utils.rename_and_groupby(
-        all_energy_balances, category_name_mapping,
-        dim_name="cat_code", new_dim_name="cat_name"
-    )
 
 
 def slice_on_sector(all_energy_balances, category_name_mapping):
