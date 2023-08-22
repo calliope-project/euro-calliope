@@ -3,6 +3,8 @@ import pycountry
 import pandas as pd
 import xarray as xr
 
+from string import digits
+
 def eu_country_code_to_iso3(eu_country_code):
     """Converts EU country code to ISO 3166 alpha 3.
     The European Union uses its own country codes, which often but not always match ISO 3166.
@@ -165,6 +167,14 @@ def to_numeric(series):
     """
     series = series.astype(str).str.extract("(\\-*\\d+\\.*\\d*)")[0]
     return pd.to_numeric(series, errors="coerce")
+
+# remove digits for ch-stats/transport.py
+def remove_digits():
+    """
+    Functionality to be passed to str.translate to remove numbers from
+    string endings
+    """
+    return str.maketrans("", "", digits)
 
 
 # added read_eurostat_tsv to be used in annual_energy_balance.py which is used in eurostat.smk: annual_energy_balances
