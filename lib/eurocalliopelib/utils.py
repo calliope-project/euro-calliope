@@ -135,9 +135,69 @@ def rename_and_groupby(
     return da
 
 
-# had to add this util function aswell, can potentially just replace this with inline code?
+# utils for conversion
 def ktoe_to_twh(array):
     """Convert KTOE to TWH"""
     return array * 1.163e-2
+
+def pj_to_twh(array):
+    """Convert PJ to TWh"""
+    return array / 3.6
+
+def tj_to_twh(array):
+    """Convert TJ to TWh"""
+    return pj_to_twh(array) / 1000
+
+
+
+
+# to numeric added to be used in read_eurostat_tsv
+def to_numeric(series):
+    """
+    Clean up a pandas.Series which was parsed as strings, but is really numeric:
+
+    1. replace "-" for "NaN" into numbers and NaNs
+    2. removes random superscript attached to numbers
+       (e.g. pointing to footnotes in an excel), "1000c" -> 1000
+
+    Returns a numeric pandas.Series.
+
+    """
+    series = series.astype(str).str.extract("(\\-*\\d+\\.*\\d*)")[0]
+    return pd.to_numeric(series, errors="coerce")
+
+
+# added read_eurostat_tsv to be used in annual_energy_balance.py which is used in eurostat.smk: annual_energy_balances
+def read_eurostat_tsv(path_to_tsv, slice_idx=None, slice_lvl=None):
+    """
+
+    Read a typical tab-delimited file from EUROSTAT. These have a specific structure
+    where the data is tab-delimited but the multi-index data is comma delimited.
+    This function also prepares the data in the expectation that it is all numeric
+    and that the columns are given as years (a standard EUROSTAT format)
+
+    Parameters
+    ---------
+    path_to_tsv: str
+    slice_idx : str, optional
+        Index level value to slice on, if required to remove potentially function-breaking data. Requires `slice_lvl` to also be defined.
+    slice_lvl : str, optional
+        Index level name to slice on, if required to remove potentially function-breaking data. Requires `slice_idx` to also be defined.
+    """
+    df = pd.read_csv(path_to_tsv, delimiter='\t', index_col=0)
+    index_names = df.index.name.split("\\")[0].split(",")
+    column_name = df.index.name.split("\\")[1]
+    df.index = df.index.str.split(',', expand=True).rename(index_names)
+    df.columns = df.columns.rename(column_name)
+    if df.columns.name == "time":
+        df.columns = df.columns.astype(int)
+    else:
+        df.columns = df.columns.str.strip()
+
+    if slice_idx is not None:
+        df = df.xs(slice_idx, level=slice_lvl)
+
+    return df.apply(to_numeric)
+
 
 

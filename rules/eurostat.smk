@@ -8,3 +8,11 @@ rule eurostat_data_tsv:
     shell: "curl -sLo {output} {params.url}"
 
 
+rule annual_energy_balances:
+    message: "Process annual energy balances from Eurostat data"
+    input:
+        src = script_dir + "eurostat/annual_energy_balance.py",
+        eurostat_energy_balance = "data/automatic/eurostat-nrg_bal_c.tsv.gz",
+    output: "build/data/eurostat/annual-energy-balances.nc"
+    conda: "../envs/default.yaml"
+    script: "../scripts/eurostat/annual_energy_balance.py"
