@@ -150,6 +150,27 @@ def tj_to_twh(array):
     """Convert TJ to TWh"""
     return pj_to_twh(array) / 1000
 
+#  used for blend and rename, which in turn is used in eurostat.smk
+def merge_da(da_list: list, merged_da_name: str = None) -> xr.DataArray:
+    """
+    Merge dataArrays with the same dimensions but different dimension items
+    into a single xarray datarray
+
+    Args:
+        da_list (list): list of xarray dataArrays
+        merged_da_name (str, optional): Defaults to None.
+            Name of merged datarray
+
+    Returns:
+        xr.DataArray:
+            Merged Datarray, in which all dimensions contain all items defined in the
+            arrays in `da_list`
+
+    """
+    datasets = [da.rename("var") for da in da_list]
+    return xr.merge(datasets, combine_attrs="no_conflicts")["var"].rename(merged_da_name)
+
+
 
 
 
