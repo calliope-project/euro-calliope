@@ -45,17 +45,33 @@ def process_jrc_transport_data(data_dir, dataset, out_path):
         read_transport_excel(file, **DATASET_PARAMS[dataset])
         for file in data_filepaths
     ])
+    print(DATASET_PARAMS[dataset]["unit"])
     if DATASET_PARAMS[dataset]["unit"] == "ktoe":
         processed_data = processed_data.apply(utils.ktoe_to_twh)
-        unit = "twh"
-    else:
-        unit = DATASET_PARAMS[dataset]["unit"]
+        print(processed_data)
+        # bei meinem dataset gibt es gar kein unit, in dem bei bryn drinnen gibt es dies, hier wird ez einfach umegrechnet
+        # falls dies nötig wird kann ich einf noch hinzufügen, ist ja überall ktoe, dies is allgemein gültig für alle 3
+        # datasets, haben alle unit
+        #processed_data.index = processed_data.index.set_levels(['twh'], level='unit')
 
-    processed_da = processed_data.stack().rename(f"jrc-idees-transport-{dataset}").to_xarray()
-    country_code_mapping = utils.convert_valid_countries(processed_da.country_code.values)
-    processed_da = utils.rename_and_groupby(processed_da, country_code_mapping, dim_name="country_code")
 
-    processed_da.assign_attrs(unit=unit).to_netcdf(out_path)
+
+    processed_data.stack('year').to_csv(out_path)
+
+    # EXPLANATION: Here I created the country code mappings code for normal pandas, since i didnt want a dataframe, but
+    # shortly after realised that this isnt done in the code provided by the other branch by tim
+
+    #processed_da = processed_data.stack().rename(f"jrc-idees-transport-{dataset}").to_xarray()
+    #print(processed_data)
+    #country_code_mapping = utils.convert_valid_countries(processed_data.index.get_level_values('country_code').unique().tolist())
+    #print(country_code_mapping)
+    #processed_data = rename_country_codes(processed_data, country_code_mapping)
+    #print(processed_data)
+    #processed_da.assign_attrs(unit=unit).to_netcdf()
+    #print(processed_da)
+
+
+
 
 
 def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, **kwargs):
@@ -79,7 +95,6 @@ def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, **kwargs)
         df = process_road_vehicles(df, column_names)
     elif sheet_name == 'TrRoad_ene':
         df = process_road_energy(df, column_names)
-
     df = (
         df
         .assign(country_code=column_names.split(' - ')[0])
@@ -164,6 +179,32 @@ def remove_of_which(df, main_carrier, of_which_carrier):
     df.loc[updated_carrier.index] = updated_carrier
     return df
 
+# code used for case where I rename dataframe
+def rename_country_codes(df: pd.DataFrame, rename_dict: dict) -> pd.DataFrame:
+    """
+    Rename country codes in a DataFrame with MultiIndex.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+        rename_dict (dict): Mapping from old to new country codes.
+
+    Returns:
+        pd.DataFrame: DataFrame with renamed country codes.
+    """
+
+    # Get the level number for 'country_code'
+    level_number = df.index.names.index('country_code')
+
+    # Create the modified levels
+    modified_levels = [
+        level.map(rename_dict) if i == level_number else level
+        for i, level in enumerate(df.index.levels)
+    ]
+
+    # Set the modified levels in the DataFrame
+    df.index = df.index.set_levels(modified_levels)
+
+    return df
 
 if __name__ == "__main__":
     process_jrc_transport_data(

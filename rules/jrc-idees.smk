@@ -40,7 +40,7 @@ rule jrc_idees_transport_processed:
     input:
         script = script_dir + "jrc-idees/transport.py",
         unprocessed_data = "build/data/jrc-idees/transport/unprocessed"
-    output: "build/data/jrc-idees/transport/processed-{dataset}.nc"
+    output: "build/data/jrc-idees/transport/processed-{dataset}.csv"
     wildcard_constraints:
         dataset = "((road-energy)|(road-distance)|(road-vehicles))"
     conda: "../envs/default.yaml"
