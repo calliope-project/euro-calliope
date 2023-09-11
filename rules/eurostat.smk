@@ -10,21 +10,21 @@ rule eurostat_annual_energy_balances:
 rule annual_energy_balances:
     message: "Get annual energy balances from Eurostat"
     input:
-        src = "src/construct/annual_energy_balance.py",
+        src = script_dir + "eurostat/annual_energy_balance.py",
         energy_balance = "data/automatic/eurostat-energy-balance.tsv.gz",
         ch_energy_balance = "data/automatic/ch-energy-balance.xlsx",
         ch_industry_energy_balance = "data/automatic/ch-industry-energy-balance.xlsx",
-        cat_names = "data/energy_balance_category_names.csv",
-        carrier_names = "data/energy_balance_carrier_names.csv"
+        cat_names = "config/energy-balances/energy_balance_category_names.csv",
+        carrier_names = "config/energy-balances/energy_balance_carrier_names.csv"
     output: "build/annual_energy_balances.csv"
     params:
         countries = config["scope"]["spatial"]["countries"]
     conda: "../envs/default.yaml"
-    script: "../src/construct/annual_energy_balance.py"
+    script: "../scripts/eurostat/annual_energy_balance.py"
 
 
-
-rule annual_energy_balances:
+#this was the previous version
+rule annual_energy_balances_old:
     message: "Process annual energy balances from Eurostat data"
     input:
         src = script_dir + "eurostat/annual_energy_balance.py",

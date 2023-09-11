@@ -228,3 +228,18 @@ def read_eurostat_tsv(path_to_tsv, slice_idx=None, slice_lvl=None):
 
 
 
+# these functions here are needed for new annual energy balance.py
+
+def get_alpha2(country, eurostat=True):
+    if country in ["United Kingdom", "GB", "GBR"] and eurostat is True:
+        return "UK"
+    elif country in ["Greece", "GR", "GRC"] and eurostat is True:
+        return "EL"
+    else:
+        return pycountry.countries.lookup(country).alpha_2
+
+
+def gwh_to_tj(array):
+    return array * 3.6
+
+

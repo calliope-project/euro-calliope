@@ -2,7 +2,7 @@ from string import digits
 
 import pandas as pd
 
-import util
+from eurocalliopelib import utils
 
 idx = pd.IndexSlice
 
@@ -22,7 +22,7 @@ def generate_annual_energy_balance_nc(
     # Names for each consumption category/sub-category and carriers have been prepared by hand
     cat_names = pd.read_csv(path_to_cat_names, header=0, index_col=0)
     carrier_names = pd.read_csv(path_to_carrier_names, header=0, index_col=0)
-    country_codes = [util.get_alpha2(i, eurostat=True) for i in countries]
+    country_codes = [utils.get_alpha2(i, eurostat=True) for i in countries]
 
     df = pd.read_csv(path_to_input, delimiter='\t', index_col=0)
     df.index = (
@@ -30,7 +30,7 @@ def generate_annual_energy_balance_nc(
         .rename(['cat_code', 'carrier_code', 'unit', 'country'])  # comes as 'nrg_bal,siec,unit,geo\\time'
     )
     df.columns = df.columns.astype(int).rename('year')
-    df = df.transform(util.to_numeric)
+    df = df.transform(utils.to_numeric)
     df = df.reorder_levels([
         'cat_code', 'carrier_code', 'unit', 'country'
     ])
@@ -113,7 +113,7 @@ def get_ch_energy_balance_sheet(path_to_excel, sheet, skipfooter, cat_code):
 
     _df = (
         _df
-        .apply(util.to_numeric)
+        .apply(utils.to_numeric)
         .astype(float)
         .assign(cat_code=cat_code)
         .set_index("cat_code", append=True)
@@ -133,7 +133,7 @@ def get_ch_waste_consumption(path_to_excel):
         path_to_excel, sheet_name='T27',
         skiprows=5, index_col=0, header=[0, 1], skipfooter=8
     )[("Consommation d'énergie (GWh)", "Ordures")]
-    waste_stream_tj = waste_stream_gwh.apply(util.gwh_to_tj)
+    waste_stream_tj = waste_stream_gwh.apply(utils.gwh_to_tj)
     waste_stream_tdf = (
         waste_stream_tj
         .to_frame("W6100_6220")  # carrier code
@@ -179,7 +179,7 @@ def get_ch_transport_energy_balance(path_to_excel):
     _df = (
         _df
         .groupby(axis=1, level=0).sum()
-        .apply(util.to_numeric)
+        .apply(utils.to_numeric)
         .rename_axis(index='year', columns='carrier_code')
     )
     _df = (
@@ -229,7 +229,7 @@ def get_ch_industry_energy_balance(path_to_excel):
     df.index = df.index.map(df['Unnamed: 0'].where(df.TOTAL.isnull()).ffill()).map(ch_carriers)
     df = (
         df
-        .apply(util.to_numeric)
+        .apply(utils.to_numeric)
         .set_index('Unnamed: 0', append=True)
         .rename_axis(index=['carrier_code', 'year'], columns='cat_code')
         .dropna(subset=['TOTAL'])
