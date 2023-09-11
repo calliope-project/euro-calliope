@@ -1,6 +1,6 @@
 import pandas as pd
 
-import util
+from eurocalliopelib import utils
 
 EFFICIENCY_QUANTILE = 0.25
 
@@ -24,12 +24,12 @@ def get_transport_demand(
     road_efficiency_out_path, rail_energy_out_path, air_energy_out_path,
     marine_energy_out_path, road_bau_electricity_out_path, rail_bau_electricity_out_path
 ):
-    energy_balances = util.read_tdf(energy_balances_path)
-    road_energy_df = util.read_tdf(jrc_road_energy_path)
-    road_distance_df = util.read_tdf(jrc_road_distance_path)
-    road_vehicles_df = util.read_tdf(jrc_road_vehicles_path)
-    rail_energy_df = util.read_tdf(jrc_rail_energy_path)
-    rail_distance_df = util.read_tdf(jrc_rail_distance_path)
+    energy_balances = utils.read_tdf(energy_balances_path)
+    road_energy_df = utils.read_tdf(jrc_road_energy_path)
+    road_distance_df = utils.read_tdf(jrc_road_distance_path)
+    road_vehicles_df = utils.read_tdf(jrc_road_vehicles_path)
+    rail_energy_df = utils.read_tdf(jrc_rail_energy_path)
+    rail_distance_df = utils.read_tdf(jrc_rail_distance_path)
 
     # Add transport energy demand from agriculture and 'not elsewhere specified' (military)
     # assumption: agriculture oil use goes to 'road' transport demand;
@@ -145,7 +145,7 @@ def get_all_distance_efficiency(
         .droplevel('unit')
         .stack()
         .add(other_transport_road, fill_value=0)
-        .apply(util.tj_to_twh)
+        .apply(utils.tj_to_twh)
         .rename_axis(index=['country_code', 'year', 'carrier'])
         .unstack("year")
         .loc[:, YEAR_RANGE]
@@ -244,7 +244,7 @@ def get_marine_aviation(energy_balances, other_energy):
         ['O4000XBIO']
         .sum(level=['country', 'year'])
         .add(other_energy, fill_value=0)
-        .apply(util.tj_to_twh)
+        .apply(utils.tj_to_twh)
         .unstack("year")
         .interpolate(axis=1, limit_direction="both")
         .stack()
