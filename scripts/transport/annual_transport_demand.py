@@ -20,20 +20,15 @@ YEAR_RANGE = slice(2000, 2018)
 
 def get_transport_demand(
     energy_balances_path, jrc_road_energy_path, jrc_road_distance_path, jrc_road_vehicles_path,
-    jrc_rail_energy_path, jrc_rail_distance_path, road_distance_out_path, road_vehicles_out_path,
-    road_efficiency_out_path, rail_energy_out_path, air_energy_out_path,
-    marine_energy_out_path, road_bau_electricity_out_path, rail_bau_electricity_out_path
+    road_distance_out_path, road_vehicles_out_path, road_efficiency_out_path, road_bau_electricity_out_path
 ):
     energy_balances = utils.read_tdf(energy_balances_path)
     road_energy_df = utils.read_tdf(jrc_road_energy_path)
     road_distance_df = utils.read_tdf(jrc_road_distance_path)
     road_vehicles_df = utils.read_tdf(jrc_road_vehicles_path)
-    rail_energy_df = utils.read_tdf(jrc_rail_energy_path)
-    rail_distance_df = utils.read_tdf(jrc_rail_distance_path)
 
     # Add transport energy demand from agriculture and 'not elsewhere specified' (military)
     # assumption: agriculture oil use goes to 'road' transport demand;
-    # fisheries' oil use goes to marine fuel demand;
     # 'not elsewhere specified' oil use goes predominantly to 'road' transport, except kerosene which goes to aviation
     other_transport_aviation = (  # all kerosene from the military destined for aviation
         energy_balances
@@ -49,12 +44,7 @@ def get_transport_demand(
         .rename_axis(columns='carrier')
         .stack()
     )
-    other_transport_marine = (  # i.e. all fisheries' oil use
-        energy_balances
-        .loc[idx[['FC_OTH_FISH_E'], 'O4000XBIO', :, :, :]]
-        .sum(level=['country', 'year'])
-    )
-
+    print(other_transport_road)
     total_road_distance, road_efficiency, road_bau_consumption = get_all_distance_efficiency(
         energy_balances, 'FC_TRA_ROAD_E', road_energy_df,
         road_distance_df, 'vehicle_subtype', other_transport_road
@@ -77,59 +67,19 @@ def get_transport_demand(
             'Gasoline engine': 'petrol',
             'Plug-in hybrid electric': 'petrol'
         }).mean()
-        .assign(unit='twh_per_mio_km').set_index('unit', append=True)
+        #.assign(unit='twh_per_mio_km').set_index('unit', append=True)
         .stack()
     )
     road_electricity_bau = (
         road_bau_consumption
-        .sum(level=['carrier', 'vehicle_type', 'country_code', 'year', 'unit'])
+        .sum(level=['carrier', 'vehicle_type', 'country_code', 'year'])
         .xs('electricity')
-    )
-    total_rail_distance, rail_efficiency, rail_bau_consumption = get_all_distance_efficiency(
-        energy_balances, 'FC_TRA_RAIL_E', rail_energy_df, rail_distance_df, 'carrier'
-    )
-    # Some cleanup that's specific to rail data
-    rail_energy = (
-        # historical energy consumption -> historical distance
-        rail_bau_consumption.droplevel('unit')
-        .mul(rail_efficiency.droplevel('unit'))    # efficiency = distance/energy
-        .sum(level=['vehicle_type', 'section', 'country_code', 'year'])
-        # historical distance -> total electricity demand
-        .div(rail_efficiency.xs('electricity', level='carrier').droplevel('unit'))
-        .sum(level=['vehicle_type', 'country_code', 'year'])
-        .to_frame('twh')
-        .rename_axis(columns='unit')
-        .stack()
-    )
-    rail_electricity_bau = (
-        rail_bau_consumption
-        .sum(level=['carrier', 'section', 'country_code', 'year', 'unit'])
-        .xs('electricity')
-    )
-    # High speed and metro are all electrified, so bau_electricity == eurocalliope_electricity
-    assert abs(
-        (rail_energy - rail_bau_consumption.xs('electricity', level='carrier'))
-        [['High speed passenger trains', 'Metro and tram, urban light rail']]
-    ).max() < 1e-10
-
-    # Air and shipping energy
-    air_energy = get_marine_aviation(
-        energy_balances.loc[['FC_TRA_DAVI_E', 'INTAVI']],
-        other_transport_aviation
-    )
-    marine_energy = get_marine_aviation(
-        energy_balances.loc[['INTMARB', 'FC_TRA_DNAVI_E']],
-        other_transport_marine
     )
 
     total_road_distance.to_csv(road_distance_out_path)
     total_road_vehicles.to_csv(road_vehicles_out_path)
     road_efficiency.to_csv(road_efficiency_out_path)
-    rail_energy.to_csv(rail_energy_out_path)
-    air_energy.to_csv(air_energy_out_path)
-    marine_energy.to_csv(marine_energy_out_path)
     road_electricity_bau.to_csv(road_bau_electricity_out_path)
-    rail_electricity_bau.to_csv(rail_bau_electricity_out_path)
 
 
 def get_all_distance_efficiency(
@@ -152,6 +102,7 @@ def get_all_distance_efficiency(
         .interpolate(axis=1, limit_direction="both")
         .stack()
     )
+    print(transport_energy_balance)
 
     # contribution of each transport mode to carrier consumption from JRC_IDEES
     # 2016-2018 from 2015 data; non-JRC countries, based on neighbour data
@@ -190,7 +141,7 @@ def get_all_distance_efficiency(
     total_transport_distance = (
         aligned_dfs[1]
         .fillna(aligned_dfs[0])
-        .sum(level=['vehicle_type', unique_dim, 'country_code', 'unit', 'year'])
+        .sum(level=['vehicle_type', unique_dim, 'country_code',  'year'])
     )
     return total_transport_distance, transport_efficiency, transport_energy_per_mode
 
@@ -198,19 +149,19 @@ def get_all_distance_efficiency(
 def get_all_vehicles(jrc_road_distance, jrc_road_vehicles, total_road_distance):
     total_vehicle_distance = fill_missing_countries_and_years(
         jrc_road_vehicles
-        .droplevel('unit')
-        .div(jrc_road_distance.droplevel('unit'))
+        #.droplevel('unit')
+        .div(jrc_road_distance)
     )
     total_road_vehicles = total_road_distance.mul(
         total_vehicle_distance
         .mean(level=['vehicle_type', 'vehicle_subtype', 'country_code', 'year'])
     )
     total_road_distance = total_road_distance.sum(
-        level=['vehicle_type', 'country_code', 'unit', 'year']
+        level=['vehicle_type', 'country_code', 'year']
     )
     total_road_vehicles = total_road_vehicles.sum(
-        level=['vehicle_type', 'country_code', 'unit', 'year']
-    ).rename({'mio_km': 'vehicles'}, level='unit')
+        level=['vehicle_type', 'country_code', 'year']
+    )#.rename({'mio_km': 'vehicles'}, level='unit')
 
     return total_road_vehicles, total_road_distance
 
@@ -237,37 +188,14 @@ def fill_missing_countries_and_years(jrc_data):
     return jrc_data.stack()
 
 
-def get_marine_aviation(energy_balances, other_energy):
-    return (
-        energy_balances
-        .unstack('carrier_code')
-        ['O4000XBIO']
-        .sum(level=['country', 'year'])
-        .add(other_energy, fill_value=0)
-        .apply(utils.tj_to_twh)
-        .unstack("year")
-        .interpolate(axis=1, limit_direction="both")
-        .stack()
-        .to_frame('twh')
-        .rename_axis(columns='unit')
-        .stack()
-    )
-
-
 if __name__ == "__main__":
     get_transport_demand(
         energy_balances_path=snakemake.input.energy_balances,
         jrc_road_energy_path=snakemake.input.jrc_road_energy,
         jrc_road_distance_path=snakemake.input.jrc_road_distance,
         jrc_road_vehicles_path=snakemake.input.jrc_road_vehicles,
-        jrc_rail_energy_path=snakemake.input.jrc_rail_energy,
-        jrc_rail_distance_path=snakemake.input.jrc_rail_distance,
         road_distance_out_path=snakemake.output.distance,
         road_vehicles_out_path=snakemake.output.vehicles,
         road_efficiency_out_path=snakemake.output.efficiency,
-        rail_energy_out_path=snakemake.output.rail_energy,
-        air_energy_out_path=snakemake.output.air_energy,
-        marine_energy_out_path=snakemake.output.marine_energy,
         road_bau_electricity_out_path=snakemake.output.road_bau_electricity,
-        rail_bau_electricity_out_path=snakemake.output.rail_bau_electricity,
     )

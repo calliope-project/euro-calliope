@@ -228,7 +228,7 @@ def read_eurostat_tsv(path_to_tsv, slice_idx=None, slice_lvl=None):
 
 
 
-# these functions here are needed for new annual energy balance.py
+# these functions here are needed for new annual energy balance.py and annual_transport_demand.py
 
 def get_alpha2(country, eurostat=True):
     if country in ["United Kingdom", "GB", "GBR"] and eurostat is True:
@@ -242,4 +242,9 @@ def get_alpha2(country, eurostat=True):
 def gwh_to_tj(array):
     return array * 3.6
 
+
+def read_tdf(filename):
+    df = pd.read_csv(filename, header=0)
+    tdf = df.set_index([i for i in df.columns[:-1]]).squeeze()
+    return tdf
 
