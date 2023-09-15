@@ -2,6 +2,7 @@
 
 localrules: jrc_idees_zipped
 
+
 EU28 = [
     "AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR",
     "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO",
@@ -23,7 +24,8 @@ rule jrc_idees_unzipped:
         countries = [
             f"data/automatic/jrc-idees/{country_code}.zip"
             for country_code in [
-                pycountry.countries.lookup(country).alpha_2 for country in config["scope"]["spatial"]["countries"]
+                pycountry.countries.lookup(country).alpha_2 if pycountry.countries.lookup(country).name != "Greece" else "EL"
+                for country in config["scope"]["spatial"]["countries"] + ["Malta"] # added it here to not mess with config
             ]
             if country_code in EU28
         ]
