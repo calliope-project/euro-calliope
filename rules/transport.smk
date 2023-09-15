@@ -16,3 +16,14 @@ rule annual_transport_demand:
         efficiency="build/data/new/annual_road_transport_efficiency.csv",
         road_bau_electricity="build/data/new/annual_road_transport_bau_electricity.csv",
     script: "../scripts/transport/annual_transport_demand.py"
+
+
+rule create_road_transport_demand_timeseries:
+    message: "Create timeseries for road transport demand"
+    input:
+        src = script_dir + "transport/road_transport_timeseries.py",
+        road_distance_path = "build/data/new/annual_road_transport_distance_demand.csv",
+    conda: "../envs/default.yaml"
+    output:
+        road_distance_timeseries_out_path="build/data/new/road_distance_timeseries.csv",
+    script: "../scripts/transport/road_transport_timeseries.py"
