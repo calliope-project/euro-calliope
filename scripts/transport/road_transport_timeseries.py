@@ -81,7 +81,6 @@ def process_timeseries(vehicle, power_scaling_factor, conversion_factor, first_y
                                                       "distance_per_hour"] * conversion_factor * power_scaling_factor * -1
     # Save the created timeseries to a csv file.
     timeseries_df.to_csv(output_path, index_label="utc-timestamp")
-    print(vehicle + " timeseries is done")
 
 
 if __name__ == "__main__":
