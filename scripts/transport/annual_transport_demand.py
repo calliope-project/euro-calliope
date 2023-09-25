@@ -44,11 +44,12 @@ def get_transport_demand(
         .rename_axis(columns='carrier')
         .stack()
     )
-    print(other_transport_road)
+
     total_road_distance, road_efficiency, road_bau_consumption = get_all_distance_efficiency(
         energy_balances, 'FC_TRA_ROAD_E', road_energy_df,
         road_distance_df, 'vehicle_subtype', other_transport_road
     )
+
     total_road_vehicles, total_road_distance = get_all_vehicles(
         road_distance_df, road_vehicles_df, total_road_distance
     )
@@ -67,7 +68,6 @@ def get_transport_demand(
             'Gasoline engine': 'petrol',
             'Plug-in hybrid electric': 'petrol'
         }).mean()
-        #.assign(unit='twh_per_mio_km').set_index('unit', append=True)
         .stack()
     )
     road_electricity_bau = (
@@ -102,7 +102,6 @@ def get_all_distance_efficiency(
         .interpolate(axis=1, limit_direction="both")
         .stack()
     )
-    print(transport_energy_balance)
 
     # contribution of each transport mode to carrier consumption from JRC_IDEES
     # 2016-2018 from 2015 data; non-JRC countries, based on neighbour data
@@ -110,6 +109,7 @@ def get_all_distance_efficiency(
         energy_df
         .div(energy_df.sum(level=['carrier', 'country_code', 'year']))
     )
+
     # Energy consumption per transport mode by mapping transport mode
     # carrier contributions to total carrier consumption
     transport_energy_per_mode = carrier_contribution.mul(transport_energy_balance).dropna()
@@ -125,6 +125,7 @@ def get_all_distance_efficiency(
             .sum(level=['country_code', unique_dim, 'section', 'vehicle_type', 'year'])
         )
     )
+
     # Distance travelled per transport mode, including years 2016-2018,
     # based on JRC IDEES transport efficiency (2015 data for 2016-2018)
     transport_distance_all_years = (
@@ -132,6 +133,7 @@ def get_all_distance_efficiency(
         .sum(level=['country_code', unique_dim, 'section', 'vehicle_type', 'year'])
         .mul(transport_efficiency)
     )
+
     # Use the distance traveled based on Eurostat to fill in blanks in JRC data
     aligned_dfs = (
         transport_distance_all_years
@@ -143,13 +145,13 @@ def get_all_distance_efficiency(
         .fillna(aligned_dfs[0])
         .sum(level=['vehicle_type', unique_dim, 'country_code',  'year'])
     )
+
     return total_transport_distance, transport_efficiency, transport_energy_per_mode
 
 
 def get_all_vehicles(jrc_road_distance, jrc_road_vehicles, total_road_distance):
     total_vehicle_distance = fill_missing_countries_and_years(
         jrc_road_vehicles
-        #.droplevel('unit')
         .div(jrc_road_distance)
     )
     total_road_vehicles = total_road_distance.mul(
@@ -161,7 +163,7 @@ def get_all_vehicles(jrc_road_distance, jrc_road_vehicles, total_road_distance):
     )
     total_road_vehicles = total_road_vehicles.sum(
         level=['vehicle_type', 'country_code', 'year']
-    )#.rename({'mio_km': 'vehicles'}, level='unit')
+    )
 
     return total_road_vehicles, total_road_distance
 
