@@ -55,6 +55,13 @@ statistical-code-mapping:
         road-transport: [ FC_TRA_ROAD_E ]
         other-road-transport: [ FC_OTH_AF_E, FC_OTH_NSP_E ]  # ASSUME: agriculture oil use and most 'not elsewhere specified' (military) oil use goes to 'road' transport demand
         rail: [ FC_TRA_RAIL_E ]
+# TODO: add right conversion factors, assumption right now: 200 MW(h) per million kilometers
+road_transport_conversion_factors:
+    ldv_conversion_factor: 200 # from mio-km to MW(h): 200 MW(h) per million kilometers
+    hdv_conversion_factor: 200
+    coaches_and_buses_conversion_factor: 200
+    passenger_cars_conversion_factor: 200
+    powered_2_wheelers_conversion_factor: 200
 crs: "EPSG:4326"
 parameters:
     maximum-installable-power-density:
