@@ -17,9 +17,11 @@ def create_road_transport_demand_timeseries(
     # Read annual road transport bau electricity into panda dataframe
     df_bau = pd.read_csv(bau_electricity_path)
 
+    # Assumption: Every hour of the day the same amount of distance gets driven.
     # Calculate the distance travelled per hour and add new column for it into road transport distance dataframe
     df["distance_per_hour"] = df["0"] / 8760
 
+    # Assumption: Every hour of the day the same amount of distance gets driven.
     # Calculate the bau electricity per hour and add new column for it into road transport bau electricity dataframe
     df_bau["electricity_per_hour"] = df_bau["0"] / 8760
 
