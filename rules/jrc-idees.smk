@@ -25,7 +25,7 @@ rule jrc_idees_unzipped:
             f"data/automatic/jrc-idees/{country_code}.zip"
             for country_code in [
                 pycountry.countries.lookup(country).alpha_2 if pycountry.countries.lookup(country).name != "Greece" else "EL"
-                for country in config["scope"]["spatial"]["countries"] + ["Malta"] # added it here to not mess with config
+                for country in config["scope"]["spatial"]["countries"]
             ]
             if country_code in EU28
         ]
