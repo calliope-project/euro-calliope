@@ -13,8 +13,6 @@ data-sources:
     potentials: https://zenodo.org/record/5112963/files/possibility-for-electricity-autarky.zip
     entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
     jrc-ppdb: https://zenodo.org/record/3574566/files/JRC-PPDB-OPEN.ver1.0.zip
-
-    # from here on newly added config values for road transport
     jrc-idees: https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/JRC-IDEES/JRC-IDEES-2015_v1/JRC-IDEES-2015_All_xlsx_{country_code}.zip
     eurostat-energy-balance: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/eurostat/nrg_bal_c.tsv.gz
     swiss-stat:
@@ -40,28 +38,13 @@ capacity-factors:
         offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
         ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
     trim-ninja-timeseries: True
-
-# added for road-transport
-statistical-code-mapping:
-    eurostat-to-sectoral-carrier-names: config/eurostat/carrier-names.csv
-    eurostat-to-sectors:
-        household: [ FC_OTH_HH_E ]
-        commercial: [ FC_OTH_CP_E ]
-        other-commercial: [ FC_OTH_AF_E, FC_OTH_FISH_E, FC_OTH_NSP_E ]  # ASSUME: 'not elsewhere specified', agriculture, and fisheries non-oil use goes to commercial buildings
-        aviation: [ FC_TRA_DAVI_E, INTAVI ]
-        other-aviation: [ FC_OTH_NSP_E ]  # ASSUME: 'not elsewhere specified' (military) kerosene/jet-fuel use goes to aviation demand
-        marine: [ INTMARB, FC_TRA_DNAVI_E ]
-        other-marine: [ FC_OTH_FISH_E ]  # ASSUME: fisheries oil use goes to marine demand
-        road-transport: [ FC_TRA_ROAD_E ]
-        other-road-transport: [ FC_OTH_AF_E, FC_OTH_NSP_E ]  # ASSUME: agriculture oil use and most 'not elsewhere specified' (military) oil use goes to 'road' transport demand
-        rail: [ FC_TRA_RAIL_E ]
-# TODO: add right conversion factors, assumption right now: 200 MW(h) per million kilometers
+# conversion factors out of sector-coupled, from mio km to MW(h)
 road_transport_conversion_factors:
-    ldv_conversion_factor: 200 # from mio-km to MW(h): 200 MW(h) per million kilometers
-    hdv_conversion_factor: 200
-    coaches_and_buses_conversion_factor: 200
-    passenger_cars_conversion_factor: 200
-    powered_2_wheelers_conversion_factor: 200
+    ldv_conversion_factor: 480
+    hdv_conversion_factor: 3248 # based on buses
+    coaches_and_buses_conversion_factor: 3248
+    passenger_cars_conversion_factor: 324
+    powered_2_wheelers_conversion_factor: 200  # based on passenger car electrical efficiency scaled by relative diesel efficiency
 crs: "EPSG:4326"
 parameters:
     maximum-installable-power-density:
