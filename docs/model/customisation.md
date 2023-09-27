@@ -38,6 +38,21 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         **demand_elec**: Electricity demand
 
+??? note "demand/electrified_transport.yaml"
+
+    === "Technologies"
+
+        **demand_road_transport_electrified**: Electrified road transport demand
+
+        **demand_road_transport_bau_electrified**: Electrified road BAU transport demand
+
+    === "Overrides"
+
+        **no_bau_road_transport_demand_electrified**: DRAFT: Allows to remove electrified road BAU transport demand.
+        This Override gets applied when only the electrified road transport demand gets looked at without the electricity demand
+        specified in demand/electricity.yaml. The reason for this is, that without the electricity demand, specified in
+        demand/electricity.yaml, no double counting of the electrified road bau transport takes place.
+
 ??? note "storage/electricity.yaml"
 
     === "Technologies"
