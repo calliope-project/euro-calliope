@@ -10,7 +10,6 @@ def create_road_transport_demand_timeseries(
     powered_2_wheelers_timeseries_out_path, light_duty_vehicles_bau_timeseries_out_path,
     coaches_and_buses_bau_timeseries_out_path, passenger_cars_bau_timeseries_out_path
 ):
-
     # Read annual road transport distance into panda dataframe
     df = pd.read_csv(road_distance_path)
 
@@ -27,37 +26,36 @@ def create_road_transport_demand_timeseries(
 
     # Process the road transport distance timeseries for each vehicle type
     process_timeseries("Light duty vehicles", power_scaling_factor, ldv_conversion_factor, first_year,
-                                   final_year, df, light_duty_vehicles_timeseries_out_path, False)
+                       final_year, df, light_duty_vehicles_timeseries_out_path, False)
     process_timeseries("Heavy duty vehicles", power_scaling_factor, hdv_conversion_factor, first_year,
-                                   final_year, df, heavy_duty_vehicles_timeseries_out_path, False)
+                       final_year, df, heavy_duty_vehicles_timeseries_out_path, False)
     process_timeseries("Motor coaches, buses and trolley buses", power_scaling_factor,
-                                   coaches_and_buses_conversion_factor, first_year, final_year, df,
-                                   coaches_and_buses_timeseries_out_path, False)
+                       coaches_and_buses_conversion_factor, first_year, final_year, df,
+                       coaches_and_buses_timeseries_out_path, False)
     process_timeseries("Passenger cars", power_scaling_factor, passenger_cars_conversion_factor, first_year,
-                                   final_year, df, passenger_cars_timeseries_out_path, False)
+                       final_year, df, passenger_cars_timeseries_out_path, False)
     process_timeseries("Powered 2-wheelers", power_scaling_factor, powered_2_wheelers_conversion_factor,
-                                   first_year, final_year, df, powered_2_wheelers_timeseries_out_path, False)
+                       first_year, final_year, df, powered_2_wheelers_timeseries_out_path, False)
 
     # Process the road transport bau electricity timeseries for each vehicle type
     process_timeseries("Light duty vehicles", power_scaling_factor, 1, first_year, final_year, df_bau,
-                                   light_duty_vehicles_bau_timeseries_out_path, True)
+                       light_duty_vehicles_bau_timeseries_out_path, True)
     process_timeseries("Motor coaches, buses and trolley buses", power_scaling_factor, 1, first_year,
-                                   final_year, df_bau, coaches_and_buses_bau_timeseries_out_path, True)
+                       final_year, df_bau, coaches_and_buses_bau_timeseries_out_path, True)
     process_timeseries("Passenger cars", power_scaling_factor, 1, first_year, final_year, df_bau,
-                                   passenger_cars_bau_timeseries_out_path, True)
+                       passenger_cars_bau_timeseries_out_path, True)
 
 
 def process_timeseries(vehicle, power_scaling_factor, conversion_factor, first_year, final_year, df,
-                                   output_path, bau):
-
+                       output_path, bau):
     # Filter data for the current vehicle type
     vehicle_df = df[df["vehicle_type"] == vehicle]
 
     # Create a df with index as timestamps and columns as countries.
     # The Dataframe is initially filled with zeros.
     timeseries_df = pd.DataFrame(index=[datetime.datetime(year, 1, 1) + datetime.timedelta(hours=hour) for year in
-                                      range(first_year, final_year + 1) for hour in range(8760)],
-        columns=vehicle_df["country_code"].unique()).fillna(0)
+                                 range(first_year, final_year + 1) for hour in range(8760)],
+                                 columns=vehicle_df["country_code"].unique()).fillna(0)
 
     # Populate the timeseries with either distance per hour for road transport distance or electricity per hour for
     # road transport bau electricity
@@ -77,8 +75,7 @@ def process_timeseries(vehicle, power_scaling_factor, conversion_factor, first_y
         # type to get from mio km to Mw(h), after that apply the power scaling factor to get to 100 GW(h) from Mw(h)
         # Finally make that value negative, since calliope works with negative values for demands.
         else:
-            timeseries_df.loc[mask, country_code] = row[
-                                                      "distance_per_hour"] * conversion_factor * power_scaling_factor * -1
+            timeseries_df.loc[mask, country_code] = row["distance_per_hour"] * conversion_factor * power_scaling_factor * -1
     # Save the created timeseries to a csv file.
     timeseries_df.to_csv(output_path, index_label="utc-timestamp")
 

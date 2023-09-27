@@ -62,4 +62,3 @@ if __name__ == "__main__":
         timeseries_paths=snakemake.input.electrified_road_bau_transport_timeseries,
         output_path=snakemake.output.road_transport_bau_timeseries
     )
-

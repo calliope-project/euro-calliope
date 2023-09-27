@@ -47,5 +47,3 @@ rule jrc_idees_transport_processed:
         dataset = "((road-energy)|(road-distance)|(road-vehicles))"
     conda: "../envs/default.yaml"
     script: "../scripts/jrc-idees/transport.py"
-
-
