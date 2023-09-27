@@ -14,9 +14,9 @@ rule annual_energy_balances:
         energy_balance = "data/automatic/eurostat-energy-balance.tsv.gz",
         ch_energy_balance = "data/automatic/ch-energy-balance.xlsx",
         ch_industry_energy_balance = "data/automatic/ch-industry-energy-balance.xlsx",
-        cat_names = "config/energy-balances/energy_balance_category_names.csv",
-        carrier_names = "config/energy-balances/energy_balance_carrier_names.csv"
-    output: "build/annual_energy_balances.csv"
+        cat_names = "config/energy-balances/energy-balance-category-names.csv",
+        carrier_names = "config/energy-balances/energy-balance-carrier-names.csv"
+    output: "build/annual-energy-balances.csv"
     params:
         countries = config["scope"]["spatial"]["countries"]
     conda: "../envs/default.yaml"
