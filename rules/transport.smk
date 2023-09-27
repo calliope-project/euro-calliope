@@ -28,14 +28,14 @@ rule create_road_transport_timeseries:
         first_year=config["scope"]["temporal"]["first-year"],
         final_year=config["scope"]["temporal"]["final-year"],
         power_scaling_factor=config["scaling-factors"]["power"],
-        ldv_conversion_factor=config["road_transport_conversion_factors"]["ldv_conversion_factor"],
-        hdv_conversion_factor=config["road_transport_conversion_factors"]["hdv_conversion_factor"],
+        ldv_conversion_factor=config["road_transport_conversion_factors"]["ldv"],
+        hdv_conversion_factor=config["road_transport_conversion_factors"]["hdv"],
         coaches_and_buses_conversion_factor=config["road_transport_conversion_factors"][
-            "coaches_and_buses_conversion_factor"],
+            "coaches-and-buses-conversion-factor"],
         passenger_cars_conversion_factor=config["road_transport_conversion_factors"][
-            "passenger_cars_conversion_factor"],
+            "passenger-cars-conversion-factor"],
         powered_2_wheelers_conversion_factor=config["road_transport_conversion_factors"][
-            "powered_2_wheelers_conversion_factor"]
+            "powered-2-wheelers-conversion-factor"]
     conda: "../envs/default.yaml"
     output:
         light_duty_vehicles_timeseries_out_path="build/data/transport/timeseries/timeseries-light-duty-vehicles.csv",

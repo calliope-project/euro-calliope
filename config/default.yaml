@@ -38,13 +38,12 @@ capacity-factors:
         offshore: 0.4223 # median of average 2016 factors for ~2800 points in Europe
         ror: 0.536781 # median of average 2016 factors for 1889 hydro stations in Europe
     trim-ninja-timeseries: True
-# conversion factors out of sector-coupled, from mio km to MW(h)
-road_transport_conversion_factors:
-    ldv_conversion_factor: 480
-    hdv_conversion_factor: 3248 # based on buses
-    coaches_and_buses_conversion_factor: 3248
-    passenger_cars_conversion_factor: 324
-    powered_2_wheelers_conversion_factor: 200  # based on passenger car electrical efficiency scaled by relative diesel efficiency
+road_transport_conversion_factors: # conversion factors out of sector-coupled, from mio km to MW(h)
+    ldv: 480
+    hdv: 3248 # based on buses
+    coaches-and-buses-conversion-factor: 3248
+    passenger-cars-conversion-factor: 324
+    powered-2-wheelers-conversion-factor: 200  # based on passenger car electrical efficiency scaled by relative diesel efficiency
 crs: "EPSG:4326"
 parameters:
     maximum-installable-power-density:
