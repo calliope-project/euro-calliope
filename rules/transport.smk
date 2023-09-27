@@ -44,3 +44,27 @@ rule create_road_transport_timeseries:
         coaches_and_buses_bau_timeseries_out_path="build/data/transport/timeseries/timeseries_coaches_and_buses_bau.csv",
         passenger_cars_bau_timeseries_out_path="build/data/transport/timeseries/timeseries_passenger_cars_bau.csv",
     script: "../scripts/transport/road_transport_timeseries.py"
+
+
+rule aggregate_timeseries:
+    message: "Aggregates timeseries for {wildcards.resolution} electrified road transport and electrified road BAU transport"
+    input:
+        electrified_road_transport_timeseries=(
+        "build/data/transport/timeseries/timeseries_light_duty_vehicles.csv",
+        "build/data/transport/timeseries/timeseries_heavy_duty_vehicles.csv",
+        "build/data/transport/timeseries/timeseries_coaches_and_buses.csv",
+        "build/data/transport/timeseries/timeseries_passenger_cars.csv",
+        "build/data/transport/timeseries/timeseries_powered_2_wheelers.csv"),
+        electrified_road_bau_transport_timeseries=(
+        "build/data/transport/timeseries/timeseries_light_duty_vehicles_bau.csv",
+        "build/data/transport/timeseries/timeseries_coaches_and_buses_bau.csv",
+        "build/data/transport/timeseries/timeseries_passenger_cars_bau.csv"),
+    conda: "../envs/default.yaml"
+    output:
+        road_transport_timeseries="build/models/{resolution}/timeseries/demand/electrified-road-transport.csv",
+        road_transport_bau_timeseries="build/models/{resolution}/timeseries/demand/electrified-bau-road-transport.csv"
+    script: "../scripts/transport/aggregate_timeseries.py"
+
+
+
+
