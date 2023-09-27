@@ -1,11 +1,10 @@
 """Utility functions."""
 import pycountry
 import pandas as pd
-import xarray as xr
 
 from string import digits
 
-# das hier lassen
+
 def eu_country_code_to_iso3(eu_country_code):
     """Converts EU country code to ISO 3166 alpha 3.
     The European Union uses its own country codes, which often but not always match ISO 3166.
@@ -14,10 +13,10 @@ def eu_country_code_to_iso3(eu_country_code):
 
     return convert_country_code(eu_country_code, output="alpha3")
 
-# these two below are new!! from featue sector coupling by brynpickering
+
 def convert_country_code(input_country, output="alpha3"):
     """
-    Converts input country code or name into either either a 2- or 3-letter code.
+    Converts input country code or name into either a 2- or 3-letter code.
 
     ISO alpha2: alpha2
     ISO alpha2 with Eurostat codes: alpha2_eurostat
@@ -75,102 +74,26 @@ def convert_valid_countries(country_codes: list, output: str = "alpha3") -> dict
     return mapped_codes
 
 
-# can just take rename and groupby 1:1 since hasnt existed before_
-def rename_and_groupby(
-    da: xr.DataArray,
-    rename_dict: dict,
-    dim_name: str,
-    new_dim_name: str = None,
-    dropna: bool = False,
-    keep_non_renamed: bool = False,
-) -> xr.DataArray:
-    """
-    Take an xarray dataarray and rename the contents of a given dimension
-    as well as (optionally) rename that dimension.
-    If renaming the contents has some overlap (e.g. {'foo' : 'A', 'bar': 'A'})
-    then the returned dataarray will be grouped over the new dimension items
-    (by summing the data).
-
-    Args:
-        da (xr.DataArray):
-            Input dataarray with the dimension "dim_name".
-        rename_dict (dict):
-            Dictionary to map items in the dimension "dim_name" to new names ({"old_item_name": "new_item_name"}).
-        dim_name (str):
-            Dimension on which to rename items.
-        new_dim_name (str, optional): Defaults to None.
-            If not None, rename the dimension "dim_name" to the given string.
-        dropna (bool, optional): Defaults to False.
-            If True, drop any items in "dim_name" after renaming/grouping which have all NaN values along all other dimensions.
-        keep_non_renamed (bool, optional): Defaults to False.
-            If False, any item in "dim_name" that is not referred to in "rename_dict" will be removed from that dimension in the returned array.
-    Returns:
-        (xr.DataArray): Same as "da" but with the items in "dim_name" renamed and possibly a. grouped, b. "dim_name" itself renamed.
-    """
-    rename_series = pd.Series(rename_dict).rename_axis(index=dim_name)
-    if keep_non_renamed is True:
-        existing_dim_items = da[dim_name].to_series()
-        rename_series = rename_series.reindex(existing_dim_items).fillna(existing_dim_items)
-
-    if new_dim_name is None:
-        new_dim_name = f"_{dim_name}"  # placeholder that we'll revert
-        revert_dim_name = True
-    else:
-        revert_dim_name = False
-
-    rename_da = xr.DataArray(rename_series.rename(new_dim_name))
-    da = (
-        da
-        .reindex({dim_name: rename_da[dim_name]})
-        .groupby(rename_da)
-        .sum(dim_name, skipna=True, min_count=1, keep_attrs=True)
-    )
-    if revert_dim_name:
-        da = da.rename({new_dim_name: dim_name})
-        new_dim_name = dim_name
-    if dropna:
-        da = da.dropna(new_dim_name, how="all")
-    return da
-
-
-# utils for conversion
+# conversion utils
 def ktoe_to_twh(array):
     """Convert KTOE to TWH"""
     return array * 1.163e-2
+
 
 def pj_to_twh(array):
     """Convert PJ to TWh"""
     return array / 3.6
 
+
 def tj_to_twh(array):
     """Convert TJ to TWh"""
     return pj_to_twh(array) / 1000
 
-#  used for blend and rename, which in turn is used in eurostat.smk
-def merge_da(da_list: list, merged_da_name: str = None) -> xr.DataArray:
-    """
-    Merge dataArrays with the same dimensions but different dimension items
-    into a single xarray datarray
 
-    Args:
-        da_list (list): list of xarray dataArrays
-        merged_da_name (str, optional): Defaults to None.
-            Name of merged datarray
-
-    Returns:
-        xr.DataArray:
-            Merged Datarray, in which all dimensions contain all items defined in the
-            arrays in `da_list`
-
-    """
-    datasets = [da.rename("var") for da in da_list]
-    return xr.merge(datasets, combine_attrs="no_conflicts")["var"].rename(merged_da_name)
+def gwh_to_tj(array):
+    return array * 3.6
 
 
-
-
-
-# to numeric added to be used in read_eurostat_tsv
 def to_numeric(series):
     """
     Clean up a pandas.Series which was parsed as strings, but is really numeric:
@@ -185,7 +108,7 @@ def to_numeric(series):
     series = series.astype(str).str.extract("(\\-*\\d+\\.*\\d*)")[0]
     return pd.to_numeric(series, errors="coerce")
 
-# remove digits for ch-stats/transport.py
+
 def remove_digits():
     """
     Functionality to be passed to str.translate to remove numbers from
@@ -193,42 +116,6 @@ def remove_digits():
     """
     return str.maketrans("", "", digits)
 
-
-# added read_eurostat_tsv to be used in annual_energy_balance.py which is used in eurostat.smk: annual_energy_balances
-def read_eurostat_tsv(path_to_tsv, slice_idx=None, slice_lvl=None):
-    """
-
-    Read a typical tab-delimited file from EUROSTAT. These have a specific structure
-    where the data is tab-delimited but the multi-index data is comma delimited.
-    This function also prepares the data in the expectation that it is all numeric
-    and that the columns are given as years (a standard EUROSTAT format)
-
-    Parameters
-    ---------
-    path_to_tsv: str
-    slice_idx : str, optional
-        Index level value to slice on, if required to remove potentially function-breaking data. Requires `slice_lvl` to also be defined.
-    slice_lvl : str, optional
-        Index level name to slice on, if required to remove potentially function-breaking data. Requires `slice_idx` to also be defined.
-    """
-    df = pd.read_csv(path_to_tsv, delimiter='\t', index_col=0)
-    index_names = df.index.name.split("\\")[0].split(",")
-    column_name = df.index.name.split("\\")[1]
-    df.index = df.index.str.split(',', expand=True).rename(index_names)
-    df.columns = df.columns.rename(column_name)
-    if df.columns.name == "time":
-        df.columns = df.columns.astype(int)
-    else:
-        df.columns = df.columns.str.strip()
-
-    if slice_idx is not None:
-        df = df.xs(slice_idx, level=slice_lvl)
-
-    return df.apply(to_numeric)
-
-
-
-# these functions here are needed for new annual energy balance.py and annual_transport_demand.py
 
 def get_alpha2(country, eurostat=True):
     if country in ["United Kingdom", "GB", "GBR"] and eurostat is True:
@@ -239,12 +126,7 @@ def get_alpha2(country, eurostat=True):
         return pycountry.countries.lookup(country).alpha_2
 
 
-def gwh_to_tj(array):
-    return array * 3.6
-
-
 def read_tdf(filename):
     df = pd.read_csv(filename, header=0)
     tdf = df.set_index([i for i in df.columns[:-1]]).squeeze()
     return tdf
-
