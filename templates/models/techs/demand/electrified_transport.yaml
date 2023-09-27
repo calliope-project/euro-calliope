@@ -1,0 +1,28 @@
+techs:
+    demand_road_transport_electrified:
+        essentials:
+            name: 'Electrified road transport demand'
+            parent: demand
+            carrier: electricity
+        constraints:
+            resource: file=demand/electrified-road-transport.csv
+
+    demand_road_transport_bau_electrified:
+        essentials:
+            name: 'Electrified BAU road transport demand'
+            parent: demand
+            carrier: electricity
+        constraints:
+            resource: file=demand/electrified-bau-road-transport.csv
+
+overrides:
+    no_bau_road_transport_demand_electrified:
+      {% for id, location in locations.iterrows() %}
+      {{ id }}.techs.demand_road_transport_bau_electrified.exists: False
+      {% endfor %}
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.techs.demand_road_transport_electrified:
+    {{ id }}.techs.demand_road_transport_bau_electrified:
+    {% endfor %}

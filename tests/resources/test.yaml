@@ -7,6 +7,7 @@ test-model:
             frozen-hydro: ["freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "no-hydro-supply-fixed-cost", "no-hydro-storage-fixed-cost"]
             alternative-cost: ["dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost"]
             shed-load: ["load-shedding"]
+            no-bau: ["no_bau_road_transport_demand_electrified"]
         national:
             default: []
             connected_neighbours: ["connect_all_neighbours"]
