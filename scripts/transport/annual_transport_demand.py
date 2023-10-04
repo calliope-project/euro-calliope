@@ -20,7 +20,8 @@ YEAR_RANGE = slice(2000, 2018)
 
 def get_transport_demand(
     energy_balances_path, jrc_road_energy_path, jrc_road_distance_path, jrc_road_vehicles_path,
-    road_distance_out_path, road_vehicles_out_path, road_efficiency_out_path, road_bau_electricity_out_path
+    fill_missing_values, road_distance_out_path, road_vehicles_out_path, road_efficiency_out_path,
+    road_bau_electricity_out_path
 ):
     energy_balances = utils.read_tdf(energy_balances_path)
     road_energy_df = utils.read_tdf(jrc_road_energy_path)
@@ -47,11 +48,11 @@ def get_transport_demand(
 
     total_road_distance, road_efficiency, road_bau_consumption = get_all_distance_efficiency(
         energy_balances, 'FC_TRA_ROAD_E', road_energy_df,
-        road_distance_df, 'vehicle_subtype', other_transport_road
+        road_distance_df, 'vehicle_subtype', fill_missing_values, other_transport_road
     )
 
     total_road_vehicles, total_road_distance = get_all_vehicles(
-        road_distance_df, road_vehicles_df, total_road_distance
+        road_distance_df, road_vehicles_df, total_road_distance, fill_missing_values
     )
     # Some cleanup that's specific to road data
     road_efficiency = (
@@ -83,7 +84,7 @@ def get_transport_demand(
 
 
 def get_all_distance_efficiency(
-    energy_balances, cat_name, energy_df, distance_df, unique_dim, other_transport_road=0
+    energy_balances, cat_name, energy_df, distance_df, unique_dim, fill_missing_values, other_transport_road=0
 ):
 
     transport_energy_balance = (
@@ -107,7 +108,8 @@ def get_all_distance_efficiency(
     # 2016-2018 from 2015 data; non-JRC countries, based on neighbour data
     carrier_contribution = fill_missing_countries_and_years(
         energy_df
-        .div(energy_df.sum(level=['carrier', 'country_code', 'year']))
+        .div(energy_df.sum(level=['carrier', 'country_code', 'year'])),
+        fill_missing_values
     )
 
     # Energy consumption per transport mode by mapping transport mode
@@ -123,7 +125,8 @@ def get_all_distance_efficiency(
             energy_df
             .where(energy_df > 0)
             .sum(level=['country_code', unique_dim, 'section', 'vehicle_type', 'year'])
-        )
+        ),
+        fill_missing_values
     )
 
     # Distance travelled per transport mode, including years 2016-2018,
@@ -149,10 +152,11 @@ def get_all_distance_efficiency(
     return total_transport_distance, transport_efficiency, transport_energy_per_mode
 
 
-def get_all_vehicles(jrc_road_distance, jrc_road_vehicles, total_road_distance):
+def get_all_vehicles(jrc_road_distance, jrc_road_vehicles, total_road_distance, fill_missing_values):
     total_vehicle_distance = fill_missing_countries_and_years(
         jrc_road_vehicles
-        .div(jrc_road_distance)
+        .div(jrc_road_distance),
+        fill_missing_values
     )
     total_road_vehicles = total_road_distance.mul(
         total_vehicle_distance
@@ -168,21 +172,12 @@ def get_all_vehicles(jrc_road_distance, jrc_road_vehicles, total_road_distance):
     return total_road_vehicles, total_road_distance
 
 
-def fill_missing_countries_and_years(jrc_data):
+def fill_missing_countries_and_years(jrc_data, fill_missing_values):
     jrc_data = jrc_data.unstack('country_code')
-    balkan_countries = jrc_data[['BG', 'HR', 'HU', 'RO', 'EL']].mean(axis=1)
-    nordic_countries = jrc_data[['SE', 'DK']].mean(axis=1)
-    ch_neighbours = jrc_data[['DE', 'AT', 'FR', 'IT']].mean(axis=1)
-    jrc_data = jrc_data.assign(
-        AL=balkan_countries,
-        BA=balkan_countries,
-        ME=balkan_countries,
-        MK=balkan_countries,
-        RS=balkan_countries,
-        NO=nordic_countries,
-        IS=nordic_countries,
-        CH=ch_neighbours,
-    ).stack().unstack('year')
+    for country, neighbors in fill_missing_values.items():
+        jrc_data = jrc_data.assign(**{country: jrc_data[neighbors].mean(axis=1)})
+
+    jrc_data = jrc_data.stack().unstack('year')
     jrc_data = jrc_data.assign(
         **{str(i): jrc_data[2015] for i in range(2016, 2019)}
     )
@@ -196,6 +191,7 @@ if __name__ == "__main__":
         jrc_road_energy_path=snakemake.input.jrc_road_energy,
         jrc_road_distance_path=snakemake.input.jrc_road_distance,
         jrc_road_vehicles_path=snakemake.input.jrc_road_vehicles,
+        fill_missing_values=snakemake.params.fill_missing_values,
         road_distance_out_path=snakemake.output.distance,
         road_vehicles_out_path=snakemake.output.vehicles,
         road_efficiency_out_path=snakemake.output.efficiency,

@@ -44,6 +44,13 @@ road_transport_conversion_factors: # conversion factors out of sector-coupled, f
     coaches-and-buses-conversion-factor: 3248
     passenger-cars-conversion-factor: 324
     powered-2-wheelers-conversion-factor: 200  # based on passenger car electrical efficiency scaled by relative diesel efficiency
+fill-missing-values:
+  AL: ['BG', 'HR', 'HU', 'RO', 'EL']
+  BA: ['BG', 'HR', 'HU', 'RO', 'EL']
+  ME: ['BG', 'HR', 'HU', 'RO', 'EL']
+  RS: ['BG', 'HR', 'HU', 'RO', 'EL']
+  "NO": ['SE', 'DK']
+  CH: ['DE', 'AT', 'FR', 'IT']
 crs: "EPSG:4326"
 parameters:
     maximum-installable-power-density:
