@@ -10,7 +10,6 @@ rule eurostat_annual_energy_balances:
 rule annual_energy_balances:
     message: "Get annual energy balances from Eurostat"
     input:
-        src = script_dir + "eurostat/annual_energy_balance.py",
         energy_balance = "data/automatic/eurostat-energy-balance.tsv.gz",
         ch_energy_balance = "data/automatic/ch-energy-balance.xlsx",
         ch_industry_energy_balance = "data/automatic/ch-industry-energy-balance.xlsx",

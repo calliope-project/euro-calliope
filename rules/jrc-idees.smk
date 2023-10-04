@@ -40,7 +40,6 @@ rule jrc_idees_unzipped:
 rule jrc_idees_transport_processed:
     message: "Process {wildcards.dataset} transport data from JRC-IDEES to be used in understanding current and future transport demand"
     input:
-        script = script_dir + "jrc-idees/transport.py",
         unprocessed_data = "build/data/jrc-idees/transport/unprocessed"
     output: "build/data/jrc-idees/transport/processed-{dataset}.csv"
     wildcard_constraints:

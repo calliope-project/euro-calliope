@@ -4,7 +4,6 @@
 rule annual_transport_demand:
     message: "Calculate future transport energy demand based on JRC IDEES"
     input:
-        src=script_dir + "transport/annual_transport_demand.py",
         energy_balances="build/annual-energy-balances.csv",
         jrc_road_energy="build/data/jrc-idees/transport/processed-road-energy.csv",
         jrc_road_distance="build/data/jrc-idees/transport/processed-road-distance.csv",
@@ -23,7 +22,6 @@ rule annual_transport_demand:
 rule create_road_transport_timeseries:
     message: "Create timeseries for road transport demand"
     input:
-        src=script_dir + "transport/road_transport_timeseries.py",
         road_distance_path="build/data/transport/annual-road-transport-distance-demand.csv",
         bau_electricity_path="build/data/transport/annual-road-transport-bau-electricity.csv"
     params:

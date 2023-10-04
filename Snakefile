@@ -13,7 +13,6 @@ model_test_dir = f"{test_dir}model"
 template_dir = f"{root_dir}templates/"
 model_template_dir = f"{template_dir}models/"
 techs_template_dir = f"{model_template_dir}techs/"
-script_dir = f"{root_dir}scripts/"
 
 include: "./rules/shapes.smk"
 include: "./rules/wind-and-solar.smk"
