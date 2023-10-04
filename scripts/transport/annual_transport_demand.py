@@ -87,7 +87,7 @@ def get_all_distance_efficiency(
     energy_balances, cat_name, energy_df, distance_df, unique_dim, fill_missing_values, other_transport_road=0
 ):
 
-    transport_energy_balance = (
+    transport_energy_balance = fill_missing_countries_and_years(
         energy_balances
         .xs(cat_name)
         .unstack('carrier_code')
