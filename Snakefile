@@ -22,9 +22,7 @@ include: "./rules/transmission.smk"
 include: "./rules/demand.smk"
 include: "./rules/nuclear.smk"
 include: "./rules/sync.smk"
-include: "./rules/jrc-idees.smk"
-include: "./rules/eurostat.smk"
-include: "./rules/ch-stats.smk"
+include: "./rules/download.smk"
 include: "./rules/transport.smk"
 min_version("7.8")
 localrules: all, clean
