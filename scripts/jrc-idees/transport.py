@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -39,7 +40,7 @@ ROAD_CARRIERS = {
 }
 
 
-def process_jrc_transport_data(data_dir, dataset, out_path):
+def process_jrc_transport_data(data_dir: str, dataset: object, out_path: str):
     data_filepaths = list(Path(data_dir).glob("*.xlsx"))
     processed_data = pd.concat([
         read_transport_excel(file, **DATASET_PARAMS[dataset])
@@ -51,7 +52,11 @@ def process_jrc_transport_data(data_dir, dataset, out_path):
     processed_data.stack('year').to_csv(out_path)
 
 
-def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, **kwargs):
+def read_transport_excel(file: Path,
+                         sheet_name: str,
+                         idx_start_str: str,
+                         idx_end_str: str,
+                         **kwargs: object) -> pd.DataFrame:
     xls = pd.ExcelFile(file)
     style_df = StyleFrame.read_excel(xls, read_style=True, sheet_name=sheet_name)
     df = pd.read_excel(xls, sheet_name=sheet_name)
@@ -88,7 +93,7 @@ def read_transport_excel(file, sheet_name, idx_start_str, idx_end_str, **kwargs)
     return df
 
 
-def process_road_vehicles(df, column_names):
+def process_road_vehicles(df: pd.DataFrame, column_names: str) -> pd.DataFrame:
     # The indent of the strings in the first column of data indicates their hierarchy in a multi-level index.
     # The vehicle subtype is identified here and ffill() is used to match all relevant rows to this subtype.
     df['vehicle_subtype'] = df.where(df.indent == 3).iloc[:, 0]
@@ -106,7 +111,7 @@ def process_road_vehicles(df, column_names):
     )
 
 
-def process_road_energy(df, column_names):
+def process_road_energy(df: pd.DataFrame, column_names: str) -> pd.DataFrame:
     # The indent of the strings in the first column of data indicates their hierarchy in a multi-level index.
     # The vehicle subtype is identified here and ffill() is used to match all relevant rows to this subtype.
     df['vehicle_subtype'] = df.where(df.indent == 3).iloc[:, 0].ffill()
@@ -142,7 +147,7 @@ def process_road_energy(df, column_names):
     return df
 
 
-def remove_of_which(df, main_carrier, of_which_carrier):
+def remove_of_which(df: pd.DataFrame, main_carrier: str, of_which_carrier: str) -> pd.DataFrame:
     """
     Subfuels (e.g. biodiesel) are given as 'of which ...', meaning the main fuel consumption
     includes those fuels (diesel is actually diesel + biofuels). We rectify that here
