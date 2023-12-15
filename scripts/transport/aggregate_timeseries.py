@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def aggregate_timeseries(resolution, timeseries_paths, output_path):
+def aggregate_timeseries(resolution: str, timeseries_paths: tuple, output_path: str):
     if resolution == "continental":
         aggregate_continental_timeseries(timeseries_paths, output_path)
     elif resolution == "national":
@@ -10,7 +10,7 @@ def aggregate_timeseries(resolution, timeseries_paths, output_path):
         aggregate_regional_timeseries(timeseries_paths, output_path)
 
 
-def aggregate_continental_timeseries(timeseries_paths, output_path):
+def aggregate_continental_timeseries(timeseries_paths: tuple, output_path: str):
     aggregated_timeseries_df = pd.DataFrame()
 
     # Loop over all the provided timeseries and read each file into a DataFrame
@@ -30,7 +30,7 @@ def aggregate_continental_timeseries(timeseries_paths, output_path):
     aggregated_timeseries_df.to_csv(output_path, index_label="utc-timestamp")
 
 
-def aggregate_national_timeseries(timeseries_paths, output_path):
+def aggregate_national_timeseries(timeseries_paths: tuple, output_path: str):
     aggregated_timeseries_df = pd.DataFrame()
 
     # Loop over all the provided timeseries and read each file into a DataFrame
@@ -48,7 +48,7 @@ def aggregate_national_timeseries(timeseries_paths, output_path):
     aggregated_timeseries_df.to_csv(output_path, index_label="utc-timestamp")
 
 
-def aggregate_regional_timeseries(timeseries_paths, output_path):
+def aggregate_regional_timeseries(timeseries_paths: tuple, output_path: str):
     raise NotImplementedError("Regional road transport (bau) has not yet been implemented!")
 
 
