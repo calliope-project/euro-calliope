@@ -9,7 +9,8 @@ rule annual_transport_demand:
         jrc_road_distance="build/data/jrc-idees/transport/processed-road-distance.csv",
         jrc_road_vehicles="build/data/jrc-idees/transport/processed-road-vehicles.csv",
     params:
-        fill_missing_values=config["fill-missing-values"]
+        fill_missing_values=config["fill-missing-values"],
+        efficiency_quantile=config["parameters"]["transport"]["future-vehicle-efficiency-percentile"]
     conda: "../envs/default.yaml"
     output:
         distance="build/data/transport/annual-road-transport-distance-demand.csv",
