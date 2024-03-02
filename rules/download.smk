@@ -78,4 +78,4 @@ rule jrc_idees_transport_processed:
     wildcard_constraints:
         dataset = "((road-energy)|(road-distance)|(road-vehicles))"
     conda: "../envs/default.yaml"
-    script: "../scripts/jrc-idees/transport.py"
+    script: "../scripts/transport/jrc_idees.py"
