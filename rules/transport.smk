@@ -4,7 +4,7 @@
 rule annual_transport_demand:
     message: "Calculate future transport energy demand based on JRC IDEES"
     input:
-        energy_balances="build/annual-energy-balances.csv",
+        energy_balances="build/data/annual-energy-balances.csv",
         jrc_road_energy="build/data/jrc-idees/transport/processed-road-energy.csv",
         jrc_road_distance="build/data/jrc-idees/transport/processed-road-distance.csv",
         jrc_road_vehicles="build/data/jrc-idees/transport/processed-road-vehicles.csv",
