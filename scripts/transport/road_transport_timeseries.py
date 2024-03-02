@@ -16,11 +16,11 @@ def create_road_transport_demand_timeseries(
     # Read annual road transport bau electricity into panda dataframe
     df_bau = pd.read_csv(bau_electricity_path)
 
-    # Assumption: Every hour of the day the same amount of distance gets driven.
+    # ASSUME: Every hour of the day the same amount of distance gets driven.
     # Calculate the distance travelled per hour and add new column for it into road transport distance dataframe
     df["distance_per_hour"] = df["0"] / 8760
 
-    # Assumption: Every hour of the day the same amount of distance gets driven.
+    # ASSUME: Every hour of the day the same amount of distance gets driven.
     # Calculate the bau electricity per hour and add new column for it into road transport bau electricity dataframe
     df_bau["electricity_per_hour"] = df_bau["0"] / 8760
 
@@ -53,9 +53,14 @@ def process_timeseries(vehicle, power_scaling_factor, conversion_factor, first_y
 
     # Create a df with index as timestamps and columns as countries.
     # The Dataframe is initially filled with zeros.
-    timeseries_df = pd.DataFrame(index=[datetime.datetime(year, 1, 1) + datetime.timedelta(hours=hour) for year in
-                                 range(first_year, final_year+1) for hour in range(8760)],
-                                 columns=vehicle_df["country_code"].unique()).fillna(0)
+    timeseries_df = (
+                    pd
+                    .DataFrame(
+                        index=[datetime.datetime(year, 1, 1) + datetime.timedelta(hours=hour) for year in range(first_year, final_year + 1) for hour in range(8760)],
+                        columns=vehicle_df["country_code"].unique()
+                    )
+                    .fillna(0)
+    )
 
     # Populate the timeseries with either distance per hour for road transport distance or electricity per hour for
     # road transport bau electricity

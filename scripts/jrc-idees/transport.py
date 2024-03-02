@@ -95,7 +95,7 @@ def read_transport_excel(file: Path,
 
 def process_road_vehicles(df: pd.DataFrame, column_names: str) -> pd.DataFrame:
     # The indent of the strings in the first column of data indicates their hierarchy in a multi-level index.
-    # The vehicle subtype is identified here and ffill() is used to match all relevant rows to this subtype.
+    # The vehicle subtype is identified here
     df['vehicle_subtype'] = df.where(df.indent == 3).iloc[:, 0]
     # ASSUME: 2-wheelers are powered by fuel oil.
     # All useful information is either when the index column string is indented 3 times,
@@ -118,7 +118,7 @@ def process_road_energy(df: pd.DataFrame, column_names: str) -> pd.DataFrame:
     # Remove bracketed information from the vehicle type and subtype
     df['vehicle_type'] = df['vehicle_type'].str.split('(', expand=True)[0].str.strip()
     df['vehicle_subtype'] = df['vehicle_subtype'].str.split('(', expand=True)[0].str.strip()
-    # ASSUME: Powered 2-wheelers are gasoline engine only (this is implicit when looking at the Excel sheet directly)
+    # Powered 2-wheelers are gasoline engine only (this is implicit when looking at the Excel sheet directly)
     df.loc[df.vehicle_type == 'Powered 2-wheelers', 'vehicle_subtype'] = 'Gasoline engine'
     df['carrier'] = df.where(df.indent == 4).iloc[:, 0]
     df['carrier'] = df['carrier'].str.replace('of which ', '')
