@@ -1,4 +1,5 @@
 from string import digits
+from enum import Enum
 
 import pandas as pd
 
@@ -9,8 +10,15 @@ idx = pd.IndexSlice
 YEARS = range(2000, 2019)
 
 
+class CAT_CODE(Enum):
+    """Original categories taken from GlobCover 2009 land cover."""
+    FINAL_CONSUMPTION_HOUSEHOLD_CATEGORY = "FC_OTH_HH_E"
+    FINAL_CONSUMPTION_INDUSTRY_CATEGORY = "FC_IND_E"
+    FINAL_CONSUMPTION_OTHER_SECTORS_COMMERCIAL_PUBLIC_SERVICES = "FC_OTH_CP_E"
+
+
 def generate_annual_energy_balance_nc(
-    path_to_input, path_to_cat_names, path_to_carrier_names, path_to_ch_excel,
+    path_to_energy_balance, path_to_cat_names, path_to_carrier_names, path_to_ch_excel,
     path_to_ch_industry_excel, path_to_result, countries
 ):
     """
@@ -24,7 +32,7 @@ def generate_annual_energy_balance_nc(
     carrier_names = pd.read_csv(path_to_carrier_names, header=0, index_col=0)
     country_codes = [utils.get_alpha2(i, eurostat=True) for i in countries]
 
-    df = pd.read_csv(path_to_input, delimiter='\t', index_col=0)
+    df = pd.read_csv(path_to_energy_balance, delimiter='\t', index_col=0)
     df.index = (
         df.index.str.split(',', expand=True)
         .rename(['cat_code', 'carrier_code', 'unit', 'country'])  # comes as 'nrg_bal,siec,unit,geo\\time'
@@ -53,14 +61,19 @@ def generate_annual_energy_balance_nc(
 
 
 def add_ch_energy_balance(path_to_ch_excel, path_to_ch_industry_excel, index_levels):
+    household_sheet = 'T17a'
+    industry_sheet = 'T17b'
+    other_sectors_sheet = 'T17c'
+
     ch_hh_energy_use = get_ch_energy_balance_sheet(
-        path_to_ch_excel, 'T17a', skipfooter=9, cat_code='FC_OTH_HH_E'
+        path_to_ch_excel, household_sheet, skipfooter=9, cat_code=CAT_CODE.FINAL_CONSUMPTION_HOUSEHOLD_CATEGORY
     )
     ch_ind_energy_use = get_ch_energy_balance_sheet(
-        path_to_ch_excel, 'T17b', skipfooter=12, cat_code='FC_IND_E'
+        path_to_ch_excel, industry_sheet, skipfooter=12, cat_code=CAT_CODE.FINAL_CONSUMPTION_INDUSTRY_CATEGORY
     )
     ch_ser_energy_use = get_ch_energy_balance_sheet(
-        path_to_ch_excel, 'T17c', skipfooter=12, cat_code='FC_OTH_CP_E'
+        path_to_ch_excel, other_sectors_sheet, skipfooter=12,
+        cat_code=CAT_CODE.FINAL_CONSUMPTION_OTHER_SECTORS_COMMERCIAL_PUBLIC_SERVICES
     )
 
     ch_waste_energy_use = get_ch_waste_consumption(path_to_ch_excel)
@@ -68,13 +81,13 @@ def add_ch_energy_balance(path_to_ch_excel, path_to_ch_industry_excel, index_lev
     ch_transport_energy_use = get_ch_transport_energy_balance(path_to_ch_excel)
 
     ch_energy_use_tdf = pd.concat([
-        i
+        df
         .reset_index('year')
         .assign(country='CH', unit='TJ')
         .set_index(['year', 'country', 'unit'], append=True)
         .squeeze()
         .reorder_levels(index_levels)
-        for i in [
+        for df in [
             ch_hh_energy_use, ch_ind_energy_use, ch_ser_energy_use, ch_waste_energy_use,
             ch_industry_subsector_energy_use, ch_transport_energy_use
         ]
@@ -125,20 +138,24 @@ def get_ch_energy_balance_sheet(path_to_excel, sheet, skipfooter, cat_code):
 
 def get_ch_waste_consumption(path_to_excel):
     """
-    In a different sheet in the CH GEST dataset, get data on the consumed quantity of
+    ASSUME: In a different sheet in the CH GEST dataset, get data on the consumed quantity of
     waste burned in WtE plants, ignoring the small (~2-3%) quantity of fossil fuels
     also consumed in WtE plants to kickstart the process.
     """
+    category_code = "TI_EHG_E"
+    carrier_code = "W6100_6220"
+    sheet_name = 'T27'
+
     waste_stream_gwh = pd.read_excel(
-        path_to_excel, sheet_name='T27',
+        path_to_excel, sheet_name=sheet_name,
         skiprows=5, index_col=0, header=[0, 1], skipfooter=8
     )[("Consommation d'énergie (GWh)", "Ordures")]
     waste_stream_tj = waste_stream_gwh.apply(utils.gwh_to_tj)
     waste_stream_tdf = (
         waste_stream_tj
-        .to_frame("W6100_6220")  # carrier code
+        .to_frame(carrier_code)  # carrier code
         .rename_axis(index="year", columns="carrier_code")
-        .assign(cat_code="TI_EHG_E")  # cat code
+        .assign(cat_code=category_code)  # cat code
         .set_index("cat_code", append=True)
         .stack()
     )
@@ -171,8 +188,8 @@ def get_ch_transport_energy_balance(path_to_excel):
     remove_digits = str.maketrans('', '', digits)
     # carrier names span across two column levels, which we merge with fillna
     carrier_name_func = (
-        lambda x:
-        _df.columns.to_frame().iloc[:, x].str.translate(remove_digits).map(carriers)
+        lambda index:
+        _df.columns.to_frame().iloc[:, index].str.translate(remove_digits).map(carriers)
     )
     _df.columns = carrier_name_func(0).fillna(carrier_name_func(1)).values
 
@@ -205,7 +222,8 @@ def get_ch_industry_energy_balance(path_to_excel):
         8: 'FC_IND_NFM_E',  # 'Non-ferrous metals',
         9: 'FC_IND_MAC_E',  # 'Machinery',
         10: 'FC_IND_MAC_E',  # 'Machinery',
-        11: 'FC_IND_NSP_E',  # 'Not elsewhere specified (industry)', 'Wood & wood products, Mining & quarrying, Transport equipment
+        11: 'FC_IND_NSP_E',
+        # 'Not elsewhere specified (industry)', 'Wood & wood products, Mining & quarrying, Transport equipment
         12: 'FC_IND_CON_E'  # 'Construction'
     }
 
@@ -243,7 +261,7 @@ def get_ch_industry_energy_balance(path_to_excel):
 
 if __name__ == "__main__":
     generate_annual_energy_balance_nc(
-        path_to_input=snakemake.input.energy_balance,
+        path_to_energy_balance=snakemake.input.energy_balance,
         path_to_ch_excel=snakemake.input.ch_energy_balance,
         path_to_ch_industry_excel=snakemake.input.ch_industry_energy_balance,
         path_to_cat_names=snakemake.input.cat_names,
