@@ -1,6 +1,5 @@
 """Utility functions."""
 import pycountry
-import pandas as pd
 
 from string import digits
 
@@ -91,22 +90,8 @@ def tj_to_twh(array):
 
 
 def gwh_to_tj(array):
+    """Convert GWh to TJ"""
     return array * 3.6
-
-
-def to_numeric(series):
-    """
-    Clean up a pandas.Series which was parsed as strings, but is really numeric:
-
-    1. replace "-" for "NaN" into numbers and NaNs
-    2. removes random superscript attached to numbers
-       (e.g. pointing to footnotes in an excel), "1000c" -> 1000
-
-    Returns a numeric pandas.Series.
-
-    """
-    series = series.astype(str).str.extract("(\\-*\\d+\\.*\\d*)")[0]
-    return pd.to_numeric(series, errors="coerce")
 
 
 def remove_digits():
@@ -115,18 +100,3 @@ def remove_digits():
     string endings
     """
     return str.maketrans("", "", digits)
-
-
-def get_alpha2(country, eurostat=True):
-    if country in ["United Kingdom", "GB", "GBR"] and eurostat is True:
-        return "UK"
-    elif country in ["Greece", "GR", "GRC"] and eurostat is True:
-        return "EL"
-    else:
-        return pycountry.countries.lookup(country).alpha_2
-
-
-def read_tdf(filename):
-    df = pd.read_csv(filename, header=0)
-    tdf = df.set_index([i for i in df.columns[:-1]]).squeeze()
-    return tdf
