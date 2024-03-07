@@ -36,7 +36,6 @@ rule annual_energy_balances:
         carrier_names = "config/energy-balances/energy-balance-carrier-names.csv"
     output: "build/data/annual-energy-balances.csv"
     params:
-        countries = config["scope"]["spatial"]["countries"],
         first_year = 2000
     conda: "../envs/default.yaml"
     script: "../scripts/data/annual_energy_balance.py"

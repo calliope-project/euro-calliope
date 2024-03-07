@@ -140,12 +140,12 @@ parameters:
             passenger-cars: Passenger cars
             motorcycles: Powered 2-wheelers
         fill-missing-values:
-            AL: ['BG', 'HR', 'HU', 'RO', 'EL']
-            BA: ['BG', 'HR', 'HU', 'RO', 'EL']
-            ME: ['BG', 'HR', 'HU', 'RO', 'EL']
-            RS: ['BG', 'HR', 'HU', 'RO', 'EL']
-            'NO': ['SE', 'DK'] # '' necessary as NO is understood as boolean False
-            CH: ['DE', 'AT', 'FR', 'IT']
+            ALB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+            BIH: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+            MNE: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+            SRB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+            NOR: ['SWE', 'DNK']
+            CHE: ['DEU', 'AUT', 'FRA', 'ITA']
     entsoe-tyndp:
         scenario: National Trends
         grid: Reference

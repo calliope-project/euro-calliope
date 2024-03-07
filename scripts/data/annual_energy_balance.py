@@ -16,7 +16,7 @@ class CAT_CODE(Enum):
 
 def generate_annual_energy_balance_nc(
     path_to_energy_balance: str, path_to_cat_names: str, path_to_carrier_names: str, path_to_ch_excel: str,
-    path_to_ch_industry_excel: str, path_to_result: str, countries: list[str], first_year: int
+    path_to_ch_industry_excel: str, path_to_result: str, first_year: int
 ) -> None:
     """
     Open a TSV file and reprocess it into a xarray dataset, including long names for
@@ -27,7 +27,6 @@ def generate_annual_energy_balance_nc(
     # Names for each consumption category/sub-category and carriers have been prepared by hand
     cat_names = pd.read_csv(path_to_cat_names, header=0, index_col=0)
     carrier_names = pd.read_csv(path_to_carrier_names, header=0, index_col=0)
-    country_codes = [utils.get_alpha2(i, eurostat=True) for i in countries]
 
     df = pd.read_csv(
         path_to_energy_balance,
@@ -36,12 +35,23 @@ def generate_annual_energy_balance_nc(
         na_values=[":", ": ", ": z"]
     )
     df.index = (
-        df.index.str.split(',', expand=True)
+        df
+        .index
+        .str
+        .split(',', expand=True)
         .rename(['cat_code', 'carrier_code', 'unit', 'country'])  # comes as 'nrg_bal,siec,unit,geo\\time'
+    )
+    not_countries = [c for c in df.reset_index().country.unique() if len(c) > 2] + ["XK"]
+    df = (
+        df
+        .drop(axis=0, level="country", labels=not_countries)
+        .reset_index(level="country")
+        .assign(country=lambda df: df.country.map(utils.convert_country_code))
+        .set_index("country", append=True)
     )
     df.columns = df.columns.astype(int).rename('year')
     df = df.loc[
-        idx[cat_names.index, carrier_names.index, 'TJ', country_codes], :
+        idx[cat_names.index, carrier_names.index, 'TJ'], :
     ].dropna(how='all')
     df = df.sort_index(axis=1).loc[:, first_year:]
 
@@ -81,7 +91,7 @@ def add_ch_energy_balance(path_to_ch_excel, path_to_ch_industry_excel, index_lev
     ch_energy_use_tdf = pd.concat([
         df
         .reset_index('year')
-        .assign(country='CH', unit='TJ')
+        .assign(country='CHE', unit='TJ')
         .set_index(['year', 'country', 'unit'], append=True)
         .squeeze()
         .reorder_levels(index_levels)
@@ -310,7 +320,6 @@ if __name__ == "__main__":
         path_to_ch_industry_excel=snakemake.input.ch_industry_energy_balance,
         path_to_cat_names=snakemake.input.cat_names,
         path_to_carrier_names=snakemake.input.carrier_names,
-        countries=snakemake.params.countries,
         first_year=snakemake.params.first_year,
         path_to_result=snakemake.output[0]
     )

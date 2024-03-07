@@ -47,8 +47,17 @@ def process_jrc_transport_data(paths_to_data: list[str], dataset: object, out_pa
     ])
     if DATASET_PARAMS[dataset]["unit"] == "ktoe":
         processed_data = processed_data.apply(utils.ktoe_to_twh)
+    processed_data = (
+        processed_data
+        .reset_index(level="country_code")
+        .assign(country_code=lambda df: df.country_code.map(utils.convert_country_code))
+        .set_index("country_code", append=True)
+        .stack('year')
+        .rename('value')
+        .to_csv(out_path)
+    )
 
-    processed_data.stack('year').rename("value").to_csv(out_path)
+    processed_data
 
 
 def read_transport_excel(path: Path,
