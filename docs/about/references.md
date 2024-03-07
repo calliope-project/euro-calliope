@@ -60,3 +60,7 @@ Barkatullah, N. and Ahmad, A. (2017). <i>Current status and emerging trends in f
 ### @BEIS:2016
 
 Department for Business, Energy and Industrial Strategy (2016). <i>Electricity Generation Costs 2016</i>. [https://www.gov.uk/government/publications/beis-electricity-generation-costs-november-2016](https://www.gov.uk/government/publications/beis-electricity-generation-costs-november-2016)
+
+### @Mantzos:2017
+
+Mantzos, L., Wiesenthal, T., Matei, N. A., Tchung-Ming, S., Rozsai, M., Russ, P., & Ramirez, A. S. (2017). JRC-IDEES: Integrated Database of the European Energy Sector: Methodological note. JRC Research Reports, Article JRC108244. https://ideas.repec.org//p/ipt/iptwpa/jrc108244.html

@@ -1,64 +1,38 @@
 import pandas as pd
 
 
-def aggregate_timeseries(resolution: str, timeseries_paths: tuple, output_path: str):
+def aggregate_timeseries(resolution: str, paths_to_input: list[str], path_to_output: str) -> None:
     if resolution == "continental":
-        aggregate_continental_timeseries(timeseries_paths, output_path)
+        ts = aggregate_continental_timeseries(paths_to_input)
     elif resolution == "national":
-        aggregate_national_timeseries(timeseries_paths, output_path)
+        ts = aggregate_national_timeseries(paths_to_input)
     elif resolution == "regional":
-        aggregate_regional_timeseries(timeseries_paths, output_path)
+        ts = aggregate_regional_timeseries(paths_to_input)
+
+    ts.to_csv(path_to_output)
 
 
-def aggregate_continental_timeseries(timeseries_paths: tuple, output_path: str):
-    aggregated_timeseries_df = pd.DataFrame()
-
-    # Loop over all the provided timeseries and read each file into a DataFrame
-    for timeseries in timeseries_paths:
-        df = pd.read_csv(timeseries, index_col='utc-timestamp', parse_dates=True)
-
-        # Sum the values across all countries for each utc-timestamp
-        df['EUR'] = df.sum(axis=1)
-
-        # Extract only the summed 'EUR' column and add it to the aggregated_timeseries_df
-        if aggregated_timeseries_df.empty:
-            aggregated_timeseries_df = df[['EUR']]
-        else:
-            aggregated_timeseries_df['EUR'] += df['EUR']
-
-    # Write the created aggregated timeseries DataFrame into a csv file at the desired output path.
-    aggregated_timeseries_df.to_csv(output_path, index_label="utc-timestamp")
+def aggregate_continental_timeseries(paths_to_input: list[str]) -> pd.DataFrame:
+    ts = aggregate_national_timeseries(paths_to_input)
+    return ts.sum(axis=1).rename("EUR")
 
 
-def aggregate_national_timeseries(timeseries_paths: tuple, output_path: str):
-    aggregated_timeseries_df = pd.DataFrame()
-
-    # Loop over all the provided timeseries and read each file into a DataFrame
-    for timeseries in timeseries_paths:
-
-        df = pd.read_csv(timeseries, index_col='utc-timestamp', parse_dates=True)
-
-        # If the aggregated timeseries DataFrame is empty, assign the current DataFrame to it
-        # Otherwise, add the current DataFrame to the aggregated timeseries DataFrame
-        if aggregated_timeseries_df.empty:
-            aggregated_timeseries_df = df
-        else:
-            aggregated_timeseries_df += df
-    # Write the created aggregated timeseries dataframe into a csv file at the desired output path.
-    aggregated_timeseries_df.to_csv(output_path, index_label="utc-timestamp")
+def aggregate_national_timeseries(paths_to_input: list[str]) -> pd.DataFrame:
+    all_ts = [
+        pd.read_csv(path, index_col='utc-timestamp', parse_dates=True)
+        for path in paths_to_input
+    ]
+    return sum(all_ts)
 
 
-def aggregate_regional_timeseries(timeseries_paths: tuple, output_path: str):
+def aggregate_regional_timeseries(paths_to_input: list[str]) -> pd.DataFrame:
+    # TODO implement
     raise NotImplementedError("Regional road transport (bau) has not yet been implemented!")
 
 
 if __name__ == "__main__":
     aggregate_timeseries(
         resolution=snakemake.wildcards.resolution,
-        timeseries_paths=snakemake.input.electrified_road_transport_timeseries,
-        output_path=snakemake.output.road_transport_timeseries)
-    aggregate_timeseries(
-        resolution=snakemake.wildcards.resolution,
-        timeseries_paths=snakemake.input.electrified_road_bau_transport_timeseries,
-        output_path=snakemake.output.road_transport_bau_timeseries
+        paths_to_input=snakemake.input.time_series,
+        path_to_output=snakemake.output[0]
     )

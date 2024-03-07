@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -40,24 +39,24 @@ ROAD_CARRIERS = {
 }
 
 
-def process_jrc_transport_data(data_dir: str, dataset: object, out_path: str):
-    data_filepaths = list(Path(data_dir).glob("*.xlsx"))
+def process_jrc_transport_data(paths_to_data: list[str], dataset: object, out_path: str):
+    paths_to_data = [Path(p) for p in paths_to_data]
     processed_data = pd.concat([
-        read_transport_excel(file, **DATASET_PARAMS[dataset])
-        for file in data_filepaths
+        read_transport_excel(path, **DATASET_PARAMS[dataset])
+        for path in paths_to_data
     ])
     if DATASET_PARAMS[dataset]["unit"] == "ktoe":
         processed_data = processed_data.apply(utils.ktoe_to_twh)
 
-    processed_data.stack('year').to_csv(out_path)
+    processed_data.stack('year').rename("value").to_csv(out_path)
 
 
-def read_transport_excel(file: Path,
+def read_transport_excel(path: Path,
                          sheet_name: str,
                          idx_start_str: str,
                          idx_end_str: str,
                          **kwargs: object) -> pd.DataFrame:
-    xls = pd.ExcelFile(file)
+    xls = pd.ExcelFile(path)
     style_df = StyleFrame.read_excel(xls, read_style=True, sheet_name=sheet_name)
     df = pd.read_excel(xls, sheet_name=sheet_name)
     column_names = str(style_df.data_df.columns[0])
@@ -69,7 +68,8 @@ def read_transport_excel(file: Path,
 
     total_to_check = df.iloc[0]
     # The indent of the strings in the first column of data indicates their hierarchy in a multi-level index.
-    # Two levels of the hierarchy are identified here and ffill() is used to match all relevant rows to the top-level name.
+    # Two levels of the hierarchy are identified here and ffill() is used to match all relevant rows
+    # to the top-level name.
     df['section'] = df.where(df.indent == 1).iloc[:, 0].ffill()
     df['vehicle_type'] = df.where(df.indent == 2).iloc[:, 0].ffill()
 
@@ -97,7 +97,7 @@ def process_road_vehicles(df: pd.DataFrame, column_names: str) -> pd.DataFrame:
     # The indent of the strings in the first column of data indicates their hierarchy in a multi-level index.
     # The vehicle subtype is identified here
     df['vehicle_subtype'] = df.where(df.indent == 3).iloc[:, 0]
-    # ASSUME: 2-wheelers are powered by fuel oil.
+    # 2-wheelers are powered by fuel oil in the dataset.
     # All useful information is either when the index column string is indented 3 times,
     # or when the vehicle type is a 2-wheeler. One of the many ways in which this dataset is a pain.
     df = df.where(
@@ -125,7 +125,8 @@ def process_road_energy(df: pd.DataFrame, column_names: str) -> pd.DataFrame:
     # Powered 2-wheelers use petrol, some of which is biofuels (we deal with the 'of which' part later)
     df.loc[(df.vehicle_type == 'Powered 2-wheelers') & (df.indent == 2), 'carrier'] = 'petrol'
     df.loc[(df.vehicle_type == 'Powered 2-wheelers') & (df.indent == 3), 'carrier'] = 'biofuels'
-    # ASSUME: both domestic and international freight uses diesel (this is implicit when looking at the Excel sheet directly)
+    # both domestic and international freight uses diesel in the dataset
+    # (this is implicit when looking at the Excel sheet directly)
     df.loc[(df.vehicle_subtype == 'Domestic') & (df.indent == 3), 'carrier'] = 'diesel'
     df.loc[(df.vehicle_subtype == 'International') & (df.indent == 3), 'carrier'] = 'diesel'
     # All other vehicle types mention the drive-train directly, so we translate that to energy carrier here
@@ -164,7 +165,7 @@ def remove_of_which(df: pd.DataFrame, main_carrier: str, of_which_carrier: str) 
 
 if __name__ == "__main__":
     process_jrc_transport_data(
-        data_dir=snakemake.input.unprocessed_data,
+        paths_to_data=snakemake.input.data,
         dataset=snakemake.wildcards.dataset,
         out_path=snakemake.output[0]
     )

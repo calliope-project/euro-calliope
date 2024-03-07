@@ -7,20 +7,17 @@ from eurocalliopelib import utils
 
 idx = pd.IndexSlice
 
-YEARS = range(2000, 2019)
-
 
 class CAT_CODE(Enum):
-    """Original categories taken from GlobCover 2009 land cover."""
     FINAL_CONSUMPTION_HOUSEHOLD_CATEGORY = "FC_OTH_HH_E"
     FINAL_CONSUMPTION_INDUSTRY_CATEGORY = "FC_IND_E"
     FINAL_CONSUMPTION_OTHER_SECTORS_COMMERCIAL_PUBLIC_SERVICES = "FC_OTH_CP_E"
 
 
 def generate_annual_energy_balance_nc(
-    path_to_energy_balance, path_to_cat_names, path_to_carrier_names, path_to_ch_excel,
-    path_to_ch_industry_excel, path_to_result, countries
-):
+    path_to_energy_balance: str, path_to_cat_names: str, path_to_carrier_names: str, path_to_ch_excel: str,
+    path_to_ch_industry_excel: str, path_to_result: str, countries: list[str], first_year: int
+) -> None:
     """
     Open a TSV file and reprocess it into a xarray dataset, including long names for
     Eurostat codes.
@@ -32,19 +29,21 @@ def generate_annual_energy_balance_nc(
     carrier_names = pd.read_csv(path_to_carrier_names, header=0, index_col=0)
     country_codes = [utils.get_alpha2(i, eurostat=True) for i in countries]
 
-    df = pd.read_csv(path_to_energy_balance, delimiter='\t', index_col=0)
+    df = pd.read_csv(
+        path_to_energy_balance,
+        delimiter='\t',
+        index_col=0,
+        na_values=[":", ": ", ": z"]
+    )
     df.index = (
         df.index.str.split(',', expand=True)
         .rename(['cat_code', 'carrier_code', 'unit', 'country'])  # comes as 'nrg_bal,siec,unit,geo\\time'
     )
     df.columns = df.columns.astype(int).rename('year')
-    df = df.transform(utils.to_numeric)
-    df = df.reorder_levels([
-        'cat_code', 'carrier_code', 'unit', 'country'
-    ])
     df = df.loc[
-         idx[cat_names.index, carrier_names.index, 'TJ', country_codes], :
-         ].dropna(how='all')
+        idx[cat_names.index, carrier_names.index, 'TJ', country_codes], :
+    ].dropna(how='all')
+    df = df.sort_index(axis=1).loc[:, first_year:]
 
     tdf = df.stack()
 
@@ -54,10 +53,9 @@ def generate_annual_energy_balance_nc(
     )
     tdf = pd.concat([tdf, ch_energy_use_tdf]).sort_index(axis=0)
 
-    # ASSUME: for the two countries with missing data in the period YEARS (ME and BA), backfill the data.
-    tdf = tdf.unstack("year").loc[:, YEARS].bfill(axis=1).stack()
+    # TODO treat missing values if necessary
 
-    tdf.to_csv(path_to_result)
+    tdf.rename("value").to_csv(path_to_result)
 
 
 def add_ch_energy_balance(path_to_ch_excel, path_to_ch_industry_excel, index_levels):
@@ -110,37 +108,46 @@ def get_ch_energy_balance_sheet(path_to_excel, sheet, skipfooter, cat_code):
     }
     # Footnote labels lead to some strings randomly ending in numbers; we remove them here
     remove_digits = str.maketrans('', '', digits)
-    _df = (
-        pd.read_excel(path_to_excel, skiprows=6, skipfooter=skipfooter,
-                      index_col=0, sheet_name=sheet, header=[0, 1, 2, 3, 4])
-        # Ignore columns giving % use
-        .xs('TJ', level=-1, axis=1)
-        # ignore the column giving subset of oil use which is light oil
-        .iloc[:, [i for i in range(10) if i != 1]]
+    df = (
+        pd
+        .read_excel(
+            path_to_excel,
+            skiprows=6,
+            skipfooter=skipfooter,
+            index_col=0,
+            sheet_name=sheet,
+            dtype="float",
+            na_values=["-"],
+            header=[0, 1, 2, 3, 4]
+        )
+        .xs('TJ', level=-1, axis=1) # Ignore columns giving % use
+        .drop(columns=["Erdölprodukte", "Erdölprodukte1"], level=0, errors="ignore") # ignore the column giving subset of oil use which is light oil
+        .rename_axis(index='year')
     )
-    _df.columns = (
-        _df.columns.get_level_values(0).str.translate(remove_digits)
-        .map(ch_energy_carriers).rename('carrier_code')
+    df.columns = (
+        df
+        .columns
+        .get_level_values(0)
+        .str
+        .translate(remove_digits)
+        .map(ch_energy_carriers)
+        .rename('carrier_code')
     )
-    _df.index.rename('year', inplace=True)
 
-    _df = (
-        _df
-        .apply(utils.to_numeric)
-        .astype(float)
+    return (
+        df
         .assign(cat_code=cat_code)
         .set_index("cat_code", append=True)
         .stack()
     )
 
-    return _df
-
 
 def get_ch_waste_consumption(path_to_excel):
     """
-    ASSUME: In a different sheet in the CH GEST dataset, get data on the consumed quantity of
+    In a different sheet in the CH GEST dataset, get data on the consumed quantity of
     waste burned in WtE plants, ignoring the small (~2-3%) quantity of fossil fuels
     also consumed in WtE plants to kickstart the process.
+    ASSUME: Small quantity (~2-3%) of fossil fuels consumed in Swiss WtE plants can be ignored.
     """
     category_code = "TI_EHG_E"
     carrier_code = "W6100_6220"
@@ -179,9 +186,18 @@ def get_ch_transport_energy_balance(path_to_excel):
         'E7000': 'FC_TRA_RAIL_E',
         'O4000XBIO': 'INTAVI'
     }
-    _df = (
-        pd.read_excel(path_to_excel, skiprows=6, skipfooter=12, index_col=0,
-                      sheet_name='T17e', header=[0, 1, 2, 3, 4])
+    df = (
+        pd
+        .read_excel(
+            path_to_excel,
+            skiprows=6,
+            skipfooter=12,
+            index_col=0,
+            sheet_name='T17e',
+            dtype="float",
+            na_values=["-"],
+            header=[0, 1, 2, 3, 4]
+        )
         .xs('TJ', level=-1, axis=1)
     )
     # Footnote labels lead to some strings randomly ending in numbers; we remove them here
@@ -189,74 +205,102 @@ def get_ch_transport_energy_balance(path_to_excel):
     # carrier names span across two column levels, which we merge with fillna
     carrier_name_func = (
         lambda index:
-        _df.columns.to_frame().iloc[:, index].str.translate(remove_digits).map(carriers)
+        df.columns.to_frame().iloc[:, index].str.translate(remove_digits).map(carriers)
     )
-    _df.columns = carrier_name_func(0).fillna(carrier_name_func(1)).values
+    df.columns = carrier_name_func(0).fillna(carrier_name_func(1)).values
 
-    _df = (
-        _df
+    return (
+        df
         .groupby(axis=1, level=0).sum()
-        .apply(utils.to_numeric)
         .rename_axis(index='year', columns='carrier_code')
-    )
-    _df = (
-        _df
         .T
-        .assign(cat_code=_df.columns.map(categories))
+        .assign(cat_code=lambda df: df.index.map(categories))
         .set_index('cat_code', append=True)
         .stack()
     )
 
-    return _df
-
 
 def get_ch_industry_energy_balance(path_to_excel):
     ch_subsectors = {
-        1: 'FC_IND_FBT_E',  # 'Food, beverages & tobacco',
-        2: 'FC_IND_TL_E',  # 'Textile & leather',
-        3: 'FC_IND_PPP_E',  # 'Paper, pulp & printing',
-        4: 'FC_IND_CPC_E',  # 'Chemical & petrochemical',
-        5: 'FC_IND_NMM_E',  # 'Non-metallic minerals',
-        6: 'FC_IND_NMM_E',  # 'Non-metallic minerals',
-        7: 'FC_IND_IS_E',  # 'Iron & steel',
-        8: 'FC_IND_NFM_E',  # 'Non-ferrous metals',
-        9: 'FC_IND_MAC_E',  # 'Machinery',
-        10: 'FC_IND_MAC_E',  # 'Machinery',
-        11: 'FC_IND_NSP_E',
+        "1 Nahrg.": 'FC_IND_FBT_E',  # 'Food, beverages & tobacco',
+        "2 Textil": 'FC_IND_TL_E',  # 'Textile & leather',
+        "3 Papier": 'FC_IND_PPP_E',  # 'Paper, pulp & printing',
+        "4 Chemie": 'FC_IND_CPC_E',  # 'Chemical & petrochemical',
+        "5 Zement": 'FC_IND_NMM_E',  # 'Non-metallic minerals',
+        "6 andere": 'FC_IND_NMM_E',  # 'Non-metallic minerals',
+        "7 Metall": 'FC_IND_IS_E',  # 'Iron & steel',
+        "8 NE": 'FC_IND_NFM_E',  # 'Non-ferrous metals',
+        "9 Metall": 'FC_IND_MAC_E',  # 'Machinery',
+        "10 Masch": 'FC_IND_MAC_E',  # 'Machinery',
+        "11 and.": 'FC_IND_NSP_E',
         # 'Not elsewhere specified (industry)', 'Wood & wood products, Mining & quarrying, Transport equipment
-        12: 'FC_IND_CON_E'  # 'Construction'
+        "12 Bau": 'FC_IND_CON_E'  # 'Construction'
     }
 
-    ch_carriers = {
-        'ELEKTRIZITÄT': 'E7000',  # 'electricity',
-        'HEIZÖL EXTRA-LEICHT': 'O4000XBIO',  # 'oil',
-        'ERDGAS': 'G3000',  # 'gas',
-        'KOHLE': 'C0000X0350-0370',  # 'solid_fuel',
-        'INDUSTRIEABFÄLLE': 'W6100_6220',  # 'waste',
-        'HEIZÖL MITTEL UND SCHWER': 'O4000XBIO',  # 'oil',
-        #    'FERNWÄRME KUMULIERT': 'heat',  # total
-        'FERNWÄRME BEZUG': 'H8000',  # 'heat',  # purchased
-        #    'FERNWÄRME ABGABE': 'heat',  # delivered
-        'HOLZ': 'R5110-5150_W6000RI',  # 'biofuel',
-        'TOTAL': 'TOTAL'
+    ch_carriers = { # first row in which carriers are defined in the file
+        25: 'E7000',  # 'electricity',
+        52: 'O4000XBIO',  # 'oil',
+        79: 'G3000',  # 'gas',
+        105: 'C0000X0350-0370',  # 'solid_fuel',
+        128: 'W6100_6220',  # 'waste',
+        151: 'O4000XBIO',  # 'oil',
+        191: 'H8000',  # 'heat',  # purchased
+        228: 'R5110-5150_W6000RI',  # 'biofuel'
     }
-    df = pd.read_excel(
-        path_to_excel, sheet_name='Überblick_tot', skiprows=5, skipfooter=16, header=0
-    ).dropna(how='all')
 
-    df.index = df.index.map(df['Unnamed: 0'].where(df.TOTAL.isnull()).ffill()).map(ch_carriers)
-    df = (
-        df
-        .apply(utils.to_numeric)
-        .set_index('Unnamed: 0', append=True)
-        .rename_axis(index=['carrier_code', 'year'], columns='cat_code')
-        .dropna(subset=['TOTAL'])
+    column_names = (
+        pd
+        .read_excel(
+            path_to_excel,
+            sheet_name='Überblick_tot',
+            skiprows=5,
+            usecols="A,E:P",
+            nrows=0,
+            header=0
+        )
+        .rename(columns=ch_subsectors)
+        .iloc[:, 1:] # ignore index column
     )
-    df.columns = df.columns.str.extract('(\d+)', expand=False).fillna(0).astype(int).map(ch_subsectors)
-    # combine any data that now has the same cat_code or carrier_code by using groupby
-    df = df.groupby(axis=1, level=0).sum().groupby(level=[0, 1]).sum()
+    column_names = ["year"] + list(column_names)
 
-    return df.stack()
+    return (
+        pd
+        .concat(
+            [
+                read_industry_subsector(path_to_excel, first_row, column_names, carrier_name)
+                for first_row, carrier_name in ch_carriers.items()
+            ],
+            axis=0
+        )
+        .groupby(axis=0, level=[0, 1]) # group carriers
+        .sum()
+        .stack()
+        .rename("value")
+    )
+
+
+def read_industry_subsector(path: str, first_row: int, column_names: list[str], carrier_code: str) -> pd.DataFrame:
+    return (
+        pd
+        .read_excel(
+            path,
+            sheet_name='Überblick_tot',
+            skiprows=first_row - 1,
+            usecols="A,E:P",
+            nrows=10,
+            header=None,
+            names=column_names,
+            index_col=0
+        )
+        .rename_axis(columns="cat_code")
+        .rename(index=lambda year: str(year)[:4])
+        .rename(columns=lambda sector: sector.split(".")[0]) # pandas adds dots and numbers to duplicates, remove
+        .assign(carrier_code=carrier_code)
+        .reset_index()
+        .set_index(["carrier_code", "year"])
+        .groupby(axis=1, level=0) # group sectors
+        .sum()
+    )
 
 
 if __name__ == "__main__":
@@ -267,5 +311,6 @@ if __name__ == "__main__":
         path_to_cat_names=snakemake.input.cat_names,
         path_to_carrier_names=snakemake.input.carrier_names,
         countries=snakemake.params.countries,
+        first_year=snakemake.params.first_year,
         path_to_result=snakemake.output[0]
     )

@@ -8,7 +8,7 @@ parser.add_argument(
     "--config",
     help=(
         "configuration file to validate. "
-        "If not given, schema itself will be validated against JSON schema Draft 7"
+        "If not given, schema itself will be validated against JSON schema Draft 2020-12"
     )
 )
 args = parser.parse_args()
@@ -23,5 +23,5 @@ if args.config:
 else:
     # We set the metaschema 'additionalProperties' to False to create a 'strict' schema checker,
     # which will fail on typos
-    jsonschema.Draft7Validator.META_SCHEMA['additionalProperties'] = False
-    jsonschema.Draft7Validator.check_schema(schema)
+    jsonschema.Draft202012Validator.META_SCHEMA['additionalProperties'] = False
+    jsonschema.Draft202012Validator.check_schema(schema)

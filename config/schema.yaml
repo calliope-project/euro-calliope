@@ -1,4 +1,4 @@
-$schema: http://json-schema.org/draft-07/schema#
+$schema: https://json-schema.org/draft/2020-12/schema
 description: Below you can find a complete enumeration of all configuration parameters of Euro-Calliope's workflow including short descriptions and datatypes. To learn where to find default values and how to change the parameter values for your model builds, head over to the Customisation section of the workflow documentation.
 definitions:
     feedstock:
@@ -16,6 +16,7 @@ definitions:
                 enum: [farmland, forest, population]
         required: ["include", "id", "proxy"]
 type: object
+additionalProperties: false
 properties:
     email:
         type: string
@@ -25,6 +26,7 @@ properties:
     data-sources:
         type: object
         description: Paths and URLs to datasets.
+        additionalProperties: false
         properties:
             biofuel-potentials-and-costs:
                 type: string
@@ -77,12 +79,29 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of JRC power plant database.
+            jrc-idees:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of JRC IDEES data.
+            eurostat-energy-balance:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of Eurostat energy balance data.
+            swiss-energy-balance:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of Swiss energy balance data.
+            swiss-industry-energy-balance:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of Swiss industry energy balance data.
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.
     cluster-sync:
         type: object
         description: Configuration for the "work local, build on remote" workflow.
+        additionalProperties: false
         properties:
             url:
                 type: string
@@ -102,6 +121,7 @@ properties:
     scaling-factors:
         type: object
         description: Factors to scale the optimisation problem to decrease its numerical range.
+        additionalProperties: false
         properties:
             power:
                 type: number
@@ -115,10 +135,12 @@ properties:
     parameters:
         type: object
         description: Parameter values of the models.
+        additionalProperties: false
         properties:
             maximum-installable-power-density:
                 type: object
                 description: Installable capacity density in MW/km² (not annual energy yield).
+                additionalProperties: false
                 properties:
                     pv-on-tilted-roofs:
                         type: number
@@ -139,6 +161,7 @@ properties:
             roof-share:
                 type: object
                 description: Share of roofs by orientation (should add up to 1)
+                additionalProperties: false
                 properties:
                     E:
                         type: number
@@ -168,6 +191,7 @@ properties:
             jrc-biofuel:
                 type: object
                 description: Biofuel potential under different scenarios, to select specific data from [@Ruiz:2019]
+                additionalProperties: false
                 properties:
                     scenario:
                         type: string
@@ -228,9 +252,70 @@ properties:
                 type: string
                 description: Scenario defining the amount of surfaces eligible for solar and wind power from [@Trondle:2019].
                 enum: ["technical-potential", "technical-social-potential"]
+            transport:
+                type: object
+                description: Parameters for transport sector model.
+                additionalProperties: fakse
+                properties:
+                    future-vehicle-efficiency-percentile:
+                        type: number
+                        minimum: 0
+                        maximum: 1
+                        description: asdasd # TODO add description
+                    road-transport-conversion-factors:
+                        type: object
+                        description: asdasd # TODO add description
+                        additionalProperties: false
+                        properties:
+                            light-duty-vehicles:
+                                type: number
+                                description: asdas # TODO add description
+                            heavy-duty-vehicles:
+                                type: number
+                                description: asd # TODO add description
+                            coaches-and-buses:
+                                type: number
+                                description: asd # TODO add description
+                            passenger-cars:
+                                type: number
+                                description: asd # TODO add description
+                            motorcycles:
+                                type: number
+                                description: asd # TODO add description
+                    names:
+                        type: object
+                        description: Names of vehicle types in JRC-IDEES.
+                        additionalProperties: false
+                        properties:
+                            light-duty-vehicles:
+                                type: string
+                                description: JRC-IDEES name of light-duty-vehicles.
+                            heavy-duty-vehicles:
+                                type: string
+                                description: JRC-IDEES name of heavy-duty-vehicles.
+                            coaches-and-buses:
+                                type: string
+                                description: JRC-IDEES name of coaches-and-buses.
+                            passenger-cars:
+                                type: string
+                                description: JRC-IDEES name of passenger-cars.
+                            motorcycles:
+                                type: string
+                                description: JRC-IDEES name of motorcycles.
+
+                    fill-missing-values:
+                        description: asdasd # TODO add description
+                        type: object
+                        #additionalProperties: false # TODO the following definitions are valid but fail in `jsonschema` 4.21.0
+                        #patternProperties:
+                        #    "^[A-Z][A-Z]$":
+                        #        type: array
+                        #        items:
+                        #            type: string
             entsoe-tyndp:
                 type: object
                 description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/
+                additionalProperties: false
                 properties:
                     scenario:
                         type: string
@@ -260,6 +345,7 @@ properties:
     scope:
         type: object
         description: Spatial and temporal scope bounding the models.
+        additionalProperties: false
         properties:
             spatial:
                 type: object
@@ -310,6 +396,7 @@ properties:
                     bounds:
                         type: object
                         description: Bounding box describing the spatial extent of geographic datasets.
+                        additionalProperties: false
                         properties:
                             x_min:
                                 type: number
@@ -334,6 +421,7 @@ properties:
             temporal:
                 type: object
                 description: The temporal scope of the models. Available range of 2010 - 2016 is set by electricity load data availability (lower bound) and capacity factor data availability (upper bound).
+                additionalProperties: false
                 properties:
                     first-year:
                         type: integer
@@ -349,6 +437,7 @@ properties:
     quality-control:
         type: object
         description: Parameters controlling the data preprocessing steps.
+        additionalProperties: false
         properties:
             hydro:
                 type: object
@@ -412,16 +501,19 @@ properties:
                 minimum: 0
                 maximum: 1
 
-    capacity_factors:
+    capacity-factors:
         type: object
         description: Parameters related to average or time-dependent capacity factors of renewables.
+        additionalProperties: false
         properties:
             min:
                 type: number
                 description: Set smaller values in time series to 0; this helps numerics in the LP.
+                minimum: 0
             max:
                 type: number
                 description: Cap larger values in time series; this helps numerics in the LP (hydro reservoir can have > 1).
+                minimum: 0
             average:
                 type: object
                 description: Average estimation used to transform annual fixed to variable costs.
@@ -429,15 +521,19 @@ properties:
                     pv:
                         type: number
                         description: Average annual PV capacity factor
+                        minimum: 0
                     onshore:
                         type: number
                         description: Average annual onshore wind capacity factor
+                        minimum: 0
                     offshore:
                         type: number
                         description: Average annual offshore wind capacity factor
+                        minimum: 0
                     ror:
                         type: number
                         description: Average annual run-of-river hydro capacity factor
+                        minimum: 0
             trim-ninja-timeseries:
                 type: boolean
                 description: If true, trims renewables.ninja time series to the year in question
