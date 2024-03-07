@@ -7,7 +7,7 @@ test-model:
             frozen-hydro: ["freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "no-hydro-supply-fixed-cost", "no-hydro-storage-fixed-cost"]
             alternative-cost: ["dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost"]
             shed-load: ["load-shedding"]
-            no-bau: ["no_bau_road_transport_demand_electrified"]
+            keep-historic-transport: ["keep-historic-electricity-demand-from-road-transport"]
         national:
             default: []
             connected_neighbours: ["connect_all_neighbours"]
@@ -17,6 +17,7 @@ test-model:
             frozen-hydro: ["freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "no-hydro-supply-fixed-cost", "no-hydro-storage-fixed-cost"]
             alternative-cost: ["dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost"]
             shed-load: ["load-shedding"]
+            keep-historic-transport: ["keep-historic-electricity-demand-from-road-transport"]
         regional:
             default: ["connect_all_neighbours", "run_barrier_no_crossover"]
             all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",

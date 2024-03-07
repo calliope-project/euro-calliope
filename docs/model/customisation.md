@@ -44,14 +44,11 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         **demand_road_transport_electrified**: Electrified road transport demand
 
-        **demand_road_transport_bau_electrified**: Electrified road BAU transport demand
+        **demand_road_transport_historic_electrified**: Removes historically electrified road transport demand
 
     === "Overrides"
 
-        **no_bau_road_transport_demand_electrified**: DRAFT: Allows to remove electrified road BAU transport demand.
-        This Override gets applied when only the electrified road transport demand gets looked at without the electricity demand
-        specified in demand/electricity.yaml. The reason for this is, that without the electricity demand, specified in
-        demand/electricity.yaml, no double counting of the electrified road bau transport takes place.
+        **keep-historic-electricity-demand-from-road-transport**: Keep historically electrified road transport demand. Historically electrified road transport demand is deleted by default, as it is already considered in historic electricity demand and would thus be counted twice. Using this override together with Euro-Calliope's default electricity demand is not advised.
 
 ??? note "storage/electricity.yaml"
 

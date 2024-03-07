@@ -7,22 +7,22 @@ techs:
         constraints:
             resource: file=demand/electrified-road-transport.csv
 
-    demand_road_transport_bau_electrified:
+    demand_road_transport_historic_electrified:
         essentials:
-            name: 'Electrified BAU road transport demand'
+            name: 'Removes historic electrified road transport demand'
             parent: demand
             carrier: electricity
         constraints:
-            resource: file=demand/electrified-bau-road-transport.csv
+            resource: file=demand/road-transport-historic-electrification.csv
 
 overrides:
-    no_bau_road_transport_demand_electrified:
+    keep-historic-electricity-demand-from-road-transport:
       {% for id, location in locations.iterrows() %}
-      {{ id }}.techs.demand_road_transport_bau_electrified.exists: False
+      {{ id }}.techs.demand_road_transport_historic_electrified.exists: False
       {% endfor %}
 
 locations:
     {% for id, location in locations.iterrows() %}
     {{ id }}.techs.demand_road_transport_electrified:
-    {{ id }}.techs.demand_road_transport_bau_electrified:
+    {{ id }}.techs.demand_road_transport_historic_electrified:
     {% endfor %}

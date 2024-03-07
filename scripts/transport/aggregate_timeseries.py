@@ -27,7 +27,7 @@ def aggregate_national_timeseries(paths_to_input: list[str]) -> pd.DataFrame:
 
 def aggregate_regional_timeseries(paths_to_input: list[str]) -> pd.DataFrame:
     # TODO implement
-    raise NotImplementedError("Regional road transport (bau) has not yet been implemented!")
+    raise NotImplementedError("Regional road transport (historic) has not yet been implemented!")
 
 
 if __name__ == "__main__":

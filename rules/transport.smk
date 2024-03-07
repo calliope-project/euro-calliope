@@ -4,19 +4,19 @@
 rule annual_transport_demand:
     message: "Calculate future transport energy demand based on JRC IDEES"
     input:
-        energy_balances="build/data/annual-energy-balances.csv",
-        jrc_road_energy="build/data/jrc-idees/transport/processed-road-energy.csv",
-        jrc_road_distance="build/data/jrc-idees/transport/processed-road-distance.csv",
-        jrc_road_vehicles="build/data/jrc-idees/transport/processed-road-vehicles.csv",
+        energy_balances = "build/data/annual-energy-balances.csv",
+        jrc_road_energy = "build/data/jrc-idees/transport/processed-road-energy.csv",
+        jrc_road_distance = "build/data/jrc-idees/transport/processed-road-distance.csv",
+        jrc_road_vehicles = "build/data/jrc-idees/transport/processed-road-vehicles.csv",
     params:
-        fill_missing_values=config["parameters"]["transport"]["fill-missing-values"],
-        efficiency_quantile=config["parameters"]["transport"]["future-vehicle-efficiency-percentile"]
+        fill_missing_values = config["parameters"]["transport"]["fill-missing-values"],
+        efficiency_quantile = config["parameters"]["transport"]["future-vehicle-efficiency-percentile"]
     conda: "../envs/default.yaml"
     output:
-        distance="build/data/transport/annual-road-transport-distance-demand.csv",
-        vehicles="build/data/transport/annual-road-transport-vehicles.csv",
-        efficiency="build/data/transport/annual-road-transport-efficiency.csv",
-        road_bau_electricity="build/data/transport/annual-road-transport-bau-electricity.csv",
+        distance = "build/data/transport/annual-road-transport-distance-demand.csv",
+        vehicles = "build/data/transport/annual-road-transport-vehicles.csv",
+        efficiency = "build/data/transport/annual-road-transport-efficiency.csv",
+        road_electricity_historic = "build/data/transport/annual-road-transport-historic-electrification.csv",
     script: "../scripts/transport/annual_transport_demand.py"
 
 
@@ -30,7 +30,7 @@ rule create_road_transport_timeseries:
         power_scaling_factor = config["scaling-factors"]["power"],
         conversion_factor = lambda wildcards: config["parameters"]["transport"]["road-transport-conversion-factors"][wildcards.type],
         type_name = lambda wildcards: config["parameters"]["transport"]["names"][wildcards.type],
-        bau = False
+        historic = False
     conda: "../envs/default.yaml"
     wildcard_constraints:
         type = "light-duty-vehicles|heavy-duty-vehicles|coaches-and-buses|passenger-cars|motorcycles"
@@ -39,19 +39,19 @@ rule create_road_transport_timeseries:
     script: "../scripts/transport/road_transport_timeseries.py"
 
 
-use rule create_road_transport_timeseries as create_road_transport_timeseries_bau with:
-    message: "Create timeseries for road transport demand"
+use rule create_road_transport_timeseries as create_road_transport_timeseries_historic_electrification with:
+    message: "Create timeseries for historic electrified road transport demand"
     input:
-        data = "build/data/transport/annual-road-transport-bau-electricity.csv"
+        data = "build/data/transport/annual-road-transport-historic-electrification.csv"
     params:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
         power_scaling_factor = config["scaling-factors"]["power"],
         conversion_factor = lambda wildcards: config["parameters"]["transport"]["road-transport-conversion-factors"][wildcards.type],
         type_name = lambda wildcards: config["parameters"]["transport"]["names"][wildcards.type],
-        bau = True
+        historic = True
     output:
-        "build/data/transport/timeseries/timeseries-{type}-bau.csv"
+        "build/data/transport/timeseries/timeseries-{type}-historic-electrification.csv"
 
 
 rule aggregate_timeseries: # TODO consider merge with other rules, as this is tiny atm
@@ -69,12 +69,12 @@ rule aggregate_timeseries: # TODO consider merge with other rules, as this is ti
     script: "../scripts/transport/aggregate_timeseries.py"
 
 
-use rule aggregate_timeseries as aggregate_bau_timeseries_bau with:
-    message: "Aggregates timeseries for {wildcards.resolution} electrified road BAU transport"
+use rule aggregate_timeseries as aggregate_timeseries_historic_electrified with:
+    message: "Aggregates timeseries for {wildcards.resolution} historically electrified road transport"
     input:
-        time_series=(
-            "build/data/transport/timeseries/timeseries-light-duty-vehicles-bau.csv",
-            "build/data/transport/timeseries/timeseries-coaches-and-buses-bau.csv",
-            "build/data/transport/timeseries/timeseries-passenger-cars-bau.csv"),
+        time_series = (
+            "build/data/transport/timeseries/timeseries-light-duty-vehicles-historic-electrification.csv",
+            "build/data/transport/timeseries/timeseries-coaches-and-buses-historic-electrification.csv",
+            "build/data/transport/timeseries/timeseries-passenger-cars-historic-electrification.csv"),
     output:
-        "build/models/{resolution}/timeseries/demand/electrified-bau-road-transport.csv"
+        "build/models/{resolution}/timeseries/demand/road-transport-historic-electrification.csv"

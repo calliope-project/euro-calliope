@@ -3,7 +3,7 @@ import pandas as pd
 
 def create_road_transport_demand_timeseries(
     path_to_input: str, first_year: int, final_year: int, type_name: str,
-    power_scaling_factor: float, conversion_factor: float, bau: bool, path_to_output: str
+    power_scaling_factor: float, conversion_factor: float, historic: bool, path_to_output: str
 ) -> None:
     # Read annual road transport distance into panda dataframe
     df = pd.read_csv(path_to_input, index_col=[0, 1, 2])
@@ -14,12 +14,12 @@ def create_road_transport_demand_timeseries(
 
     # Process the road transport distance timeseries
     process_timeseries(type_name, power_scaling_factor, conversion_factor, first_year,
-                       final_year, series, path_to_output, bau=bau)
+                       final_year, series, path_to_output, historic=historic)
 
 
 def process_timeseries(vehicle: str, power_scaling_factor: float, conversion_factor: float,
                        first_year: int, final_year: int, series: pd.Series,
-                       output_path: str, bau: bool):
+                       output_path: str, historic: bool):
     ts_index = pd.to_datetime(range(first_year, final_year + 2), format="%Y")
     ts = (
         series
@@ -32,7 +32,7 @@ def process_timeseries(vehicle: str, power_scaling_factor: float, conversion_fac
         .iloc[:-1] # remove first hour in following year
         .mul(conversion_factor)
         .mul(power_scaling_factor)
-        .mul(1 if bau else -1)
+        .mul(1 if historic else -1) # historic demand is actually a supply to avoid double counting
     )
     ts_index = pd.to_datetime(ts.index, format="%Y")
     ts = ts.set_index(ts_index)
@@ -47,6 +47,6 @@ if __name__ == "__main__":
         final_year=snakemake.params.final_year,
         type_name=snakemake.params.type_name,
         conversion_factor=snakemake.params.conversion_factor,
-        bau=snakemake.params.bau,
+        historic=snakemake.params.historic,
         path_to_output=snakemake.output[0],
     )

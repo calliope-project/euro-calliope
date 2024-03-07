@@ -21,10 +21,10 @@ def get_transport_demand(
     road_distance_out_path: str,
     road_vehicles_out_path: str,
     road_efficiency_out_path: str,
-    road_bau_electricity_out_path: str
+    road_historic_electricity_out_path: str
 ):
-    # Calculate total road distance, road efficiency and road BAU consumption
-    total_road_distance, road_efficiency, road_bau_consumption = get_all_distance_efficiency(
+    # Calculate total road distance, road efficiency and road historic electrified consumption
+    total_road_distance, road_efficiency, road_historic_electrified_consumption = get_all_distance_efficiency(
         'FC_TRA_ROAD_E',
         'vehicle_subtype'
     )
@@ -35,14 +35,14 @@ def get_transport_demand(
     # Some cleanup that's specific to road data for road efficiency
     road_efficiency = road_efficiency_cleanup(road_efficiency)
 
-    # Extract electricity BAU consumption
-    road_electricity_bau = get_road_electricity_bau_consumption(road_bau_consumption)
+    # Extract historically electrified consumption
+    road_electricity_historic = get_historic_road_electricity_consumption(road_historic_electrified_consumption)
 
     # Create CSV Files for calculated data
     total_road_distance.rename("value").to_csv(road_distance_out_path)
     total_road_vehicles.rename("value").to_csv(road_vehicles_out_path)
     road_efficiency.rename("value").to_csv(road_efficiency_out_path)
-    road_electricity_bau.rename("value").to_csv(road_bau_electricity_out_path)
+    road_electricity_historic.rename("value").to_csv(road_historic_electricity_out_path)
 
 
 def get_all_distance_efficiency(cat_name: str, unique_dim: str, energy_balance: pd.Series,
@@ -173,9 +173,9 @@ def road_efficiency_cleanup(road_efficiency: pd.DataFrame, efficiency_quantile: 
     )
 
 
-def get_road_electricity_bau_consumption(road_bau_consumption: pd.DataFrame) -> pd.DataFrame:
+def get_historic_road_electricity_consumption(road_historic_consumption: pd.DataFrame) -> pd.DataFrame:
     return (
-        road_bau_consumption
+        road_historic_consumption
         .groupby(level=['carrier', 'vehicle_type', 'country_code', 'year'])
         .sum()
         .xs('electricity')
@@ -221,8 +221,8 @@ if __name__ == "__main__":
 
     fill_missing_values = snakemake.params.fill_missing_values
 
-    # Calculate total road distance, road efficiency and road BAU consumption
-    total_road_distance, road_efficiency, road_bau_consumption = get_all_distance_efficiency(
+    # Calculate total road distance, road efficiency and historically electrified road consumption
+    total_road_distance, road_efficiency, road_historically_electrified_consumption = get_all_distance_efficiency(
         'FC_TRA_ROAD_E',
         'vehicle_subtype',
         energy_balance=energy_balances,
@@ -242,11 +242,11 @@ if __name__ == "__main__":
     # Some cleanup that's specific to road data for road efficiency
     road_efficiency = road_efficiency_cleanup(road_efficiency, snakemake.params.efficiency_quantile)
 
-    # Extract electricity BAU consumption
-    road_electricity_bau = get_road_electricity_bau_consumption(road_bau_consumption)
+    # Extract historical electricity consumption
+    road_electricity_historic = get_historic_road_electricity_consumption(road_historically_electrified_consumption)
 
     # Create CSV Files for calculated data
     total_road_distance.rename("value").to_csv(snakemake.output.distance)
     total_road_vehicles.rename("value").to_csv(snakemake.output.vehicles)
     road_efficiency.rename("value").to_csv(snakemake.output.efficiency)
-    road_electricity_bau.rename("value").to_csv(snakemake.output.road_bau_electricity)
+    road_electricity_historic.rename("value").to_csv(snakemake.output.road_electricity_historic)
