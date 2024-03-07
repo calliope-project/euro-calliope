@@ -10,10 +10,11 @@ techs:
     demand_road_transport_historic_electrified:
         essentials:
             name: 'Removes historic electrified road transport demand'
-            parent: demand
+            parent: supply
             carrier: electricity
         constraints:
             resource: file=demand/road-transport-historic-electrification.csv
+            resource_min_use: 1
 
 overrides:
     keep-historic-electricity-demand-from-road-transport:
