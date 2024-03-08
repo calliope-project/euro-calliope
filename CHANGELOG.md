@@ -4,7 +4,9 @@
 
 ### Added (models)
 
-* **ADD** nuclear power plant technology with capacity limits. Capacity limits can be equals to today or be bound by a minimum and maximum capacity to represent an available range in future. In either case, capacities are allocated at a subnational resolution based on linear scaling from current capacity geolocations, using the JRC power plant database (#78).
+* **ADD** fully-electrified road transportation (#270).
+
+* **ADD** nuclear power plant technology with capacity limits. Capacity limits can be equal to today or be bound by a minimum and maximum capacity to represent an available range in future. In either case, capacities are allocated at a subnational resolution based on linear scaling from current capacity geolocations, using the JRC power plant database (#78).
 
 ### Added (workflow)
 

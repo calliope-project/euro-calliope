@@ -15,12 +15,14 @@ model_template_dir = f"{template_dir}models/"
 techs_template_dir = f"{model_template_dir}techs/"
 
 include: "./rules/shapes.smk"
+include: "./rules/data.smk"
 include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
 include: "./rules/transmission.smk"
 include: "./rules/demand.smk"
 include: "./rules/nuclear.smk"
+include: "./rules/transport.smk"
 include: "./rules/sync.smk"
 min_version("7.8")
 localrules: all, clean
@@ -35,7 +37,6 @@ ALL_CF_TECHNOLOGIES = [
     "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat", "hydro-run-of-river",
     "hydro-reservoir"
 ]
-ALL_DEMAND_CARRIERS = ["electricity"]
 
 def ensure_lib_folder_is_linked():
     if not workflow.conda_prefix:
@@ -152,6 +153,7 @@ rule model_template:
                 "interest-rate.yaml",
                 "locations.yaml",
                 "techs/demand/electricity.yaml",
+                "techs/demand/electrified-transport.yaml",
                 "techs/storage/electricity.yaml",
                 "techs/storage/hydro.yaml",
                 "techs/supply/biofuel.yaml",
@@ -167,9 +169,10 @@ rule model_template:
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_CF_TECHNOLOGIES
         ),
-        demand_timeseries_data = expand(
-            "build/models/{{resolution}}/timeseries/demand/{energy_carrier}.csv",
-            energy_carrier=ALL_DEMAND_CARRIERS
+        demand_timeseries_data = (
+            "build/models/{resolution}/timeseries/demand/electricity.csv",
+            "build/models/{resolution}/timeseries/demand/electrified-road-transport.csv",
+            "build/models/{resolution}/timeseries/demand/road-transport-historic-electrification.csv"
         ),
         optional_input_files = lambda wildcards: expand(
             f"build/models/{wildcards.resolution}/{{input_file}}",

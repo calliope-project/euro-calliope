@@ -1,0 +1,29 @@
+techs:
+    demand_road_transport_electrified:
+        essentials:
+            name: 'Electrified road transport demand'
+            parent: demand
+            carrier: electricity
+        constraints:
+            resource: file=demand/electrified-road-transport.csv
+
+    demand_road_transport_historic_electrified:
+        essentials:
+            name: 'Removes historic electrified road transport demand'
+            parent: supply
+            carrier: electricity
+        constraints:
+            resource: file=demand/road-transport-historic-electrification.csv
+            resource_min_use: 1
+
+overrides:
+    keep-historic-electricity-demand-from-road-transport:
+      {% for id, location in locations.iterrows() %}
+      {{ id }}.techs.demand_road_transport_historic_electrified.exists: False
+      {% endfor %}
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.techs.demand_road_transport_electrified:
+    {{ id }}.techs.demand_road_transport_historic_electrified:
+    {% endfor %}
