@@ -1,7 +1,8 @@
+from enum import Enum
+
 import pandas as pd
 
 from eurocalliopelib import utils
-from typing import Tuple
 
 CARRIERS = {
     'O4652XR5210B': 'petrol',
@@ -12,47 +13,42 @@ CARRIERS = {
     'G3000': 'natural_gas',
     'E7000': 'electricity'
 }
+
 idx = pd.IndexSlice
 
 YEAR_RANGE = slice(2000, 2018)
 
 
-def get_transport_demand(
-    road_distance_out_path: str,
-    road_vehicles_out_path: str,
-    road_efficiency_out_path: str,
-    road_historic_electricity_out_path: str
-):
-    # Calculate total road distance, road efficiency and road historic electrified consumption
-    total_road_distance, road_efficiency, road_historic_electrified_consumption = get_all_distance_efficiency(
-        'FC_TRA_ROAD_E',
-        'vehicle_subtype'
-    )
-
-    # Calculate total road vehicles and aggregate total road distance
-    total_road_vehicles, total_road_distance = get_all_vehicles(total_road_distance)
-
-    # Some cleanup that's specific to road data for road efficiency
-    road_efficiency = road_efficiency_cleanup(road_efficiency)
-
-    # Extract historically electrified consumption
-    road_electricity_historic = get_historic_road_electricity_consumption(road_historic_electrified_consumption)
-
-    # Create CSV Files for calculated data
-    total_road_distance.rename("value").to_csv(road_distance_out_path)
-    total_road_vehicles.rename("value").to_csv(road_vehicles_out_path)
-    road_efficiency.rename("value").to_csv(road_efficiency_out_path)
-    road_electricity_historic.rename("value").to_csv(road_historic_electricity_out_path)
+class FinalConsumption(str, Enum):
+    ROAD_TRANSPORT = "FC_TRA_ROAD_E"
+    OTHER_SECTORS = "FC_OTH_NSP_E"
+    AGRICULTURE_AND_FORESTRY = "FC_OTH_AF_E"
 
 
-def get_all_distance_efficiency(cat_name: str, unique_dim: str, energy_balance: pd.Series,
+class Carrier(str, Enum):
+    AVIATION_GASOLINE = "O4651"
+    GASOLINE_JET_FUEL = "O4653"
+    KEROSENE_JET_FUEL = "O4661XR5230B"
+    OTHER_KEROSENE = "O4669"
+    OIL_AND_PETROLEUM = "O4000XBIO"
+
+
+AVIATION_CARRIERS = [
+    Carrier.AVIATION_GASOLINE,
+    Carrier.GASOLINE_JET_FUEL,
+    Carrier.KEROSENE_JET_FUEL,
+    Carrier.OTHER_KEROSENE
+]
+
+
+def get_all_distance_efficiency(energy_balance: pd.Series,
                                 other_transport_road: pd.Series, road_energy: pd.Series, road_distance: pd.Series,
                                 fill_missing_values: dict[str, str]
-                                ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+                                ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     # Add transport energy demand from agriculture and 'not elsewhere specified' (military) (OTHER_TRANSPORT_ROAD)
     transport_energy_balance = (
         energy_balance
-        .xs(cat_name)
+        .xs(FinalConsumption.ROAD_TRANSPORT)
         .unstack('carrier_code')
         .groupby(CARRIERS, axis=1).sum(min_count=1)
         .rename_axis(columns='carrier')
@@ -86,7 +82,7 @@ def get_all_distance_efficiency(cat_name: str, unique_dim: str, energy_balance: 
         .div(
             road_energy
             .where(road_energy > 0)
-            .groupby(level=['country_code', unique_dim, 'section', 'vehicle_type', 'year'])
+            .groupby(level=['country_code', 'vehicle_subtype', 'section', 'vehicle_type', 'year'])
             .sum()
         ),
         fill_missing_values
@@ -96,7 +92,7 @@ def get_all_distance_efficiency(cat_name: str, unique_dim: str, energy_balance: 
     # based on JRC IDEES transport efficiency (2015 data for 2016-2018)
     transport_distance_all_years = (
         transport_energy_per_mode
-        .groupby(level=['country_code', unique_dim, 'section', 'vehicle_type', 'year'])
+        .groupby(level=['country_code', 'vehicle_subtype', 'section', 'vehicle_type', 'year'])
         .sum()
         .mul(transport_efficiency)
     )
@@ -110,7 +106,7 @@ def get_all_distance_efficiency(cat_name: str, unique_dim: str, energy_balance: 
     total_transport_distance = (
         aligned_dfs[1]
         .fillna(aligned_dfs[0])
-        .groupby(level=['vehicle_type', unique_dim, 'country_code', 'year'])
+        .groupby(level=['vehicle_type', 'vehicle_subtype', 'country_code', 'year'])
         .sum()
     )
 
@@ -118,7 +114,7 @@ def get_all_distance_efficiency(cat_name: str, unique_dim: str, energy_balance: 
 
 
 def get_all_vehicles(total_road_distance: pd.DataFrame, road_vehicles: pd.Series,
-                     fill_missing_values: dict[str, str]) -> Tuple[pd.DataFrame, pd.DataFrame]:
+                     fill_missing_values: dict[str, str]) -> tuple[pd.DataFrame, pd.DataFrame]:
     total_vehicle_distance = fill_missing_countries_and_years(
         road_vehicles.div(road_vehicles),
         fill_missing_values
@@ -156,7 +152,6 @@ def fill_missing_countries_and_years(jrc_data: pd.DataFrame, fill_missing_values
 
 def road_efficiency_cleanup(road_efficiency: pd.DataFrame, efficiency_quantile: float) -> pd.DataFrame:
     return (
-        # 25th percentile of 2015 efficiency in TWh/mio km
         (1 / road_efficiency.xs(2015, level='year'))
         .unstack(['vehicle_type', 'vehicle_subtype'])
         .quantile(efficiency_quantile)
@@ -204,13 +199,13 @@ if __name__ == "__main__":
     # 'not elsewhere specified' oil use goes predominantly to 'road' transport, except kerosene which goes to aviation
     other_transportation_aviation = (  # all kerosene from the military destined for aviation
         energy_balances
-        .loc[idx['FC_OTH_NSP_E', ['O4651', 'O4653', 'O4661XR5230B', 'O4669'], :, :, :]]
+        .loc[idx[FinalConsumption.OTHER_SECTORS, AVIATION_CARRIERS, :, :, :]]
         .groupby(level=["country", "year"])
         .sum()
     )
     other_transport_road = (  # i.e. all oil that isn't destined for aviation
         energy_balances
-        .loc[idx[['FC_OTH_AF_E', 'FC_OTH_NSP_E'], 'O4000XBIO', :, :, :]]
+        .loc[idx[[FinalConsumption.AGRICULTURE_AND_FORESTRY, FinalConsumption.OTHER_SECTORS], Carrier.OIL_AND_PETROLEUM, :, :, :]]
         .groupby(level=["country", "year"])
         .sum()
         .sub(other_transportation_aviation, fill_value=0)  # remove fuel use assumed for aviation
@@ -223,8 +218,6 @@ if __name__ == "__main__":
 
     # Calculate total road distance, road efficiency and historically electrified road consumption
     total_road_distance, road_efficiency, road_historically_electrified_consumption = get_all_distance_efficiency(
-        'FC_TRA_ROAD_E',
-        'vehicle_subtype',
         energy_balance=energy_balances,
         other_transport_road=other_transport_road,
         road_energy=road_energy,
