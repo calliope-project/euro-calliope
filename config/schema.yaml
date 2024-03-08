@@ -302,7 +302,6 @@ properties:
                             motorcycles:
                                 type: string
                                 description: JRC-IDEES name of motorcycles.
-
                     fill-missing-values:
                         description: Fill missing values in annual transport demand.
                         type: object

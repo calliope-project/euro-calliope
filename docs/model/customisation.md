@@ -44,7 +44,7 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         **demand_road_transport_electrified**: Electrified road transport demand
 
-        **demand_road_transport_historic_electrified**: Removes historically electrified road transport demand
+        **demand_road_transport_historic_electrified**: Removes historically electrified road transport demand to avoid double counting
 
     === "Overrides"
 

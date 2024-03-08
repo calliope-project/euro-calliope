@@ -13,13 +13,13 @@ def create_road_transport_demand_timeseries(
     series = df["value"] / 8760
 
     # Process the road transport distance timeseries
-    process_timeseries(type_name, power_scaling_factor, conversion_factor, first_year,
-                       final_year, series, path_to_output, historic=historic)
+    create_timeseries(type_name, power_scaling_factor, conversion_factor, first_year,
+                      final_year, series, path_to_output, historic=historic)
 
 
-def process_timeseries(vehicle: str, power_scaling_factor: float, conversion_factor: float,
-                       first_year: int, final_year: int, series: pd.Series,
-                       output_path: str, historic: bool):
+def create_timeseries(vehicle: str, power_scaling_factor: float, conversion_factor: float,
+                      first_year: int, final_year: int, series: pd.Series,
+                      output_path: str, historic: bool):
     ts_index = pd.to_datetime(range(first_year, final_year + 2), format="%Y")
     ts = (
         series
