@@ -255,33 +255,33 @@ properties:
             transport:
                 type: object
                 description: Parameters for transport sector model.
-                additionalProperties: fakse
+                additionalProperties: false
                 properties:
                     future-vehicle-efficiency-percentile:
                         type: number
                         minimum: 0
                         maximum: 1
-                        description: asdasd # TODO add description
+                        description: Percentile of vehicle efficiency across countries.
                     road-transport-conversion-factors:
                         type: object
-                        description: asdasd # TODO add description
+                        description: Electricity required per distance travelled (MWh / million km).
                         additionalProperties: false
                         properties:
                             light-duty-vehicles:
                                 type: number
-                                description: asdas # TODO add description
+                                description: Light duty vehicles / trucks.
                             heavy-duty-vehicles:
                                 type: number
-                                description: asd # TODO add description
+                                description: Heavy duty vehicles / trucks.
                             coaches-and-buses:
                                 type: number
-                                description: asd # TODO add description
+                                description: Coaches and buses.
                             passenger-cars:
                                 type: number
-                                description: asd # TODO add description
+                                description: Passenger cars.
                             motorcycles:
                                 type: number
-                                description: asd # TODO add description
+                                description: Motorcylces.
                     names:
                         type: object
                         description: Names of vehicle types in JRC-IDEES.
@@ -304,14 +304,17 @@ properties:
                                 description: JRC-IDEES name of motorcycles.
 
                     fill-missing-values:
-                        description: asdasd # TODO add description
+                        description: Fill missing values in annual transport demand.
                         type: object
-                        #additionalProperties: false # TODO the following definitions are valid but fail in `jsonschema` 4.21.0
-                        #patternProperties:
-                        #    "^[A-Z][A-Z]$":
-                        #        type: array
-                        #        items:
-                        #            type: string
+                        additionalProperties: false
+                        patternProperties:
+                            "^[A-Z][A-Z][A-Z]$":
+                                type: array
+                                description: Country to fill missing values for.
+                                items:
+                                    type: string
+                                    pattern: ^[A-Z][A-Z][A-Z]$
+                                    description: Country to fill missing values from.
             entsoe-tyndp:
                 type: object
                 description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/

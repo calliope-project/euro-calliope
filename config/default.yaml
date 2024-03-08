@@ -126,8 +126,9 @@ parameters:
     biofuel-efficiency: 0.45
     wind-and-solar-potential-scenario: technical-potential
     transport:
-        future-vehicle-efficiency-percentile: 0.25
-        road-transport-conversion-factors:  # MWh / mio km 25th percentile efficiency of all countries in 2015 [@Mantzos:2017]
+        future-vehicle-efficiency-percentile: 0.25 # FIXME Why so low? Why not 0.5?
+        # FIXME road-transport-conversion-factors are redundant, as they are derived using future-vehicle-efficiency-percentile
+        road-transport-conversion-factors: # MWh / mio km 25th percentile efficiency of all countries in 2015 [@Mantzos:2017]
             light-duty-vehicles: 480
             heavy-duty-vehicles: 3248 # based on buses
             coaches-and-buses: 3248

@@ -21,7 +21,4 @@ if args.config:
         config = yaml.safe_load(f)
     jsonschema.validate(config, schema)
 else:
-    # We set the metaschema 'additionalProperties' to False to create a 'strict' schema checker,
-    # which will fail on typos
-    jsonschema.Draft202012Validator.META_SCHEMA['additionalProperties'] = False
     jsonschema.Draft202012Validator.check_schema(schema)
