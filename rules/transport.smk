@@ -63,6 +63,8 @@ rule aggregate_timeseries: # TODO consider merge with other rules, as this is ti
             "build/data/transport/timeseries/timeseries-coaches-and-buses.csv",
             "build/data/transport/timeseries/timeseries-passenger-cars.csv",
             "build/data/transport/timeseries/timeseries-motorcycles.csv"),
+        locations = "build/data/regional/units.csv",
+        populations = "build/data/regional/population.csv"
     params:
         countries = config["scope"]["spatial"]["countries"]
     conda: "../envs/default.yaml"

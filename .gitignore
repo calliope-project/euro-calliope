@@ -5,6 +5,10 @@ notebooks
 
 gurobi.log
 
+.vscode
+
+.DS_Store
+
 # Python
 *.pyc
 build/
