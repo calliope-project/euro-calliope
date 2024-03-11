@@ -10,6 +10,7 @@
 
 ### Added (workflow)
 
+* **ADD** IPython debugger to all conda environments to ease debugging (#254).
 * **ADD** a default Snakemake profile to run on local machines in addition to the existing profile for Euler (#211).
 * **ADD** a Snakemake profile to run using conda instead of mamba (#211).
 * **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality (#152).
