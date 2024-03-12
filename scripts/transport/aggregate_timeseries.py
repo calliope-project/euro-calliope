@@ -18,7 +18,7 @@ def create_national_timeseries(paths_to_input: list[str], country_codes: list[st
 def create_regional_timeseries(
     paths_to_input: list[str],
     country_codes: list[str],
-    country_region_mapping: str,
+    region_country_mapping: str,
     population: str,
 ) -> pd.DataFrame:
     """Create regional timeseries by 
@@ -26,12 +26,14 @@ def create_regional_timeseries(
         2. scaling each region according to the relative population in that region
 
     Output: a dataframe with columns over regions and rows over timestamps.
+
+    ASSUME all road transport is subnationally distributed in proportion to population.
     """
 
     df_national = create_national_timeseries(paths_to_input, country_codes)
 
-    country_region_mapping = (
-        pd.read_csv(country_region_mapping, index_col=0)
+    region_country_mapping = (
+        pd.read_csv(region_country_mapping, index_col=0)
         .loc[:, "country_code"]
         .to_dict()
     )
@@ -39,8 +41,8 @@ def create_regional_timeseries(
     df_population_share = (
         pd.read_csv(population, index_col=0)
         .loc[:, "population_sum"]
-        .reindex(country_region_mapping.keys())
-        .groupby(by=country_region_mapping)
+        .reindex(region_country_mapping.keys())
+        .groupby(by=region_country_mapping)
         .transform(lambda df: df / df.sum())
     )
 
@@ -49,7 +51,7 @@ def create_regional_timeseries(
             index=df_national.index,
             data={
                 id: df_national[country_code]
-                for id, country_code in country_region_mapping.items()
+                for id, country_code in region_country_mapping.items()
             }
         )
         .mul(df_population_share)
