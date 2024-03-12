@@ -53,6 +53,7 @@ def create_regional_timeseries(
             }
         )
         .mul(df_population_share)
+        .rename(columns=lambda col_name: col_name.replace('.', '-'))    
     )
 
     pd.testing.assert_series_equal(df_regional.sum(axis=1), df_national.sum(axis=1))
