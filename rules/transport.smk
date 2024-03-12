@@ -63,6 +63,8 @@ rule aggregate_timeseries: # TODO consider merge with other rules, as this is ti
             "build/data/transport/timeseries/timeseries-coaches-and-buses.csv",
             "build/data/transport/timeseries/timeseries-passenger-cars.csv",
             "build/data/transport/timeseries/timeseries-motorcycles.csv"),
+        locations = "build/data/regional/units.csv",
+        populations = "build/data/regional/population.csv"
     params:
         countries = config["scope"]["spatial"]["countries"]
     conda: "../envs/default.yaml"
@@ -78,5 +80,7 @@ use rule aggregate_timeseries as aggregate_timeseries_historic_electrified with:
             "build/data/transport/timeseries/timeseries-light-duty-vehicles-historic-electrification.csv",
             "build/data/transport/timeseries/timeseries-coaches-and-buses-historic-electrification.csv",
             "build/data/transport/timeseries/timeseries-passenger-cars-historic-electrification.csv"),
+        locations = "build/data/regional/units.csv",
+        populations = "build/data/regional/population.csv"
     output:
         "build/models/{resolution}/timeseries/demand/road-transport-historic-electrification.csv"
