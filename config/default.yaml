@@ -142,13 +142,22 @@ parameters:
             passenger-cars: Passenger cars
             motorcycles: Powered 2-wheelers
         fill-missing-values:
-            ALB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            BIH: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            MNE: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            MKD: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            SRB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            NOR: ['SWE', 'DNK']
-            CHE: ['DEU', 'AUT', 'FRA', 'ITA']
+            annual-data:
+                ALB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+                BIH: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+                MNE: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+                MKD: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+                SRB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+                NOR: ['SWE', 'DNK']
+                CHE: ['DEU', 'AUT', 'FRA', 'ITA']
+            timeseries-data:
+                ALB: ['HRV']
+                MKD: ['HRV']
+                GRC: ['ROU']
+                BGR: ['ROU']
+                BIH: ['HRV', 'HUN']
+                MNE: ['HRV']
+                SRB: ['HUN']
     entsoe-tyndp:
         scenario: National Trends
         grid: Reference

@@ -17,7 +17,7 @@ rule annual_transport_demand:
         jrc_road_distance = "build/data/jrc-idees/transport/processed-road-distance.csv",
         jrc_road_vehicles = "build/data/jrc-idees/transport/processed-road-vehicles.csv",
     params:
-        fill_missing_values = config["parameters"]["transport"]["fill-missing-values"],
+        fill_missing_values = config["parameters"]["transport"]["fill-missing-values"]["annual-data"],
         efficiency_quantile = config["parameters"]["transport"]["future-vehicle-efficiency-percentile"]
     conda: "../envs/default.yaml"
     output:
@@ -40,6 +40,7 @@ rule create_road_transport_timeseries:
         conversion_factor = lambda wildcards: config["parameters"]["transport"]["road-transport-conversion-factors"][wildcards.vehicle_type],
         historic = False,
         countries = config["scope"]["spatial"]["countries"],
+        country_neighbour_dict= config["parameters"]["transport"]["fill-missing-values"]["timeseries-data"],
     conda: "../envs/default.yaml"
     wildcard_constraints:
         vehicle_type = "light-duty-vehicles|heavy-duty-vehicles|coaches-and-buses|passenger-cars|motorcycles"
@@ -60,6 +61,7 @@ use rule create_road_transport_timeseries as create_road_transport_timeseries_hi
         conversion_factor = lambda wildcards: config["parameters"]["transport"]["road-transport-conversion-factors"][wildcards.vehicle_type],
         historic = True,
         countries = config["scope"]["spatial"]["countries"],
+        country_neighbour_dict= config["parameters"]["transport"]["fill-missing-values"]["timeseries-data"],
     output:
         "build/data/transport/timeseries/timeseries-{vehicle_type}-historic-electrification.csv"
 

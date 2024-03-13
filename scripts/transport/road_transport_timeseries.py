@@ -78,6 +78,5 @@ if __name__ == "__main__":
         historic=snakemake.params.historic,
         path_to_output=snakemake.output[0],
         country_codes=[pycountry.countries.lookup(c).alpha_3 for c in snakemake.params.countries],
-        country_neighbour_dict={'ALB': ['HRV'], 'MKD': ['HRV'], 'GRC': ['ROU'], 'BGR': ['ROU'],
-        'BIH': ['HRV', 'HUN'], 'MNE': ['HRV'], 'SRB': ['HUN']},
+        country_neighbour_dict=snakemake.params.country_neighbour_dict,
     )
