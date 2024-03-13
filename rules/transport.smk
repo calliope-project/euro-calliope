@@ -7,16 +7,13 @@ rule annual_transport_demand:
         energy_balances = "build/data/annual-energy-balances.csv",
         jrc_road_energy = "build/data/jrc-idees/transport/processed-road-energy.csv",
         jrc_road_distance = "build/data/jrc-idees/transport/processed-road-distance.csv",
-        jrc_road_vehicles = "build/data/jrc-idees/transport/processed-road-vehicles.csv",
     params:
         fill_missing_values = config["parameters"]["transport"]["fill-missing-values"],
         efficiency_quantile = config["parameters"]["transport"]["future-vehicle-efficiency-percentile"]
     conda: "../envs/default.yaml"
     output:
         distance = "build/data/transport/annual-road-transport-distance-demand.csv",
-        vehicles = "build/data/transport/annual-road-transport-vehicles.csv",
-        efficiency = "build/data/transport/annual-road-transport-efficiency.csv",
-        road_electricity_historic = "build/data/transport/annual-road-transport-historic-electrification.csv",
+        distance_historic_electrification = "build/data/transport/annual-road-transport-historic-electrification.csv",
     script: "../scripts/transport/annual_transport_demand.py"
 
 
