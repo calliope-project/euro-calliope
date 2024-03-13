@@ -8,6 +8,7 @@ rule download_ch_energy_balances:
     params:
         url = lambda wildcards: config["data-sources"][f"swiss-{wildcards.dataset}"]
     output: protected("data/automatic/ch-{dataset}.xlsx")
+    conda: "../envs/shell.yaml"
     wildcard_constraints:
         dataset = "((energy-balance)|(industry-energy-balance))"
     localrule: True
@@ -21,6 +22,7 @@ rule download_eurostat_annual_energy_balances:
     message: "Download Eurostat Annual Energy Balances from euro-calliope datasets"
     params:
         url = config["data-sources"]["eurostat-energy-balance"]
+    conda: "../envs/shell.yaml"
     output: protected("data/automatic/eurostat-energy-balance.tsv.gz")
     localrule: True
     shell: "curl -sLo {output} {params.url}"
@@ -81,7 +83,9 @@ rule jrc_idees_transport_processed:
             country_code=EU28
         )
     output: "build/data/jrc-idees/transport/processed-{dataset}.csv"
+    params:
+        vehicle_type_names = config["parameters"]["transport"]["vehicle-type-names"],
     wildcard_constraints:
-        dataset = "((road-energy)|(road-distance)|(road-vehicles))"
+        dataset = "road-energy|road-distance|road-vehicles"
     conda: "../envs/default.yaml"
     script: "../scripts/transport/jrc_idees.py"

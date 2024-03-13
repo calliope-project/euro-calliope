@@ -1,5 +1,13 @@
 """Rules to process transport sector data."""
 
+rule download_transport_timeseries:
+    message: "Get EV data from RAMP"
+    params:
+        url = config["data-sources"]["ev-data"]
+    conda: "../envs/shell.yaml"
+    output: protected("data/automatic/ramp-ev-consumption-profiles.csv.gz")
+    localrule: True
+    shell: "curl -sLo {output} {params.url}"
 
 rule annual_transport_demand:
     message: "Calculate future transport energy demand based on JRC IDEES"
@@ -23,35 +31,37 @@ rule annual_transport_demand:
 rule create_road_transport_timeseries:
     message: "Create timeseries for road transport demand"
     input:
-        data = "build/data/transport/annual-road-transport-distance-demand.csv",
+        annual_data = "build/data/transport/annual-road-transport-distance-demand.csv",
+        timeseries = "data/automatic/ramp-ev-consumption-profiles.csv.gz"
     params:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
         power_scaling_factor = config["scaling-factors"]["power"],
-        conversion_factor = lambda wildcards: config["parameters"]["transport"]["road-transport-conversion-factors"][wildcards.type],
-        type_name = lambda wildcards: config["parameters"]["transport"]["names"][wildcards.type],
-        historic = False
+        conversion_factor = lambda wildcards: config["parameters"]["transport"]["road-transport-conversion-factors"][wildcards.vehicle_type],
+        historic = False,
+        countries = config["scope"]["spatial"]["countries"],
     conda: "../envs/default.yaml"
     wildcard_constraints:
-        type = "light-duty-vehicles|heavy-duty-vehicles|coaches-and-buses|passenger-cars|motorcycles"
+        vehicle_type = "light-duty-vehicles|heavy-duty-vehicles|coaches-and-buses|passenger-cars|motorcycles"
     output:
-        main = "build/data/transport/timeseries/timeseries-{type}.csv",
+        main = "build/data/transport/timeseries/timeseries-{vehicle_type}.csv",
     script: "../scripts/transport/road_transport_timeseries.py"
 
 
 use rule create_road_transport_timeseries as create_road_transport_timeseries_historic_electrification with:
     message: "Create timeseries for historic electrified road transport demand"
     input:
-        data = "build/data/transport/annual-road-transport-historic-electrification.csv"
+        annual_data = "build/data/transport/annual-road-transport-historic-electrification.csv",
+        timeseries = "data/automatic/ramp-ev-consumption-profiles.csv.gz",
     params:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
         power_scaling_factor = config["scaling-factors"]["power"],
-        conversion_factor = lambda wildcards: config["parameters"]["transport"]["road-transport-conversion-factors"][wildcards.type],
-        type_name = lambda wildcards: config["parameters"]["transport"]["names"][wildcards.type],
-        historic = True
+        conversion_factor = lambda wildcards: config["parameters"]["transport"]["road-transport-conversion-factors"][wildcards.vehicle_type],
+        historic = True,
+        countries = config["scope"]["spatial"]["countries"],
     output:
-        "build/data/transport/timeseries/timeseries-{type}-historic-electrification.csv"
+        "build/data/transport/timeseries/timeseries-{vehicle_type}-historic-electrification.csv"
 
 
 rule aggregate_timeseries: # TODO consider merge with other rules, as this is tiny atm
@@ -65,8 +75,6 @@ rule aggregate_timeseries: # TODO consider merge with other rules, as this is ti
             "build/data/transport/timeseries/timeseries-motorcycles.csv"),
         locations = "build/data/regional/units.csv",
         populations = "build/data/regional/population.csv"
-    params:
-        countries = config["scope"]["spatial"]["countries"]
     conda: "../envs/default.yaml"
     output:
         "build/models/{resolution}/timeseries/demand/electrified-road-transport.csv",
