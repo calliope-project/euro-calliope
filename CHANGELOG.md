@@ -10,6 +10,7 @@
 
 ### Added (workflow)
 
+* **ADD** DAG rule that generates a visualisation of Snakemake's directed acyclic graph (#208).
 * **ADD** IPython debugger to all conda environments to ease debugging (#254).
 * **ADD** a default Snakemake profile to run on local machines in addition to the existing profile for Euler (#211).
 * **ADD** a Snakemake profile to run using conda instead of mamba (#211).
