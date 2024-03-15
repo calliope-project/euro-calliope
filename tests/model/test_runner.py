@@ -1,20 +1,26 @@
-from pathlib import Path
-import sys
-import yaml
 import os
+import sys
+from pathlib import Path
 
-import pytest
 import calliope
 import pandas as pd
+import pytest
+import yaml
 
 
 def run_test(snakemake):
-    with open(os.path.join(snakemake.input.test_dir, "..", "resources", "test.yaml")) as f:
+    with open(
+        os.path.join(snakemake.input.test_dir, "..", "resources", "test.yaml")
+    ) as f:
         test_config = yaml.safe_load(f)
 
-    override_dict = test_config["test-model"]["overrides"][snakemake.wildcards.resolution]
+    override_dict = test_config["test-model"]["overrides"][
+        snakemake.wildcards.resolution
+    ]
     scenarios = test_config["test-model"]["scenarios"][snakemake.wildcards.resolution]
-    subset_time = test_config["test-model"]["subset_time"][snakemake.wildcards.resolution]
+    subset_time = test_config["test-model"]["subset_time"][
+        snakemake.wildcards.resolution
+    ]
 
     exit_code = pytest.main(
         [
@@ -23,7 +29,9 @@ def run_test(snakemake):
             "--self-contained-html",
             "--verbose",
         ],
-        plugins=[_create_config_plugin(snakemake, override_dict, scenarios, subset_time)]
+        plugins=[
+            _create_config_plugin(snakemake, override_dict, scenarios, subset_time)
+        ],
     )
     if exit_code == 0:
         Path(snakemake.output[0]).touch()
@@ -33,8 +41,7 @@ def run_test(snakemake):
 def _create_config_plugin(snakemake, override_dict, scenarios, subset_time):
     """Creates fixtures from Snakemake configuration."""
 
-    class SnakemakeConfigPlugin():
-
+    class SnakemakeConfigPlugin:
         @pytest.fixture(scope="session")
         def config(self):
             return snakemake.params.config
@@ -56,7 +63,7 @@ def _create_config_plugin(snakemake, override_dict, scenarios, subset_time):
             return calliope.Model(
                 snakemake.input.example_model,
                 scenario=",".join(scenarios[scenario]),
-                override_dict=override_dict
+                override_dict=override_dict,
             )
 
         @pytest.fixture(scope="session")
@@ -66,9 +73,15 @@ def _create_config_plugin(snakemake, override_dict, scenarios, subset_time):
 
         @pytest.fixture(scope="session")
         def energy_cap(self, optimised_model, scaling_factors):
-            return optimised_model.get_formatted_array("energy_cap") / scaling_factors["power"]
+            return (
+                optimised_model.get_formatted_array("energy_cap")
+                / scaling_factors["power"]
+            )
 
-        @pytest.fixture(scope="module", params=_read_locs(snakemake.input.capacity_factor_timeseries[0]))
+        @pytest.fixture(
+            scope="module",
+            params=_read_locs(snakemake.input.capacity_factor_timeseries[0]),
+        )
         def location(self, request):
             return request.param
 
@@ -77,12 +90,14 @@ def _create_config_plugin(snakemake, override_dict, scenarios, subset_time):
             model = calliope.Model(
                 snakemake.input.example_model,
                 override_dict=override_dict,
-                scenario=",".join(scenarios["default"])
+                scenario=",".join(scenarios["default"]),
             )
             model.run()
             return model
 
-        @pytest.fixture(scope="function", params=snakemake.input.capacity_factor_timeseries)
+        @pytest.fixture(
+            scope="function", params=snakemake.input.capacity_factor_timeseries
+        )
         def capacity_factor_timeseries(self, request):
             return pd.read_csv(request.param, index_col=0, parse_dates=True)
 
@@ -102,8 +117,11 @@ def _create_config_plugin(snakemake, override_dict, scenarios, subset_time):
             return pd.read_csv(path, index_col=0, parse_dates=True)
 
         def _select_capacity_factor_time_series(self, technology):
-            selected = [path for path in snakemake.input.capacity_factor_timeseries
-                        if Path(path).name == f"capacityfactors-{technology}.csv"]
+            selected = [
+                path
+                for path in snakemake.input.capacity_factor_timeseries
+                if Path(path).name == f"capacityfactors-{technology}.csv"
+            ]
             assert len(selected) == 1
             return selected[0]
 

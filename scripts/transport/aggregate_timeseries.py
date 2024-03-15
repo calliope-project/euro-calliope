@@ -1,5 +1,4 @@
 import pandas as pd
-import pycountry
 
 
 def create_continental_timeseries(paths_to_input: list[str]) -> pd.DataFrame:
@@ -9,7 +8,7 @@ def create_continental_timeseries(paths_to_input: list[str]) -> pd.DataFrame:
 
 def create_national_timeseries(paths_to_input: list[str]) -> pd.DataFrame:
     all_ts = [
-        pd.read_csv(path, index_col='utc-timestamp', parse_dates=True)
+        pd.read_csv(path, index_col="utc-timestamp", parse_dates=True)
         for path in paths_to_input
     ]
     return sum(all_ts)
@@ -20,7 +19,7 @@ def create_regional_timeseries(
     region_country_mapping: str,
     population: str,
 ) -> pd.DataFrame:
-    """Create regional timeseries by 
+    """Create regional timeseries by
         1. disaggregating the national timeseries into regional
         2. scaling each region according to the relative population in that region
 
@@ -51,10 +50,10 @@ def create_regional_timeseries(
             data={
                 id: df_national[country_code]
                 for id, country_code in region_country_mapping.items()
-            }
+            },
         )
         .mul(df_population_share)
-        .rename(columns=lambda col_name: col_name.replace('.', '-'))    
+        .rename(columns=lambda col_name: col_name.replace(".", "-"))
     )
 
     pd.testing.assert_series_equal(df_regional.sum(axis=1), df_national.sum(axis=1))
@@ -63,20 +62,21 @@ def create_regional_timeseries(
 
 
 if __name__ == "__main__":
-    resolution=snakemake.wildcards.resolution
-    paths_to_input=snakemake.input.time_series
-    path_to_output=snakemake.output[0]
-    path_to_locations=snakemake.input.locations
-    path_to_populations=snakemake.input.populations
+    resolution = snakemake.wildcards.resolution
+    paths_to_input = snakemake.input.time_series
+    path_to_output = snakemake.output[0]
+    path_to_locations = snakemake.input.locations
+    path_to_populations = snakemake.input.populations
 
     if resolution == "continental":
         ts = create_continental_timeseries(paths_to_input)
     elif resolution == "national":
         ts = create_national_timeseries(paths_to_input)
     elif resolution == "regional":
-        ts = create_regional_timeseries(paths_to_input, path_to_locations, path_to_populations)
+        ts = create_regional_timeseries(
+            paths_to_input, path_to_locations, path_to_populations
+        )
     else:
         raise ValueError("Input resolution not recognised.")
 
     ts.to_csv(path_to_output)
-

@@ -29,7 +29,7 @@ if __name__ == "__main__":
             snakemake.params.x_min,
             snakemake.params.y_min,
             snakemake.params.x_max,
-            snakemake.params.y_max
+            snakemake.params.y_max,
         ),
-        path_to_output=snakemake.output[0]
+        path_to_output=snakemake.output[0],
     )

@@ -2,7 +2,6 @@ from textwrap import dedent
 
 import geopandas as gpd
 import matplotlib.pyplot as plt
-
 from eurocalliopelib.geo import EPSG3035
 
 LIGHT_BLUE = "#8fa2cf"
@@ -15,15 +14,17 @@ MAP_MAX_X = 6300000
 MAP_MAX_Y = 5500000
 
 
-def spatial_scope_and_resolutions(path_to_regional_units, path_to_national_units, dpi, path_to_output):
+def spatial_scope_and_resolutions(
+    path_to_regional_units, path_to_national_units, dpi, path_to_output
+):
     # read data
     regional = gpd.read_file(path_to_regional_units).to_crs(EPSG3035).simplify(10000)
     national = gpd.read_file(path_to_national_units).to_crs(EPSG3035).simplify(10000)
 
     # prepare figure
-    plt.rcParams.update({'font.size': 6})
+    plt.rcParams.update({"font.size": 6})
     fig = plt.figure(figsize=(4, 1.4))
-    axes = fig.subplots(1, 4, gridspec_kw={'width_ratios': [0.15, 0.35, 0.35, 0.15]})
+    axes = fig.subplots(1, 4, gridspec_kw={"width_ratios": [0.15, 0.35, 0.35, 0.15]})
     for ax in axes:
         ax.axis("off")
 
@@ -43,37 +44,32 @@ def _plot_text(national, regional, ax):
     ax.text(
         x=0.0,
         y=0.65,
-        fontdict={'fontweight': 'semibold', 'va': 'top', 'ha': 'left'},
-        s="Euro-Calliope's resolutions:"
+        fontdict={"fontweight": "semibold", "va": "top", "ha": "left"},
+        s="Euro-Calliope's resolutions:",
     )
     ax.text(
         x=0.03,
         y=0.63,
-        fontdict={'va': 'top', 'ha': 'left'},
+        fontdict={"va": "top", "ha": "left"},
         s=dedent(
             f"""
             · a single continent,
             · {len(national)} countries,
             · or {len(regional)} regions.
             """
-        )
+        ),
     )
     ax.text(
         x=0.0,
         y=0.15,
-        fontdict={'va': 'top', 'size': 4},
-        s="Source: GADM, NUTS © EuroGeographics."
+        fontdict={"va": "top", "size": 4},
+        s="Source: GADM, NUTS © EuroGeographics.",
     )
 
 
 def _plot_map(data, ax, edge_width, face_color=LIGHT_BLUE, edge_color=WHITE):
-    ax.set_aspect('equal')
-    data.plot(
-        ax=ax,
-        facecolor=face_color,
-        edgecolor=edge_color,
-        linewidth=edge_width
-    )
+    ax.set_aspect("equal")
+    data.plot(ax=ax, facecolor=face_color, edgecolor=edge_color, linewidth=edge_width)
     ax.set_xlim(MAP_MIN_X, MAP_MAX_X)
     ax.set_ylim(MAP_MIN_Y, MAP_MAX_Y)
 
@@ -83,5 +79,5 @@ if __name__ == "__main__":
         path_to_regional_units=snakemake.input.regional_units,
         path_to_national_units=snakemake.input.national_units,
         dpi=snakemake.params.dpi,
-        path_to_output=snakemake.output[0]
+        path_to_output=snakemake.output[0],
     )

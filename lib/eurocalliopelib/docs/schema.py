@@ -1,17 +1,17 @@
-import yaml
 from pathlib import Path
 
 import jsonschema2md
 import mkdocs
+import yaml
 from mkdocs.plugins import BasePlugin
 from mkdocs.structure.files import File
 
 
 class SchemaPlugin(BasePlugin):
     config_scheme = (
-        ('path_to_schema', mkdocs.config.config_options.Type(str)),
-        ('path_to_src_dir', mkdocs.config.config_options.Type(str)),
-        ('path_to_md_relative_to_site', mkdocs.config.config_options.Type(str))
+        ("path_to_schema", mkdocs.config.config_options.Type(str)),
+        ("path_to_src_dir", mkdocs.config.config_options.Type(str)),
+        ("path_to_md_relative_to_site", mkdocs.config.config_options.Type(str)),
     )
 
     def on_serve(self, server, config, builder):
@@ -22,7 +22,11 @@ class SchemaPlugin(BasePlugin):
     def on_files(self, files, config, **kwargs):
         """Generate overview over configuration schema and add to mkdoc's files."""
         path_to_schema = Path.cwd() / self.config["path_to_schema"]
-        path_to_md = Path.cwd() / self.config["path_to_src_dir"] / self.config["path_to_md_relative_to_site"]
+        path_to_md = (
+            Path.cwd()
+            / self.config["path_to_src_dir"]
+            / self.config["path_to_md_relative_to_site"]
+        )
         path_to_md.parent.mkdir(parents=True, exist_ok=True)
 
         parser = jsonschema2md.Parser()
@@ -38,7 +42,7 @@ class SchemaPlugin(BasePlugin):
             path=self.config["path_to_md_relative_to_site"],
             src_dir=self.config["path_to_src_dir"],
             dest_dir=config["site_dir"],
-            use_directory_urls=config["use_directory_urls"]
+            use_directory_urls=config["use_directory_urls"],
         )
         files.append(schema_md_file)
         return files
@@ -46,9 +50,9 @@ class SchemaPlugin(BasePlugin):
     @staticmethod
     def customise_markdown(lines):
         # 1. Change headline
-        assert lines[0] == '# JSON Schema\n\n'
+        assert lines[0] == "# JSON Schema\n\n"
         lines[0] = "# Configuration parameters of Euro-Calliope's workflow\n\n"
         # 2. Remove main description and subheadline
-        assert lines[2] == '## Properties\n\n'
+        assert lines[2] == "## Properties\n\n"
         del lines[2]
         return lines
