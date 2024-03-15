@@ -11,7 +11,10 @@ If you have found a bug in Euro-Calliope or you want to propose a new feature, p
 
 We welcome changes that you provide as [a pull request](https://github.com/calliope-project/euro-calliope/pulls).
 
-If you consider doing that, you need to know our branching model -- that is, which branches exist and what meaning they have.
+If you consider doing that, you need to know two things: our code guidelines and our branching model.
+Our code guidelines are implemented through automatic linting (code analysis) and formatting. For both, we employ the tool [Ruff](https://docs.astral.sh/ruff/). It is open-source and available as a [plug-in to many IDEs](https://docs.astral.sh/ruff/integrations/). All you need is to install the plug-in for your IDE and then you should see linting problems and you will be able to format the code automatically based on our guidelines. If you want more, you can use a [Git pre-commit-hook](https://pre-commit.com) but that step is optional.
+
+Next, let's talk about our branching model -- that is, which branches exist and what meaning they have.
 Do not worry, it is easy. Our branching model is a simplified version of _git-flow_. We are giving you a summary here that is likely sufficient for you.
 If you want more information, read the [blog entry](https://nvie.com/posts/a-successful-git-branching-model/) introducing git-flow.
 
