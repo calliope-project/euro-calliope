@@ -5,7 +5,7 @@ def create_road_transport_demand_timeseries(
     path_to_annual_data: str, path_to_timeseries: str, first_year: int, final_year: int, vehicle_type: str, country_neighbour_dict: dict[str, list[str]],
     power_scaling_factor: float, conversion_factor: float, historic: bool, country_codes: list[str], path_to_output: str
 ) -> None:
-    
+
     # Read annual road transport distance into panda dataframe
     df_annual = (
         pd
@@ -20,9 +20,9 @@ def create_road_transport_demand_timeseries(
         .iloc[:-1]
     )
 
-    # TODO check if path_to_timeseries data is charging demand or transport demand
-
     if vehicle_type in ["passenger-cars","motorcycles","light-duty-vehicles"]:
+        # Use RAMP time series profiles for small and light vehicles.
+        # TODO check if path_to_timeseries data is charging demand or transport demand
         df_timeseries = (
             pd
             .read_csv(path_to_timeseries, index_col=[0, 1, 2], parse_dates=[0])
@@ -36,16 +36,16 @@ def create_road_transport_demand_timeseries(
         )
 
     elif vehicle_type in ["heavy-duty-vehicles","coaches-and-buses"]:
-        # ASSUME heavy transport profiles are flat
+        # ASSUME flat profiles for heavy transport.
         df_timeseries = (
             df_annual
             .groupby(by = lambda idx: idx.year)
             .transform(lambda x: x/ len(x.index))
         )
-    
+
     else:
         raise ValueError(f"vehicle_type {vehicle_type} is not supported")
-    
+
     df_timeseries = (
         df_timeseries
         .mul(conversion_factor)
