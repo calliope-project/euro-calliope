@@ -39,7 +39,7 @@ ROAD_CARRIERS = {
 }
 
 
-def process_jrc_transport_data(paths_to_data: list[str], dataset: object, out_path: str):
+def process_jrc_transport_data(paths_to_data: list[str], dataset: object, out_path: str, vehicle_type_names: dict[str, str]) -> None:
     paths_to_data = [Path(p) for p in paths_to_data]
     processed_data = pd.concat([
         read_transport_excel(path, **DATASET_PARAMS[dataset])
@@ -54,10 +54,10 @@ def process_jrc_transport_data(paths_to_data: list[str], dataset: object, out_pa
         .set_index("country_code", append=True)
         .stack('year')
         .rename('value')
+        .rename(index = vehicle_type_names, level = 'vehicle_type')
         .to_csv(out_path)
     )
 
-    processed_data
 
 
 def read_transport_excel(path: Path,
@@ -176,5 +176,6 @@ if __name__ == "__main__":
     process_jrc_transport_data(
         paths_to_data=snakemake.input.data,
         dataset=snakemake.wildcards.dataset,
-        out_path=snakemake.output[0]
+        out_path=snakemake.output[0],
+        vehicle_type_names={v:k for k,v in snakemake.params.vehicle_type_names.items()},
     )

@@ -95,6 +95,10 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of Swiss industry energy balance data.
+            ev-data:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of electric vehicle data.
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.
@@ -282,7 +286,7 @@ properties:
                             motorcycles:
                                 type: number
                                 description: Motorcylces.
-                    names:
+                    vehicle-type-names:
                         type: object
                         description: Names of vehicle types in JRC-IDEES.
                         additionalProperties: false
@@ -303,17 +307,34 @@ properties:
                                 type: string
                                 description: JRC-IDEES name of motorcycles.
                     fill-missing-values:
-                        description: Fill missing values in annual transport demand.
                         type: object
+                        description: Dictionaries to fill missing values
                         additionalProperties: false
-                        patternProperties:
-                            "^[A-Z][A-Z][A-Z]$":
-                                type: array
-                                description: Country to fill missing values for.
-                                items:
-                                    type: string
-                                    pattern: ^[A-Z][A-Z][A-Z]$
-                                    description: Country to fill missing values from.
+                        properties:
+                            annual-data:
+                                description: Fill missing values in annual transport demand.
+                                type: object
+                                additionalProperties: false
+                                patternProperties:
+                                    "^[A-Z][A-Z][A-Z]$":
+                                        type: array
+                                        description: Country to fill missing values for.
+                                        items:
+                                            type: string
+                                            pattern: ^[A-Z][A-Z][A-Z]$
+                                            description: Country to fill missing values from.
+                            timeseries-data:
+                                description: Fill missing countries in timeseries profile.
+                                type: object
+                                additionalProperties: false
+                                patternProperties:
+                                    "^[A-Z][A-Z][A-Z]$":
+                                        type: array
+                                        description: Country to fill missing values for.
+                                        items:
+                                            type: string
+                                            pattern: ^[A-Z][A-Z][A-Z]$
+                                            description: Country to fill missing values from.
             entsoe-tyndp:
                 type: object
                 description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/

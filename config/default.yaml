@@ -17,6 +17,7 @@ data-sources:
     eurostat-energy-balance: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/eurostat/nrg_bal_c.tsv.gz # FIXME do not use cached data
     swiss-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/gesamtenergiestatistik.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvNzUxOQ==.html
     swiss-industry-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/teilstatistiken.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODc4OA==.html
+    ev-data: https://zenodo.org/record/6579421/files/ramp-ev-consumption-profiles.csv.gz?download=1
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch
@@ -134,19 +135,29 @@ parameters:
             coaches-and-buses: 3248
             passenger-cars: 324
             motorcycles: 200  # based on passenger car electrical efficiency scaled by relative diesel efficiency
-        names:
+        vehicle-type-names:
             light-duty-vehicles: Light duty vehicles
             heavy-duty-vehicles: Heavy duty vehicles
             coaches-and-buses: Motor coaches, buses and trolley buses
             passenger-cars: Passenger cars
             motorcycles: Powered 2-wheelers
         fill-missing-values:
-            ALB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            BIH: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            MNE: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            SRB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            NOR: ['SWE', 'DNK']
-            CHE: ['DEU', 'AUT', 'FRA', 'ITA']
+            annual-data:
+                ALB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+                BIH: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+                MNE: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+                MKD: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+                SRB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
+                NOR: ['SWE', 'DNK']
+                CHE: ['DEU', 'AUT', 'FRA', 'ITA']
+            timeseries-data:
+                ALB: ['HRV']
+                MKD: ['HRV']
+                GRC: ['ROU']
+                BGR: ['ROU']
+                BIH: ['HRV', 'HUN']
+                MNE: ['HRV']
+                SRB: ['HUN']
     entsoe-tyndp:
         scenario: National Trends
         grid: Reference
