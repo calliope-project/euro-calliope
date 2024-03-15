@@ -201,6 +201,21 @@ rule build_metadata:
     script: "scripts/metadata.py"
 
 
+rule dag_dot:
+    output: temp("build/dag.dot")
+    shell:
+        "snakemake --rulegraph > {output}"
+
+
+rule dag:
+    message: "Plot dependency graph of the workflow."
+    input: rules.dag_dot.output[0]
+    # Output is deliberatly omitted so rule is executed each time.
+    conda: "envs/dag.yaml"
+    shell:
+        "dot -Tpdf {input} -o build/dag.pdf"
+
+
 rule clean: # removes all generated results
     shell:
         """
