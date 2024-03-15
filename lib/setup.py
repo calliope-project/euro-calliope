@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
-    name='eurocalliopelib',
-    version='1.2.0.dev', # additionally defined in __init__.py
-    description='Library code of the Euro-Calliope workflow.',
-    maintainer='calliope-project',
-    maintainer_email='tim.troendle@usys.ethz.ch',
+    name="eurocalliopelib",
+    version="1.2.0.dev",  # additionally defined in __init__.py
+    description="Library code of the Euro-Calliope workflow.",
+    maintainer="calliope-project",
+    maintainer_email="tim.troendle@usys.ethz.ch",
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
@@ -18,31 +18,31 @@ setup(
         # "pycountry==18.12.8" # TODO readd after solving #262
     ],
     extras_require={
-        'geo': [
+        "geo": [
             # "geopandas", # TODO readd after solving #262
             # "rasterio", # TODO readd after solving #262
             # "rasterstats", # TODO readd after solving #262
         ],
-        'docs': [
+        "docs": [
             # "pydot", # TODO readd after solving #262
             # "graphviz", # TODO readd after solving #262
             # "mkdocs", # TODO readd after solving #262
             # "jsonschema2md" # TODO readd after solving #262
-        ]
+        ],
     },
     entry_points={
-        'mkdocs.plugins': [
-            'dag = eurocalliopelib.docs.dag:DAGPlugin',
-            'schema = eurocalliopelib.docs.schema:SchemaPlugin',
-            'add-file = eurocalliopelib.docs.addfile:AddFilePlugin'
+        "mkdocs.plugins": [
+            "dag = eurocalliopelib.docs.dag:DAGPlugin",
+            "schema = eurocalliopelib.docs.schema:SchemaPlugin",
+            "add-file = eurocalliopelib.docs.addfile:AddFilePlugin",
         ]
     },
     classifiers=[
-        'Environment :: Console',
-        'Intended Audience :: Science/Research',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.8',
-        'Topic :: Scientific/Engineering'
-    ]
+        "Environment :: Console",
+        "Intended Audience :: Science/Research",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.8",
+        "Topic :: Scientific/Engineering",
+    ],
 )

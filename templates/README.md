@@ -47,6 +47,3 @@ Contains modified Copernicus Atmosphere Monitoring Service information 2020. Nei
 Contains modified data from [Renewables.ninja](https://www.renewables.ninja/).
 
 Contains modified data from [Open Power System Data](https://open-power-system-data.org).
-
-
-

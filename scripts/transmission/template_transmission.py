@@ -1,16 +1,20 @@
 """Link all those locations that are neighbours."""
+
 import geopandas as gpd
-import shapely
 import networkx as nx
 import pandas as pd
-
+import shapely
 from eurocalliopelib.geo import EPSG3035
 from eurocalliopelib.template import parametrise_template
 
-K_EDGE_CONNECTION = 1 # every component of the graph is connect with at least this amount of edges
+K_EDGE_CONNECTION = (
+    1  # every component of the graph is connect with at least this amount of edges
+)
 
 
-def construct_techs_and_links(path_to_units, path_to_output, scaling_factors, sea_connections, path_to_template):
+def construct_techs_and_links(
+    path_to_units, path_to_output, scaling_factors, sea_connections, path_to_template
+):
     """Link all those locations that are neighbours."""
     graph = _create_graph_with_land_connections(path_to_units)
     if sea_connections:
@@ -21,11 +25,12 @@ def construct_techs_and_links(path_to_units, path_to_output, scaling_factors, se
     links = pd.Series(index=graph.edges, data=None)
 
     return parametrise_template(
-        path_to_template, path_to_output,
+        path_to_template,
+        path_to_output,
         links=links,
         scaling_factors=scaling_factors,
-        link_comment="# All direct neighbours are linked (+ explicitly defined under-sea connections)"
-        )
+        link_comment="# All direct neighbours are linked (+ explicitly defined under-sea connections)",
+    )
 
 
 def _create_graph_with_land_connections(path_to_units):
@@ -36,7 +41,8 @@ def _create_graph_with_land_connections(path_to_units):
         for region_id, region_centroid in regions.centroid.to_dict().items()
     ])
     neighbours = {
-        index: _neighbours(region.geometry, index, regions) for index, region in regions.iterrows()
+        index: _neighbours(region.geometry, index, regions)
+        for index, region in regions.iterrows()
     }
     graph.add_edges_from([
         (region, other)
@@ -48,8 +54,12 @@ def _create_graph_with_land_connections(path_to_units):
 
 def _neighbours(region_geometry, region_index, regions):
     region_geometry = shapely.prepared.prep(region_geometry)
-    return [other_index for other_index, other_region in regions.iterrows()
-            if (other_index is not region_index) and region_geometry.intersects(other_region.geometry)]
+    return [
+        other_index
+        for other_index, other_region in regions.iterrows()
+        if (other_index is not region_index)
+        and region_geometry.intersects(other_region.geometry)
+    ]
 
 
 if __name__ == "__main__":
@@ -58,5 +68,5 @@ if __name__ == "__main__":
         path_to_units=snakemake.input.units,
         scaling_factors=snakemake.params.scaling_factors,
         sea_connections=snakemake.params.sea_connections,
-        path_to_output=snakemake.output[0]
+        path_to_output=snakemake.output[0],
     )

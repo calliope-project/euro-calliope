@@ -1,2 +1,2 @@
-class snakemake: # avoids linting errors with the injected snakemake object
+class snakemake:  # avoids linting errors with the injected snakemake object
     pass

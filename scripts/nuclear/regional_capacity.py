@@ -1,13 +1,16 @@
-import pandas as pd
-import shapely.geometry
 import geopandas as gpd
+import pandas as pd
 import pycountry
+import shapely.geometry
 
 
 def regionalise_nuclear_capacity(
-    path_to_power_plant_database: str, path_to_units: str,
-    nuclear_capacity_scenario: str, countries: list, resolution: str,
-    path_to_output: str
+    path_to_power_plant_database: str,
+    path_to_units: str,
+    nuclear_capacity_scenario: str,
+    countries: list,
+    resolution: str,
+    path_to_output: str,
 ):
     """
     Use current geolocations of nuclear capacity in Europe to assign nuclear
@@ -35,24 +38,24 @@ def regionalise_nuclear_capacity(
     power_plants = pd.read_csv(path_to_power_plant_database)
     units = gpd.read_file(path_to_units)
 
-    capacity_current = power_plants[power_plants.type_g == 'Nuclear']
+    capacity_current = power_plants[power_plants.type_g == "Nuclear"]
     capacity_current_points = [
         shapely.geometry.Point(xy)
         for xy in zip(capacity_current.lon, capacity_current.lat)
     ]
     capacity_current_gdf = gpd.GeoDataFrame(
-        capacity_current, geometry=capacity_current_points, crs='EPSG:4326'
+        capacity_current, geometry=capacity_current_points, crs="EPSG:4326"
     )
     capacity_current_per_region = (
         gpd.overlay(capacity_current_gdf.to_crs(units.crs), units)
-        .groupby(["id", "country_code"]).sum()
+        .groupby(["id", "country_code"])
+        .sum()
         .capacity_g  # Generating unit capacity, net (MW)
     )
 
     if nuclear_capacity_scenario == "current":
-        capacity_per_region = (
-            capacity_current_per_region
-            .to_frame("installed_capacity_nuclear_equals_MW")
+        capacity_per_region = capacity_current_per_region.to_frame(
+            "installed_capacity_nuclear_equals_MW"
         )
     else:
         future_capacity = _get_future_capacity_from_config_file(
@@ -61,15 +64,12 @@ def regionalise_nuclear_capacity(
 
         # ASSUME: future capacity is distributed to subnational regions based on a
         # linear scaling from the current distribution of capacity
-        nuclear_regional_proportion = (
-            capacity_current_per_region
-            .groupby("country_code")
-            .transform(lambda x: x / x.sum())
-        )
+        nuclear_regional_proportion = capacity_current_per_region.groupby(
+            "country_code"
+        ).transform(lambda x: x / x.sum())
 
-        capacity_per_region = (
-            future_capacity
-            .mul(nuclear_regional_proportion, level='country_code', axis=0)
+        capacity_per_region = future_capacity.mul(
+            nuclear_regional_proportion, level="country_code", axis=0
         )
 
         # Check that we haven't lost any capacity on regionalisation
@@ -82,8 +82,9 @@ def _iso3(country_name):
     return pycountry.countries.lookup(country_name).alpha_3
 
 
-def _get_future_capacity_from_config_file(nuclear_capacity_scenario, resolution, countries):
-
+def _get_future_capacity_from_config_file(
+    nuclear_capacity_scenario, resolution, countries
+):
     nuclear_scenario_df = (
         pd.read_csv(nuclear_capacity_scenario, index_col="country")
         .loc[:, ["min", "max"]]
@@ -108,5 +109,5 @@ if __name__ == "__main__":
         nuclear_capacity_scenario=snakemake.params.nuclear_capacity_scenario,
         countries=snakemake.params.countries,
         resolution=snakemake.wildcards.resolution,
-        path_to_output=snakemake.output[0]
+        path_to_output=snakemake.output[0],
     )
