@@ -86,7 +86,7 @@ def water_to_capped_energy_inflow(inflow_m3, annual_generation, cap):
         return abs(generation(scaling_factor).sum() - annual_generation)
 
     x0 = annual_generation / inflow_m3.sum()
-    res = minimize(residual, x0, method='nelder-mead', options={'xtol': 1e-10})
+    res = minimize(residual, x0, method='nelder-mead', options={'xatol': 1e-10})
     assert res.success, print(res)
     assert res.fun < 1, print(res) # error smaller than 1 MWh
 
