@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import util
 
 
 def national_to_continental_resolution(
@@ -82,70 +81,45 @@ def fill_annual_heat_demand_missing_values(  # FIXME we shouldn't fill NaNs with
     return demand
 
 
-def get_population_intensity(region_country_mapping, path_to_populations):
-    region_country_mapping = (
-        pd.read_csv(region_country_mapping, index_col=0)
-        .loc[:, "country_code"]
-        .to_dict()
-    )
-    df_population_share = (
-        pd.read_csv(path_to_populations, index_col=0)
-        .loc[:, "population_sum"]
-        .reindex(region_country_mapping.keys())
-        .groupby(by=region_country_mapping)
-        .transform(lambda df: df / df.sum())
-    )
-    return df_population_share
-
-
-def get_population_intensity_(path_to_population, units):
-    population_df = (
-        pd.read_csv(path_to_population, index_col=0)
-        .set_index(units.set_index(['id', 'country_code']).index)
-    )
-    return (
-        population_df.div(population_df.sum(level='country_code')).population_sum
-    )
-
-
-def align_and_scale(orig_df, scaling_df, units):
-
-    aligned_df = scaling_df.align(orig_df)
-    scaled_df = aligned_df[0].mul(aligned_df[1]).dropna()
-
-    # make sure numbers add up
-    check_scaling_df = scaled_df.sum(level=orig_df.index.names)
-
-    assert np.allclose(
-        check_scaling_df.sum(level='country_code'),
-        orig_df.reindex(check_scaling_df.index).sum(level='country_code'),
-        equal_nan=True
-    )
-
-    return scaled_df
-
 if __name__ == "__main__":
     resolution = snakemake.wildcards.resolution
     path_to_annual_demand = snakemake.input.annual_demand
+    path_to_historically_electrified = snakemake.input.electricity
+    path_to_populations = snakemake.input.populations
     path_to_locations = snakemake.params.locations
-    path_to_populations = snakemake.params.populations
     path_to_demand = snakemake.output.demand
+    path_to_electricity = snakemake.output.electricity
 
     if resolution == "continental":
         demand = national_to_continental_resolution(
             path_to_annual_demand,
         )
+        electrified = national_to_continental_resolution(
+            path_to_historically_electrified,
+        )
+
     elif resolution == "national":
         demand = national_to_national_resolution(
             path_to_annual_demand,
         )
+        electrified = national_to_national_resolution(
+            path_to_historically_electrified,
+        )
+
     elif resolution == "regional":
         demand = national_to_regional_resolution(
             path_to_annual_demand,
             path_to_locations,
             path_to_populations,
         )
+        electrified = national_to_regional_resolution(
+            path_to_historically_electrified,
+            path_to_locations,
+            path_to_populations,
+        )
+
     else:
         raise ValueError(f"Unknown resolution {resolution}")
 
     demand.to_csv(path_to_demand)
+    electrified.to_csv(path_to_electricity)
