@@ -24,6 +24,7 @@ include: "./rules/demand.smk"
 include: "./rules/nuclear.smk"
 include: "./rules/transport.smk"
 include: "./rules/sync.smk"
+include: "./rules/heat.smk"
 min_version("7.8")
 localrules: all, clean
 wildcard_constraints:

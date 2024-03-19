@@ -3,14 +3,14 @@
 
 "Rules regarding CH Data:"
 
-rule download_ch_energy_balances:
+rule download_ch_energy_data:
     message: "Get {wildcards.dataset} from Swiss statistics"
     params:
         url = lambda wildcards: config["data-sources"][f"swiss-{wildcards.dataset}"]
     output: protected("data/automatic/ch-{dataset}.xlsx")
     conda: "../envs/shell.yaml"
     wildcard_constraints:
-        dataset = "((energy-balance)|(industry-energy-balance))"
+        dataset = "energy-balance|industry-energy-balance|end-use"
     localrule: True
     shell: "curl -sLo {output} {params.url}"
 
@@ -18,12 +18,14 @@ rule download_ch_energy_balances:
 "Rules regarding Eurostat Data:"
 
 
-rule download_eurostat_annual_energy_balances:
-    message: "Download Eurostat Annual Energy Balances from euro-calliope datasets"
+rule download_eurostat_energy_data:
+    message: "Download {wildcards.dataset} Eurostat data from euro-calliope datasets"
     params:
-        url = config["data-sources"]["eurostat-energy-balance"]
+        url = lambda wildcards: config["data-sources"][f"eurostat-{wildcards.dataset}"]
+    wildcard_constraints:
+        dataset = "energy-balance|hh-end-use"
     conda: "../envs/shell.yaml"
-    output: protected("data/automatic/eurostat-energy-balance.tsv.gz")
+    output: protected("data/automatic/eurostat-{dataset}.tsv.gz")
     localrule: True
     shell: "curl -sLo {output} {params.url}"
 
@@ -61,12 +63,22 @@ rule jrc_idees_unzipped:
         "data/automatic/jrc-idees/{country_code}.zip"
     params: sector_title_case = lambda wildcards: wildcards.sector.title()
     wildcard_constraints:
-        sector = "(transport)"
-    output: temp("build/data/jrc-idees/{sector}/unprocessed/JRC-IDEES-2015_Transport_{country_code}.xlsx")
+        sector = "transport"
+    output: temp("build/data/jrc-idees/{sector}/unprocessed/JRC-IDEES-2015_{sector}_{country_code}.xlsx")
     conda: "../envs/shell.yaml"
     shadow: "minimal"
     localrule: True
     shell: "unzip -j {input} -d build/data/jrc-idees/{wildcards.sector}/unprocessed/"
+
+rule jrc_idees_unzipped_heat:  # TODO merge this rule with the previous one. Careful to name confusion between 'heat' and 'Tertiary'
+    message: "Unzip all JRC-IDEES heat sector country data"
+    input:
+        "data/automatic/jrc-idees/{country_code}.zip"
+    output: temp("build/data/jrc-idees/heat/unprocessed/JRC-IDEES-2015_Tertiary_{country_code}.xlsx")
+    conda: "../envs/shell.yaml"
+    shadow: "minimal"
+    localrule: True
+    shell: "unzip -j {input} -d build/data/jrc-idees/heat/unprocessed/"
 
 "EU28 county codes used for downloading JRC-IDEES"
 EU28 = [
@@ -89,3 +101,14 @@ rule jrc_idees_transport_processed:
         dataset = "road-energy|road-distance|road-vehicles"
     conda: "../envs/default.yaml"
     script: "../scripts/transport/jrc_idees.py"
+
+rule jrc_idees_heat_processed: # TODO merge this rule with the previous one. Careful to name confusion between 'heat' and 'Tertiary'
+    message: "Process tertiary heat data from JRC-IDEES"
+    input:
+        data = expand(
+            "build/data/jrc-idees/heat/unprocessed/JRC-IDEES-2015_Tertiary_{country_code}.xlsx",
+            country_code=EU28
+        )
+    output: "build/data/jrc-idees/heat/commercial/jrc_idees_processed_energy.csv"
+    conda: "../envs/default.yaml"
+    script: "../scripts/heat/jrc_idees.py"

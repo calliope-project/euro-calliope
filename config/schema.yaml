@@ -87,6 +87,14 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of Eurostat energy balance data.
+            eurostat-hh-end-use:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of Eurostat household end use data.
+            swiss-end-use:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of Swiss annual energy consumption data.
             swiss-energy-balance:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
@@ -139,7 +147,7 @@ properties:
     parameters:
         type: object
         description: Parameter values of the models.
-        additionalProperties: false
+        additionalProperties: true # FIXME put this back to false -- this allows to add additional properties to the default.yaml without breaking the schema
         properties:
             maximum-installable-power-density:
                 type: object
