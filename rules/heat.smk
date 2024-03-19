@@ -15,17 +15,17 @@ rule annual_heat_demand:
         electricity=temp("build/data/heat/annual-heat-electricity-consumption.csv"),
     script: "../scripts/heat/annual_heat_demand.py"
 
-rule annual_disagreggate_heat_demand: # TODO have a subrule for the historic timeseries
+rule disagreggate_annual_heat_demand: # TODO have a subrule for the historic timeseries
     message: "Re-scale national heat demand at {wildcards.resolution} for household and commercial sectors"
     input:
         annual_demand = rules.annual_heat_demand.output["demand"],
     params:
-        locations = "build/data/regional/units.csv",
+        locations = "config/locations/units_default_config_regional.csv", # FIXME we need all regions even in the minimal workflow, but this should be accessible outside pre-downloaded data
         populations = "build/data/regional/population.csv",
     conda: "../envs/default.yaml"
     output:
         demand=temp("build/data/heat/{resolution}/annual-heat-demand.csv"),
-    script: "../scripts/heat/annual_disaggregate_heat_demand.py"
+    script: "../scripts/heat/disaggregate_annual_heat_demand.py"
 
 # rule create_heat_demand_timeseries: # TODO have realistic and separate space heat and water heat demand profiles
 #     message: "Create heat demand timeseries for household and commercial sectors"
