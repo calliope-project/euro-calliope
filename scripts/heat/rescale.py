@@ -27,7 +27,7 @@ def national_to_regional_resolution(
         .groupby(by=region_country_mapping)
         .transform(lambda df: df / df.sum())
     )
-    regional_df = (  # FIXME here we remove GEO,ISL,MDA,MLT,UKR from the demand data if we use the mapping from the default config
+    regional_df = (
         pd.DataFrame(
             index=annual_demand.index,
             data={
