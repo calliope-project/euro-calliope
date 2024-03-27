@@ -47,7 +47,7 @@ rule download_basins_database:
         protected("data/automatic/raw-hydro-basins.zip")
     conda: "../envs/shell.yaml"
     shell:
-        "curl -sLo {output} '{params.url}'"
+        "curl  --http1.1 -sLo {output} '{params.url}'"
 
 
 rule download_stations_database:
