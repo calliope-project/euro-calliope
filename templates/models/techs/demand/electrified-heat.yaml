@@ -9,7 +9,7 @@ techs:
 
     demand_heat_historic_electrified:
         essentials:
-            name: 'Removes historic electrified road transport demand'
+            name: 'Removes historic electrified heat demand'
             parent: supply
             carrier: electricity
         constraints:
