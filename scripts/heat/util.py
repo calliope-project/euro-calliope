@@ -1,7 +1,8 @@
-import pycountry
-import pandas as pd
-import pytz
 import numpy as np
+import pandas as pd
+import pycountry
+import pytz
+
 
 def get_alpha2(country, eurostat=True):
     if country in ["United Kingdom", "GB", "GBR"] and eurostat is True:
@@ -21,8 +22,8 @@ def get_alpha3(country):
 
 
 def to_numeric(series):
-    series = series.astype(str).str.extract('(\-*\d+\.*\d*)')[0]
-    return pd.to_numeric(series, errors='coerce')
+    series = series.astype(str).str.extract(r"(\-*\d+\.*\d*)")[0]
+    return pd.to_numeric(series, errors="coerce")
 
 
 def pj_to_twh(array):
@@ -49,17 +50,17 @@ def update_timeseries_timezone(x, country, model_year):
     """
     Shift a generic profile forward/backward in time based on a country's timezone
     """
-    if country == 'UK':
-        country = 'GB'
-    elif country == 'EL':
-        country = 'GR'
+    if country == "UK":
+        country = "GB"
+    elif country == "EL":
+        country = "GR"
     tz = pytz.country_timezones[country][0]
     try:
-        idx = x.index.tz_localize(tz, nonexistent='shift_forward').tz_convert('UTC')
+        idx = x.index.tz_localize(tz, nonexistent="shift_forward").tz_convert("UTC")
     except pytz.AmbiguousTimeError as err:
         idx = x.index.tz_localize(
-            tz, ambiguous=x.index != err.args[0], nonexistent='shift_forward'
-        ).tz_convert('UTC')
+            tz, ambiguous=x.index != err.args[0], nonexistent="shift_forward"
+        ).tz_convert("UTC")
     shift = len(idx[idx.year > model_year]) - len(idx[idx.year < model_year])
 
     x = np.roll(x, shift=shift)
@@ -74,8 +75,8 @@ def read_tdf(filename):
 
 
 def read_eurostat_tsv(path_to_tsv, index_names, slice_idx=None, slice_lvl=None):
-    df = pd.read_csv(path_to_tsv, delimiter='\t', index_col=0)
-    df.index = df.index.str.split(',', expand=True).rename(index_names)
+    df = pd.read_csv(path_to_tsv, delimiter="\t", index_col=0)
+    df.index = df.index.str.split(",", expand=True).rename(index_names)
     if slice_idx is not None:
         df = df.xs(slice_idx, level=slice_lvl)
     df.columns = df.columns.astype(int).rename("year")
@@ -84,8 +85,8 @@ def read_eurostat_tsv(path_to_tsv, index_names, slice_idx=None, slice_lvl=None):
 
 def get_timedelta(model_time, model_year):
     model_timedelta = (
-        pd.to_datetime(model_time[1].replace("year", model_year)) -
-        pd.to_datetime(model_time[0].replace("year", model_year))
+        pd.to_datetime(model_time[1].replace("year", model_year))
+        - pd.to_datetime(model_time[0].replace("year", model_year))
     ).days + 1
     if pd.to_datetime(model_year).is_leap_year:
         model_timedelta = model_timedelta / 366
@@ -97,9 +98,11 @@ def get_timedelta(model_time, model_year):
 def verify_profiles(profile, key, annual_demand):
     assert (profile <= 0).all().all()
     if isinstance(key, list):
-        demand = sum([annual_demand.xs(_k, level='end_use').sum(level='id') for _k in key])
+        demand = sum([
+            annual_demand.xs(_k, level="end_use").sum(level="id") for _k in key
+        ])
     else:
-        demand = annual_demand.xs(key, level='end_use').sum(level='id')
+        demand = annual_demand.xs(key, level="end_use").sum(level="id")
     assert np.allclose(profile.sum().abs().reindex(demand.index), demand.abs())
 
 
