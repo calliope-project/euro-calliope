@@ -64,7 +64,7 @@ rule jrc_idees_unzipped:
     params: sector_title_case = lambda wildcards: wildcards.sector.title()
     wildcard_constraints:
         sector = "transport"
-    output: temp("build/data/jrc-idees/{sector}/unprocessed/JRC-IDEES-2015_{sector}_{country_code}.xlsx")
+    output: temp("build/data/jrc-idees/{sector}/unprocessed/JRC-IDEES-2015_Transport_{country_code}.xlsx")
     conda: "../envs/shell.yaml"
     shadow: "minimal"
     localrule: True
