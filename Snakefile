@@ -155,6 +155,7 @@ rule model_template:
                 "locations.yaml",
                 "techs/demand/electricity.yaml",
                 "techs/demand/electrified-transport.yaml",
+                "techs/demand/electrified-heat.yaml",
                 "techs/storage/electricity.yaml",
                 "techs/storage/hydro.yaml",
                 "techs/supply/biofuel.yaml",
@@ -173,7 +174,9 @@ rule model_template:
         demand_timeseries_data = (
             "build/models/{resolution}/timeseries/demand/electricity.csv",
             "build/models/{resolution}/timeseries/demand/electrified-road-transport.csv",
-            "build/models/{resolution}/timeseries/demand/road-transport-historic-electrification.csv"
+            "build/models/{resolution}/timeseries/demand/road-transport-historic-electrification.csv",
+            "build/models/{resolution}/timeseries/demand/electrified-heat-demand.csv",
+            "build/models/{resolution}/timeseries/demand/heat-demand-historic-electrification.csv",
         ),
         optional_input_files = lambda wildcards: expand(
             f"build/models/{wildcards.resolution}/{{input_file}}",
