@@ -147,7 +147,7 @@ properties:
     parameters:
         type: object
         description: Parameter values of the models.
-        additionalProperties: false 
+        additionalProperties: false
         properties:
             maximum-installable-power-density:
                 type: object
@@ -420,7 +420,7 @@ properties:
                             oil_eff:
                                 type: number
                                 description: Oil boiler efficiency.
-                            solid_fossil_eff:   
+                            solid_fossil_eff:
                                 type: number
                                 description: Solid fossil boiler efficiency.
                             biofuel_eff:
