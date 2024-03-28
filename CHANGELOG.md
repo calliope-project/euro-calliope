@@ -3,6 +3,7 @@
 ## 1.2.0 (unpublished)
 
 ### Added (models)
+* **ADD** fully-electrified heat demand (#284).
 
 * **ADD** fully-electrified road transportation (#270), (#271).
 
