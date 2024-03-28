@@ -147,7 +147,7 @@ properties:
     parameters:
         type: object
         description: Parameter values of the models.
-        additionalProperties: true # FIXME put this back to false -- this allows to add additional properties to the default.yaml without breaking the schema
+        additionalProperties: false 
         properties:
             maximum-installable-power-density:
                 type: object
@@ -372,6 +372,94 @@ properties:
                 type: string
                 description: Nuclear technology capacity scenario. "current" will use today's capacities based on the JRC power plant database (PPDB). All other scenario names should point to a configuration CSV file specifying minimum and maximum capacities per country in MW with non-zero capacities (columns=[country, min, max]).
                 pattern: ^(current)|(\w+.csv)$
+            heat-end-use:
+                type: object
+                description: Parameters for heat heat sector model.
+                additionalProperties: false
+                properties:
+                    space_heat_techs:
+                        type: object
+                        description: Efficiencies of space heating techs.
+                        additionalProperties: false
+                        properties:
+                            carnot_performance:
+                                type: number
+                                description: Carnot performance.
+                            gas_eff:
+                                type: number
+                                description: Gas boiler efficiency.
+                            oil_eff:
+                                type: number
+                                description: Oil boiler efficiency.
+                            solid_fossil_eff:
+                                type: number
+                                description: Solid fossil boiler efficiency.
+                            biofuel_eff:
+                                type: number
+                                description: Biofuel boiler efficiency.
+                            solar_thermal_eff:
+                                type: number
+                                description: Solar thermal efficiency.
+                            electricity_eff:
+                                type: number
+                                description: Electric heater efficiency.
+                            space_heat_temp:
+                                type: number
+                                description: Space heating temperature.
+                            hp_cop:
+                                type: number
+                                description: Heat pump coefficient of performance.
+                    water_heat_techs:
+                        type: object
+                        description: Efficiencies of water heating techs.
+                        additionalProperties: false
+                        properties:
+                            gas_eff:
+                                type: number
+                                description: Gas boiler efficiency.
+                            oil_eff:
+                                type: number
+                                description: Oil boiler efficiency.
+                            solid_fossil_eff:   
+                                type: number
+                                description: Solid fossil boiler efficiency.
+                            biofuel_eff:
+                                type: number
+                                description: Biofuel boiler efficiency.
+                            solar_thermal_eff:
+                                type: number
+                                description: Solar thermal efficiency.
+                            electricity_eff:
+                                type: number
+                                description: Electric heater efficiency.
+                            water_heat_temp:
+                                type: number
+                                description: Water heating temperature.
+                            hp_cop:
+                                type: number
+                                description: Heat pump coefficient of performance.
+                    cooking_techs:
+                        type: object
+                        description: Efficiencies of cooking techs.
+                        additionalProperties: false
+                        properties:
+                            gas_eff:
+                                type: number
+                                description: Gas stove efficiency.
+                            oil_eff:
+                                type: number
+                                description: Oil stove efficiency.
+                            solid_fossil_eff:
+                                type: number
+                                description: Solid fossil stove efficiency.
+                            biofuel_eff:
+                                type: number
+                                description: Biofuel stove efficiency.
+                            electricity_eff:
+                                type: number
+                                description: Electric stove efficiency.
+
+
 
     scope:
         type: object
