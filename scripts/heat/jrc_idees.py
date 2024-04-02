@@ -6,9 +6,9 @@ import pandas as pd
 idx = pd.IndexSlice
 
 END_USES = {
-    "Space heating": "space_heating",
+    "Space heating": "space_heat",
     "Space cooling": "end_use_electricity",
-    "Hot water": "water_heating",
+    "Hot water": "water_heat",
     "Catering": "cooking",
 }
 CARRIER_NAMES = {

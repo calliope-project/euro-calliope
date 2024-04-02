@@ -52,8 +52,6 @@ def get_heat_demand(
     path_to_electricity_consumption: str,
     path_to_output: str,
 ) -> None:
-    # TODO Should we sum _heat and _heating in the historical electrified demand?
-
     # Get annual energy balance data for household and commercial sectors
     energy_balance_dfs = get_energy_balances(
         path_to_energy_balance, path_to_carrier_names
