@@ -10,7 +10,7 @@ def create_heat_demand_timeseries(
     path_to_output: str,
 ) -> None:
     # Read annual heat demand into panda dataframe before inputing timeseries profile
-    annual_demand = (  # TODO do not just sum over all types of end_use heat
+    annual_demand = (
         pd.read_csv(path_to_annual_demand, index_col=[0, 1, 2], parse_dates=[0])
         .xs(slice(str(first_year), str(final_year + 1)), level="year", drop_level=False)
         .groupby(level="year")

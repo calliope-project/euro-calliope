@@ -1,4 +1,6 @@
 # A simple config to allow for quick test runs of the workflow. It builds on `./default.yaml`.
+data-pre-processing:
+    fill-missing-values: {}
 quality-control:
     hydro:
         scale-phs-according-to-geth-et-al: True # switched on to test the Geth scaling
@@ -8,9 +10,6 @@ sea-connections:
         - [GBR, IRL]
     regional: # Source: https://www.entsoe.eu/data/map/
         - [GBR.4_1, IRL.17_1] # Wales and Meath
-parameters:
-    transport:
-        fill-missing-values: {}
 scope:
     spatial:
         countries:

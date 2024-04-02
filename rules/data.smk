@@ -57,58 +57,36 @@ rule download_jrc_idees_zipped:
     shell: "curl -sLo {output} '{params.url}'"
 
 
+def jrc_to_euro_calliope_sector(sector: str):
+    if sector == "transport":
+        return "Transport"
+    elif sector == "heat":
+        return "Tertiary"
+    else:
+        raise ValueError(f"Unknown sector {sector}.")
+
+
 rule jrc_idees_unzipped:
     message: "Unzip all JRC-IDEES {wildcards.sector} sector country data"
     input:
         "data/automatic/jrc-idees/{country_code}.zip"
-    params: sector_title_case = lambda wildcards: wildcards.sector.title()
+    params:
+        file_name = lambda wildcards: f"JRC-IDEES-2015_{jrc_to_euro_calliope_sector(wildcards.sector)}_{wildcards.country_code}.xlsx"
     wildcard_constraints:
-        sector = "transport"
-    output: temp("build/data/jrc-idees/{sector}/unprocessed/JRC-IDEES-2015_Transport_{country_code}.xlsx")
+        sector = "transport|heat"
+    output: temp("build/data/jrc-idees/{sector}/unprocessed/{country_code}.xlsx")
     conda: "../envs/shell.yaml"
     shadow: "minimal"
     localrule: True
-    shell: "unzip -j {input} -d build/data/jrc-idees/{wildcards.sector}/unprocessed/"
+    shell: """
+    unzip -j {input} -d build/data/jrc-idees/{wildcards.sector}/unprocessed/
+    mv build/data/jrc-idees/{wildcards.sector}/unprocessed/{params.file_name} {output}
+    """
 
-rule jrc_idees_unzipped_heat:  # TODO merge this rule with the previous one. Careful to name confusion between 'heat' and 'Tertiary'
-    message: "Unzip all JRC-IDEES heat sector country data"
-    input:
-        "data/automatic/jrc-idees/{country_code}.zip"
-    output: temp("build/data/jrc-idees/heat/unprocessed/JRC-IDEES-2015_Tertiary_{country_code}.xlsx")
-    conda: "../envs/shell.yaml"
-    shadow: "minimal"
-    localrule: True
-    shell: "unzip -j {input} -d build/data/jrc-idees/heat/unprocessed/"
 
 "EU28 county codes used for downloading JRC-IDEES"
-EU28 = [
+JRC_IDEES_SCOPE = [
     "AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR",
     "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO",
     "SE", "SI", "SK", "UK"
 ]
-
-rule jrc_idees_transport_processed:
-    message: "Process {wildcards.dataset} transport data from JRC-IDEES to be used in understanding current and future transport demand"
-    input:
-        data = expand(
-            "build/data/jrc-idees/transport/unprocessed/JRC-IDEES-2015_Transport_{country_code}.xlsx",
-            country_code=EU28
-        )
-    output: "build/data/jrc-idees/transport/processed-{dataset}.csv"
-    params:
-        vehicle_type_names = config["parameters"]["transport"]["vehicle-type-names"],
-    wildcard_constraints:
-        dataset = "road-energy|road-distance|road-vehicles"
-    conda: "../envs/default.yaml"
-    script: "../scripts/transport/jrc_idees.py"
-
-rule jrc_idees_heat_processed: # TODO merge this rule with the previous one. Careful to name confusion between 'heat' and 'Tertiary'
-    message: "Process tertiary heat data from JRC-IDEES"
-    input:
-        data = expand(
-            "build/data/jrc-idees/heat/unprocessed/JRC-IDEES-2015_Tertiary_{country_code}.xlsx",
-            country_code=EU28
-        )
-    output: "build/data/jrc-idees/heat/commercial/jrc_idees_processed_energy.csv"
-    conda: "../envs/default.yaml"
-    script: "../scripts/heat/jrc_idees.py"

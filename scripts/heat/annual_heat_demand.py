@@ -1,7 +1,8 @@
+from contextlib import suppress
+
 import numpy as np
 import pandas as pd
 import pycountry
-import util
 from eurocalliopelib import utils
 
 END_USE_CAT_NAMES = {
@@ -40,17 +41,17 @@ idx = pd.IndexSlice
 
 
 def get_heat_demand(
-    path_to_hh_end_use,
-    path_to_ch_end_use,
-    path_to_energy_balance,
-    path_to_commercial_demand,
-    path_to_carrier_names,
-    heat_tech_params,
-    country_codes,
-    path_to_electricity_consumption,
-    path_to_output,
-):
-    # TODO possibly merge this script with transport
+    path_to_hh_end_use: str,
+    path_to_ch_end_use: str,
+    path_to_energy_balance: str,
+    path_to_commercial_demand: str,
+    path_to_carrier_names: str,
+    heat_tech_params: dict[str, dict[str, float]],
+    fill_missing_values: dict[str, list[str]],
+    country_codes: list[str],
+    path_to_electricity_consumption: str,
+    path_to_output: str,
+) -> None:
     # TODO Should we sum _heat and _heating in the historical electrified demand?
 
     # Get annual energy balance data for household and commercial sectors
@@ -69,6 +70,7 @@ def get_heat_demand(
         path_to_ch_end_use,
         path_to_commercial_demand,
         annual_consumption,
+        fill_missing_values=fill_missing_values,
     )
 
     # Fix data gaps for some countries
@@ -95,57 +97,90 @@ def get_heat_demand(
         ).to_csv(path)
 
 
-def get_energy_balances(energy_balance, carrier_names):
-    energy_balance_df = util.read_tdf(energy_balance)
-    carrier_names_df = pd.read_csv(carrier_names, index_col=0, header=0)
+def get_energy_balances(
+    path_to_energy_balance: str, path_to_carrier_names: str
+) -> dict[str, pd.DataFrame]:
+    energy_balance_df = pd.read_csv(
+        path_to_energy_balance,
+        index_col=["cat_code", "carrier_code", "unit", "country", "year"],
+        header=0,
+    ).squeeze()
+    carrier_names_df = pd.read_csv(path_to_carrier_names, index_col=0, header=0)
 
-    balances = {}
     balance_codes = {
         "hh": ["FC_OTH_HH_E"],
         "com": ["FC_OTH_CP_E"],
         "oth": ["FC_OTH_AF_E", "FC_OTH_FISH_E", "FC_OTH_NSP_E"],
     }
-    for balance_code, cat_code in balance_codes.items():
-        _df = energy_balance_df.loc[cat_code]  # cat_code is always the first element
-
-        assert (
-            _df.index.get_level_values("unit").unique().tolist() == ["TJ"]
-        ), "There are other units than TJ in the energy balance data. This is not expected."
-
-        _df = (
-            _df.xs("TJ", level="unit")
-            .apply(util.tj_to_twh)  # TJ -> TWh
-            .unstack("year")
-            .rename(
-                index=carrier_names_df[f"{balance_code}_carrier_name"]
-                .dropna()
-                .to_dict(),
-                level="carrier_code",
-            )
-            .groupby(by=["carrier_code", "country"], level=["carrier_code", "country"])
-            .sum()
-            .loc[
-                list(set(carrier_names_df[f"{balance_code}_carrier_name"].dropna()))
-            ]  # remove carriers that are not relevant
-            .rename_axis(["carrier_name", "country_code"], axis=0)
+    balances = {
+        sector_code: slice_energy_balance_by_sector(
+            sector_code=sector_code,
+            df=energy_balance_df,
+            carrier_names_df=carrier_names_df,
+            cat_codes=cat_codes,
         )
-        balances[balance_code] = _df
-
-        balances[balance_code] = _df
+        for sector_code, cat_codes in balance_codes.items()
+    }
     return balances
 
 
-def get_household_energy_consumption(hh_end_use, ch_end_use, carrier_names):
-    """
-    Combine annual energy balance information with data on household
-    end use energy consumption
-    """
+def slice_energy_balance_by_sector(
+    df: pd.DataFrame,
+    carrier_names_df: pd.DataFrame,
+    cat_codes: list[str],
+    sector_code: str,
+) -> pd.DataFrame:
+    df = df.loc[cat_codes]  # cat_code is always the first element
 
-    carrier_names_df = pd.read_csv(carrier_names, index_col=0, header=0)
+    assert df.index.get_level_values("unit").unique().tolist() == [
+        "TJ"
+    ], "There are other units than TJ in the energy balance data. This is not expected."
+
+    df = (
+        df.xs("TJ", level="unit")
+        .apply(utils.tj_to_twh)  # TJ -> TWh
+        .unstack("year")
+        .rename(
+            index=carrier_names_df[f"{sector_code}_carrier_name"].dropna().to_dict(),
+            level="carrier_code",
+        )
+        .groupby(by=["carrier_code", "country"], level=["carrier_code", "country"])
+        .sum()
+        .loc[
+            list(set(carrier_names_df[f"{sector_code}_carrier_name"].dropna()))
+        ]  # remove carriers that are not relevant
+        .rename_axis(["carrier_name", "country_code"], axis=0)
+    )
+    return df
+
+
+def get_household_energy_consumption(
+    path_to_hh_end_use: str, path_to_ch_end_use: str, path_to_carrier_names: str
+) -> pd.DataFrame:
+    """Read data on household end use energy consumption."""
+
+    carrier_names_df = pd.read_csv(path_to_carrier_names, index_col=0, header=0)
 
     # Index name in TSV file is 'nrg_bal,siec,unit,geo\time'
-    hh_end_use_df = util.read_eurostat_tsv(
-        hh_end_use, ["cat_code", "carrier_code", "unit", "country_code"]
+    hh_end_use_df = pd.read_csv(
+        path_to_hh_end_use, delimiter="\t", index_col=0, na_values=[":", ": ", ": z"]
+    )
+    hh_end_use_df.index = hh_end_use_df.index.str.split(",", expand=True).rename([
+        "cat_code",
+        "carrier_code",
+        "unit",
+        "country_code",
+    ])
+    hh_end_use_df.columns = hh_end_use_df.columns.astype(int).rename("year")
+
+    # remove 'countries' which are not relevant
+    not_countries = [
+        c
+        for c in hh_end_use_df.index.get_level_values("country_code").unique()
+        if len(c) > 2
+    ] + ["XK"]
+    hh_end_use_df = hh_end_use_df.drop(
+        axis=0, level="country_code", labels=not_countries
     )
 
     assert check_units_removed(
@@ -155,23 +190,13 @@ def get_household_energy_consumption(hh_end_use, ch_end_use, carrier_names):
     # Just keep relevant data
     hh_end_use_df = (
         hh_end_use_df.xs("TJ", level="unit")
-        .apply(util.tj_to_twh)  # TJ -> TWh
-        .astype(float)
+        .apply(utils.tj_to_twh)  # TJ -> TWh
         .dropna(how="all")
     )
 
     # clean up renewables info
     update_renewable_energy_consumption(hh_end_use_df)
 
-    # # remove 'countries' which are not relevant
-    not_countries = [
-        c
-        for c in hh_end_use_df.index.get_level_values("country_code").unique()
-        if len(c) > 2
-    ] + ["XK"]
-    hh_end_use_df = hh_end_use_df.drop(
-        axis=0, level="country_code", labels=not_countries
-    )
     country_codes_ = {
         c: utils.convert_country_code(c)
         for c in hh_end_use_df.index.get_level_values("country_code")
@@ -193,7 +218,7 @@ def get_household_energy_consumption(hh_end_use, ch_end_use, carrier_names):
     )
 
     # Add Swiss data
-    ch_hh_end_use_df = ch_hh_consumption(ch_end_use)
+    ch_hh_end_use_df = ch_hh_consumption(path_to_ch_end_use)
     hh_end_use_df = hh_end_use_df.append(ch_hh_end_use_df, sort=True)
 
     # Clean up data
@@ -201,7 +226,6 @@ def get_household_energy_consumption(hh_end_use, ch_end_use, carrier_names):
         hh_end_use_df.sort_index()
         .where(hh_end_use_df > 0)
         .dropna(how="all")
-        .loc[:, :2018]  # limit year of data to 2018 as the most recent
         .assign(cat_name="household")
         .set_index("cat_name", append=True)
     )
@@ -209,10 +233,7 @@ def get_household_energy_consumption(hh_end_use, ch_end_use, carrier_names):
     return hh_end_use_df
 
 
-def check_units_removed(df, carrier_names_df):
-    not_countries = [
-        c for c in df.index.get_level_values("country_code").unique() if len(c) > 2
-    ] + ["XK"]
+def check_units_removed(df: pd.DataFrame, carrier_names_df: pd.DataFrame) -> bool:
     df = (  # first re-organise df
         df.stack("year")
         .unstack("unit")
@@ -225,7 +246,6 @@ def check_units_removed(df, carrier_names_df):
             ],
             :,
         ]
-        .drop(axis=0, level="country_code", labels=not_countries)
     )
 
     # check that when 'TJ' is NaN, the other values are also NaN.
@@ -235,7 +255,7 @@ def check_units_removed(df, carrier_names_df):
     return len(df) == 0
 
 
-def update_renewable_energy_consumption(df):
+def update_renewable_energy_consumption(df: pd.DataFrame) -> None:
     """
     Some household consumption data has a higher overall renewables energy consumption (RA000)
     than the sum of renewable energy carriers. Here we scale all renewable energy carriers
@@ -283,30 +303,33 @@ def update_renewable_energy_consumption(df):
     assert _get_rows_to_update(df)[0].empty
 
 
-def ch_hh_consumption(ch_end_use):
+def ch_hh_consumption(path_to_ch_end_use: str) -> pd.DataFrame:
     """
     Switzerland data isn't in Eurostat, so we get it from their govt. stats directly
     """
-    ch_hh_end_use_df_sh = get_ch_sheet(
-        ch_end_use,
+    space_heat = get_ch_sheet(
+        path_to_ch_end_use,
         "Tabelle 18",
         skipfooter=8,
         translation=CH_ENERGY_CARRIER_TRANSLATION,
     )
-    ch_hh_end_use_df_hw = get_ch_sheet(
-        ch_end_use,
+    water_heat = get_ch_sheet(
+        path_to_ch_end_use,
         "Tabelle 20",
         skipfooter=5,
         translation=CH_ENERGY_CARRIER_TRANSLATION,
     )
     # Quirk of the excel is that there is no space in this sheet name
-    ch_hh_end_use_df_c = get_ch_sheet(
-        ch_end_use, "Tabelle21", skipfooter=4, translation=CH_ENERGY_CARRIER_TRANSLATION
+    cooking = get_ch_sheet(
+        path_to_ch_end_use,
+        "Tabelle21",
+        skipfooter=4,
+        translation=CH_ENERGY_CARRIER_TRANSLATION,
     )
 
-    ch_hh_end_use_df = (
+    df = (
         pd.concat(
-            [ch_hh_end_use_df_sh, ch_hh_end_use_df_hw, ch_hh_end_use_df_c],
+            [space_heat, water_heat, cooking],
             keys=("space_heat", "water_heat", "cooking"),
             names=["cat_name", "carrier_name"],
         )
@@ -315,62 +338,18 @@ def ch_hh_consumption(ch_end_use):
     )
 
     # Columns are years
-    ch_hh_end_use_df.columns = ch_hh_end_use_df.columns.astype(int).rename("year")
+    df.columns = df.columns.astype(int).rename("year")
 
-    return ch_hh_end_use_df.apply(util.pj_to_twh)  # PJ -> TWh
-
-
-def map_jrc_to_eurostat(energy_balance, jrc_end_use_df):
-    jrc_end_use_df = (
-        jrc_end_use_df.xs("ktoe", level="unit")
-        .rename(util.get_alpha3, level="country_code")
-        .apply(util.ktoe_to_twh)  # kTOE -> TWh
-    )
-    jrc_end_use_percent = (
-        jrc_end_use_df.div(jrc_end_use_df.unstack("end_use").sum(axis=1))
-        .unstack("year")
-        .dropna(how="all")
-    )
-    # Fill newer, missing years
-    missing_years = energy_balance.columns.difference(
-        jrc_end_use_df.index.get_level_values("year").unique()
-    )
-    for yr in missing_years:
-        jrc_end_use_percent[int(yr)] = jrc_end_use_percent.mean(axis=1)
-
-    # Fill missing countries with neighbouring countries
-    jrc_end_use_percent_by_country = jrc_end_use_percent.stack("year").unstack(
-        "country_code"
-    )
-    balkan_countries = jrc_end_use_percent_by_country[
-        ["BGR", "HRV", "HUN", "ROU", "GRC"]
-    ].mean(axis=1)
-    nordic_countries = jrc_end_use_percent_by_country[["SWE", "FIN", "DNK"]].mean(
-        axis=1
-    )
-    jrc_end_use_percent_by_country = jrc_end_use_percent_by_country.assign(
-        ALB=balkan_countries,
-        BIH=balkan_countries,
-        MNE=balkan_countries,
-        MKD=balkan_countries,
-        SRB=balkan_countries,
-        NOR=nordic_countries,
-        ISL=nordic_countries,
-    )
-
-    mapped_end_uses = (
-        jrc_end_use_percent_by_country.stack()
-        .align(energy_balance.stack())[1]
-        .mul(jrc_end_use_percent_by_country.stack())
-        .dropna()
-    )
-
-    return mapped_end_uses
+    return df.apply(utils.pj_to_twh)  # PJ -> TWh
 
 
 def get_commercial_energy_consumption(
-    energy_balance, ch_end_use, jrc_end_use, annual_consumption
-):
+    energy_balance: pd.DataFrame,
+    path_to_ch_end_use: str,
+    path_to_jrc_end_use: str,
+    annual_consumption: pd.DataFrame,
+    fill_missing_values: dict[str, list[str]],
+) -> pd.DataFrame:
     """
     Use JRC IDEES service sector consumption to estimate consumption for
     space heating and hot water in the commercial sector across all countries.
@@ -378,13 +357,31 @@ def get_commercial_energy_consumption(
     """
 
     # 'fuel' is actually just generic non-electric energy, which distribute based on household data
-    ch_con_fuel = ch_non_hh_consumption(ch_end_use, "Tabelle 25", annual_consumption)
-    ch_con_elec = ch_non_hh_consumption(ch_end_use, "Tabelle26", "electricity")
+    ch_con_fuel = ch_non_hh_non_electricity_consumption(
+        path_to_ch_end_use, "Tabelle 25", annual_consumption
+    )
+    ch_con_elec = ch_non_hh_electricity_consumption(path_to_ch_end_use, "Tabelle26")
 
-    jrc_end_use_df = util.read_tdf(jrc_end_use).xs("consumption", level="energy")
+    jrc_end_use_df = (
+        pd.read_csv(
+            path_to_jrc_end_use,
+            index_col=[
+                "carrier_name",
+                "end_use",
+                "country_code",
+                "unit",
+                "energy",
+                "year",
+            ],
+        )
+        .squeeze()
+        .xs("consumption", level="energy")
+    )
 
     # Map JRC end uses to annual commercial demand
-    mapped_end_uses = map_jrc_to_eurostat(energy_balance, jrc_end_use_df)
+    mapped_end_uses = map_jrc_to_eurostat(
+        energy_balance, jrc_end_use_df, fill_missing_values
+    )
 
     # Add Swiss data and ambient heat from heat pumps
     mapped_end_uses = (
@@ -422,49 +419,132 @@ def get_commercial_energy_consumption(
     return annual_consumption
 
 
-def ch_non_hh_consumption(ch_end_use, sheet_name, carrier):
+def map_jrc_to_eurostat(
+    energy_balance: pd.DataFrame,
+    jrc_end_use_df: pd.DataFrame,
+    fill_missing_values: dict[str, list[str]],
+) -> pd.DataFrame:
+    jrc_end_use_df = (
+        jrc_end_use_df.xs("ktoe", level="unit")
+        .rename(utils.convert_country_code, level="country_code")
+        .apply(utils.ktoe_to_twh)  # kTOE -> TWh
+    )
+    jrc_end_use_percent = (
+        jrc_end_use_df.div(jrc_end_use_df.unstack("end_use").sum(axis=1))
+        .unstack("year")
+        .dropna(how="all")
+        .stack("year")
+    )
+
+    jrc_end_use_percent = fill_missing_countries_and_years(
+        jrc_data=jrc_end_use_percent, fill_missing_values=fill_missing_values
+    )
+
+    mapped_end_uses = (
+        jrc_end_use_percent.align(energy_balance.stack())[1]
+        .mul(jrc_end_use_percent)
+        .dropna()
+    )
+
+    return mapped_end_uses
+
+
+def fill_missing_countries_and_years(
+    jrc_data: pd.DataFrame, fill_missing_values: dict[str, str]
+) -> pd.DataFrame:
+    fill_missing_values.pop(
+        "CHE", None
+    )  # do not fill Swiss values as they are taken from CH data
+    jrc_data = jrc_data.unstack("country_code")
+    with suppress(
+        KeyError
+    ):  # it's fine. Just checking there is no MultiIndex in the columns
+        jrc_data = jrc_data.loc[:, "value"]
+    for country, neighbors in fill_missing_values.items():
+        jrc_data = jrc_data.assign(**{country: jrc_data[neighbors].mean(axis=1)})
+
+    jrc_data = jrc_data.stack().unstack("year")
+    jrc_data = jrc_data.assign(**{
+        str(year): jrc_data[2015] for year in range(2016, 2019)
+    })
+    jrc_data.columns = jrc_data.columns.astype(int)
+    return jrc_data.stack()
+
+
+def ch_non_hh_electricity_consumption(
+    path_to_ch_end_use: str,
+    sheet_name: str,
+) -> pd.DataFrame:
     """
     Switzerland data isn't in Eurostat, so we get it from their govt. stats directly
     """
 
+    return (
+        get_ch_sheet(
+            path_to_ch_end_use,
+            sheet_name,
+            skipfooter=4,
+            translation=CH_HH_END_USE_TRANSLATION,
+        )
+        .assign(carrier_name="electricity", country_code="CHE")
+        .set_index(["country_code", "carrier_name"], append=True)
+        .stack()
+        .rename_axis(index=["end_use", "country_code", "carrier_name", "year"])
+        .apply(utils.pj_to_twh)  # PJ -> TWh
+    )
+
+
+def ch_non_hh_non_electricity_consumption(
+    path_to_ch_end_use: str, sheet_name: str, hh_consumption: pd.DataFrame
+):
+    """
+    Switzerland data isn't in Eurostat, so we get it from their govt. stats directly
+    """
     ch_con = get_ch_sheet(
-        ch_end_use, sheet_name, skipfooter=4, translation=CH_HH_END_USE_TRANSLATION
+        path_to_ch_end_use,
+        sheet_name,
+        skipfooter=4,
+        translation=CH_HH_END_USE_TRANSLATION,
     )
     # this is actually just generic non-electric energy,
     # which we assign to fuels using household ratios
-    if isinstance(carrier, str):
-        ch_con = ch_con.assign(carrier_name=carrier)
-    else:
-        hh_con = carrier.xs(("CHE", "household"), level=("country_code", "cat_name"))
-        hh_ratios = hh_con.div(
-            hh_con.drop("electricity", level="carrier_name").sum(level=["end_use"]),
-            axis=0,
-        )
-        ch_con_disaggregated = hh_ratios.mul(ch_con, level="end_use", axis=0).dropna(
-            how="all"
-        )
+    # ASSUME Swiss carrier ratios in commerce are the same as in households
+    hh_con = hh_consumption.xs(("CHE", "household"), level=("country_code", "cat_name"))
+    hh_ratios = hh_con.div(
+        hh_con.drop("electricity", level="carrier_name").sum(level=["end_use"]),
+        axis=0,
+    )
+    ch_con_disaggregated = hh_ratios.mul(ch_con, level="end_use", axis=0).dropna(
+        how="all"
+    )
 
-        assert np.allclose(ch_con_disaggregated.sum(level="end_use"), ch_con)
-        ch_con = ch_con_disaggregated.reset_index("carrier_name")
-    ch_con = (
+    assert np.allclose(ch_con_disaggregated.sum(level="end_use"), ch_con)
+    ch_con = ch_con_disaggregated.reset_index("carrier_name")
+    return (
         ch_con.assign(country_code="CHE")
         .set_index(["country_code", "carrier_name"], append=True)
         .stack()
         .rename_axis(index=["end_use", "country_code", "carrier_name", "year"])
-        .apply(util.pj_to_twh)  # PJ -> TWh
+        .apply(utils.pj_to_twh)  # PJ -> TWh
     )
 
-    return ch_con
 
-
-def hardcoded_country_cleanup(annual_consumption, energy_balance_df):
+def hardcoded_country_cleanup(
+    annual_consumption: pd.DataFrame, energy_balance_df: pd.DataFrame
+) -> pd.DataFrame:
     # Montenegro data isn't in the database, so we combine estimates from the World bank
     # with average end use contributions of neighbouring countries
     # biomass fuel = 69%, electricity = 28%, oil/solid fossil fuel = 1-2%
     # See The World Bank Montenegro Second Energy Efficiency Project (P165509)
+    # FIXME this function is surprising. Why is a special case treatment necessary for Montenegro?
+    # Montenegro is missing from JRC IDEES like all Western Balkan countries.
+    # The data that is supposed to be filled in this function is in fact existing.
+    # See https://github.com/calliope-project/euro-calliope/issues/298.
     MNE_energy_balance = energy_balance_df.loc[idx[:, "MNE"], :]
     MNE_heat_electricity_consumption = MNE_energy_balance.loc["biofuel"] * 0.28 / 0.69
-    MNE_energy_balance.loc["electricity"].update(MNE_heat_electricity_consumption)
+    MNE_energy_balance.loc["electricity"].update(
+        MNE_heat_electricity_consumption
+    )  # FIXME this line is broken. It does not do anything.
     neighbours = ["SRB", "HRV", "ALB", "BIH"]
     neighbour_consumption = annual_consumption.loc[
         idx[END_USE_CAT_NAMES.values(), :, neighbours, ["household"]], :
@@ -488,7 +568,9 @@ def hardcoded_country_cleanup(annual_consumption, energy_balance_df):
     return annual_consumption
 
 
-def fill_data_gaps(end_use_df, energy_balance_dfs, fill):
+def fill_data_gaps(
+    end_use_df: pd.DataFrame, energy_balance_dfs: dict[str, pd.DataFrame], fill: str
+) -> pd.DataFrame:
     end_use_df = end_use_df.where(end_use_df > 0)
 
     # Fill the household sector's end-use data based on total sectoral consumption
@@ -517,7 +599,9 @@ def fill_data_gaps(end_use_df, energy_balance_dfs, fill):
     return end_use_df
 
 
-def get_annual_electricity_consumption(annual_consumption, energy_balance_dfs):
+def get_annual_electricity_consumption(
+    annual_consumption: pd.DataFrame, energy_balance_dfs: dict[str, pd.DataFrame]
+) -> pd.DataFrame:
     """
     Get annual energy consumption coming from electricity, to remove later from the
     electricity demand profile.
@@ -541,44 +625,21 @@ def get_annual_electricity_consumption(annual_consumption, energy_balance_dfs):
     return electricity_consumption
 
 
-def get_national_heat_demand(annual_consumption, energy_balance_dfs, heat_tech_params):
+def get_national_heat_demand(
+    annual_consumption: pd.DataFrame,
+    energy_balance_dfs: dict[str, pd.DataFrame],
+    heat_tech_params: dict[str, dict[str, float]],
+) -> pd.DataFrame:
     """
     Get consumption of heat techs and convert to demand for heating
     """
-
-    def efficiencies(end_use):
-        return pd.Series({
-            "biogas": heat_tech_params[f"{end_use}_techs"].get("gas_eff", 1),
-            "biofuel": heat_tech_params[f"{end_use}_techs"].get("biofuel_eff", 1),
-            "solid_fossil": heat_tech_params[f"{end_use}_techs"].get(
-                "solid_fossil_eff", 1
-            ),
-            "natural_gas": heat_tech_params[f"{end_use}_techs"].get("gas_eff", 1),
-            "manufactured_gas": heat_tech_params[f"{end_use}_techs"].get("gas_eff", 1),
-            "gas": heat_tech_params[f"{end_use}_techs"].get("gas_eff", 1),
-            "oil": heat_tech_params[f"{end_use}_techs"].get("oil_eff", 1),
-            "solar_thermal": heat_tech_params[f"{end_use}_techs"].get(
-                "solar_thermal_eff", 1
-            ),
-            "renewable_heat": heat_tech_params[f"{end_use}_techs"].get(
-                "solar_thermal_eff", 1
-            ),
-            "electricity": heat_tech_params[f"{end_use}_techs"].get(
-                "electricity_eff", 1
-            ),
-            "direct_electric": 1,  # don't need to deal with heat pump COP if direct electric is 100% efficient
-            "heat": 1,
-            # heat demand met by heat pumps = heat pump electricity + ambient heat
-            "heat_pump": 1,
-            "ambient_heat": 1,
-        })
 
     # Convert end use consumption data to demand
     demands = []
     for end_use in ["space_heat", "water_heat", "cooking"]:
         _demand = (
             annual_consumption.loc[[end_use]]
-            .mul(efficiencies(end_use), level="carrier_name", axis=0)
+            .mul(efficiencies(heat_tech_params[end_use]), level="carrier_name", axis=0)
             .sum(level=["end_use", "country_code", "cat_name"])
         )
         # sense check: demand is at least the minimum efficiency * consumption
@@ -587,7 +648,7 @@ def get_national_heat_demand(annual_consumption, energy_balance_dfs, heat_tech_p
                 _demand
                 >= (
                     annual_consumption.loc[[end_use]]
-                    .mul(efficiencies(end_use).min())
+                    .mul(efficiencies(heat_tech_params[end_use]).min())
                     .sum(level=["end_use", "country_code", "cat_name"])
                 )
             )
@@ -607,18 +668,40 @@ def get_national_heat_demand(annual_consumption, energy_balance_dfs, heat_tech_p
     return demand
 
 
-def get_ch_sheet(path_to_excel, sheet, skipfooter, translation=None):
-    _df = pd.read_excel(
+def efficiencies(params: dict[str, float]) -> pd.Series:
+    return pd.Series({
+        "biogas": params.get("gas-eff", np.nan),
+        "biofuel": params.get("biofuel-eff", np.nan),
+        "solid_fossil": params.get("solid-fossil-eff", np.nan),
+        "natural_gas": params.get("gas-eff", np.nan),
+        "manufactured_gas": params.get("gas-eff", np.nan),
+        "gas": params.get("gas-eff", np.nan),
+        "oil": params.get("oil-eff", np.nan),
+        "solar_thermal": params.get("solar-thermal-eff", np.nan),
+        "renewable_heat": params.get("solar-thermal-eff", np.nan),
+        "electricity": params.get("electricity-eff", np.nan),
+        "direct_electric": 1,  # don't need to deal with heat pump COP if direct electric is 100% efficient
+        "heat": 1,
+        # heat demand met by heat pumps = heat pump electricity + ambient heat
+        "heat_pump": 1,
+        "ambient_heat": 1,
+    })
+
+
+def get_ch_sheet(
+    path_to_excel: str, sheet: str, skipfooter, translation=None
+) -> pd.DataFrame:
+    df = pd.read_excel(
         path_to_excel, sheet_name=sheet, skiprows=9, skipfooter=skipfooter, index_col=1
     ).drop(["Unnamed: 0", "Δ ’00 – ’18"], axis=1)
-    _df.index = _df.index.str.strip()
-    _df.columns = _df.columns.astype(int)
-    _df = _df.drop(2019, axis=1, errors="ignore")
+    df.index = df.index.str.strip()
+    df.columns = df.columns.astype(int)
+    df = df.drop(2019, axis=1, errors="ignore")
 
     if translation is not None:
-        return _df.groupby(translation).sum()
+        return df.groupby(translation).sum()
     else:
-        return _df
+        return df
 
 
 def fill_remaining_missing_values(
@@ -639,6 +722,7 @@ if __name__ == "__main__":
         country_codes=[
             pycountry.countries.lookup(c).alpha_3 for c in snakemake.params.countries
         ],
+        fill_missing_values=snakemake.params.fill_missing_values,
         path_to_electricity_consumption=snakemake.output.electricity,
-        path_to_output=snakemake.output.demand,
+        path_to_output=snakemake.output.total_demand,
     )

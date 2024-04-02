@@ -20,7 +20,8 @@ def national_to_regional_resolution(
     region_country_mapping: dict,
     populations: pd.DataFrame,
 ) -> pd.DataFrame:
-    # TODO regional allocation is according to population, maybe we want to have it per GVA for commercial demand
+    # ASSUME national heat demand is spatially distributed by population.
+    # TODO maybe we want to have it per GVA for commercial demand
     df_population_share = (
         populations.loc[:, "population_sum"]
         .reindex(region_country_mapping.keys())
@@ -77,7 +78,7 @@ if __name__ == "__main__":
             annual_demand,
             populations=populations,
             region_country_mapping=region_country_mapping,
-        ).to_csv(snakemake.output.demand)
+        ).to_csv(snakemake.output.total_demand)
     )
     (
         rescale_function(

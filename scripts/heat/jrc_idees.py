@@ -5,13 +5,13 @@ import pandas as pd
 
 idx = pd.IndexSlice
 
-end_uses = {
+END_USES = {
     "Space heating": "space_heating",
     "Space cooling": "end_use_electricity",
     "Hot water": "water_heating",
     "Catering": "cooking",
 }
-carrier_names = {
+CARRIER_NAMES = {
     "Advanced electric heating": "electricity",
     "Biomass and wastes": "biofuel",
     "Conventional electric heating": "electricity",
@@ -30,34 +30,15 @@ carrier_names = {
 }
 
 
-def process_jrc_heat_tertiary_sector_data(paths_to_data: list[str], out_path: str):
-    paths_to_data = [Path(p) for p in paths_to_data]
+def process_jrc_heat_tertiary_sector_data(
+    paths_to_national_data: list[str], out_path: str
+):
+    paths_to_national_data = [Path(p) for p in paths_to_national_data]
     dfs = []
-    for file in paths_to_data:
+    for file in paths_to_national_data:
         df_consumption = pd.read_excel(file, sheet_name="SER_hh_fec", index_col=0)
         df_demand = pd.read_excel(file, sheet_name="SER_hh_tes", index_col=0)
         df_summary = pd.read_excel(file, sheet_name="SER_summary", index_col=0)
-
-        def clean_df(df, energy_type):
-            country_code = df.index.names[0].split(" - ")[0]
-            df = df.assign(end_use=np.nan)
-            df.loc[df.index.isin(end_uses.keys()), "end_use"] = list(end_uses.keys())
-            df.end_use = df.end_use.fillna(df.end_use.ffill())
-
-            df = (
-                df.dropna()
-                .set_index("end_use", append=True)
-                .drop(end_uses.keys(), level=0)
-                .groupby([carrier_names, end_uses], level=[0, 1])
-                .sum()
-                .assign(country_code=country_code, unit="ktoe", energy=energy_type)
-                .set_index(["country_code", "unit", "energy"], append=True)
-                .rename_axis(
-                    columns="year",
-                    index=["carrier_name", "end_use", "country_code", "unit", "energy"],
-                )
-            )
-            return df
 
         df_consumption = clean_df(df_consumption, "consumption")
         df_demand = clean_df(df_demand, "demand")
@@ -88,7 +69,29 @@ def process_jrc_heat_tertiary_sector_data(paths_to_data: list[str], out_path: st
     pd.concat(dfs).stack().to_csv(out_path)
 
 
+def clean_df(df: pd.DataFrame, energy_type: str):
+    country_code = df.index.names[0].split(" - ")[0]
+    df = df.assign(end_use=np.nan)
+    df.loc[df.index.isin(END_USES.keys()), "end_use"] = list(END_USES.keys())
+    df.end_use = df.end_use.fillna(df.end_use.ffill())
+
+    df = (
+        df.dropna()
+        .set_index("end_use", append=True)
+        .drop(END_USES.keys(), level=0)
+        .groupby([CARRIER_NAMES, END_USES], level=[0, 1])
+        .sum()
+        .assign(country_code=country_code, unit="ktoe", energy=energy_type)
+        .set_index(["country_code", "unit", "energy"], append=True)
+        .rename_axis(
+            columns="year",
+            index=["carrier_name", "end_use", "country_code", "unit", "energy"],
+        )
+    )
+    return df
+
+
 if __name__ == "__main__":
     process_jrc_heat_tertiary_sector_data(
-        paths_to_data=snakemake.input.data, out_path=snakemake.output[0]
+        paths_to_national_data=snakemake.input.data, out_path=snakemake.output[0]
     )
