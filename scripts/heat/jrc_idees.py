@@ -36,14 +36,14 @@ def process_jrc_heat_tertiary_sector_data(
     paths_to_national_data = [Path(p) for p in paths_to_national_data]
     dfs = []
     for file in paths_to_national_data:
-        df_consumption = pd.read_excel(file, sheet_name="SER_hh_fec", index_col=0)
-        df_demand = pd.read_excel(file, sheet_name="SER_hh_tes", index_col=0)
+        df_final_energy = pd.read_excel(file, sheet_name="SER_hh_fec", index_col=0)
+        df_useful_energy = pd.read_excel(file, sheet_name="SER_hh_tes", index_col=0)
         df_summary = pd.read_excel(file, sheet_name="SER_summary", index_col=0)
 
-        df_consumption = clean_df(df_consumption, "consumption")
-        df_demand = clean_df(df_demand, "demand")
+        df_final_energy = clean_df(df_final_energy, "final_energy")
+        df_useful_energy = clean_df(df_useful_energy, "useful_energy")
 
-        df = pd.concat([df_consumption, df_demand])
+        df = pd.concat([df_final_energy, df_useful_energy])
 
         df_elec = (
             df_summary.loc[
@@ -58,7 +58,7 @@ def process_jrc_heat_tertiary_sector_data(
         )
 
         assert np.allclose(
-            df.xs("consumption", level="energy").sum(),
+            df.xs("final_energy", level="energy").sum(),
             df_summary.loc[
                 "Energy consumption by fuel - Eurostat structure (ktoe)"
             ].astype(float),

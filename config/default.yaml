@@ -23,21 +23,21 @@ data-sources:
 data-pre-processing:
     fill-missing-values:
         jrc-idees:
-            ALB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            BIH: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            MNE: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            MKD: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            SRB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-            NOR: ['SWE', 'DNK']
-            CHE: ['DEU', 'AUT', 'FRA', 'ITA']
+            ALB: [BGR, HRV, HUN, ROU, GRC]
+            BIH: [BGR, HRV, HUN, ROU, GRC]
+            MNE: [BGR, HRV, HUN, ROU, GRC]
+            MKD: [BGR, HRV, HUN, ROU, GRC]
+            SRB: [BGR, HRV, HUN, ROU, GRC]
+            NOR: [SWE, DNK]
+            CHE: [DEU, AUT, FRA, ITA]
         ramp:
-            ALB: ['HRV']
-            MKD: ['HRV']
-            GRC: ['ROU']
-            BGR: ['ROU']
-            BIH: ['HRV', 'HUN']
-            MNE: ['HRV']
-            SRB: ['HUN']
+            ALB: [HRV]
+            MKD: [HRV]
+            GRC: [ROU]
+            BGR: [ROU]
+            BIH: [HRV, HUN]
+            MNE: [HRV]
+            SRB: [HUN]
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch

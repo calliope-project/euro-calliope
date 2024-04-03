@@ -25,7 +25,7 @@ rule annual_heat_demand:
     conda: "../envs/default.yaml"
     output:
         total_demand = "build/data/heat/annual-heat-demand-twh.csv",
-        electricity = "build/data/heat/annual-heat-electricity-consumption-twh.csv",
+        electricity = "build/data/heat/annual-heat-electricity-demand-twh.csv",
     script: "../scripts/heat/annual_heat_demand.py"
 
 
@@ -39,7 +39,7 @@ rule rescale_annual_heat_demand_to_resolution:
     conda: "../envs/default.yaml"
     output:
         total_demand = "build/data/heat/{resolution}/annual-heat-demand-twh.csv",
-        electricity = "build/data/heat/{resolution}/annual-heat-electricity-consumption-twh.csv",
+        electricity = "build/data/heat/{resolution}/annual-heat-electricity-demand-twh.csv",
     script: "../scripts/heat/rescale.py"
 
 
