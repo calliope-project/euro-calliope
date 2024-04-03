@@ -87,6 +87,14 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of Eurostat energy balance data.
+            eurostat-hh-end-use:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of Eurostat household end use data.
+            swiss-end-use:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of Swiss annual energy consumption data.
             swiss-energy-balance:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
@@ -99,6 +107,40 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of electric vehicle data.
+    data-pre-processing:
+        type: object
+        description: Parameters for the pre-processing of raw data.
+        additionalProperties: false
+        properties:
+            fill-missing-values:
+                type: object
+                description: Strategies to fill missing values.
+                additionalProperties: false
+                properties:
+                    jrc-idees:
+                        description: Fill missing countries in JRC IDEES annual demand data.
+                        type: object
+                        additionalProperties: false
+                        patternProperties:
+                            "^[A-Z][A-Z][A-Z]$":
+                                type: array
+                                description: Country to fill missing values for.
+                                items:
+                                    type: string
+                                    pattern: ^[A-Z][A-Z][A-Z]$
+                                    description: Country to fill missing values from.
+                    ramp:
+                        description: Fill missing countries in RAMP timeseries profiles.
+                        type: object
+                        additionalProperties: false
+                        patternProperties:
+                            "^[A-Z][A-Z][A-Z]$":
+                                type: array
+                                description: Country to fill missing values for.
+                                items:
+                                    type: string
+                                    pattern: ^[A-Z][A-Z][A-Z]$
+                                    description: Country to fill missing values from.
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.
@@ -306,35 +348,6 @@ properties:
                             motorcycles:
                                 type: string
                                 description: JRC-IDEES name of motorcycles.
-                    fill-missing-values:
-                        type: object
-                        description: Dictionaries to fill missing values
-                        additionalProperties: false
-                        properties:
-                            annual-data:
-                                description: Fill missing values in annual transport demand.
-                                type: object
-                                additionalProperties: false
-                                patternProperties:
-                                    "^[A-Z][A-Z][A-Z]$":
-                                        type: array
-                                        description: Country to fill missing values for.
-                                        items:
-                                            type: string
-                                            pattern: ^[A-Z][A-Z][A-Z]$
-                                            description: Country to fill missing values from.
-                            timeseries-data:
-                                description: Fill missing countries in timeseries profile.
-                                type: object
-                                additionalProperties: false
-                                patternProperties:
-                                    "^[A-Z][A-Z][A-Z]$":
-                                        type: array
-                                        description: Country to fill missing values for.
-                                        items:
-                                            type: string
-                                            pattern: ^[A-Z][A-Z][A-Z]$
-                                            description: Country to fill missing values from.
             entsoe-tyndp:
                 type: object
                 description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/
@@ -364,7 +377,92 @@ properties:
                 type: string
                 description: Nuclear technology capacity scenario. "current" will use today's capacities based on the JRC power plant database (PPDB). All other scenario names should point to a configuration CSV file specifying minimum and maximum capacities per country in MW with non-zero capacities (columns=[country, min, max]).
                 pattern: ^(current)|(\w+.csv)$
-
+            heat:
+                type: object
+                description: Parameters for heat sector model.
+                additionalProperties: false
+                properties:
+                    space_heat:
+                        type: object
+                        description: Parameters of space heating technologies.
+                        additionalProperties: false
+                        properties:
+                            carnot-performance:
+                                type: number
+                                description: Carnot performance.
+                            gas-eff:
+                                type: number
+                                description: Gas boiler efficiency.
+                            oil-eff:
+                                type: number
+                                description: Oil boiler efficiency.
+                            solid-fossil-eff:
+                                type: number
+                                description: Solid fossil boiler efficiency.
+                            biofuel-eff:
+                                type: number
+                                description: Biofuel boiler efficiency.
+                            solar-thermal-eff:
+                                type: number
+                                description: Solar thermal efficiency.
+                            electricity-eff:
+                                type: number
+                                description: Electric heater efficiency.
+                            space-heat-temp:
+                                type: number
+                                description: Space heating temperature.
+                            hp-cop:
+                                type: number
+                                description: Heat pump coefficient of performance.
+                    water_heat:
+                        type: object
+                        description: Parameters of water heating technologies.
+                        additionalProperties: false
+                        properties:
+                            gas-eff:
+                                type: number
+                                description: Gas boiler efficiency.
+                            oil-eff:
+                                type: number
+                                description: Oil boiler efficiency.
+                            solid-fossil-eff:
+                                type: number
+                                description: Solid fossil boiler efficiency.
+                            biofuel-eff:
+                                type: number
+                                description: Biofuel boiler efficiency.
+                            solar-thermal-eff:
+                                type: number
+                                description: Solar thermal efficiency.
+                            electricity-eff:
+                                type: number
+                                description: Electric heater efficiency.
+                            water-heat-temp:
+                                type: number
+                                description: Water heating temperature.
+                            hp-cop:
+                                type: number
+                                description: Heat pump coefficient of performance.
+                    cooking:
+                        type: object
+                        description: Parameters of cooking technologies.
+                        additionalProperties: false
+                        properties:
+                            gas-eff:
+                                type: number
+                                description: Gas stove efficiency.
+                            oil-eff:
+                                type: number
+                                description: Oil stove efficiency.
+                            solid-fossil-eff:
+                                type: number
+                                description: Solid fossil stove efficiency.
+                            biofuel-eff:
+                                type: number
+                                description: Biofuel stove efficiency.
+                            electricity-eff:
+                                type: number
+                                description: Electric stove efficiency.
     scope:
         type: object
         description: Spatial and temporal scope bounding the models.
