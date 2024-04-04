@@ -68,7 +68,9 @@ rule all:
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",
-        "build/models/build-metadata.yaml",
+        "build/models/continental/build-metadata.yaml",
+        "build/models/national/build-metadata.yaml",
+        "build/models/regional/build-metadata.yaml",
         "build/models/regional/summary-of-potentials.nc",
         "build/models/regional/summary-of-potentials.csv",
         "build/models/national/summary-of-potentials.nc",
@@ -194,13 +196,11 @@ rule model_template:
 rule build_metadata:
     message: "Generate build metadata."
     input:
-        "build/models/continental/example-model.yaml",
-        "build/models/national/example-model.yaml",
-        "build/models/regional/example-model.yaml",
+        "build/models/{resolution}/example-model.yaml",
     params:
         config = config,
         version = __version__
-    output: "build/models/build-metadata.yaml"
+    output: "build/models/{resolution}/build-metadata.yaml"
     conda: "envs/default.yaml"
     script: "scripts/metadata.py"
 
