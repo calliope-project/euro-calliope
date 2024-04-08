@@ -1,9 +1,7 @@
 industry:
   inputs:
+    path-energy-balances: build/data/annual-energy-balances.csv
   parameters:
   setup:
-    script-path: modules/industry/src
-    data-path: modules/industry/tmp
-    out-path: modules/industry/out
     main-out-path: data/industry
 
