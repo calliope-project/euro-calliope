@@ -139,12 +139,11 @@ def get_ch_sheet(
 ):
     df = pd.read_excel(
         path_to_excel, sheet_name=sheet, skiprows=9, skipfooter=skipfooter, index_col=1
-    ).drop(["Unnamed: 0", "Δ ’00 – ’18"], axis=1)
+    )
+    to_drop = [col for col in df.columns if col.startswith(("Unnamed", "Δ"))]
+    df = df.drop(to_drop, axis=1)
     df.index = df.index.str.strip()
     df.columns = df.columns.astype(int)
-    df = df.drop(
-        2019, axis=1, errors="ignore"
-    )  # strip out the year 2019 in case it has appeared
 
     if translation is not None:
         df = df.groupby(translation).sum()

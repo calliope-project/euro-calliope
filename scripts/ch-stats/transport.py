@@ -11,7 +11,9 @@ CARRIER_TO_CARRIER_CODE_AND_END_USE = {
 }
 
 
-def ch_transport_energy_balance(path_to_ch_energy_balance_excel, path_to_output):
+def ch_transport_energy_balance(
+    path_to_ch_energy_balance_excel: str, path_to_output: str
+):
     """
     Swiss transport sector energy balance sheet is structured differently to the other sectors,
     requiring us to infer the end uses for the fuels (road, rail, and aviation).
@@ -26,19 +28,13 @@ def ch_transport_energy_balance(path_to_ch_energy_balance_excel, path_to_output)
         skipfooter=12,
         index_col=0,
         sheet_name="T17e",
+        dtype="float",
+        na_values=["-"],
         header=[0, 1, 2, 3, 4],
     ).xs("TJ", level=-1, axis=1)
 
     # carrier names span two column levels, which we merge with fillna
-    carrier_name_func = (  # noqa: E731
-        lambda x: df.columns.to_frame()
-        .iloc[:, x]
-        .str.translate(
-            utils.remove_digits()
-        )  # Footnote labels lead to some strings randomly ending in numbers; we remove them here
-        .map(CARRIER_TO_CARRIER_CODE_AND_END_USE)
-    )
-    df.columns = carrier_name_func(0).fillna(carrier_name_func(1)).values
+    df.columns = _carrier_name_func(df, 0).fillna(_carrier_name_func(df, 1)).values
 
     df_twh = (
         df.groupby(axis=1, level=0)
@@ -56,6 +52,16 @@ def ch_transport_energy_balance(path_to_ch_energy_balance_excel, path_to_output)
 
     da.expand_dims(country_code=["CHE"]).assign_attrs(unit="twh").to_netcdf(
         path_to_output
+    )
+
+
+def _carrier_name_func(df: pd.DataFrame, x: int) -> pd.Series:
+    return (
+        df.columns.to_frame()
+        .iloc[:, x]
+        # Footnote labels lead to some strings randomly ending in numbers; we remove them here:
+        .str.translate(utils.remove_digits())
+        .map(CARRIER_TO_CARRIER_CODE_AND_END_USE)
     )
 
 

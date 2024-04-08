@@ -30,7 +30,9 @@ ENERGY_CARRIER_TRANSLATIONS = {
 }
 
 
-def ch_industry_energy_balance_dataset(path_to_ch_industry_excel, path_to_output):
+def ch_industry_energy_balance_dataset(
+    path_to_ch_industry_excel: str, path_to_output: str
+):
     """
     Industry subsector energy balances are in a completely different spreadsheet,
     which are processed here.
@@ -41,7 +43,7 @@ def ch_industry_energy_balance_dataset(path_to_ch_industry_excel, path_to_output
     1. Extracting and renaming the per-table energy carriers (they are in the same column as the years, but have no data associated with them) and assigning those names to the index
     2. Adding years to the index as a new level
     3. Deleting all index items that relate to empty data (the rows from which the energy carrier names were extracted)
-    4. Renaming the subsectors based on the subsetor number
+    4. Renaming the subsectors based on the subsector number
 
     Energy carrier and industry subsector translations are based on manual inspection.
     ASSUME: some translations are not perfect matches to eurostat energy carriers.
@@ -66,7 +68,7 @@ def ch_industry_energy_balance_dataset(path_to_ch_industry_excel, path_to_output
     )
 
     # Clean data
-    # commas in the data can lead to string intepretations, which we deal with here
+    # commas in the data can lead to string interpretations, which we deal with here
     df = df.apply(utils.to_numeric)
 
     # ASSUME: we take the 'new' 2013 values from this dataset, rather than the 'old' ones since they likely account for some correction in the underlying statistical analysis.
