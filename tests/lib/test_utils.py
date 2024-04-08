@@ -36,4 +36,4 @@ def test_conversion_to_alpha2(input, alpha2):
     [("uk", "UK"), ("el", "EL"), ("de", "DE"), ("Germany", "DE"), ("Greece", "EL")],
 )
 def test_conversion_to_eu_alpha2(input, alpha2):
-    assert convert_country_code(input, "alpha2_eu") == alpha2
+    assert convert_country_code(input, "alpha2_eurostat") == alpha2
