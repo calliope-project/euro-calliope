@@ -1,0 +1,9 @@
+industry:
+  inputs:
+  parameters:
+  setup:
+    script-path: modules/industry/src
+    data-path: modules/industry/tmp
+    out-path: modules/industry/out
+    main-out-path: data/industry
+
