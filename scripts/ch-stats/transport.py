@@ -30,7 +30,7 @@ def ch_transport_energy_balance(path_to_ch_energy_balance_excel, path_to_output)
     ).xs("TJ", level=-1, axis=1)
 
     # carrier names span two column levels, which we merge with fillna
-    carrier_name_func = (
+    carrier_name_func = (  # noqa: E731
         lambda x: df.columns.to_frame()
         .iloc[:, x]
         .str.translate(
