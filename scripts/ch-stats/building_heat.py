@@ -94,12 +94,10 @@ def ch_non_hh_consumption(path_to_ch_end_use_excel: str, household_consumption: 
         commercial_fuel_consumption_assigned_to_end_uses.sum("carrier_name"),
         commercial_fuel_consumption,
     )
-    commercial_energy_consumption = utils.merge_da(
-        [
-            commercial_electricity_consumption,
-            commercial_fuel_consumption_assigned_to_end_uses,
-        ]
-    )
+    commercial_energy_consumption = utils.merge_da([
+        commercial_electricity_consumption,
+        commercial_fuel_consumption_assigned_to_end_uses,
+    ])
 
     return commercial_energy_consumption
 
@@ -123,13 +121,11 @@ def ch_hh_consumption(path_to_ch_end_use_excel: str):
         path_to_ch_end_use_excel, "Tabelle21", skipfooter=4, **household_sheet_kwargs
     )
 
-    household_energy_consumption = utils.merge_da(
-        [
-            household_space_heat_consumption.expand_dims(end_use=["space_heat"]),
-            household_hot_water_consumption.expand_dims(end_use=["water_heat"]),
-            household_cooking_consumption.expand_dims(end_use=["cooking"]),
-        ]
-    )
+    household_energy_consumption = utils.merge_da([
+        household_space_heat_consumption.expand_dims(end_use=["space_heat"]),
+        household_hot_water_consumption.expand_dims(end_use=["water_heat"]),
+        household_cooking_consumption.expand_dims(end_use=["cooking"]),
+    ])
 
     return household_energy_consumption
 
