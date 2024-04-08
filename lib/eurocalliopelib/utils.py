@@ -1,7 +1,7 @@
 """Utility functions."""
 
 from string import digits
-from typing import Optional
+from typing import Literal, Optional
 
 # We import netCDF4 before xarray to mitigate a numpy warning that translates to an error on linux:
 # https://github.com/pydata/xarray/issues/7259
@@ -11,7 +11,7 @@ import pycountry
 import xarray as xr
 
 
-def eu_country_code_to_iso3(eu_country_code):
+def eu_country_code_to_iso3(eu_country_code: str) -> str:
     """Converts EU country code to ISO 3166 alpha 3.
     The European Union uses its own country codes, which often but not always match ISO 3166.
     """
@@ -22,7 +22,10 @@ def eu_country_code_to_iso3(eu_country_code):
     return convert_country_code(eu_country_code, output="alpha3")
 
 
-def convert_country_code(input_country, output="alpha3"):
+def convert_country_code(
+    input_country: str,
+    output: Literal["alpha2", "alpha3", "alpha2_eurostat"] = "alpha3",
+) -> str:
     """
     Converts input country code or name into either either a 2- or 3-letter code.
 
@@ -136,7 +139,7 @@ def merge_da(da_list: list, merged_da_name: Optional[str] = None) -> xr.DataArra
     )
 
 
-def to_numeric(series):
+def to_numeric(series: pd.Series) -> pd.Series:
     """
     Clean up a pandas.Series which was parsed as strings, but is really numeric:
 
@@ -171,7 +174,7 @@ def gwh_to_tj(array):
     return array * 3.6
 
 
-def remove_digits():
+def remove_digits() -> dict:
     """
     Functionality to be passed to str.translate to remove numbers from
     string endings

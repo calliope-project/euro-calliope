@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 import pandas as pd
 from eurocalliopelib import utils
@@ -29,7 +31,9 @@ CH_HH_END_USE_TRANSLATION = {
 }
 
 
-def ch_building_energy_consumption_dataset(path_to_ch_end_use_excel, path_to_output):
+def ch_building_energy_consumption_dataset(
+    path_to_ch_end_use_excel: str, path_to_output: str
+):
     household_consumption = ch_hh_consumption(path_to_ch_end_use_excel)
     commercial_consumption = ch_non_hh_consumption(
         path_to_ch_end_use_excel, household_consumption
@@ -51,7 +55,7 @@ def ch_building_energy_consumption_dataset(path_to_ch_end_use_excel, path_to_out
     final_da.to_netcdf(path_to_output)
 
 
-def ch_non_hh_consumption(path_to_ch_end_use_excel, household_consumption):
+def ch_non_hh_consumption(path_to_ch_end_use_excel: str, household_consumption: str):
     """
     Switzerland data isn't in Eurostat, so we get it from their govt. stats directly
     """
@@ -90,15 +94,17 @@ def ch_non_hh_consumption(path_to_ch_end_use_excel, household_consumption):
         commercial_fuel_consumption_assigned_to_end_uses.sum("carrier_name"),
         commercial_fuel_consumption,
     )
-    commercial_energy_consumption = utils.merge_da([
-        commercial_electricity_consumption,
-        commercial_fuel_consumption_assigned_to_end_uses,
-    ])
+    commercial_energy_consumption = utils.merge_da(
+        [
+            commercial_electricity_consumption,
+            commercial_fuel_consumption_assigned_to_end_uses,
+        ]
+    )
 
     return commercial_energy_consumption
 
 
-def ch_hh_consumption(path_to_ch_end_use_excel):
+def ch_hh_consumption(path_to_ch_end_use_excel: str):
     """
     Switzerland data isn't in Eurostat, so we get it from their govt. stats directly
     """
@@ -117,16 +123,24 @@ def ch_hh_consumption(path_to_ch_end_use_excel):
         path_to_ch_end_use_excel, "Tabelle21", skipfooter=4, **household_sheet_kwargs
     )
 
-    household_energy_consumption = utils.merge_da([
-        household_space_heat_consumption.expand_dims(end_use=["space_heat"]),
-        household_hot_water_consumption.expand_dims(end_use=["water_heat"]),
-        household_cooking_consumption.expand_dims(end_use=["cooking"]),
-    ])
+    household_energy_consumption = utils.merge_da(
+        [
+            household_space_heat_consumption.expand_dims(end_use=["space_heat"]),
+            household_hot_water_consumption.expand_dims(end_use=["water_heat"]),
+            household_cooking_consumption.expand_dims(end_use=["cooking"]),
+        ]
+    )
 
     return household_energy_consumption
 
 
-def get_ch_sheet(path_to_excel, sheet, skipfooter, index_name, translation=None):
+def get_ch_sheet(
+    path_to_excel: str,
+    sheet: str,
+    skipfooter: int,
+    index_name: str,
+    translation: Optional[dict] = None,
+):
     df = pd.read_excel(
         path_to_excel, sheet_name=sheet, skiprows=9, skipfooter=skipfooter, index_col=1
     ).drop(["Unnamed: 0", "Δ ’00 – ’18"], axis=1)
