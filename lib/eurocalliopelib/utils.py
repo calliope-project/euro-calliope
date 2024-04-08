@@ -1,7 +1,11 @@
 """Utility functions."""
 
 from string import digits
+from typing import Optional
 
+# We import netCDF4 before xarray to mitigate a numpy warning that translates to an error on linux:
+# https://github.com/pydata/xarray/issues/7259
+import netCDF4  # noqa: F401
 import pandas as pd
 import pycountry
 import xarray as xr
@@ -57,7 +61,7 @@ def rename_and_groupby(
     da: xr.DataArray,
     rename_dict: dict,
     dim_name: str,
-    new_dim_name: str = None,
+    new_dim_name: Optional[str] = None,
     dropna: bool = False,
     keep_non_renamed: bool = False,
 ) -> xr.DataArray:
@@ -75,7 +79,7 @@ def rename_and_groupby(
             Dictionary to map items in the dimension "dim_name" to new names ({"old_item_name": "new_item_name"}).
         dim_name (str):
             Dimension on which to rename items.
-        new_dim_name (str, optional): Defaults to None.
+        new_dim_name (Optional[str], optional): Defaults to None.
             If not None, rename the dimension "dim_name" to the given string.
         dropna (bool, optional): Defaults to False.
             If True, drop any items in "dim_name" after renaming/grouping which have all NaN values along all other dimensions.
@@ -111,15 +115,14 @@ def rename_and_groupby(
     return da
 
 
-def merge_da(da_list: list, merged_da_name: str = None) -> xr.DataArray:
+def merge_da(da_list: list, merged_da_name: Optional[str] = None) -> xr.DataArray:
     """
     Merge dataArrays with the same dimensions but different dimension items
     into a single xarray datarray
 
     Args:
-        da_list (list): list of xarray dataArrays
-        merged_da_name (str, optional): Defaults to None.
-            Name of merged datarray
+        da_list (list): List of xarray DataArrays.
+        merged_da_name (Optional[str], optional): Name of merged datarray. Defaults to None.
 
     Returns:
         xr.DataArray:
