@@ -1,9 +1,11 @@
 """Utility functions."""
-import pycountry
-import pandas as pd
-import xarray as xr
 
 from string import digits
+
+import pandas as pd
+import pycountry
+import xarray as xr
+
 
 def eu_country_code_to_iso3(eu_country_code):
     """Converts EU country code to ISO 3166 alpha 3.
@@ -14,6 +16,7 @@ def eu_country_code_to_iso3(eu_country_code):
     ), f"EU country codes are of length 2, yours is '{eu_country_code}'."
 
     return convert_country_code(eu_country_code, output="alpha3")
+
 
 def convert_country_code(input_country, output="alpha3"):
     """
@@ -84,7 +87,9 @@ def rename_and_groupby(
     rename_series = pd.Series(rename_dict).rename_axis(index=dim_name)
     if keep_non_renamed is True:
         existing_dim_items = da[dim_name].to_series()
-        rename_series = rename_series.reindex(existing_dim_items).fillna(existing_dim_items)
+        rename_series = rename_series.reindex(existing_dim_items).fillna(
+            existing_dim_items
+        )
 
     if new_dim_name is None:
         new_dim_name = f"_{dim_name}"  # placeholder that we'll revert
@@ -94,8 +99,7 @@ def rename_and_groupby(
 
     rename_da = xr.DataArray(rename_series.rename(new_dim_name))
     da = (
-        da
-        .reindex({dim_name: rename_da[dim_name]})
+        da.reindex({dim_name: rename_da[dim_name]})
         .groupby(rename_da)
         .sum(dim_name, skipna=True, min_count=1, keep_attrs=True)
     )
@@ -124,7 +128,9 @@ def merge_da(da_list: list, merged_da_name: str = None) -> xr.DataArray:
 
     """
     datasets = [da.rename("var") for da in da_list]
-    return xr.merge(datasets, combine_attrs="no_conflicts")["var"].rename(merged_da_name)
+    return xr.merge(datasets, combine_attrs="no_conflicts")["var"].rename(
+        merged_da_name
+    )
 
 
 def to_numeric(series):

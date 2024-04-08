@@ -1,5 +1,4 @@
 import pandas as pd
-
 from eurocalliopelib import utils
 
 
@@ -20,7 +19,7 @@ def ch_energy_balance(path_to_ch_energy_balance_excel, path_to_output):
     ch_energy_use_da = utils.merge_da([
         ch_hh_energy_use,
         ch_ind_energy_use,
-        ch_ser_energy_use
+        ch_ser_energy_use,
     ])
 
     ch_energy_use_da.expand_dims(country_code=["CHE"]).to_netcdf(path_to_output)
@@ -64,24 +63,20 @@ def get_ch_energy_balance_excel_sheet(path_to_excel, sheet, skipfooter, cat_code
         .iloc[:, [i for i in range(10) if i != 1]]
     )
     df.columns = (
-        df
-        .columns
-        .get_level_values(0)
-        .str
-        .translate(utils.remove_digits())
+        df.columns.get_level_values(0)
+        .str.translate(utils.remove_digits())
         .map(ch_energy_carriers)
         .rename("carrier_code")
     )
     df.index.rename("year", inplace=True)
 
-    df_twh = (
-        df
-        .apply(utils.to_numeric)
-        .apply(utils.tj_to_twh)
-        .stack()
-    )
+    df_twh = df.apply(utils.to_numeric).apply(utils.tj_to_twh).stack()
 
-    da = df_twh.to_xarray().expand_dims(cat_code=[cat_code]).assign_attrs({"unit": "twh"})
+    da = (
+        df_twh.to_xarray()
+        .expand_dims(cat_code=[cat_code])
+        .assign_attrs({"unit": "twh"})
+    )
 
     return da
 
@@ -89,5 +84,5 @@ def get_ch_energy_balance_excel_sheet(path_to_excel, sheet, skipfooter, cat_code
 if __name__ == "__main__":
     ch_energy_balance(
         path_to_ch_energy_balance_excel=snakemake.input.ch_energy_balance_excel,
-        path_to_output=snakemake.output[0]
+        path_to_output=snakemake.output[0],
     )

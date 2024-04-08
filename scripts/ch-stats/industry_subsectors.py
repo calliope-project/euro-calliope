@@ -1,6 +1,5 @@
-import pandas as pd
 import numpy as np
-
+import pandas as pd
 from eurocalliopelib import utils
 
 SUBSECTOR_TRANSLATIONS = {
@@ -53,21 +52,27 @@ def ch_industry_energy_balance_dataset(path_to_ch_industry_excel, path_to_output
         sheet_name="Überblick_tot",
         skiprows=5,
         skipfooter=16,
-        header=0
+        header=0,
     ).dropna(how="all")
 
     # 1. Extract and rename energy carrier names
-    df.index = df.index.map(df["Unnamed: 0"].where(df.TOTAL.isnull()).ffill())  # carrier names are defined over two possible columns
+    df.index = df.index.map(
+        df["Unnamed: 0"].where(df.TOTAL.isnull()).ffill()
+    )  # carrier names are defined over two possible columns
 
     # 2. Add years to index as new level and define the index/column names
-    df = df.set_index("Unnamed: 0", append=True).rename_axis(index=["carrier_code", "year"], columns="cat_code")
+    df = df.set_index("Unnamed: 0", append=True).rename_axis(
+        index=["carrier_code", "year"], columns="cat_code"
+    )
 
-    ## Clean data
+    # Clean data
     # commas in the data can lead to string intepretations, which we deal with here
     df = df.apply(utils.to_numeric)
 
     # ASSUME: we take the 'new' 2013 values from this dataset, rather than the 'old' ones since they likely account for some correction in the underlying statistical analysis.
-    df = df.drop(["2013alt", "2013 alt"], level="year").rename({"2013neu": 2013, "2013 neu": 2013}, level="year")
+    df = df.drop(["2013alt", "2013 alt"], level="year").rename(
+        {"2013neu": 2013, "2013 neu": 2013}, level="year"
+    )
 
     # 3. Delete all index items related to empty data
     df = df.dropna(subset=["TOTAL"])
@@ -76,16 +81,23 @@ def ch_industry_energy_balance_dataset(path_to_ch_industry_excel, path_to_output
     df_industry_sum = df["INDU-"].to_xarray()
 
     # 3. strip subsectors of all but their number (we don't use the other information)
-    df.columns = df.columns.str.extract("(\d+)", expand=False).astype(float)
+    df.columns = df.columns.str.extract(r"(\d+)", expand=False).astype(float)
 
     dataarray = df.loc[:, SUBSECTOR_TRANSLATIONS.keys()].stack().to_xarray()
-    dataarray = utils.rename_and_groupby(dataarray, SUBSECTOR_TRANSLATIONS, dim_name="cat_code")
-    dataarray = utils.rename_and_groupby(dataarray, ENERGY_CARRIER_TRANSLATIONS, dim_name="carrier_code")
+    dataarray = utils.rename_and_groupby(
+        dataarray, SUBSECTOR_TRANSLATIONS, dim_name="cat_code"
+    )
+    dataarray = utils.rename_and_groupby(
+        dataarray, ENERGY_CARRIER_TRANSLATIONS, dim_name="carrier_code"
+    )
 
     # Test that we have at least captured all expected subsector energy demand
     assert np.allclose(
         dataarray.sum("cat_code", min_count=1),
-        utils.rename_and_groupby(df_industry_sum, ENERGY_CARRIER_TRANSLATIONS, dim_name="carrier_code"), equal_nan=True
+        utils.rename_and_groupby(
+            df_industry_sum, ENERGY_CARRIER_TRANSLATIONS, dim_name="carrier_code"
+        ),
+        equal_nan=True,
     )
     # Data is given in TJ, so we convert to twh here
     dataarray = utils.tj_to_twh(dataarray.assign_attrs(unit="twh"))
@@ -96,5 +108,5 @@ def ch_industry_energy_balance_dataset(path_to_ch_industry_excel, path_to_output
 if __name__ == "__main__":
     ch_industry_energy_balance_dataset(
         path_to_ch_industry_excel=snakemake.input.ch_industry_excel,
-        path_to_output=snakemake.output[0]
+        path_to_output=snakemake.output[0],
     )
