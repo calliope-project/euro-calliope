@@ -1,10 +1,8 @@
 import numpy as np
 import pandas as pd
 import pytest
-import xarray as xr
 from eurocalliopelib.utils import (
     convert_country_code,
-    convert_valid_countries,
     merge_da,
     remove_digits,
     rename_and_groupby,
@@ -286,24 +284,6 @@ def test_country_code_conversion(input_country, iso3166, output):
 )
 def test_country_code_conversion_no_output_specified(input_country, iso3166):
     assert convert_country_code(input_country) == iso3166
-
-
-@pytest.mark.parametrize(
-    ["countries", "expected_output"],
-    [
-        (["uk", "fr"], {"uk": "GBR", "fr": "FRA"}),
-        (["el", "ba"], {"el": "GRC", "ba": "BIH"}),
-        (["foo", "bar"], {}),
-        (["Germany", "foo"], {"Germany": "DEU"}),
-        (
-            xr.DataArray(pd.Index(["Germany", "foo"], name="bar")).bar.values,
-            {"Germany": "DEU"},
-        ),
-    ],
-)
-def test_valid_list_of_country_codes(countries, expected_output):
-    mapped_countries = convert_valid_countries(countries)
-    assert mapped_countries == expected_output
 
 
 @pytest.mark.parametrize("string_with_digits", ["trial01"])
