@@ -162,9 +162,11 @@ def ktoe_to_twh(array):
     """Convert KTOE to TWH"""
     return array * 1.163e-2
 
+
 def gwh_to_tj(array):
     """Convert GWh to TJ"""
     return array * 3.6
+
 
 def remove_digits():
     """
