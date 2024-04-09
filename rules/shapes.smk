@@ -92,6 +92,18 @@ rule units:
     script: "../scripts/shapes/units.py"
 
 
+rule custom_units:
+    message: "Form units of resolution {wildcards.resolution} by remixing NUTS and GADM."
+    input:
+        disaggregated_units = "build/data/{resolution}_disaggregated/units.geojson", # this doesn't exist in develop
+        nuts_to_regions = lambda wildcards: config["data-sources"]["statistical-units-to-custom-regions"][wildcards.resolution]
+    params:
+        nuts_year = config["parameters"]["nuts-year"]
+    output: "build/data/{resolution}/units.geojson"
+    conda: "../envs/geo.yaml"
+    script: "../scripts/shapes/aggregate_statistical_units_to_custom_regions.py"
+
+
 rule units_without_shape:
     message: "Dataset of units on resolution {wildcards.resolution} without geo information."
     input:

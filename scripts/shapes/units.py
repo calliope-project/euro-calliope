@@ -1,4 +1,5 @@
 """Remixes NUTS, LAU, and GADM data to form the units of the analysis."""
+# conda environment: a2ca789384a8cddee28a4468a498d5c4_.yaml
 
 import fiona
 import geopandas as gpd
@@ -11,7 +12,10 @@ DRIVER = "GeoJSON"
 def remix_units(
     path_to_nuts, path_to_gadm, path_to_output, layer_name, layer_config, all_countries
 ):
-    """Remixes NUTS, LAU, and GADM data to form the units of the analysis."""
+    """Remixes NUTS, LAU, and GADM data to form the units of the analysis.
+    source_layers: a dict with keys as each geographical layer type (nutsX or gadmnX)
+    and values as a geodataframe of the POLYGONS
+    """
     source_layers = _read_source_layers(path_to_nuts, path_to_gadm)
     _validate_source_layers(source_layers)
     _validate_layer_config(all_countries, layer_config, layer_name)
@@ -86,6 +90,62 @@ def _write_layer(gdf, path_to_file):
 
 
 if __name__ == "__main__":
+    # DUBUG CONFIGURATION
+    # ----------------------------------------------------------------------------------
+    # path_to_nuts = "build/data/administrative-borders-nuts.gpkg"
+    # path_to_gadm = "build/data/administrative-borders-gadm.gpkg"
+    # path_to_output = "build/data/regional/units.geojson"
+    # layer_name = "regional"
+    # all_countries = ["Ireland", "United Kingdom"]
+    # layer_config = {
+    #     "Ireland": "gadm1",
+    #     "United Kingdom": "gadm1",
+    #     "Austria": "gadm1",
+    #     "Belgium": "gadm1",
+    #     "Bulgaria": "gadm1",
+    #     "Croatia": "gadm1",
+    #     "Cyprus": "gadm1",
+    #     "Czech Republic": "gadm1",
+    #     "Denmark": "gadm1",
+    #     "Estonia": "gadm1",
+    #     "Finland": "gadm1",
+    #     "France": "gadm1",
+    #     "Germany": "gadm1",
+    #     "Greece": "gadm1",
+    #     "Hungary": "gadm1",
+    #     "Italy": "gadm1",
+    #     "Latvia": "gadm1",
+    #     "Lithuania": "gadm1",
+    #     "Luxembourg": "gadm2",
+    #     "Netherlands": "gadm1",
+    #     "Poland": "gadm1",
+    #     "Portugal": "gadm1",
+    #     "Romania": "gadm1",
+    #     "Slovakia": "gadm1",
+    #     "Slovenia": "gadm1",
+    #     "Spain": "gadm1",
+    #     "Sweden": "gadm1",
+    #     "Albania": "gadm1",
+    #     "Bosnia and Herzegovina": "gadm1",
+    #     "Macedonia, Republic of": "nuts3",
+    #     "Montenegro": "gadm1",
+    #     "Norway": "gadm1",
+    #     "Serbia": "gadm1",
+    #     "Switzerland": "gadm1",
+    # }
+
+    # remix_units(
+    #     path_to_nuts=path_to_nuts,
+    #     path_to_gadm=path_to_gadm,
+    #     path_to_output=path_to_output,
+    #     layer_name=layer_name,
+    #     all_countries=all_countries,
+    #     layer_config=layer_config,
+    # )
+    # ----------------------------------------------------------------------------------
+
+    # breakpoint()
+
     layer_name = snakemake.wildcards[0]
     remix_units(
         path_to_nuts=snakemake.input.nuts,
