@@ -39,14 +39,16 @@ ALL_CF_TECHNOLOGIES = [
     "hydro-reservoir"
 ]
 
+
 def ensure_lib_folder_is_linked():
-    if not workflow.conda_prefix:
+    if not workflow.deployment_settings.conda_prefix:
         return
-    link = Path(workflow.conda_prefix) / "lib"
+    link = Path(workflow.deployment_settings.conda_prefix) / "lib"
     if not link.exists():
         print("Creating link from conda env dir to eurocalliopelib.")
-        makedirs(workflow.conda_prefix)
-        shell(f"ln -s {workflow.basedir}/lib {workflow.conda_prefix}/lib")
+        makedirs(workflow.deployment_settings.conda_prefix)
+        shell(f"ln -s {workflow.basedir}/lib {workflow.deployment_settings.conda_prefix}/lib")
+
 
 ensure_lib_folder_is_linked()
 
@@ -220,7 +222,7 @@ rule dag:
         "dot -Tpdf {input} -o build/dag.pdf"
 
 
-rule clean: # removes all generated results
+rule clean:  # removes all generated results
     shell:
         """
         rm -r build/
