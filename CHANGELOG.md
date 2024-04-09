@@ -43,7 +43,7 @@
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
 * **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264).
-* **UPDATE** default conda prefix directory including consistent handling of the path to eurocalliopelib (#264).
+* **UPDATE** default conda prefix directory including consistent handling of the path to eurocalliopelib (#264, #331).
 
 ### Fixed (models)
 
@@ -57,7 +57,6 @@
 
 * **FIX** fixed optimisation tolerance of hydro power plants from xtol to xatol (#266).
 * **FIX** fixed rule `download_basins_database`, which previously failed on some linux and mac machines, by requiring a more recent curl in the environment `envs/shell.yaml` (#267).
-* **FIX** fixed creation of symlink to eurocalliopelib if workflow directory has been moved or renamed.
 
 ## 1.1.0 (2021-12-22)
 

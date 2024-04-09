@@ -44,7 +44,8 @@ def ensure_lib_folder_is_linked():
     if not workflow.conda_prefix:
         return
     link = Path(workflow.conda_prefix) / "lib"
-    if not link.exists():  # Returns False if link exists but is an invalid symlink
+    if not link.exists():
+        # Link either does not exist or is an invalid symlink
         print("Creating link from conda env dir to eurocalliopelib.")
         if link.is_symlink():  # Deal with existing but invalid symlink
             shell(f"rm {link}")
