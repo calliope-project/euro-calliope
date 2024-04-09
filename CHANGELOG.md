@@ -57,6 +57,7 @@
 
 * **FIX** fixed optimisation tolerance of hydro power plants from xtol to xatol (#266).
 * **FIX** fixed rule `download_basins_database`, which previously failed on some linux and mac machines, by requiring a more recent curl in the environment `envs/shell.yaml` (#267).
+* **FIX** fixed creation of symlink to eurocalliopelib if workflow directory has been moved or renamed.
 
 ## 1.1.0 (2021-12-22)
 
