@@ -65,7 +65,6 @@ def get_all_distance_efficiency(
         .interpolate(axis=1, limit_direction="both")
         .stack()
     )
-
     # contribution of each transport mode to carrier consumption from JRC_IDEES
     # 2016-2018 from 2015 data; non-JRC countries, based on neighbour data
     carrier_contribution = fill_missing_countries_and_years(
@@ -74,7 +73,6 @@ def get_all_distance_efficiency(
         ),
         fill_missing_values,
     )
-
     # Energy consumption per transport mode by mapping transport mode
     # carrier contributions to total carrier consumption
     transport_energy_per_mode = carrier_contribution.mul(
