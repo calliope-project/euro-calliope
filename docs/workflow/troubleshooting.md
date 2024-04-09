@@ -109,3 +109,13 @@ Yes, absolutely. We rely on the de-facto standard [JSON schema](http://json-sche
     }
 }
 ```
+
+### After updating the code in the workflow, snakemake aborts with a `ProtectedOutputException`. What should I do?
+
+If you are certain that the files in question do not need to be re-generated, run the following command to clean up metadata for all files in `data/automatic`:
+
+```shell
+snakemake --cleanup-metadata data/automatic/**/*
+```
+
+The issue is that files generated in `data/automatic` are marked as protected in the rules which generate them, which makes them write-protected on disk. Snakemake thinks it needs to re-generate these files based on changes to the code. It needs to be told that this is not necessary.
