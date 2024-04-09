@@ -1,20 +1,6 @@
 "Rules downloading and preprocessing data that is used in different places of the workflow"
 # TODO consider merging shape.smk into this
 
-"Rules regarding CH Data:"
-
-rule download_ch_energy_data:
-    message: "Get {wildcards.dataset} from Swiss statistics"
-    params:
-        url = lambda wildcards: config["data-sources"][f"swiss-{wildcards.dataset}"]
-    output: protected("data/automatic/ch-{dataset}.xlsx")
-    conda: "../envs/shell.yaml"
-    wildcard_constraints:
-        dataset = "energy-balance|industry-energy-balance|end-use"
-    localrule: True
-    shell: "curl -sLo {output} {params.url}"
-
-
 "Rules regarding Eurostat Data:"
 
 
