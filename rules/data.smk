@@ -12,7 +12,7 @@ rule download_ch_energy_data:
     wildcard_constraints:
         dataset = "energy-balance|industry-energy-balance|end-use"
     localrule: True
-    shell: "curl -sLo {output} {params.url}"
+    shell: "curl -sSLo {output} {params.url}"
 
 
 "Rules regarding Eurostat Data:"
@@ -27,7 +27,7 @@ rule download_eurostat_energy_data:
     conda: "../envs/shell.yaml"
     output: protected("data/automatic/eurostat-{dataset}.tsv.gz")
     localrule: True
-    shell: "curl -sLo {output} {params.url}"
+    shell: "curl -sSLo {output} {params.url}"
 
 
 rule annual_energy_balances:
@@ -54,7 +54,7 @@ rule download_jrc_idees_zipped:
     output: protected("data/automatic/jrc-idees/{country_code}.zip")
     conda: "../envs/shell.yaml"
     localrule: True
-    shell: "curl -sLo {output} '{params.url}'"
+    shell: "curl -sSLo {output} '{params.url}'"
 
 
 def jrc_to_euro_calliope_sector(sector: str):

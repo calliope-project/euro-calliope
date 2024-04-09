@@ -8,7 +8,7 @@ rule download_transport_timeseries:
     conda: "../envs/shell.yaml"
     output: protected("data/automatic/ramp-ev-consumption-profiles.csv.gz")
     localrule: True
-    shell: "curl -sLo {output} {params.url}"
+    shell: "curl -sSLo {output} {params.url}"
 
 
 rule jrc_idees_transport_processed:
