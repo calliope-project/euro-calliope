@@ -29,13 +29,11 @@ def ch_energy_balance(path_to_ch_energy_balance_excel: str, path_to_output: str)
         path_to_ch_energy_balance_excel, "T17c", skipfooter=12, cat_code="FC_OTH_CP_E"
     )
 
-    ch_energy_use_da = utils.merge_da(
-        [
-            ch_hh_energy_use,
-            ch_ind_energy_use,
-            ch_ser_energy_use,
-        ]
-    )
+    ch_energy_use_da = utils.merge_da([
+        ch_hh_energy_use,
+        ch_ind_energy_use,
+        ch_ser_energy_use,
+    ])
 
     ch_energy_use_da.expand_dims(country_code=["CHE"]).to_netcdf(path_to_output)
 
