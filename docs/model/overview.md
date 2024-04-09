@@ -17,10 +17,13 @@ Within each resolution-specific model directory, there is a subdirectory for tec
 |   |   └── demand
 |   |   |   └── electricity.csv                             <- Timeseries of electricity demand on each node.
 |   |   |   └── electrified-road-transport.csv              <- Timeseries of road transport demand electrified on each node.
+|   |   |   └── electrified-heat-demand.csv                 <- Timeseries of heat demand electrified on each node.
 |   |   |   └── road-transport-historic-electrification.csv <- Timeseries of historically electrified road transport demand on each node.
+|   |   |   └── heat-demand-historic-electrification.csv    <- Timeseries of historically electrified heat demand on each node.
 |   ├── techs                                               <- All technology definition YAML files.
 |   |   |── {technology-class}                              <- Calliope base technology classes (one of `supply`, `demand`, `storage`, `transmission`).
 |   |   |   └── {technology-group}.yaml                     <- Definition of a technology (or group of technologies) relevant to the base technology, and the allocation of that technology to nodes in the model.
+│   ├── build-metadata.yaml                                 <- Metadata of the build process.
 │   ├── example-model.yaml                                  <- Calliope example model definition. Only the technology definition YAML files imported here (under the "import" key) will be available in the model. By default no transmission technology definition files are imported.
 |   ├── interest-rate.yaml                                  <- Interest rates of all capacity investments.
 |   ├── scenarios.yaml                                      <- Scenario names which can be used to override the base model configuration.
@@ -28,7 +31,6 @@ Within each resolution-specific model directory, there is a subdirectory for tec
 │   ├── locations.csv                                       <- Lists all nodes in the model, including their abbreviation codes.
 |   ├── summary-of-potentials.csv                           <- Lists the potentials of each technology at each node as stacked list (.csv format)
 │   └── summary-of-potentials.nc                            <- Lists the potentials of each technology at each node as 3D array (.nc format)
-├── build-metadata.yaml                                     <- Metadata of the build process.
 ├── environment.yaml                                        <- Conda file defining an environment to run the model in.
 └── README.md                                               <- Basic documentation.
 ```

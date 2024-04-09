@@ -38,7 +38,7 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         **demand_elec**: Electricity demand
 
-??? note "demand/electrified_transport.yaml"
+??? note "demand/electrified-transport.yaml"
 
     === "Technologies"
 
@@ -49,6 +49,18 @@ Here, we describe each module in terms of the technologies they contain (`callio
     === "Overrides"
 
         **keep-historic-electricity-demand-from-road-transport**: Keep historically electrified road transport demand. Historically electrified road transport demand is deleted by default, as it is already considered in historic electricity demand and would thus be counted twice. Using this override together with Euro-Calliope's default electricity demand is not advised.
+
+??? note "demand/electrified-heat.yaml"
+
+    === "Technologies"
+
+        **demand_heat_electrified**: Electrified heat demand
+
+        **demand_heat_historic_electrified**: Removes historically electrified heat demand to avoid double counting
+
+    === "Overrides"
+
+        **keep-historic-electricity-demand-from-heat**: Keep historically electrified heat demand. Historically electrified heat demand is deleted by default, as it is already considered in historic electricity demand and would thus be counted twice. Using this override together with Euro-Calliope's default electricity demand is not advised.
 
 ??? note "storage/electricity.yaml"
 
