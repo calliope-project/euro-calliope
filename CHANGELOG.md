@@ -56,6 +56,7 @@
 ### Fixed (workflow)
 
 * **FIX** fixed optimisation tolerance of hydro power plants from xtol to xatol (#266).
+* **FIX** source of Exclusive Economic Zones (EEZ) to use a cache on [euro-calliope-datasets](https://github.com/calliope-project/euro-calliope-datasets) so that we can keep using v11 (#332).
 
 ## 1.1.0 (2021-12-22)
 
