@@ -87,7 +87,7 @@ In the following, we split additions, fixes, and updates between those which aff
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
 * **ADD** minimal configuration to be able to test the entire workflow more quickly (#60).
-* **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59).
+* **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59, #267).
 * **ADD** sync infrastructure to easily send and receive files to and from a cluster (#74).
 * **ADD** parameter `station-nearest-basin-max-km` controlling the mapping of hydro power stations to basins (#138).
 * **ADD** optional email notifications whenever builds fail or succeed (#92).

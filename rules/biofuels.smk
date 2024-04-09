@@ -8,7 +8,7 @@ rule download_biofuel_potentials_and_costs:
     params: url = config["data-sources"]["biofuel-potentials-and-costs"]
     output: protected("data/automatic/raw-biofuel-potentials-and-costs.xlsx")
     conda: "../envs/shell.yaml"
-    shell: "curl -sLo {output} '{params.url}'"
+    shell: "curl -sSLo {output} '{params.url}'"
 
 
 rule preprocess_biofuel_potentials_and_cost:
