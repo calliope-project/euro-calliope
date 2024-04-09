@@ -41,13 +41,14 @@ ALL_CF_TECHNOLOGIES = [
 
 
 def ensure_lib_folder_is_linked():
-    if not workflow.deployment_settings.conda_prefix:
+    if not (hasattr(workflow, "deployment_settings") and not
+            hasattr(workflow.deployment_settings, "conda_prefix")):
         return
     link = Path(workflow.deployment_settings.conda_prefix) / "lib"
     if not link.exists():
         print("Creating link from conda env dir to eurocalliopelib.")
         makedirs(workflow.deployment_settings.conda_prefix)
-        shell(f"ln -s {workflow.basedir}/lib {workflow.deployment_settings.conda_prefix}/lib")
+        shell(f"ln -s {workflow.basedir}/lib {link}")
 
 
 ensure_lib_folder_is_linked()
