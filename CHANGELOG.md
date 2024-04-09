@@ -44,6 +44,7 @@
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
 * **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264).
 * **UPDATE** default conda prefix directory including consistent handling of the path to eurocalliopelib (#264).
+* **UPDATE** snakemake to v8.10.6.
 
 ### Fixed (models)
 
