@@ -230,13 +230,12 @@ def get_ch_transport_energy_balance(path_to_excel):
     df.columns = carrier_name_func(0).fillna(carrier_name_func(1)).values
 
     df = (
-        df
-        .groupby(axis=1, level=0)
+        df.groupby(axis=1, level=0)
         .sum()
         .rename_axis(index="year", columns="carrier_code")
         .T
     )
-    df.index = pd.MultiIndex.from_tuples(df.index, names=('carrier_code', 'cat_code'))
+    df.index = pd.MultiIndex.from_tuples(df.index, names=("carrier_code", "cat_code"))
     return df.stack()
 
 
