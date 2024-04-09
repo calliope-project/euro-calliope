@@ -7,6 +7,8 @@ dependencies:
     - ipdb=0.13.13
     - numpy=1.20.2
     - pandas=1.2.3
+    - pycountry=18.12.8
     - snakemake-minimal=7.26.0
     - pip:
         - styleframe==4.2
+        - -e ./lib

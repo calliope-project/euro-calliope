@@ -11,10 +11,13 @@ rule steel_iron_industry:
     message: "."
     conda: CONDA_PATH
     params:
-    input:
+        year_range = config["params"]["year-range"],
         path_energy_balances = config["inputs"]["path-energy-balances"],
+        path_cat_names = config["inputs"]["path-cat-names"],
+        path_carrier_names = config["inputs"]["path-carrier-names"],
+    input:
         path_jrc_energy = f"{DATA_PATH}/jrc_idees_processed_energy.csv.gz",
-        path_jrc_production = f"{DATA_PATH}/jrc_idees_processed_production.csv.gz"
+        path_jrc_production = f"{DATA_PATH}/jrc_idees_processed_production.csv.gz",
     output: f"{TMP_PATH}/annual_iron_steel_demand.csv"
     script: f"{SRC_PATH}/steel_iron_industry.py"
 

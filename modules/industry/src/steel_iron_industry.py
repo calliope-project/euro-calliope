@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-# import snakemake
+from utils import formatting
 from utils import jrc_idees_parser as jrc
 
 CAT_NAME_STEEL = "Iron and steel"
@@ -12,44 +12,46 @@ HDRI_CONSUMPTION = 0.0116  # H-DRI: 135kWh_e/t = 0.0116ktoe/kt
 MWH_PER_T_TO_KTOE_PER_KT = 0.08598  # 1 MWh/t -> 1 GWh/kt -> 0.08598 ktoe/kt
 METHANOL_LHV_KTOE = 0.476  # 19.915 MJ/kg LHV -> 19915000MJ/kt -> 0.476ktoe/kt
 
-def get_steel_iron_demand(path_jrc_energy, path_jrc_production):
-    # Ensure we only operate with the relevant sector's data
+
+def get_steel_iron_demand(
+        year_range,
+        path_energy_balances,
+        path_cat_names,
+        path_carrier_names,
+        path_jrc_energy,
+        path_jrc_production
+    ):
+    energy_balances_df = pd.read_csv(path_energy_balances, index_col=[0, 1, 2, 3, 4], squeeze=True)
+    cat_names_df = pd.read_csv(path_cat_names, header=0, index_col=0)
+    cat_names_df = cat_names_df[cat_names_df["jrc_idees"] == CAT_NAME_STEEL]
+    carrier_names_df = pd.read_csv(path_carrier_names, header=0, index_col=0)
+    # Grab and clean the jrc files (specific industry, no low enthalpy heat)
     energy_df = pd.read_csv(path_jrc_energy, index_col=[0, 1, 2, 3, 4, 5, 6])
     energy_df = energy_df.xs(CAT_NAME_STEEL, level="cat_name", drop_level=False)
+    energy_df = energy_df.drop('Low enthalpy heat', level='subsection')
+
     prod_df = pd.read_csv(path_jrc_production, index_col=[0, 1, 2, 3])
     prod_df = prod_df.xs(CAT_NAME_STEEL, level="cat_name", drop_level=False)
 
-    demand = energy_df.xs('demand').sum(level=['section', 'subsection', 'country_code', 'cat_name', 'unit'])
+    # Process the industry sector
+    steel_energy_consumption = process_steel_energy_consumption(energy_df, prod_df)
 
-    # TODO: acquiring all the demands below should be done in a utils function
+    # Format the file
+    steel_energy_consumption.columns = steel_energy_consumption.columns.astype(int).rename('year')
+    filled_consumption_df = formatting.fill_missing_data(energy_balances_df, cat_names_df, carrier_names_df, steel_energy_consumption)
+    breakpoint()
+    formatting.verify_data(filled_consumption_df, energy_balances_df, year_range)
 
-    # if it can be met by electricity (exclusively or otherwise),
-    # then it's an end-use electricity demand
-    electrical_consumption = (
-        jrc.get_carrier_demand('Electricity', demand, energy_df)
-        .assign(carrier='electricity').set_index('carrier', append=True)
+    units = filled_consumption_df.index.get_level_values('unit')
+    filled_consumption_df.loc[units == 'ktoe'] = (
+        filled_consumption_df.loc[units == 'ktoe'].apply(formatting.ktoe_to_twh)
     )
-    # If it can only be met by natural gas (steam heating) then it's natural gas
-    nat_gas_consumption = (
-        jrc.get_carrier_demand('Natural gas (incl. biogas)', demand, energy_df)
-        .drop(electrical_consumption.droplevel('carrier').index, errors='ignore')
-        .assign(carrier='methane').set_index('carrier', append=True)
-    )
-    # If it can only be met by diesel (backup generators) then it's diesel
-    diesel_consumption = (
-        jrc.get_carrier_demand('Diesel oil (incl. biofuels)', demand, energy_df)
-        .drop(nat_gas_consumption.droplevel('carrier').index, errors='ignore')
-        .drop(electrical_consumption.droplevel('carrier').index, errors='ignore')
-        .assign(carrier='diesel').set_index('carrier', append=True)
-    )
-
-    # TODO: space heat demand should be taken here, in a generic form
-
-    steel_energy_consumption = get_steel_energy_consumption(energy_df, prod_df)
-    pass
+    filled_consumption_df = filled_consumption_df.rename({'ktoe': 'twh'}, level='unit')
+    filled_consumption_df.index = filled_consumption_df.index.set_names('subsector', level='cat_name')
+    filled_consumption_df = filled_consumption_df.stack()
 
 
-def get_steel_energy_consumption(energy_df, prod_df):
+def process_steel_energy_consumption(energy_df, prod_df):
     """
     Calculates energy consumption in the iron and steel industry based on expected
     change in process to avoid fossil feedstocks. All process specific energy consumption
@@ -143,16 +145,6 @@ def get_steel_energy_consumption(energy_df, prod_df):
         .rename(index={'electricity': 'hydrogen'})
     )
     total_specific_consumption = total_specific_consumption.append(total_specific_h2_consumption)
-    # Space heat
-    space_heat_specific_demand = (
-        energy_df
-        .xs(('demand', 'Electric arc', 'Low enthalpy heat'))
-        .div(prod_df.xs('Electric arc').droplevel('unit'))
-        .assign(carrier='space_heat').set_index('carrier', append=True)
-        .sum(level=total_specific_consumption.index.names)
-        .rename(index={'ktoe': 'ktoe/kt'})
-    )
-    total_specific_consumption = total_specific_consumption.append(space_heat_specific_demand)
 
     steel_consumption = (
         total_specific_consumption
@@ -165,6 +157,10 @@ def get_steel_energy_consumption(energy_df, prod_df):
 
 if __name__ == "__main__":
     get_steel_iron_demand(
+        year_range=snakemake.params.year_range,
+        path_energy_balances=snakemake.params.path_energy_balances,
+        path_cat_names=snakemake.params.path_cat_names,
+        path_carrier_names=snakemake.params.path_carrier_names,
         path_jrc_energy=snakemake.input.path_jrc_energy,
         path_jrc_production=snakemake.input.path_jrc_production
     )

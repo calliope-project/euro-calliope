@@ -68,3 +68,8 @@ def tj_to_twh(array):
 def gwh_to_tj(array):
     """Convert GWh to TJ"""
     return array * 3.6
+
+
+def tj_to_ktoe(array):
+    """Convert TJ to Ktoe"""
+    return array * 23.88e-3
