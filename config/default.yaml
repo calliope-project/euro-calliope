@@ -162,6 +162,7 @@ parameters:
             coaches-and-buses: Motor coaches, buses and trolley buses
             passenger-cars: Passenger cars
             motorcycles: Powered 2-wheelers
+        uncontrolled-charging-share: 1
     entsoe-tyndp:
         scenario: National Trends
         grid: Reference

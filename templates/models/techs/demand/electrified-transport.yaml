@@ -5,7 +5,7 @@ techs:
             parent: demand
             carrier: electricity
         constraints:
-            resource: file=demand/electrified-road-transport.csv
+            resource: file=demand/uncontrolled-electrified-road-transport.csv
 
     demand_road_transport_historic_electrified:
         essentials:
@@ -13,7 +13,7 @@ techs:
             parent: supply
             carrier: electricity
         constraints:
-            resource: file=demand/road-transport-historic-electrification.csv
+            resource: file=demand/uncontrolled-road-transport-historic-electrification.csv
             resource_min_use: 1
 
 overrides:
