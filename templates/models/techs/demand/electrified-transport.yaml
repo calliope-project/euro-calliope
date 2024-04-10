@@ -14,7 +14,7 @@ techs:
             carrier: electricity
         constraints:
             resource: file=demand/uncontrolled-road-transport-historic-electrification.csv
-            resource_min_use: 1
+            force_resource: False
 
     demand_road_transport_electrified_controlled:
         essentials:
@@ -22,7 +22,7 @@ techs:
             parent: demand
             carrier: electricity
         constraints:
-            force_resource: false
+            force_resource: False
             resource: -.inf
 
 overrides:
@@ -45,6 +45,8 @@ overrides:
 
 locations:
     {% for id, location in locations.iterrows() %}
-    {{ id }}.techs.demand_road_transport_electrified_uncontrolled:
-    {{ id }}.techs.demand_road_transport_historic_electrified_uncontrolled:
+    {{ id }}.techs:
+        demand_road_transport_electrified_uncontrolled:
+        demand_road_transport_historic_electrified_uncontrolled:
+        demand_road_transport_electrified_controlled:
     {% endfor %}
