@@ -348,7 +348,7 @@ properties:
                             motorcycles:
                                 type: string
                                 description: JRC-IDEES name of motorcycles.
-                    uncontrolled-charging-share:
+                    uncontrolled-ev-charging-share:
                         type: number
                         description: Share of uncontrolled charging.
             entsoe-tyndp:

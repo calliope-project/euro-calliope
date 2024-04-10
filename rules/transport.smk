@@ -1,7 +1,8 @@
 """Rules to process transport sector data."""
 
 
-rule download_transport_timeseries: # TODO have correct timeseries data once RAMP has generated the new charging profile and it's been put on Zenodo
+rule download_transport_timeseries: 
+    # TODO have correct timeseries data once RAMP has generated the new charging profile and it's been put on Zenodo
     message: "Get EV data from RAMP"
     params:
         url = config["data-sources"]["ev-data"]
@@ -36,7 +37,7 @@ rule annual_transport_demand:
     params:
         fill_missing_values = config["data-pre-processing"]["fill-missing-values"]["jrc-idees"],
         efficiency_quantile = config["parameters"]["transport"]["future-vehicle-efficiency-percentile"],
-        uncontrolled_charging_share = config["parameters"]["transport"]["uncontrolled-charging-share"],
+        uncontrolled_charging_share = config["parameters"]["transport"]["uncontrolled-ev-charging-share"],
     conda: "../envs/default.yaml"
     output:
         road_distance_controlled = "build/data/transport/annual-road-transport-distance-demand-controlled.csv",
@@ -84,7 +85,7 @@ rule create_uncontrolled_road_transport_timeseries:
     script: "../scripts/transport/road_transport_timeseries.py"
 
 
-use rule create_uncontrolled_road_transport_timeseries as create_unctronolled_road_transport_timeseries_historic_electrification with:
+use rule create_uncontrolled_road_transport_timeseries as create_uncontrolled_road_transport_timeseries_historic_electrification with:
     message: "Create timeseries for historic electrified road transport demand (uncontrolled charging)"
     input:
         annual_data = "build/data/transport/annual-road-transport-distance-demand-historic-electrification.csv",
@@ -104,12 +105,10 @@ use rule create_uncontrolled_road_transport_timeseries as create_unctronolled_ro
 rule aggregate_timeseries: # TODO consider merge with other rules, as this is tiny atm
     message: "Aggregates uncontrolled charging timeseries for {wildcards.resolution} electrified road transport transport"
     input:
-        time_series = (
-            "build/data/transport/timeseries/timeseries-uncontrolled-light-duty-vehicles.csv",
-            "build/data/transport/timeseries/timeseries-uncontrolled-heavy-duty-vehicles.csv",
-            "build/data/transport/timeseries/timeseries-uncontrolled-coaches-and-buses.csv",
-            "build/data/transport/timeseries/timeseries-uncontrolled-passenger-cars.csv",
-            "build/data/transport/timeseries/timeseries-uncontrolled-motorcycles.csv"),
+        time_series = [
+            f'build/data/transport/timeseries/timeseries-uncontrolled-{vehicle_type}.csv'
+            for vehicle_type in config["parameters"]["transport"]["road-transport-conversion-factors"].keys()
+        ],
         locations = "build/data/regional/units.csv",
         populations = "build/data/regional/population.csv"
     conda: "../envs/default.yaml"

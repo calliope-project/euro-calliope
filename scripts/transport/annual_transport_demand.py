@@ -243,7 +243,8 @@ if __name__ == "__main__":
         .sub(total_historically_electrified_distance.rename("value"), fill_value=0)
         .to_csv(snakemake.output.road_distance_uncontrolled)
     )
-    road_distance_historically_electrified = (  # ASSUME historically electrified road consumption is all uncontrolled
+    # ASSUME historically electrified road consumption is all uncontrolled
+    road_distance_historically_electrified = (
         total_historically_electrified_distance.rename("value").to_csv(
             snakemake.output.road_distance_historically_electrified
         )

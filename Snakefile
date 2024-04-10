@@ -99,7 +99,7 @@ rule all_tests:
 
 
 rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_template` with a locational CSV linked to each technology that has no location-specific data to define.
-    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."  # Not used only if ruleorder is updated at top of file
+    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."  # Update ruleorder at the top of the file if you instead want the techs_and_locations_template rule to be used to generate a file
     input: rules.locations_template.output.csv
     output: "build/data/{resolution}/{tech_group}/{tech}.csv"
     conda: "envs/shell.yaml"
