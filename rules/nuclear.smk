@@ -5,7 +5,7 @@ rule jrc_power_plant_database_zipped:
     params: url = config["data-sources"]["jrc-ppdb"]
     output:  "data/automatic/jrc_power_plant_database.zip"
     conda: "../envs/shell.yaml"
-    shell: "curl -sLo {output[0]} '{params.url}'"
+    shell: "curl -sSLo {output[0]} '{params.url}'"
 
 
 rule jrc_power_plant_database:

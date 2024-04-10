@@ -11,7 +11,7 @@ rule download_hydro_generation_data:
         protected("data/automatic/raw-hydro-generation.csv")
     conda: "../envs/shell.yaml"
     shell:
-        "curl -sLo {output} '{params.url}'"
+        "curl -sSLo {output} '{params.url}'"
 
 
 rule download_pumped_hydro_data:
@@ -21,7 +21,7 @@ rule download_pumped_hydro_data:
         protected("data/automatic/raw-pumped-hydro-storage-capacities-gwh.csv")
     conda: "../envs/shell.yaml"
     shell:
-        "curl -sLo {output} '{params.url}'"
+        "curl -sSLo {output} '{params.url}'"
 
 
 rule download_runoff_data:
@@ -47,7 +47,7 @@ rule download_basins_database:
         protected("data/automatic/raw-hydro-basins.zip")
     conda: "../envs/shell.yaml"
     shell:
-        "curl -sLo {output} '{params.url}'"
+        "curl -sSLo {output} '{params.url}'"
 
 
 rule download_stations_database:
@@ -57,7 +57,7 @@ rule download_stations_database:
         protected("data/automatic/raw-hydro-stations.zip")
     conda: "../envs/shell.yaml"
     shell:
-        "curl -sLo {output} '{params.url}'"
+        "curl -sSLo {output} '{params.url}'"
 
 
 rule basins_database:

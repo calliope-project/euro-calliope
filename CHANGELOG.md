@@ -43,7 +43,7 @@
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
 * **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264).
-* **UPDATE** default conda prefix directory including consistent handling of the path to eurocalliopelib (#264).
+* **UPDATE** default conda prefix directory including consistent handling of the path to eurocalliopelib (#264, #331).
 
 ### Fixed (models)
 
@@ -56,7 +56,8 @@
 ### Fixed (workflow)
 
 * **FIX** fixed optimisation tolerance of hydro power plants from xtol to xatol (#266).
-* **FIX** source of Exclusive Economic Zones (EEZ) to use a cache on [euro-calliope-datasets](https://github.com/calliope-project/euro-calliope-datasets) so that we can keep using v11 (#332).
+* **FIX** source of Exclusive Economic Zones (EEZ) to use a cache on [zenodo](https://sandbox.zenodo.org/records/45135) so that we can keep using v11 (#332).
+* **FIX** fixed rule `download_basins_database`, which previously failed on some linux and mac machines, by requiring a more recent curl in the environment `envs/shell.yaml` (#267).
 
 ## 1.1.0 (2021-12-22)
 
@@ -88,7 +89,7 @@ In the following, we split additions, fixes, and updates between those which aff
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
 * **ADD** minimal configuration to be able to test the entire workflow more quickly (#60).
-* **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59).
+* **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59, #267).
 * **ADD** sync infrastructure to easily send and receive files to and from a cluster (#74).
 * **ADD** parameter `station-nearest-basin-max-km` controlling the mapping of hydro power stations to basins (#138).
 * **ADD** optional email notifications whenever builds fail or succeed (#92).

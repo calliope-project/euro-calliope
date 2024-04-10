@@ -194,21 +194,16 @@ def get_ch_waste_consumption(path_to_excel):
 
 def get_ch_transport_energy_balance(path_to_excel):
     carriers = {
-        "Elektrizität": "E7000",
-        "Gas übriger Vekehr": "G3000",
-        "Übrige erneuerbare Energien": "R5220B",
-        "davon Benzin": "O4652XR5210B",
-        "davon Diesel": "O4671XR5220B",
-        "davon Flugtreibstoffe": "O4000XBIO",
+        "Gas übriger Vekehr": ("G3000", "FC_TRA_ROAD_E"),
+        "Übrige erneuerbare Energien": ("R5220B", "FC_TRA_ROAD_E"),
+        "davon Benzin": ("O4652XR5210B", "FC_TRA_ROAD_E"),
+        "davon Diesel": ("O4671XR5220B", "FC_TRA_ROAD_E"),
+        "davon Flugtreibstoffe": ("O4000XBIO", "INTAVI"),
+        "davon Bahnen": ("E7000", "FC_TRA_RAIL_E"),
+        "davon Strasse": ("E7000", "FC_TRA_ROAD_E"),
     }
-    categories = {
-        "O4652XR5210B": "FC_TRA_ROAD_E",
-        "O4671XR5220B": "FC_TRA_ROAD_E",
-        "R5220B": "FC_TRA_ROAD_E",
-        "G3000": "FC_TRA_ROAD_E",
-        "E7000": "FC_TRA_RAIL_E",
-        "O4000XBIO": "INTAVI",
-    }
+    # ASSUME "davon Non-Road" is not included in electrified transport
+
     df = pd.read_excel(
         path_to_excel,
         skiprows=6,
@@ -219,6 +214,7 @@ def get_ch_transport_energy_balance(path_to_excel):
         na_values=["-"],
         header=[0, 1, 2, 3, 4],
     ).xs("TJ", level=-1, axis=1)
+
     # Footnote labels lead to some strings randomly ending in numbers; we remove them here
     remove_digits = str.maketrans("", "", digits)
     # carrier names span across two column levels, which we merge with fillna
@@ -233,14 +229,14 @@ def get_ch_transport_energy_balance(path_to_excel):
 
     df.columns = carrier_name_func(0).fillna(carrier_name_func(1)).values
 
-    return (
+    df = (
         df.groupby(axis=1, level=0)
         .sum()
         .rename_axis(index="year", columns="carrier_code")
-        .T.assign(cat_code=lambda df: df.index.map(categories))
-        .set_index("cat_code", append=True)
-        .stack()
+        .T
     )
+    df.index = pd.MultiIndex.from_tuples(df.index, names=("carrier_code", "cat_code"))
+    return df.stack()
 
 
 def get_ch_industry_energy_balance(path_to_excel):

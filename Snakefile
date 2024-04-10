@@ -39,14 +39,19 @@ ALL_CF_TECHNOLOGIES = [
     "hydro-reservoir"
 ]
 
+
 def ensure_lib_folder_is_linked():
     if not workflow.conda_prefix:
         return
     link = Path(workflow.conda_prefix) / "lib"
     if not link.exists():
+        # Link either does not exist or is an invalid symlink
         print("Creating link from conda env dir to eurocalliopelib.")
+        if link.is_symlink():  # Deal with existing but invalid symlink
+            shell(f"rm {link}")
         makedirs(workflow.conda_prefix)
-        shell(f"ln -s {workflow.basedir}/lib {workflow.conda_prefix}/lib")
+        shell(f"ln -s {workflow.basedir}/lib {link}")
+
 
 ensure_lib_folder_is_linked()
 
@@ -68,7 +73,9 @@ rule all:
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",
-        "build/models/build-metadata.yaml",
+        "build/models/continental/build-metadata.yaml",
+        "build/models/national/build-metadata.yaml",
+        "build/models/regional/build-metadata.yaml",
         "build/models/regional/summary-of-potentials.nc",
         "build/models/regional/summary-of-potentials.csv",
         "build/models/national/summary-of-potentials.nc",
@@ -194,13 +201,11 @@ rule model_template:
 rule build_metadata:
     message: "Generate build metadata."
     input:
-        "build/models/continental/example-model.yaml",
-        "build/models/national/example-model.yaml",
-        "build/models/regional/example-model.yaml",
+        "build/models/{resolution}/example-model.yaml",
     params:
         config = config,
         version = __version__
-    output: "build/models/build-metadata.yaml"
+    output: "build/models/{resolution}/build-metadata.yaml"
     conda: "envs/default.yaml"
     script: "scripts/metadata.py"
 
