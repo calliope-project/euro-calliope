@@ -13,7 +13,7 @@ def scale_to_resolution_and_create_file(
         df = scale_national_to_regional(df, region_country_mapping, populations)
     else:
         raise ValueError(f"Resolution {resolution} is not supported")
-    df.to_csv(output_path)
+    df.tz_localize(None).rename_axis("utc-timestamp").to_csv(output_path)
 
 
 def scale_national_to_regional(df, region_country_mapping, populations):
