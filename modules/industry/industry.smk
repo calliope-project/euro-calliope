@@ -14,11 +14,11 @@ rule steel_industry:
     message: "Calculate energy demand for the 'Iron and steel' sector in JRC-IDEES."
     conda: CONDA_PATH
     params:
-        year_range = config["params"]["year-range"],
+        year_range = config["params"]["year-range"]
+    input:
         path_energy_balances = config["inputs"]["path-energy-balances"],
         path_cat_names = config["inputs"]["path-cat-names"],
         path_carrier_names = config["inputs"]["path-carrier-names"],
-    input:
         path_jrc_energy = f"{DATA_PATH}/jrc_idees_processed_energy.csv.gz",
         path_jrc_production = f"{DATA_PATH}/jrc_idees_processed_production.csv.gz",
     output:

@@ -216,9 +216,9 @@ def process_steel_energy_consumption(
 if __name__ == "__main__":
     get_steel_demand_df(
         year_range=snakemake.params.year_range,
-        path_energy_balances=snakemake.params.path_energy_balances,
-        path_cat_names=snakemake.params.path_cat_names,
-        path_carrier_names=snakemake.params.path_carrier_names,
+        path_energy_balances=snakemake.input.path_energy_balances,
+        path_cat_names=snakemake.input.path_cat_names,
+        path_carrier_names=snakemake.input.path_carrier_names,
         path_jrc_energy=snakemake.input.path_jrc_energy,
         path_jrc_production=snakemake.input.path_jrc_production,
         path_output=snakemake.output.path_output,
