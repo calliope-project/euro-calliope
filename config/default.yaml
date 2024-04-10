@@ -38,6 +38,7 @@ data-pre-processing:
             BIH: [HRV, HUN]
             MNE: [HRV]
             SRB: [HUN]
+            CYP: [ROU]
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch

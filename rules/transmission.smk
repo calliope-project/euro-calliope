@@ -8,7 +8,7 @@ rule download_entsoe_tyndp_zip:
     params: url = config["data-sources"]["entsoe-tyndp"]
     output: protected("data/automatic/raw-entsoe-tyndp.xlsx.zip")
     conda: "../envs/shell.yaml"
-    shell: "curl -sLo {output} '{params.url}'"
+    shell: "curl -sSLo {output} '{params.url}'"
 
 
 rule entsoe_tyndp_xlsx:
