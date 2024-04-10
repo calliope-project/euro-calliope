@@ -103,4 +103,4 @@ if __name__ == "__main__":
         )
     else:
         raise ValueError("Input resolution is not recognised")
-    df.T.to_csv(path_to_output, index_label=['id'])
+    df.T.to_csv(path_to_output, index_label=["id"])
