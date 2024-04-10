@@ -1,3 +1,5 @@
+from typing import Optional
+
 import eurocalliopelib.utils as ec_utils
 import pandas as pd
 from utils import formatting
@@ -18,7 +20,7 @@ def get_steel_demand_df(
     path_carrier_names: str,
     path_jrc_energy: str,
     path_jrc_production: str,
-    path_output: str = "",
+    path_output: Optional[str] = None,
 ) -> pd.DataFrame:
     """Execute the data processing pipeline for the "Iron and steel" sub-sector.
 
@@ -78,7 +80,7 @@ def get_steel_demand_df(
     )
     filled_consumption_df = filled_consumption_df.stack()
 
-    if path_output:
+    if path_output is not None:
         filled_consumption_df.reorder_levels(formatting.LEVEL_ORDER).to_csv(path_output)
 
     return filled_consumption_df

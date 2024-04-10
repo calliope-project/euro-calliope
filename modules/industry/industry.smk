@@ -1,8 +1,11 @@
-SRC_PATH = "src"
-TMP_PATH = "modules/industry/tmp"
-OUT_PATH = "modules/industry/out"
-DATA_PATH = "modules/industry/raw_data"
-# Snakemake searches for conda environments at the same level as this file
+# Paths dependent on main Snakefile
+MODULE_PATH = "modules/industry"
+TMP_PATH = f"{MODULE_PATH}/tmp"
+OUT_PATH = f"{MODULE_PATH}/out"
+DATA_PATH = f"{MODULE_PATH}/raw_data"
+
+# Paths relative to this snakefile (snakemake behaviour is inconsitent)
+SRC_PATH = "src"  # scripts are called relative to this file
 CONDA_PATH = "./env_industry.yaml"
 
 # TODO:

@@ -121,7 +121,7 @@ def fill_missing_data(
     _to_fill = filled_jrc_no_data.stack(["unit", "carrier"]).unstack("year")
 
     # Fill data for all years where there is no JRC data
-    years_to_fill = [y for y in year_range if y > jrc.MAX_YEAR]
+    years_to_fill = [y for y in range(*year_range) if y > jrc.MAX_YEAR]
     if years_to_fill:
         new_years_filler = _filler.stack(["unit", "carrier"]).unstack("year")
         _to_fill = _to_fill.assign(**{
