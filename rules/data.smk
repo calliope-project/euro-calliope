@@ -99,6 +99,15 @@ rule download_gridded_temperature_data:
     shell: "curl -sSLo {output} '{params.url}'"
 
 
+rule download_gridded_10m_windspeed_data:
+    message: "Download gridded 10m wind speed data"
+    params: url = config["data-sources"]["gridded-10m-windspeed-data"]
+    output: protected("data/automatic/gridded-weather/wind10m.nc")
+    conda: "../envs/shell.yaml"
+    localrule: True
+    shell: "curl -sSLo {output} '{params.url}'"
+
+
 rule download_when2heat_params:
     message: "Get parameters for heat demand profiles from the When2Heat project repository"
     output: directory("data/automatic/when2heat")
@@ -108,3 +117,19 @@ rule download_when2heat_params:
         )
     conda: "../envs/shell.yaml"
     shell: "mkdir -p {output} && curl -sSLo '{output}/#1' '{params.url}'"
+
+rule download_raw_population_zipped:
+    message: "Download population data."
+    output:
+        protected("data/automatic/raw-population-data.zip")
+    params: url = config["data-sources"]["population"]
+    conda: "../envs/shell.yaml"
+    shell: "curl -sSLo {output} '{params.url}'"
+
+
+rule raw_population_unzipped:
+    message: "Extract population data TIF."
+    input: rules.download_raw_population_zipped.output
+    output: temp("build/JRC_1K_POP_2018.tif")
+    conda: "../envs/shell.yaml"
+    shell: "unzip {input} '*.tif' -d ./build/"

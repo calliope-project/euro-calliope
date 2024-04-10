@@ -69,3 +69,18 @@ use rule create_heat_demand_timeseries as create_heat_demand_timeseries_historic
         power_scaling_factor = config["scaling-factors"]["power"],
     output:
         "build/models/{resolution}/timeseries/demand/heat-demand-historic-electrification.csv",
+
+rule population_per_weather_gridbox:
+    message: "Get {wildcards.resolution} population information per weather data gridbox"
+    input:
+        script = "scripts/heat/population_per_gridbox.py",
+        wind_speed = rules.download_gridded_10m_windspeed_data.output[0],
+        population = rules.raw_population_unzipped.output[0],
+        locations = rules.units.output[0]
+    params:
+        lat_name = "lat",
+        lon_name = "lon",
+    conda: "../envs/geo.yaml"
+    output: "build/data/{resolution}/population.nc"
+    script: "../scripts/heat/population_per_gridbox.py"
+
