@@ -44,6 +44,19 @@ overrides:
     {% endfor %}
     {% endfor %}
 
+    monthly_transport_demand_range:
+        techs:
+            demand_road_transport_electrified_controlled:
+                constraints:
+                    demand_shape_per_month_min: file=demand/demand-shape-min-ev.csv
+                    demand_shape_per_month_max: file=demand/demand-shape-max-ev.csv
+    
+    monthly_transport_demand_equality:
+        techs:
+            demand_road_transport_electrified_controlled:
+                constraints:
+                    demand_shape_per_month_equals: file=demand/demand-shape-equals-ev.csv
+
 locations:
     {% for id, location in locations.iterrows() %}
     {{ id }}.techs:
