@@ -1,29 +1,50 @@
 techs:
-    demand_road_transport_electrified:
+    demand_road_transport_electrified_uncontrolled:
         essentials:
-            name: 'Electrified road transport demand'
+            name: 'Uncontrolled electrified road transport demand -- follows a timeseries'
             parent: demand
             carrier: electricity
         constraints:
             resource: file=demand/uncontrolled-electrified-road-transport.csv
 
-    demand_road_transport_historic_electrified:
+    demand_road_transport_historic_electrified_uncontrolled:
         essentials:
-            name: 'Removes historic electrified road transport demand'
+            name: 'Removes historic electrified road transport demand -- assumed uncontrolled'
             parent: supply
             carrier: electricity
         constraints:
             resource: file=demand/uncontrolled-road-transport-historic-electrification.csv
             resource_min_use: 1
 
+    demand_road_transport_electrified_controlled:
+        essentials:
+            name: 'Controlled electrified road transport demand'
+            parent: demand
+            carrier: electricity
+        constraints:
+            force_resource: false
+            resource: -.inf
+
 overrides:
     keep-historic-electricity-demand-from-road-transport:
       {% for id, location in locations.iterrows() %}
-      {{ id }}.techs.demand_road_transport_historic_electrified.exists: False
+      {{ id }}.techs.demand_road_transport_historic_electrified_uncontrolled.exists: False
       {% endfor %}
+
+    {% for year in locations.columns %}
+    {{ year }}_transport_controlled_electrified_demand:
+        group_constraints:
+    {% for location in locations.index %}
+            {{ location }}_annual_controlled_electricity_demand:
+                locs: [{{ location }}]
+                techs: [demand_road_transport_electrified_controlled]
+                carrier_con_equals:
+                    electricity: {{ locations.loc[location, year] }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+    {% endfor %}
+    {% endfor %}
 
 locations:
     {% for id, location in locations.iterrows() %}
-    {{ id }}.techs.demand_road_transport_electrified:
-    {{ id }}.techs.demand_road_transport_historic_electrified:
+    {{ id }}.techs.demand_road_transport_electrified_uncontrolled:
+    {{ id }}.techs.demand_road_transport_historic_electrified_uncontrolled:
     {% endfor %}

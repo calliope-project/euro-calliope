@@ -59,7 +59,7 @@ rule create_controlled_road_transport_annual_demand:
         country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],
     conda: "../envs/default.yaml"
     output:
-        main = "build/data/transport/{resolution}/annual-road-transport-electricity-demand-controlled-charging-{resolution}.csv",
+        main = "build/data/{resolution}/demand/electrified-transport.csv",
     script: "../scripts/transport/road_transport_controlled_charging.py"
 
 

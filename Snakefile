@@ -32,6 +32,7 @@ wildcard_constraints:
 
 ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
 ruleorder: bio_techs_and_locations_template > techs_and_locations_template
+ruleorder: create_controlled_road_transport_annual_demand > dummy_tech_locations_template
 
 ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
@@ -98,7 +99,7 @@ rule all_tests:
 
 
 rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_template` with a locational CSV linked to each technology that has no location-specific data to define.
-    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."
+    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."  # Not used only if ruleorder is updated at top of file
     input: rules.locations_template.output.csv
     output: "build/data/{resolution}/{tech_group}/{tech}.csv"
     conda: "envs/shell.yaml"

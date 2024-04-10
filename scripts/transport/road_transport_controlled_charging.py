@@ -62,7 +62,7 @@ def convert_annual_distance_to_electricity_demand(
         .unstack("country_code")
     )
 
-    return df_energy_demand
+    return -df_energy_demand
 
 
 if __name__ == "__main__":
@@ -94,12 +94,13 @@ if __name__ == "__main__":
     )
 
     if resolution == "continental":
-        scale_to_continental_resolution(df).to_csv(path_to_output)
+        df = scale_to_continental_resolution(df)
     elif resolution == "national":
-        scale_to_national_resolution(df).to_csv(path_to_output)
+        df = scale_to_national_resolution(df)
     elif resolution == "regional":
-        scale_to_regional_resolution(
+        df = scale_to_regional_resolution(
             df, region_country_mapping=region_country_mapping, populations=populations
-        ).to_csv(path_to_output)
+        )
     else:
         raise ValueError("Input resolution is not recognised")
+    df.T.to_csv(path_to_output, index_label=['id'])
