@@ -141,6 +141,14 @@ properties:
                                     type: string
                                     pattern: ^[A-Z][A-Z][A-Z]$
                                     description: Country to fill missing values from.
+            statistical-to-custom-units:
+                type: object
+                description: Path to a csv file which defines the 
+                additionalProperties: false
+                patternProperties:
+                    ^[a-zA-Z]+.*$:
+                        type: string
+                        pattern: .*\.csv$
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.

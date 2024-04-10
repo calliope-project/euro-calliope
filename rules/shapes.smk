@@ -94,15 +94,15 @@ rule units:
 
 
 rule custom_units:
-    message: "Form units of resolution {wildcards.resolution} by remixing NUTS and GADM."
+    message: "Form units of custom resolution {wildcards.resolution} by remixing NUTS and GADM."
     input:
         disaggregated_units = "build/data/{resolution}_disaggregated/units.geojson",
-        nuts_to_regions = lambda wildcards: config["data-sources"]["statistical-units-to-custom-regions"][wildcards.resolution]
+        nuts_to_regions = lambda wildcards: config["data-pre-processing"]["statistical-to-custom-units"][wildcards.resolution]
     params:
         nuts_year = config["parameters"]["nuts-year"]
     output: "build/data/{resolution}/units.geojson"
     conda: "../envs/geo.yaml"
-    script: "../scripts/shapes/aggregate_statistical_units_to_custom_regions.py"
+    script: "../scripts/shapes/custom_units.py" # statistical_to_custom_units_aggregation
 
 
 rule units_without_shape:
