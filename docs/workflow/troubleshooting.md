@@ -41,7 +41,7 @@ You can now inspect this file to learn about the details of how hydro data is pr
 
 ### How can I debug a workflow step?
 
-Most of our workflow steps are Python scripts and you can debug them with default debugging methods. For example, you may include a `breakpoint()` statement in a line in which you want to drop into the debugger `pdb`.
+Most of our workflow steps are Python scripts and you can debug them with default debugging methods. For example, you may include a `breakpoint()` statement in a line in which you want to drop into the `ipdb` debugger (the iPython-enabled [pdb](https://docs.python.org/3/library/)).
 
 ### How long should I expect the workflow to run?
 
@@ -66,16 +66,6 @@ Run `bjobs` on the cluster to verify whether the jobs are still running.
 If they are not, the cluster has killed your jobs, likely due to resource overuse.
 You can look up the reason by reading the corresponding log file in `build/logs`.
 Terminate Snakemake manually, increase the requested resources, and only then restart the workflow.
-
-### I have updated configuration parameters but this seems to have no effect. Did I do something wrong?
-
-Yes and no.
-This is a caveat of Snakemake: Snakemake detects the parameter changes but will not automatically rebuild the affected parts of the models.
-You will have to manually rebuild these parts, see [Customisation of the workflow](./customisation.md#configuration).
-
-### Can you run the workflow for several different weather years?
-
-Not out-of-the-box, but [this feature is on our roadmap](https://github.com/calliope-project/euro-calliope/issues/152).
 
 ### How to run different configurations of the workflow in parallel?
 
