@@ -86,8 +86,9 @@ rule units:
     params:
         all_countries = config["scope"]["spatial"]["countries"],
         layer_configs = config["shapes"]
-    output:
-        "build/data/{resolution}/units.geojson"
+    wildcard_constraints:
+        resolution = "continental|national|regional|.+_disaggregated" # why are we now disaggregating?
+    output: "build/data/{resolution}/units.geojson"
     conda: "../envs/geo.yaml"
     script: "../scripts/shapes/units.py"
 
@@ -95,7 +96,7 @@ rule units:
 rule custom_units:
     message: "Form units of resolution {wildcards.resolution} by remixing NUTS and GADM."
     input:
-        disaggregated_units = "build/data/{resolution}_disaggregated/units.geojson", # this doesn't exist in develop
+        disaggregated_units = "build/data/{resolution}_disaggregated/units.geojson",
         nuts_to_regions = lambda wildcards: config["data-sources"]["statistical-units-to-custom-regions"][wildcards.resolution]
     params:
         nuts_year = config["parameters"]["nuts-year"]

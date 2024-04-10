@@ -38,6 +38,8 @@ data-pre-processing:
             BIH: [HRV, HUN]
             MNE: [HRV]
             SRB: [HUN]
+    statistical-units-to-custom-regions:
+        ehighways: ../data/statistical_units_to_ehighways_regions.csv
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch
