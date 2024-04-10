@@ -97,5 +97,5 @@ rule gridded_unscaled_heat_profiles:
         lat_name = "lat",
         lon_name = "lon",
     conda: "../envs/default.yaml"
-    output: temp("build/data/{resolution}/gridded_hourly_unscaled_heat_demand_{year}.nc")
+    output: "build/data/{resolution}/gridded_hourly_unscaled_heat_demand_{year}.nc"
     script: "../scripts/heat/gridded_unscaled_heat_profiles.py"
