@@ -1,7 +1,7 @@
 """Rules to process transport sector data."""
 
 
-rule download_transport_timeseries: 
+rule download_transport_timeseries:
     # TODO have correct timeseries data once RAMP has generated the new charging profile and it's been put on Zenodo
     message: "Get EV data from RAMP"
     params:
