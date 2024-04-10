@@ -84,7 +84,7 @@ def gridded_weather_population(
     )
 
     population_da = xr.DataArray.from_series(
-        gridboxes_mapped_to_locations.set_index("site").population
+        gridboxes_mapped_to_locations.set_index(["site", "id"]).population
     )
     population_da.to_netcdf(out_path)
 

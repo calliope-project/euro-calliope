@@ -42,6 +42,9 @@ def get_unscaled_heat_profiles(
         temperature_ds["temperature"], time_dim="time"
     )
 
+    # After running get_reference_temperature(), we now subset to get only the target year
+    reference_temperature = reference_temperature.sel(time=str(year))
+
     # Parameters and how to apply them is based on [@BDEW:2015]
     daily_params = read_daily_parameters(path_to_when2heat_params)
     hourly_params = read_hourly_parameters(path_to_when2heat_params)
@@ -56,24 +59,28 @@ def get_unscaled_heat_profiles(
 
     # population weighted profiles.
     # NOTE: profile magnitude is now only consistent within each region, not between them
-    weight = population / population.sum(["x", "y"])
+    weight = population / population.sum(["site"])
     # `hourly_heat` has dims [x, y, datetime], `weight` has dims [x, y, id],
     # we want a final array with dims [id, datetime]
     grouped_hourly_heat = xr.concat(
-        [(hourly_heat * weight.sel({"id": id})).sum(["x", "y"]) for id in weight.id],
+        [(hourly_heat * weight.sel({"id": id})).sum(["site"]) for id in weight.id],
         dim="id",
     )
 
-    grouped_hourly_heat.loc[{"time": str(year)}].to_netcdf(out_path)
+    grouped_hourly_heat.to_netcdf(out_path)
 
 
 def get_hourly_heat_profiles(reference_temperature, daily_heat, hourly_params):
+    """
+    reference_temperature: temperature in degrees C
+
+    """
     # Heavily modified from https://github.com/oruhnau/when2heat/blob/351bd1a2f9392ed50a7bdb732a103c9327c51846/scripts/demand.py
     # to work with xarray datasets and to improve efficiency
 
     # get temperature in 5C increments between -15C and +30C
     temperature_increments = (
-        (np.ceil(((reference_temperature - 273.15) / 5).astype("float64")) * 5)
+        (np.ceil((reference_temperature / 5).astype("float64")) * 5)
         .clip(min=-15, max=30)
         .to_series()
     )
