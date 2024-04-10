@@ -28,6 +28,13 @@ def get_unscaled_heat_profiles(
     wind_ds = xr.open_dataset(path_to_wind_speed).rename({lon_name: "x", lat_name: "y"})
     wind_da = wind_ds["wind_speed"].mean("time")
 
+    # Subset temperature to the selected year extended by a couple of days either end,
+    # so we don't compute values for years we don't need, but keep a buffer for the shifts
+    # happening in get_reference_temperature()
+    temperature_ds = temperature_ds.sel(
+        time=slice(str(int(year) - 1) + "-12-25", str(int(year) + 1) + "-01-05")
+    )
+
     # This is a weighted average temperature from 3 days prior to each day in the timeseries
     # to represent the relative impact of historical daily temperature on the heat demand of each day.
     # See [@Ruhnau:2019] for more information on the method
