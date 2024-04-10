@@ -5,9 +5,12 @@ rule download_transport_timeseries:
     # TODO have correct timeseries data once RAMP has generated the new charging profile and it's been put on Zenodo
     message: "Get EV data from RAMP"
     params:
-        url = config["data-sources"]["ev-data"]
+        url = config["data-sources"]["controlled-ev-data"]
     conda: "../envs/shell.yaml"
-    output: protected("data/automatic/ramp-ev-consumption-profiles.csv.gz")
+    output: 
+        protected("data/automatic/ramp-ev-{dataset}.csv.gz")
+    wildcard_constraints:
+        dataset = "consumption-profiles|plugin-profiles"
     localrule: True
     shell: "curl -sLo {output} {params.url}"
 
@@ -63,6 +66,21 @@ rule create_controlled_road_transport_annual_demand:
         main = "build/data/{resolution}/demand/electrified-transport.csv",
     script: "../scripts/transport/road_transport_controlled_charging.py"
 
+rule create_controlled_ev_charging_parameters:
+    message: "Create timeseries parameters for controlled EV charging"
+    input:
+        locations = "build/data/regional/units.csv",
+        ev_profiles = lambda wildcards: "data/automatic/ramp-ev-consumption-profiles.csv.gz" if "demand" in wildcards.dataset_name else f"data/automatic/ramp-ev-{wildcards.dataset_name}.csv.gz",
+        populations = "build/data/regional/population.csv",
+    params:
+        demand_range = config["parameters"]["transport"]["monthly_demand_ranges"],
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
+        country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],
+        countries = config["scope"]["spatial"]["countries"],
+    conda: "../envs/default.yaml"
+    output: "build/models/{resolution}/timeseries/demand/{dataset_name}-ev.csv"
+    script: "../scripts/transport/road_transport_controlled_constraints.py"
 
 rule create_uncontrolled_road_transport_timeseries:
     message: "Create timeseries for road transport demand  (uncontrolled charging)"
