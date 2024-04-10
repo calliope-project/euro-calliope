@@ -39,7 +39,7 @@ data-pre-processing:
             MNE: [HRV]
             SRB: [HUN]
     statistical-to-custom-units:
-        ehighways: config/shapes/statistical-to-ehighways-units.csv # maybe move to own section
+        ehighways: config/shapes/statistical-to-ehighways-units.csv
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch
