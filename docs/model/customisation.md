@@ -45,7 +45,7 @@ Here, we describe each module in terms of the technologies they contain (`callio
         **demand_road_transport_electrified_uncontrolled**: Share of electrified road transport demand which is uncontrolled.
 
         **demand_road_transport_historic_electrified_uncontrolled**: Removes historically electrified road transport demand to avoid double counting. It is assumed uncontrolled.
-        
+
         **demand_road_transport_electrified_controlled**: Share of electrified road transport demand whose charging is optimised by the solver.
 
     === "Overrides"
