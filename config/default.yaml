@@ -456,7 +456,7 @@ shapes: # This config must be consistent with data from https://doi.org/10.5281/
         United Kingdom: nuts3
         Albania: gadm0
         Bosnia and Herzegovina: gadm0
-        North Macedonia: gadm0
+        Macedonia, Republic of: gadm0
         Montenegro: gadm0
         Norway: nuts3
         Serbia: gadm0

@@ -143,7 +143,7 @@ properties:
                                     description: Country to fill missing values from.
             statistical-to-custom-units:
                 type: object
-                description: Path to a csv file which defines the 
+                description: Path to a csv file which defines how lower-level statistical units (i.e., NUTS and GADM) are combined to form units of a custom resolutions (e.g., ehighways)
                 additionalProperties: false
                 patternProperties:
                     ^[a-zA-Z]+.*$:
@@ -526,6 +526,7 @@ properties:
                                 - "Norway"
                                 - "Serbia"
                                 - "Switzerland"
+                                - "Iceland" # added for ehighways
                     bounds:
                         type: object
                         description: Bounding box describing the spatial extent of geographic datasets.
@@ -693,9 +694,10 @@ properties:
                         description: Region code
     shapes:
         description: Source for geospatial shapes of all locations. The config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
+        # TODO: replace zenodo link with Bryn's new one, which includes the potentials for ehighways
         type: object
         propertyNames:
-            enum: [continental, national, regional]
+            enum: [continental, national, regional, ehighways]
         additionalProperties: false
         patternProperties:
             ^[a-zA-Z]+.*$:
