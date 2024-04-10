@@ -11,6 +11,7 @@
 
 ### Added (workflow)
 
+* **ADD** Pre-commit to base `euro-calliope` environment dependencies (#339).
 * **ADD** Ruff as our default linter and formatter (#285).
 * **ADD** DAG rule that generates a visualisation of Snakemake's directed acyclic graph (#208).
 * **ADD** IPython debugger to all conda environments to ease debugging (#254).
