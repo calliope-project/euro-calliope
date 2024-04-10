@@ -1,7 +1,7 @@
 # For descriptions of the configuration values, see `./schema.yaml`.
 data-sources:
     biofuel-potentials-and-costs: https://cidportal.jrc.ec.europa.eu/ftp/jrc-opendata/ENSPRESO/ENSPRESO_BIOMASS.xlsx
-    eez: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/add-eez/eez/eez.gpkg.zip # FIXME move to Zenodo?
+    eez: https://sandbox.zenodo.org/records/45135/files/eez_v11.gpkg.zip?download=1
     hydro-generation: https://zenodo.org/record/5797549/files/hydro-generation.csv?download=1
     national-phs-storage-capacities: https://zenodo.org/record/5797549/files/pumped-hydro-storage-capacities-gwh.csv?download=1
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1

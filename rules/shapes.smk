@@ -121,7 +121,7 @@ rule eez:
     shell:
         """
         fio cat --bbox {params.bounds} "zip://{input}"\
-        | fio filter "f.properties.territory1 in [{params.countries}]"\
+        | fio filter "f.properties.TERRITORY1 in [{params.countries}]"\
         | fio collect > {output}
         """
 
