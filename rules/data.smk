@@ -83,10 +83,17 @@ rule jrc_idees_unzipped:
     mv build/data/jrc-idees/{wildcards.sector}/unprocessed/{params.file_name} {output}
     """
 
-
 "EU28 county codes used for downloading JRC-IDEES"
 JRC_IDEES_SCOPE = [
     "AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "EL", "ES", "FI", "FR",
     "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO",
     "SE", "SI", "SK", "UK"
 ]
+
+rule download_gridded_temperature_data:
+    message: "Download gridded temperature data"
+    params: url = config["data-sources"]["gridded-temperature-data"]
+    output: protected("data/automatic/gridded-weather/temperature.nc")
+    conda: "../envs/shell.yaml"
+    localrule: True
+    shell: "curl -sSLo {output} '{params.url}'"
