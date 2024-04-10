@@ -1,5 +1,4 @@
 """Remixes NUTS, LAU, and GADM data to form the units of the analysis."""
-# conda environment: a2ca789384a8cddee28a4468a498d5c4_.yaml
 
 import fiona
 import geopandas as gpd

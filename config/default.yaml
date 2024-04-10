@@ -316,6 +316,7 @@ scope:
         first-year: 2016
         final-year: 2016
 shapes: # This config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
+    # TODO: update this link to Bryn's new one, which includes the potentials for ehighways
     continental:
         Austria: nuts0
         Belgium: nuts0
@@ -425,3 +426,39 @@ shapes: # This config must be consistent with data from https://doi.org/10.5281/
         Norway: gadm1 # match 19
         Serbia: gadm1 # gadm1 25 regions; wiki 5 regions
         Switzerland: gadm1 # match 26
+    ehighways:
+        Austria: nuts3
+        Belgium: nuts0
+        Bulgaria: nuts0
+        Croatia: nuts0
+        Cyprus: nuts0
+        Czech Republic: nuts3
+        Denmark: nuts3
+        Estonia: nuts0
+        Finland: nuts3
+        France: nuts3
+        Germany: nuts3
+        Greece: nuts3
+        Hungary: nuts0
+        Ireland: nuts0
+        Italy: nuts3
+        Latvia: nuts0
+        Lithuania: nuts0
+        Luxembourg: nuts0
+        Netherlands: nuts0
+        Poland: nuts3
+        Portugal: nuts3
+        Romania: nuts3
+        Slovakia: nuts0
+        Slovenia: nuts0
+        Spain: nuts3
+        Sweden: nuts3
+        United Kingdom: nuts3
+        Albania: gadm0
+        Bosnia and Herzegovina: gadm0
+        North Macedonia: gadm0
+        Montenegro: gadm0
+        Norway: nuts3
+        Serbia: gadm0
+        Switzerland: nuts3
+        Iceland: nuts0

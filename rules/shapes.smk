@@ -91,7 +91,7 @@ rule units:
     output: "build/data/{resolution}/units.geojson"
     conda: "../envs/geo.yaml"
     script: "../scripts/shapes/units.py"
-
+# need to combine units with custom_units to create custom units
 
 rule custom_units:
     message: "Form units of custom resolution {wildcards.resolution} by remixing NUTS and GADM."
