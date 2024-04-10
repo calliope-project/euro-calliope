@@ -122,9 +122,9 @@ use rule aggregate_timeseries as aggregate_timeseries_historic_electrified with:
     message: "Aggregates uncontrolled charging timeseries for {wildcards.resolution} historically electrified road transport"
     input:
         time_series = (
-            "build/data/transport/timeseries/timeseries-light-duty-vehicles-historic-electrification.csv",
-            "build/data/transport/timeseries/timeseries-coaches-and-buses-historic-electrification.csv",
-            "build/data/transport/timeseries/timeseries-passenger-cars-historic-electrification.csv"),
+            "build/data/transport/timeseries/timeseries-uncontrolled-light-duty-vehicles-historic-electrification.csv",
+            "build/data/transport/timeseries/timeseries-uncontrolled-coaches-and-buses-historic-electrification.csv",
+            "build/data/transport/timeseries/timeseries-uncontrolled-passenger-cars-historic-electrification.csv"),
         locations = "build/data/regional/units.csv",
         populations = "build/data/regional/population.csv"
     output:

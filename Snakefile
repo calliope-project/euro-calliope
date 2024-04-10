@@ -175,8 +175,8 @@ rule model_template:
         ),
         demand_timeseries_data = (
             "build/models/{resolution}/timeseries/demand/electricity.csv",
-            "build/models/{resolution}/timeseries/demand/electrified-road-transport.csv",
-            "build/models/{resolution}/timeseries/demand/road-transport-historic-electrification.csv",
+            "build/models/{resolution}/timeseries/demand/uncontrolled-electrified-road-transport.csv",
+            "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv",
             "build/models/{resolution}/timeseries/demand/electrified-heat-demand.csv",
             "build/models/{resolution}/timeseries/demand/heat-demand-historic-electrification.csv",
         ),
