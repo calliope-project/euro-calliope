@@ -111,6 +111,10 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: "Web address of gridded temperature data. Expecting a netCDF file with the coordinates [time, site], and the variables [temperature, lat, lon]."
+            when2heat-params:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: "Web address of When2Heat parameters for heat demand profiles."
     data-pre-processing:
         type: object
         description: Parameters for the pre-processing of raw data.

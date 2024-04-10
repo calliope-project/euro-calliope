@@ -97,3 +97,14 @@ rule download_gridded_temperature_data:
     conda: "../envs/shell.yaml"
     localrule: True
     shell: "curl -sSLo {output} '{params.url}'"
+
+
+rule download_when2heat_params:
+    message: "Get parameters for heat demand profiles from the When2Heat project repository"
+    output: directory("data/automatic/when2heat")
+    params:
+        url = lambda wildcards: config["data-sources"]["when2heat-params"].format(dataset=
+            "{" + ",".join(["daily_demand.csv", "hourly_factors_COM.csv", "hourly_factors_MFH.csv", "hourly_factors_SFH.csv"]) + "}"
+        )
+    conda: "../envs/shell.yaml"
+    shell: "mkdir -p {output} && curl -sSLo '{output}/#1' '{params.url}'"
