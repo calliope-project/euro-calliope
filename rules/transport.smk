@@ -44,8 +44,26 @@ rule annual_transport_demand:
         road_distance_historically_electrified = "build/data/transport/annual-road-transport-distance-demand-historic-electrification.csv",
     script: "../scripts/transport/annual_transport_demand.py"
 
+rule create_controlled_road_transport_annual_demand:
+    message: "Create annual demand for controlled charging at {wildcards.resolution} resolution"
+    input:
+        annual_controlled_demand = "build/data/transport/annual-road-transport-distance-demand-controlled.csv",
+        locations = "build/data/regional/units.csv",
+        populations = "build/data/regional/population.csv",
+    params:
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
+        power_scaling_factor = config["scaling-factors"]["power"],
+        conversion_factors = config["parameters"]["transport"]["road-transport-conversion-factors"],
+        countries = config["scope"]["spatial"]["countries"],
+        country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],
+    conda: "../envs/default.yaml"
+    output:
+        main = "build/data/transport/{resolution}/annual-road-transport-electricity-demand-controlled-charging-{resolution}.csv",
+    script: "../scripts/transport/road_transport_controlled_charging.py"
 
-rule create_road_transport_timeseries:
+
+rule create_uncontrolled_road_transport_timeseries:
     message: "Create timeseries for road transport demand  (uncontrolled charging)"
     input:
         annual_data = "build/data/transport/annual-road-transport-distance-demand-uncontrolled.csv",
@@ -66,7 +84,7 @@ rule create_road_transport_timeseries:
     script: "../scripts/transport/road_transport_timeseries.py"
 
 
-use rule create_road_transport_timeseries as create_road_transport_timeseries_historic_electrification with:
+use rule create_uncontrolled_road_transport_timeseries as create_unctronolled_road_transport_timeseries_historic_electrification with:
     message: "Create timeseries for historic electrified road transport demand (uncontrolled charging)"
     input:
         annual_data = "build/data/transport/annual-road-transport-distance-demand-historic-electrification.csv",
@@ -84,7 +102,7 @@ use rule create_road_transport_timeseries as create_road_transport_timeseries_hi
 
 
 rule aggregate_timeseries: # TODO consider merge with other rules, as this is tiny atm
-    message: "Aggregates timeseries for {wildcards.resolution} electrified road transport transport"
+    message: "Aggregates uncontrolled charging timeseries for {wildcards.resolution} electrified road transport transport"
     input:
         time_series = (
             "build/data/transport/timeseries/timeseries-uncontrolled-light-duty-vehicles.csv",
@@ -101,7 +119,7 @@ rule aggregate_timeseries: # TODO consider merge with other rules, as this is ti
 
 
 use rule aggregate_timeseries as aggregate_timeseries_historic_electrified with:
-    message: "Aggregates timeseries for {wildcards.resolution} historically electrified road transport"
+    message: "Aggregates uncontrolled charging timeseries for {wildcards.resolution} historically electrified road transport"
     input:
         time_series = (
             "build/data/transport/timeseries/timeseries-light-duty-vehicles-historic-electrification.csv",
