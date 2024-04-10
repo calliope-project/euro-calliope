@@ -9,7 +9,14 @@ DRIVER = "GeoJSON"
 
 
 def remix_units(
-    path_to_nuts, path_to_gadm, path_to_output, resolution, layer_config, all_countries
+    path_to_nuts,
+    path_to_gadm,
+    path_to_output,
+    resolution,
+    layer_config,
+    all_countries,
+    statistical_to_custom_units,
+    nuts_year,
 ):
     """Remixes NUTS, LAU, and GADM data to form the units of the analysis."""
     source_layers = _read_source_layers(path_to_nuts, path_to_gadm)
@@ -21,7 +28,7 @@ def remix_units(
         layer = _continental_layer(layer)
     elif mapping is not None:
         layer = _custom_layer(layer, mapping)
-    _write_layer(layer, path_to_output) 
+    _write_layer(layer, path_to_output)
 
 
 def _read_source_layers(path_to_nuts, path_to_gadm):
@@ -33,10 +40,12 @@ def _read_source_layers(path_to_nuts, path_to_gadm):
         layer_name: gpd.read_file(path_to_nuts, layer=layer_name)
         for layer_name in fiona.listlayers(path_to_nuts)
     }
-    source_layers.update({
-        layer_name: gpd.read_file(path_to_gadm, layer=layer_name)
-        for layer_name in fiona.listlayers(path_to_gadm)
-    })
+    source_layers.update(
+        {
+            layer_name: gpd.read_file(path_to_gadm, layer=layer_name)
+            for layer_name in fiona.listlayers(path_to_gadm)
+        }
+    )
     return source_layers
 
 
@@ -65,12 +74,14 @@ def _build_layer(layer_config, source_layers):
         layer_config
     """
     crs = [layer.crs for layer in source_layers.values()][0]
-    layer = pd.concat([
-        source_layers[source_layer][
-            source_layers[source_layer].country_code == _iso3(country)
+    layer = pd.concat(
+        [
+            source_layers[source_layer][
+                source_layers[source_layer].country_code == _iso3(country)
+            ]
+            for country, source_layer in layer_config.items()
         ]
-        for country, source_layer in layer_config.items()
-    ])
+    )
     assert isinstance(layer, pd.DataFrame)
     return gpd.GeoDataFrame(layer, crs=crs)
 
@@ -103,15 +114,17 @@ def _write_layer(gdf, path_to_file):
 
 if __name__ == "__main__":
     # DEBUG ----------------------------------------------------------------------------
+    breakpoint()
+    # building national resolution units (with layer_config a bit varied)
+    resolution = "national"
     remix_units(
         path_to_nuts="build/data/administrative-borders-nuts.gpkg",
         path_to_gadm="build/data/administrative-borders-gadm.gpkg",
         path_to_output="build/data/national/units.geojson",
-        resolution="national",
         all_countries=["Ireland", "United Kingdom"],
         layer_config={
             "Ireland": "nuts0",
-            "United Kingdom": "nuts2",
+            "United Kingdom": "nuts0",
             "Austria": "nuts0",
             "Belgium": "nuts0",
             "Bulgaria": "nuts0",
@@ -145,6 +158,58 @@ if __name__ == "__main__":
             "Serbia": "gadm0",
             "Switzerland": "nuts0",
         },
+        resolution="national",
+        statistical_to_custom_units=[],
+        nuts_year=2006,
+    )
+
+    # building ehighways
+    resolution = "ehighways"
+    remix_units(
+        path_to_nuts="build/data/administrative-borders-nuts.gpkg",
+        path_to_gadm="build/data/administrative-borders-gadm.gpkg",
+        path_to_output="build/data/ehighways/units.geojson",
+        all_countries=["Ireland", "United Kingdom"],
+        layer_config={
+            "Austria": "nuts3",
+            "Belgium": "nuts0",
+            "Bulgaria": "nuts0",
+            "Croatia": "nuts0",
+            "Cyprus": "nuts0",
+            "Czech Republic": "nuts3",
+            "Denmark": "nuts3",
+            "Estonia": "nuts0",
+            "Finland": "nuts3",
+            "France": "nuts3",
+            "Germany": "nuts3",
+            "Greece": "nuts3",
+            "Hungary": "nuts0",
+            "Ireland": "nuts0",
+            "Italy": "nuts3",
+            "Latvia": "nuts0",
+            "Lithuania": "nuts0",
+            "Luxembourg": "nuts0",
+            "Netherlands": "nuts0",
+            "Poland": "nuts3",
+            "Portugal": "nuts3",
+            "Romania": "nuts3",
+            "Slovakia": "nuts0",
+            "Slovenia": "nuts0",
+            "Spain": "nuts3",
+            "Sweden": "nuts3",
+            "United Kingdom": "nuts3",
+            "Albania": "gadm0",
+            "Bosnia and Herzegovina": "gadm0",
+            "Macedonia, Republic of": "gadm0",
+            "Montenegro": "gadm0",
+            "Norway": "nuts3",
+            "Serbia": "gadm0",
+            "Switzerland": "nuts3",
+            "Iceland": "nuts0",
+        },
+        resolution="ehighways",
+        statistical_to_custom_units="config/shapes/statistical-to-ehighways-units.csv",
+        nuts_year=[],
     )
     # ----------------------------------------------------------------------------------
 
@@ -153,7 +218,9 @@ if __name__ == "__main__":
         path_to_nuts=snakemake.input.nuts,
         path_to_gadm=snakemake.input.gadm,
         path_to_output=snakemake.output[0],
-        resolution=resolution,
         all_countries=snakemake.params.all_countries,
         layer_config=snakemake.params.layer_configs[resolution],
+        resolution=resolution,
+        statistical_to_custom_units=snakemake.input.statistical_to_custom_units,
+        nuts_year=snakemake.params.nuts_year,
     )

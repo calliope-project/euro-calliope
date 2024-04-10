@@ -82,29 +82,17 @@ rule units: # for original resolutions of regional, national, continental
     message: "Form units of resolution {wildcards.resolution} by remixing NUTS and GADM."
     input:
         nuts = rules.administrative_borders_nuts.output[0],
-        gadm = rules.administrative_borders_gadm.output[0]
+        gadm = rules.administrative_borders_gadm.output[0],
+        statistical_to_custom_units = lambda wildcards: config["data-pre-processing"]["statistical-to-custom-units"].get(wildcards.resolution, []) # returns None if no mapping provided
     params:
         all_countries = config["scope"]["spatial"]["countries"],
-        layer_configs = config["shapes"] # mapping between countries and their statistical unit resolution (e.g., DE: nuts0)
+        layer_configs = config["shapes"], # mapping between countries and their statistical unit resolution (e.g., DE: nuts0)
+        nuts_year = config["parameters"].get("nuts-year", []) # returns None if no nuts-year
     wildcard_constraints:
-        resolution = "continental|national|regional"
+        resolution = "continental|national|regional|ehighways" # extend for new resolutions
     output: "build/data/{resolution}/units.geojson"
     conda: "../envs/geo.yaml"
     script: "../scripts/shapes/units.py"
-
-
-rule custom_units: # for new resolutions, currently only ehighways
-    message: "Form units of custom resolution {wildcards.resolution} by remixing NUTS and GADM."
-    input:
-        # disaggregated_units = "build/data/{resolution}_disaggregated/units.geojson", # no-longer needed
-        statistical_to_custom_units = lambda wildcards: config["data-pre-processing"]["statistical-to-custom-units"][wildcards.resolution]
-    params:
-        nuts_year = config["parameters"]["nuts-year"]
-    wildcard_constraints:
-        resolution = "ehighways" # extend for new resolutions
-    output: "build/data/{resolution}/units.geojson"
-    conda: "../envs/geo.yaml"
-    script: "../scripts/shapes/custom_units.py" # statistical_to_custom_units_aggregation
 
 
 rule units_without_shape:
