@@ -41,7 +41,7 @@ You can now inspect this file to learn about the details of how hydro data is pr
 
 ### How can I debug a workflow step?
 
-Most of our workflow steps are Python scripts and you can debug them with default debugging methods. For example, you may include a `breakpoint()` statement in a line in which you want to drop into the debugger `ipdb`.
+Most of our workflow steps are Python scripts and you can debug them with default debugging methods. For example, you may include a `breakpoint()` statement in a line in which you want to drop into the `ipdb` debugger (the iPython-enabled [pdb](https://docs.python.org/3/library/)).
 
 ### How long should I expect the workflow to run?
 
