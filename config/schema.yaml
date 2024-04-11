@@ -144,6 +144,9 @@ properties:
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.
+    max-threads:
+        type: integer
+        description: maximum available threads for multiprocessing, in those rules that are able to accept multiple threads.
     cluster-sync:
         type: object
         description: Configuration for the "work local, build on remote" workflow.

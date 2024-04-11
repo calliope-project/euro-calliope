@@ -40,6 +40,7 @@ data-pre-processing:
             SRB: [HUN]
             CYP: [ROU]
 root-directory: .
+max-threads: 2
 cluster-sync:
     url: euler.ethz.ch
     send-ignore: .syncignore-send

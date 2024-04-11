@@ -16,7 +16,7 @@ rule jrc_idees_transport_processed:
     input:
         data = expand(
             "build/data/jrc-idees/transport/unprocessed/{country_code}.xlsx",
-            country_code=JRC_IDEES_SCOPE
+            country_code=JRC_IDEES_SPATIAL_SCOPE
         )
     output: "build/data/jrc-idees/transport/processed-{dataset}.csv"
     params:

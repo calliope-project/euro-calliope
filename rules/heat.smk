@@ -3,7 +3,7 @@ rule jrc_idees_heat_processed:
     input:
         data = expand(
             "build/data/jrc-idees/heat/unprocessed/{country_code}.xlsx",
-            country_code=JRC_IDEES_SCOPE
+            country_code=JRC_IDEES_SPATIAL_SCOPE
         )
     output: "build/data/jrc-idees/heat/commercial/processed.csv"
     conda: "../envs/default.yaml"
