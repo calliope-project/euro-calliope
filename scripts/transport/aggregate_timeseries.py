@@ -76,6 +76,10 @@ if __name__ == "__main__":
         ts = create_regional_timeseries(
             paths_to_input, path_to_locations, path_to_populations
         )
+    elif resolution == "ehighways":
+        ts = create_regional_timeseries(
+            paths_to_input, path_to_locations, path_to_populations
+        )
     else:
         raise ValueError("Input resolution not recognised.")
 
