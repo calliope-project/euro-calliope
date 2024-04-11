@@ -1,11 +1,10 @@
 # Paths dependent on main Snakefile
 MODULE_PATH = "modules/industry"
-TMP_PATH = f"{MODULE_PATH}/tmp"
-OUT_PATH = f"{MODULE_PATH}/out"
+BUILD_PATH = f"{MODULE_PATH}/build"
 DATA_PATH = f"{MODULE_PATH}/raw_data"
 
 # Paths relative to this snakefile (snakemake behaviour is inconsitent)
-SRC_PATH = "src"  # scripts are called relative to this file
+SCRIPT_PATH = "scripts"  # scripts are called relative to this file
 CONDA_PATH = "./env_industry.yaml"
 
 # TODO:
@@ -26,8 +25,8 @@ rule steel_industry:
         path_jrc_energy = f"{DATA_PATH}/jrc_idees_processed_energy.csv.gz",
         path_jrc_production = f"{DATA_PATH}/jrc_idees_processed_production.csv.gz",
     output:
-        path_output = f"{TMP_PATH}/annual_demand_steel.csv"
-    script: f"{SRC_PATH}/steel_industry.py"
+        path_output = f"{BUILD_PATH}/annual_demand_steel.csv"
+    script: f"{SCRIPT_PATH}/steel_industry.py"
 
 rule chemical_industry:
     message: "."
@@ -35,15 +34,15 @@ rule chemical_industry:
     params:
     input:
     output:
-    script: f"{SRC_PATH}/chemicals.py"
+    script: f"{SCRIPT_PATH}/chemicals.py"
 
 rule other_industry:
     message: "."
     conda: CONDA_PATH
     params:
     input:
-    output: f"{TMP_PATH}/other_industry.csv"
-    script: f"{SRC_PATH}/other_industry.py"
+    output: f"{BUILD_PATH}/other_industry.csv"
+    script: f"{SCRIPT_PATH}/other_industry.py"
 
 # rule combine_and_scale:
 #     message: "."
