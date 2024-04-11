@@ -83,7 +83,7 @@ rule units: # for original resolutions of regional, national, continental
     input:
         nuts = rules.administrative_borders_nuts.output[0],
         gadm = rules.administrative_borders_gadm.output[0],
-        statistical_to_custom_units = lambda wildcards: config["data-pre-processing"]["statistical-to-custom-units"].get(wildcards.resolution, []) # returns None if no mapping provided
+        statistical_to_custom_units = lambda wildcards: config["data-pre-processing"]["statistical-to-custom-units"].get(wildcards.resolution, []) # returns[] if no mapping exists for chosen resolution
     params:
         all_countries = config["scope"]["spatial"]["countries"],
         layer_configs = config["shapes"], # mapping between countries and their statistical unit resolution (e.g., DE: nuts0)

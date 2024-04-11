@@ -7,7 +7,7 @@ DRIVER = "GeoJSON"
 
 
 def dissolve_nuts3(
-    # path_to_disaggregated_units,
+    path_to_disaggregated_units,
     path_to_output,
     nuts_year,
     path_to_statistical_to_custom_units,
