@@ -12,7 +12,7 @@ module module_industry:
     snakefile: "modules/industry/industry.smk"
     config: config["industry"]
 use rule * from module_industry as module_industry_*
-#
+
 
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
@@ -204,6 +204,7 @@ rule build_metadata:
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",
+        "modules/industry/config.yaml"
     params:
         config = config,
         version = __version__

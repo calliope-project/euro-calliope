@@ -1,0 +1,31 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+description: Enumeration of configuration parameters of Euro-Calliope's industry module.
+definitions:
+type: object
+additionalProperties: false
+properties:
+    industry:
+        type: object
+        description: Inputs, outputs and parameters used by the industry module.
+        additionalProperties: false
+        properties:
+            inputs:
+                type: object
+                description: Inputs are paths for prerequired files.
+                additionalProperties: false
+                properties:
+                    path-energy-balances:
+                        type: string
+                        description: "Annual energy balance file with columns [cat_code,carrier_code,unit,country,year,value]."
+                    path-cat-names:  #  Ideally this should be module-specific.
+                        type: string
+                        description: "Category mapping file with columns [carrier_code,carrier_name,hh_carrier_name,com_carrier_name,ind_carrier_name,oth_carrier_name]."
+                    path-carrier-names:
+                        type: string
+                        description:
+            outputs:
+                type: object
+            params:
+                type: object
+            setup:
+                type: object
