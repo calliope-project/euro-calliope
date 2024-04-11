@@ -8,5 +8,3 @@ industry:
         year-range: [2000, 2018]  # Start and end year for JRC data parsing
         steel:
             recycled-steel-share: 0.5  # % of recycled scrap steel for H-DRI
-    setup:
-        main-out-path: data/industry  # Path to use in case output files must be created at the EC level.
