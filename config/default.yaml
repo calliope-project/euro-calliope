@@ -38,6 +38,7 @@ data-pre-processing:
             BIH: [HRV, HUN]
             MNE: [HRV]
             SRB: [HUN]
+            CYP: [ROU]
     statistical-to-custom-units: # this is picked up by rule `units` to build custom spatial units
         ehighways: config/shapes/statistical-to-ehighways-units.csv
 root-directory: .

@@ -13,7 +13,7 @@ rule download_potentials:
     params: url = config["data-sources"]["potentials"]
     output: protected("data/automatic/raw-potentials.zip")
     conda: "../envs/shell.yaml"
-    shell: "curl -sLo {output} '{params.url}'"
+    shell: "curl -sSLo {output} '{params.url}'"
 
 
 rule potentials:
@@ -37,7 +37,7 @@ rule download_capacity_factors_wind_and_solar:
     params: url = lambda wildcards: config["data-sources"]["capacity-factors"].format(filename=wildcards.filename)
     output: protected("data/automatic/capacityfactors/{filename}")
     conda: "../envs/shell.yaml"
-    shell: "curl -sLo {output} '{params.url}'"
+    shell: "curl -sSLo {output} '{params.url}'"
 
 
 rule area_to_capacity_limits:
