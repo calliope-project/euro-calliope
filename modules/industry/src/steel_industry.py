@@ -13,6 +13,7 @@ HDRI_CONSUMPTION = 0.0116  # H-DRI: 135kWh_e/t = 0.0116ktoe/kt
 
 def _get_h2_to_steel(recycled_steel_share: float) -> float:
     """Get t_h2/t_steel, usually for H-DRI."""
+    # ASSUME: conversion factor of 0.05 t_h2/t_steel.
     return (1 - recycled_steel_share) * 0.05
 
 
