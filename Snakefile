@@ -203,8 +203,7 @@ rule build_metadata:
     input:
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
-        "build/models/regional/example-model.yaml",
-        "modules/industry/config.yaml"
+        "build/models/regional/example-model.yaml"
     params:
         config = config,
         version = __version__
