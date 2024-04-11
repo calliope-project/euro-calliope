@@ -686,7 +686,7 @@ properties:
         description: Source for geospatial shapes of all locations. The config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
         type: object
         propertyNames:
-            enum: [continental, national, regional]
+            enum: [continental, national, regional, ehighways]
         additionalProperties: false
         patternProperties:
             ^[a-zA-Z]+.*$:
