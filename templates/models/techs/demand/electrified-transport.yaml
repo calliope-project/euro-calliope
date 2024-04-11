@@ -26,6 +26,7 @@ techs:
             resource: -.inf
 
     road_transport_controlled_dummy:
+        exists: false
         essentials:
             name: 'Dummy tech for controlled road transport demand -- required for max potential charging'
             parent: conversion
@@ -71,6 +72,8 @@ overrides:
     {% for year in locations.columns %}
     {% if "charging" in year %}
     {{ year }}_max_ev_potential:
+        techs:
+            road_transport_controlled_dummy.exists: true
         locations:
     {% for location in locations.index %}
             {{ location }}:

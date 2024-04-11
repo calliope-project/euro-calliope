@@ -69,20 +69,20 @@ onerror:
 rule all:
     message: "Generate euro-calliope pre-built models and run tests."
     input:
-        "build/logs/continental/test.success",
-        "build/logs/national/test.success",
+        #"build/logs/continental/test.success",
+        #"build/logs/national/test.success",
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",
         "build/models/continental/build-metadata.yaml",
         "build/models/national/build-metadata.yaml",
         "build/models/regional/build-metadata.yaml",
-        "build/models/regional/summary-of-potentials.nc",
-        "build/models/regional/summary-of-potentials.csv",
-        "build/models/national/summary-of-potentials.nc",
-        "build/models/national/summary-of-potentials.csv",
-        "build/models/continental/summary-of-potentials.nc",
-        "build/models/continental/summary-of-potentials.csv"
+        # "build/models/regional/summary-of-potentials.nc",
+        # "build/models/regional/summary-of-potentials.csv",
+        # "build/models/national/summary-of-potentials.nc",
+        # "build/models/national/summary-of-potentials.csv",
+        # "build/models/continental/summary-of-potentials.nc",
+        # "build/models/continental/summary-of-potentials.csv"
 
 
 rule all_tests:
