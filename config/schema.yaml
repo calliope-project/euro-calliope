@@ -517,6 +517,7 @@ properties:
                                 - "Norway"
                                 - "Serbia"
                                 - "Switzerland"
+                                - "Iceland" # added for ehighways
                     bounds:
                         type: object
                         description: Bounding box describing the spatial extent of geographic datasets.
