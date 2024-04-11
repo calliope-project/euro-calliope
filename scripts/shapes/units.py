@@ -4,6 +4,7 @@ import fiona
 import geopandas as gpd
 import pandas as pd
 import pycountry
+import shapely
 from eurocalliopelib import utils
 
 DRIVER = "GeoJSON"
@@ -24,22 +25,22 @@ def remix_units(
     source_layers = _read_source_layers(path_to_nuts, path_to_gadm)
     _validate_source_layers(source_layers)
     _validate_layer_config(all_countries, layer_config, resolution)
-    layer = _build_layer(layer_config, source_layers)
-    _validate_layer(layer, resolution, all_countries)
+    units = _build_layer(layer_config, source_layers)
+    _validate_layer(units, resolution, all_countries)
     if resolution == "continental":
         # sum all of the units together into one block
-        layer = _continental_layer(layer)
+        units = _continental_layer(units)
     elif path_to_statistical_to_custom_units != []:
         _validate_nuts_year(nuts_year)
-        layer.to_file("layer_debug.geojson")  # debug
+        units.to_file("layer_debug.geojson")  # debug
         # sum units together according to custom mapping
-        layer = _custom_layer(layer, path_to_statistical_to_custom_units, nuts_year)
-    _write_layer(layer, path_to_output)
+        units = _custom_layer(units, path_to_statistical_to_custom_units, nuts_year)
+    _write_layer(units, path_to_output)
 
 
-def _custom_layer(layer, path_to_statistical_to_custom_units, nuts_year):
+def _custom_layer(base_units, path_to_statistical_to_custom_units, nuts_year):
     """Combine the lower-level statistical units (aspecified in layer_config)
-    into the custom units, according to statistical_to_custom_units, using dissolve
+    into the custom units, according to statistical_to_custom_units, using _merge_units
     function.
 
     Inputs:
@@ -73,9 +74,37 @@ def _custom_layer(layer, path_to_statistical_to_custom_units, nuts_year):
         )
     )
 
-    pass
+    units = _merge_units(base_units, locations)
+    return units
 
-    # Locations is a series indexed by the statistical unit (NUTS or GADM) with values of the id (the ehighways unit)
+
+def _merge_units(base_units, locations):
+    """Summary:
+    - uses 'dissolve' method of GeoPandas to combine base units into custom units
+    - _to_multi_polygon function handles shapes with same unit but no shared border
+    """
+
+    def _to_multi_polygon(geometry):
+        if isinstance(geometry, dict):
+            geometry = shapely.geometry.shape(geometry)
+        if isinstance(geometry, shapely.geometry.polygon.Polygon):
+            return shapely.geometry.MultiPolygon(polygons=[geometry])
+        else:
+            return geometry
+
+    base_units = base_units.set_index("id")
+    base_units["custom_unit"] = (locations.reindex(base_units.index)).dropna()
+    base_units.loc[~base_units.is_valid, "geometry"] = base_units.loc[
+        ~base_units.is_valid, "geometry"
+    ].buffer(0)
+    units = base_units.dissolve("custom_unit")
+    units.geometry = units.geometry.map(_to_multi_polygon)
+    units.index.rename("id", inplace=True)
+    units = units.reset_index()
+    units.loc[units["type"].isnull(), "name"] = "custom_unit"
+    units["type"].fillna("custom_unit", inplace=True)
+
+    return units
 
 
 def _build_layer(layer_config, source_layers):
