@@ -5,6 +5,8 @@ industry:
         path-carrier-names: config/energy-balances/energy-balance-carrier-names.csv
     outputs:
     params:
-        year-range: [2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018]
+        year-range: [2000, 2018]  # Start and end year for JRC data parsing
+        steel:
+            recycled-steel-share: 0.5  # % of recycled scrap steel for H-DRI
     setup:
         main-out-path: data/industry  # Path to use in case output files must be created at the EC level.

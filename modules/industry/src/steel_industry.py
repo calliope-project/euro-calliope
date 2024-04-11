@@ -1,3 +1,5 @@
+from typing import Optional
+
 import eurocalliopelib.utils as ec_utils
 import pandas as pd
 from utils import formatting
@@ -6,19 +8,23 @@ from utils import jrc_idees_parser as jrc
 CAT_NAME_STEEL = "Iron and steel"
 
 H2_LHV_KTOE = 2.863  # 0.0333 TWh/kt LHV -> 2.863ktoe/kt
-RECYCLED_STEEL = 0.5  # 50% H-DRI Iron, 50% scrap steel
-H2_TO_STEEL = (1 - RECYCLED_STEEL) * 0.05  # 0.05t_h2/t_steel in H-DRI
 HDRI_CONSUMPTION = 0.0116  # H-DRI: 135kWh_e/t = 0.0116ktoe/kt
+
+
+def _get_h2_to_steel(recycled_steel_share: float) -> float:
+    """Get t_h2/t_steel, usually for H-DRI."""
+    return (1 - recycled_steel_share) * 0.05
 
 
 def get_steel_demand_df(
     year_range: list,
+    cnf_steel: dict,
     path_energy_balances: str,
     path_cat_names: str,
     path_carrier_names: str,
     path_jrc_energy: str,
     path_jrc_production: str,
-    path_output: str = "",
+    path_output: Optional[str] = None,
 ) -> pd.DataFrame:
     """Execute the data processing pipeline for the "Iron and steel" sub-sector.
 
@@ -52,7 +58,9 @@ def get_steel_demand_df(
     # -------------------------------------------------------------------------
     # Process data
     # -------------------------------------------------------------------------
-    steel_energy_consumption = process_steel_energy_consumption(energy_df, prod_df)
+    steel_energy_consumption = process_steel_energy_consumption(
+        energy_df, prod_df, cnf_steel
+    )
 
     # -------------------------------------------------------------------------
     # Format the final output
@@ -78,14 +86,14 @@ def get_steel_demand_df(
     )
     filled_consumption_df = filled_consumption_df.stack()
 
-    if path_output:
+    if path_output is not None:
         filled_consumption_df.reorder_levels(formatting.LEVEL_ORDER).to_csv(path_output)
 
     return filled_consumption_df
 
 
 def process_steel_energy_consumption(
-    jrc_energy_df: pd.DataFrame, jrc_prod_df: pd.DataFrame
+    jrc_energy_df: pd.DataFrame, jrc_prod_df: pd.DataFrame, cnf_steel: dict
 ) -> pd.DataFrame:
     """Processing of steel energy demand for different carriers.
 
@@ -109,6 +117,7 @@ def process_steel_energy_consumption(
     Args:
         jrc_energy_df (pd.DataFrame): jrc country-specific steel energy demand.
         jrc_prod_df (pd.DataFrame): jrc country-specific steel production.
+        cnf_steel (dict): configuration for the steel industry.
 
     Returns:
         pd.DataFrame: processed dataframe with the expected steel energy consumption.
@@ -150,8 +159,10 @@ def process_steel_energy_consumption(
     #   If the country only recycles steel:
     #   smelting + EAF + refining/rolling + finishing + auxiliaries
 
+    recycled_steel_share = cnf_steel["recycled-steel-share"]
+
     total_specific_consumption = (
-        sintering_specific_consumption.mul(1 - RECYCLED_STEEL)
+        sintering_specific_consumption.mul(1 - recycled_steel_share)
         .add(
             eaf_smelting_specific_consumption
             # if no sintering, this country/year recycles 100% of steel
@@ -159,7 +170,7 @@ def process_steel_energy_consumption(
             # if there is sintering, update smelting consumption to equal our assumed 2050 recycling rate
             # and add weighted H-DRI consumption to process the remaining iron ore
             .fillna(
-                eaf_smelting_specific_consumption.mul(RECYCLED_STEEL).add(
+                eaf_smelting_specific_consumption.mul(recycled_steel_share).add(
                     HDRI_CONSUMPTION
                 )
             )
@@ -180,7 +191,7 @@ def process_steel_energy_consumption(
 
     # Hydrogen consumption for H-DRI, only for those country/year combinations that handle iron ore
     # and don't recycle all their steel
-    h2_specific_consumption = H2_LHV_KTOE * H2_TO_STEEL
+    h2_specific_consumption = H2_LHV_KTOE * _get_h2_to_steel(recycled_steel_share)
     total_specific_h2_consumption = (
         total_specific_consumption.where(sintering_specific_consumption > 0)
         .fillna(0)
@@ -216,9 +227,10 @@ def process_steel_energy_consumption(
 if __name__ == "__main__":
     get_steel_demand_df(
         year_range=snakemake.params.year_range,
-        path_energy_balances=snakemake.params.path_energy_balances,
-        path_cat_names=snakemake.params.path_cat_names,
-        path_carrier_names=snakemake.params.path_carrier_names,
+        cnf_steel=snakemake.params.cnf_steel,
+        path_energy_balances=snakemake.input.path_energy_balances,
+        path_cat_names=snakemake.input.path_cat_names,
+        path_carrier_names=snakemake.input.path_carrier_names,
         path_jrc_energy=snakemake.input.path_jrc_energy,
         path_jrc_production=snakemake.input.path_jrc_production,
         path_output=snakemake.output.path_output,
