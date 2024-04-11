@@ -4,6 +4,10 @@
 
 ### Added (models)
 
+* **ADD** chemicals industry energy demand processing. NOT CONNECTED TO THE MAIN WORKFLOW. Industry sectors pending: "other".
+
+### Added (models)
+
 * **ADD** industry module and steel industry energy demand processing. NOT CONNECTED TO THE MAIN WORKFLOW. Industry sectors pending: chemical, "other".
 
 ### Added (models)
