@@ -1,3 +1,5 @@
+from typing import Optional
+
 import eurocalliopelib.utils as ec_utils
 import pandas as pd
 from utils import formatting as fmt
@@ -12,7 +14,7 @@ def get_other_demand(
     path_carrier_names: str,
     path_jrc_energy: str,
     path_jrc_production: str,
-    path_output: str = "",
+    path_output: Optional[str] = None,
 ) -> pd.DataFrame:
     """Execute the default data processing pipeline all non-specific industries.
 
@@ -118,7 +120,8 @@ def get_other_demand(
     all_other_consumption_filled.index = all_other_consumption_filled.index.set_names(
         "subsector", level="cat_name"
     )
-    all_other_consumption_filled = None
+    all_other_consumption_filled = all_other_consumption_filled.stack()
+    breakpoint()
     if path_output:
         all_other_consumption_filled.reorder_levels(fmt.LEVEL_ORDER).to_csv(path_output)
 

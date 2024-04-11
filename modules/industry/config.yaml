@@ -6,7 +6,7 @@ industry:
     outputs:
     params:
         year-range: [2000, 2018]  # Start and end year for JRC data parsing
-        specific-industries: ["Iron and steel"]
+        specific-industries: ["Iron and steel", "Chemicals Industry"]
         steel:
             recycled-steel-share: 0.5  # % of recycled scrap steel for H-DRI
     setup:
