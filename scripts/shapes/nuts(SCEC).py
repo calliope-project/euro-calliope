@@ -1,16 +1,11 @@
 """Preprocessing of raw NUTS data to bring it into normalised form."""
 
-import zipfile
-
 import fiona
 import fiona.transform
 import geopandas as gpd
-import pandas as pd
 import pycountry
-
 import shapely.geometry
 from eurocalliopelib import utils
-
 
 OUTPUT_DRIVER = "GPKG"
 LAYER_NAME = "nuts{layer_id}"
@@ -25,7 +20,7 @@ def normalise(path_to_nuts, path_to_output, crs, study_area, all_countries, sche
     """
     with fiona.open(path_to_nuts, "r") as nuts_file:
         for layer_id in range(4):
-            print("Building layer {}...".format(layer_id))
+            print(f"Building layer {layer_id}...")
             _write_layer(
                 nuts_file,
                 crs,
@@ -95,9 +90,9 @@ def _all_parts_in_study_area_and_crs(feature, src_crs, dst_crs, study_area):
                 feature["properties"]["NUTS_ID"]
             )
         )
-        new_unit = shapely.geometry.MultiPolygon(
-            [polygon for polygon in unit.geoms if study_area.contains(polygon)]
-        )
+        new_unit = shapely.geometry.MultiPolygon([
+            polygon for polygon in unit.geoms if study_area.contains(polygon)
+        ])
         unit = new_unit
     geometry = shapely.geometry.mapping(unit)
     return fiona.transform.transform_geom(

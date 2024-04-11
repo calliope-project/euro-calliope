@@ -119,14 +119,12 @@ def _build_layer(layer_config, source_layers):
         layer_config
     """
     crs = [layer.crs for layer in source_layers.values()][0]
-    layer = pd.concat(
-        [
-            source_layers[source_layer][
-                source_layers[source_layer].country_code == _iso3(country)
-            ]
-            for country, source_layer in layer_config.items()
+    layer = pd.concat([
+        source_layers[source_layer][
+            source_layers[source_layer].country_code == _iso3(country)
         ]
-    )
+        for country, source_layer in layer_config.items()
+    ])
     assert isinstance(layer, pd.DataFrame)
     return gpd.GeoDataFrame(layer, crs=crs)
 
@@ -140,12 +138,10 @@ def _read_source_layers(path_to_nuts, path_to_gadm):
         layer_name: gpd.read_file(path_to_nuts, layer=layer_name)
         for layer_name in fiona.listlayers(path_to_nuts)
     }
-    source_layers.update(
-        {
-            layer_name: gpd.read_file(path_to_gadm, layer=layer_name)
-            for layer_name in fiona.listlayers(path_to_gadm)
-        }
-    )
+    source_layers.update({
+        layer_name: gpd.read_file(path_to_gadm, layer=layer_name)
+        for layer_name in fiona.listlayers(path_to_gadm)
+    })
     return source_layers
 
 

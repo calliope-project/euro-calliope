@@ -37,8 +37,8 @@ def dissolve_nuts3(
 
 
 def _update_units(path_to_units, locations):
-    """Handles potentially problematic shapes (same unit, no shared border)
-    """
+    """Handles potentially problematic shapes (same unit, no shared border)"""
+
     def _to_multi_polygon(geometry):
         if isinstance(geometry, dict):
             geometry = shapely.geometry.shape(geometry)
