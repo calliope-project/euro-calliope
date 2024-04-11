@@ -178,6 +178,9 @@ properties:
             monetary:
                 type: number
                 description: "Applied to all quantities of monetary cost (base: EUR)."
+            transport:
+                type: number
+                description: "Applied to all quantities of transport (base: Mio km)."
     parameters:
         type: object
         description: Parameter values of the models.
@@ -348,6 +351,26 @@ properties:
                             motorcycles:
                                 type: string
                                 description: JRC-IDEES name of motorcycles.
+                    ev-battery-sizes:
+                        type: object
+                        description: EV battery size per vehicle type.
+                        additionalProperties: false
+                        properties:
+                            light-duty-vehicles:
+                                type: number
+                                description: Light duty vehicles / trucks.
+                            heavy-duty-vehicles:
+                                type: number
+                                description: Heavy duty vehicles / trucks.
+                            coaches-and-buses:
+                                type: number
+                                description: Coaches and buses.
+                            passenger-cars:
+                                type: number
+                                description: Passenger cars.
+                            motorcycles:
+                                type: number
+                                description: Motorcylces.
                     uncontrolled-ev-charging-share:
                         type: number
                         description: Share of uncontrolled charging.

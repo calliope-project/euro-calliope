@@ -66,6 +66,27 @@ rule create_controlled_road_transport_annual_demand:
         main = "build/data/{resolution}/demand/electrified-transport.csv",
     script: "../scripts/transport/road_transport_controlled_charging.py"
 
+rule extract_ev_installed_capacities_for_controlled_charging:
+    message: "Extract electrified road transport installed capacities for controlled charging at {wildcards.resolution} resolution"
+    input:
+        ev_vehicle_number = "build/data/jrc-idees/transport/processed-road-vehicles.csv",
+        jrc_road_distance = "build/data/jrc-idees/transport/processed-road-distance.csv",
+        locations = "build/data/regional/units.csv",
+        populations = "build/data/regional/population.csv",
+    params:
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
+        transport_scaling_factor = config["scaling-factors"]["transport"],
+        conversion_factors = config["parameters"]["transport"]["road-transport-conversion-factors"],
+        battery_sizes = config["parameters"]["transport"]["ev-battery-sizes"],
+        countries = config["scope"]["spatial"]["countries"],
+        country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],
+        fill_missing_values_jrc = config["data-pre-processing"]["fill-missing-values"]["jrc-idees"],
+    conda: "../envs/default.yaml"
+    output:
+        main = "build/data/{resolution}/transport/ev-installed-capacities.csv",
+    script: "../scripts/transport/extract_ev_installed_capacities.py"
+
 rule create_controlled_ev_charging_parameters:
     message: "Create timeseries parameters for controlled EV charging"
     input:
