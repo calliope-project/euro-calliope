@@ -32,7 +32,7 @@ wildcard_constraints:
 
 ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
 ruleorder: bio_techs_and_locations_template > techs_and_locations_template
-ruleorder: create_controlled_road_transport_annual_demand > extract_ev_installed_capacities_for_controlled_charging > dummy_tech_locations_template
+ruleorder: create_controlled_road_transport_annual_demand_and_installed_capacities > dummy_tech_locations_template
 
 ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",

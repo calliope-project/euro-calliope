@@ -25,6 +25,15 @@ techs:
             force_resource: false
             resource: -.inf
 
+    road_transport_controlled_dummy:
+        essentials:
+            name: 'Dummy tech for controlled road transport demand -- required for max potential charging'
+            parent: conversion
+            carrier_in: electricity
+            carrier_out: electricity
+        constraints:
+            energy_eff: 1
+
 overrides:
     keep-historic-electricity-demand-from-road-transport:
       # TODO: possibly remove this override as there may be no use-cases for it.
@@ -33,15 +42,17 @@ overrides:
       {% endfor %}
 
     {% for year in locations.columns %}
-    {{ year }}_transport_controlled_electrified_demand:
+    {% if "demand" in year %}
+    {{ year }}_transport_controlled_electrified:
         group_constraints:
     {% for location in locations.index %}
-            {{ location }}_annual_controlled_electricity_demand:
+            {{ location }}_annual_controlled_electricity:
                 locs: [{{ location }}]
                 techs: [demand_road_transport_electrified_controlled]
                 carrier_con_equals:
                     electricity: {{ locations.loc[location, year] }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
     {% endfor %}
+    {% endif %}
     {% endfor %}
 
     monthly_transport_demand_range:
@@ -56,6 +67,20 @@ overrides:
             demand_road_transport_electrified_controlled:
                 constraints:
                     demand_shape_per_month_equals: file=demand/demand-shape-equals-ev.csv
+    
+    {% for year in locations.columns %}
+    {% if "charging" in year %}
+    {{ year }}_max_ev_potential:
+        locations:
+    {% for location in locations.index %}
+            {{ location }}:
+                techs: 
+                    road_transport_controlled_dummy:
+                        constraints:
+                            energy_cap_max: {{ locations.loc[location, year] }} # {{ (1 / scaling_factors.transport) | unit("Mio km") }}
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
 
 locations:
     {% for id, location in locations.iterrows() %}
