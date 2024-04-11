@@ -209,13 +209,7 @@ rule model_template:
 rule build_metadata:
     message: "Generate build metadata."
     input:
-<<<<<<< HEAD
-        "build/models/continental/example-model.yaml",
-        "build/models/national/example-model.yaml",
-        "build/models/regional/example-model.yaml"
-=======
         "build/models/{resolution}/example-model.yaml",
->>>>>>> origin/develop
     params:
         config = config,
         version = __version__
