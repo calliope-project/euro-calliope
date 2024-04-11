@@ -9,12 +9,12 @@ techs:
 
     demand_road_transport_historic_electrified_uncontrolled:
         essentials:
-            name: 'Removes historic electrified road transport demand -- assumed uncontrolled'
+            name: 'Removes historic electrified road transport demand from ENTSOE-derived historical electricity demand profile -- assumed uncontrolled'
             parent: supply
             carrier: electricity
         constraints:
             resource: file=demand/uncontrolled-road-transport-historic-electrification.csv
-            force_resource: False
+            force_resource: true
 
     demand_road_transport_electrified_controlled:
         essentials:
@@ -22,13 +22,14 @@ techs:
             parent: demand
             carrier: electricity
         constraints:
-            force_resource: False
+            force_resource: false
             resource: -.inf
 
 overrides:
     keep-historic-electricity-demand-from-road-transport:
+      # TODO: possibly remove this override as there may be no use-cases for it.
       {% for id, location in locations.iterrows() %}
-      {{ id }}.techs.demand_road_transport_historic_electrified_uncontrolled.exists: False
+      {{ id }}.techs.demand_road_transport_historic_electrified_uncontrolled.exists: false
       {% endfor %}
 
     {% for year in locations.columns %}
