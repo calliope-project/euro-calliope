@@ -43,4 +43,3 @@ rule annual_energy_balances:
         first_year = 2000
     conda: "../envs/default.yaml"
     script: "../scripts/data/annual_energy_balance.py"
-

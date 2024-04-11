@@ -45,5 +45,3 @@ rule jrc_idees_industry_processed:
     conda: "../envs/default.yaml"
     threads: config["max-threads"]
     script: "../scripts/jrc-idees/industry.py"
-
-

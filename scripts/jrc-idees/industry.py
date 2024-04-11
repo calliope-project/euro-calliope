@@ -1,22 +1,21 @@
-from pathlib import Path
-from multiprocessing import Pool
 from itertools import product
+from multiprocessing import Pool
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from styleframe import StyleFrame
-
 from eurocalliopelib import utils
+from styleframe import StyleFrame
 
 idx = pd.IndexSlice
 
-SHEETS = ['ISI', 'NFM', 'CHI', 'NMM', 'PPA', 'FBT', 'TRE', 'MAE', 'TEL', 'WWP', 'OIS']
+SHEETS = ["ISI", "NFM", "CHI", "NMM", "PPA", "FBT", "TRE", "MAE", "TEL", "WWP", "OIS"]
 
 ENERGY_SHEET_COLORS = {
-    'section': ['FFC00000'],
-    'subsection': ['FF0070C0', '4f6228', '953735'],
-    'end_use': ['984807'],
-    'carrier_name': ['808080', 'e46c0a', '000000', 'dc9e9c']
+    "section": ["FFC00000"],
+    "subsection": ["FF0070C0", "4f6228", "953735"],
+    "end_use": ["984807"],
+    "carrier_name": ["808080", "e46c0a", "000000", "dc9e9c"],
 }
 
 ENERGY_SHEET_CARRIERS = {
@@ -38,8 +37,12 @@ def process_jrc_industry_data(data_dir, dataset, threads, out_path):
 
     processed_data.columns = processed_data.columns.rename("year").astype(int)
     processed_da = processed_data.stack().rename("jrc-idees-industry-twh").to_xarray()
-    country_code_mapping = utils.convert_valid_countries(processed_da.country_code.values)
-    processed_da = utils.rename_and_groupby(processed_da, country_code_mapping, dim_name="country_code")
+    country_code_mapping = utils.convert_valid_countries(
+        processed_da.country_code.values
+    )
+    processed_da = utils.rename_and_groupby(
+        processed_da, country_code_mapping, dim_name="country_code"
+    )
 
     processed_da.assign_attrs(unit=unit).to_netcdf(out_path)
 
@@ -47,8 +50,7 @@ def process_jrc_industry_data(data_dir, dataset, threads, out_path):
 def process_energy(data_filepaths, threads):
     with Pool(int(threads)) as pool:
         demand_consumption = pool.starmap(
-            get_jrc_idees_demand_consumption,
-            product(SHEETS, data_filepaths)
+            get_jrc_idees_demand_consumption, product(SHEETS, data_filepaths)
         )
 
     processed_data = pd.concat(demand_consumption).sort_index()
@@ -72,9 +74,7 @@ def get_jrc_idees_demand_consumption(sheet, file):
     consumption = get_jrc_idees_energy_sheet(f"{sheet}_fec", xls)
     demand = get_jrc_idees_energy_sheet(f"{sheet}_ued", xls)
     return pd.concat(
-        [consumption, demand],
-        names=['energy'],
-        keys=['consumption', 'demand']
+        [consumption, demand], names=["energy"], keys=["consumption", "demand"]
     )
 
 
@@ -87,27 +87,37 @@ def get_jrc_idees_energy_sheet(sheet_name, xls):
     df = pd.read_excel(xls, sheet_name=sheet_name)
     column_names = str(style_df.data_df.columns[0])
 
-    last_index_of_data = int(style_df[style_df[column_names].str.find('Market shares') > -1].item())
-    df = assign_section_level_based_on_colour(style_df, df, column_names, last_index_of_data)
+    last_index_of_data = int(
+        style_df[style_df[column_names].str.find("Market shares") > -1].item()
+    )
+    df = assign_section_level_based_on_colour(
+        style_df, df, column_names, last_index_of_data
+    )
     df, total_to_check = slice_on_indent(style_df, df, column_names, last_index_of_data)
     df = rename_carriers(df)
     df = assign_category_country_information(df, column_names)
 
     # Check that we haven't lost some data
     assert np.allclose(
-        total_to_check.reindex(df.columns).astype(float),
-        df.sum().astype(float)
+        total_to_check.reindex(df.columns).astype(float), df.sum().astype(float)
     )
 
     return df
 
 
-def assign_section_level_based_on_colour(style_df, df, column_names, last_index_of_data):
-
+def assign_section_level_based_on_colour(
+    style_df, df, column_names, last_index_of_data
+):
     for section_level, colours in ENERGY_SHEET_COLORS.items():
-        idx = style_df[column_names].style.font_color.isin(colours).loc[:last_index_of_data]
+        idx = (
+            style_df[column_names]
+            .style.font_color.isin(colours)
+            .loc[:last_index_of_data]
+        )
         df.loc[idx[idx].index, section_level] = (
-            style_df.loc[idx[idx].index, column_names].astype(str).where(lambda x: x != 'nan')
+            style_df.loc[idx[idx].index, column_names]
+            .astype(str)
+            .where(lambda x: x != "nan")
         )
     return df
 
@@ -122,7 +132,9 @@ def slice_on_indent(style_df, df, column_names, last_index_of_data):
     # We keep this to check at the end that we haven't lost some data
     total_to_check = df[df.indent == 1].sum()
 
-    df = df.dropna(subset=['section', 'subsection', 'end_use', 'carrier_name'], how='all')
+    df = df.dropna(
+        subset=["section", "subsection", "end_use", "carrier_name"], how="all"
+    )
 
     # All data between section/subsection names correspond to the preceding section/subsection name
     df["section"].ffill(inplace=True)
@@ -142,44 +154,42 @@ def rename_carriers(df):
             df.end_use.str.lower().str.contains(
                 carrier_search_string, regex=True, na=False
             ),
-            'carrier_name'
+            "carrier_name",
         ] = carrier_group
-    df.loc[df.end_use.isnull(), 'carrier_name'] = (
-        df.loc[df.end_use.isnull(), 'carrier_name'].fillna('Electricity')
-    )
+    df.loc[df.end_use.isnull(), "carrier_name"] = df.loc[
+        df.end_use.isnull(), "carrier_name"
+    ].fillna("Electricity")
     return df
 
 
 def assign_category_country_information(df, column_names):
-    index = ['section', 'subsection', 'carrier_name', 'country_code', 'cat_name']
+    index = ["section", "subsection", "carrier_name", "country_code", "cat_name"]
     return (
-        df
-        .assign(
-            cat_name=column_names.split(': ')[1].split(' / ')[0],
-            country_code=column_names.split(': ')[0]
+        df.assign(
+            cat_name=column_names.split(": ")[1].split(" / ")[0],
+            country_code=column_names.split(": ")[0],
         )
         .set_index(index)
-        .drop([column_names, 'indent', 'end_use'], axis="columns")
+        .drop([column_names, "indent", "end_use"], axis="columns")
         .sum(level=index)
     )
 
 
 def get_jrc_idees_production_sheet(sheet_name, xls):
     df = pd.read_excel(xls, sheet_name=sheet_name, index_col=0)
-    start = df.filter(regex='Physical output', axis=0)
-    end = df.filter(regex='Installed capacity', axis=0)
+    start = df.filter(regex="Physical output", axis=0)
+    end = df.filter(regex="Installed capacity", axis=0)
 
     return (
-        df
-        .loc[start.index[0]:end.index[0]]
+        df.loc[start.index[0] : end.index[0]]
         .iloc[1:-1]
-        .dropna(how='all')
+        .dropna(how="all")
         .assign(
-            country_code=df.index.name.split(':')[0],
-            cat_name=df.index.name.split(': ')[1],
+            country_code=df.index.name.split(":")[0],
+            cat_name=df.index.name.split(": ")[1],
         )
-        .rename_axis(index='produced_material')
-        .set_index(['country_code', 'cat_name'], append=True)
+        .rename_axis(index="produced_material")
+        .set_index(["country_code", "cat_name"], append=True)
     )
 
 
@@ -188,5 +198,5 @@ if __name__ == "__main__":
         data_dir=snakemake.input.unprocessed_data,
         dataset=snakemake.wildcards.dataset,
         threads=snakemake.threads,
-        out_path=snakemake.output[0]
+        out_path=snakemake.output[0],
     )
