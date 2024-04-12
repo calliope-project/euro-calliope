@@ -53,8 +53,7 @@ rule jrc_idees_unzipped:
         infill_country_config = config["data-pre-processing"]["fill-missing-values"]["jrc-idees"],
         countries = config["scope"]["spatial"]["countries"]
     wildcard_constraints:
-        # TODO: update `heat` to `tertiary` when moving other JRC-IDEES processing to this snakefile.
-        sector = "((industry)|(transport)|(heat))"
+        sector = "((industry)|(transport)|(tertiary))"
     output: temp(directory("build/data/jrc-idees/{sector}/unprocessed"))
     conda: "../envs/shell.yaml"
     shell:

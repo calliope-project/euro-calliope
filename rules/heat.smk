@@ -1,7 +1,7 @@
 rule jrc_idees_heat_processed:
     message: "Process tertiary heat data from JRC-IDEES"
     input:
-        data = "build/data/jrc-idees/heat/unprocessed"
+        data = "build/data/jrc-idees/tertiary/unprocessed"
     output: "build/data/jrc-idees/heat/commercial/processed.csv"
     conda: "../envs/default.yaml"
     script: "../scripts/heat/jrc_idees.py"
