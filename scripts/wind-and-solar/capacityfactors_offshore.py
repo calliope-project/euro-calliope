@@ -22,7 +22,7 @@ def capacityfactors(
     final_year=None,
 ):
     """Generate offshore capacityfactor time series for each location."""
-    eez = gpd.read_file(path_to_eez).set_index("mrgid").to_crs(EPSG3035).geometry
+    eez = gpd.read_file(path_to_eez).set_index("MRGID").to_crs(EPSG3035).geometry
     shared_coast = pd.read_csv(path_to_shared_coast, index_col=0)
     shared_coast.index = shared_coast.index.map(lambda x: x.replace(".", "-"))
     shared_coast.columns = shared_coast.columns.astype(int)
@@ -83,11 +83,11 @@ if __name__ == "__main__":
         path_to_timeseries=snakemake.input.timeseries,
         cf_threshold=float(snakemake.params.cf_threshold),
         gridcell_overlap_threshold=float(snakemake.params.gridcell_overlap_threshold),
-        first_year=str(snakemake.params.first_year)
-        if snakemake.params.trim_ts
-        else None,
-        final_year=str(snakemake.params.final_year)
-        if snakemake.params.trim_ts
-        else None,
+        first_year=(
+            str(snakemake.params.first_year) if snakemake.params.trim_ts else None
+        ),
+        final_year=(
+            str(snakemake.params.final_year) if snakemake.params.trim_ts else None
+        ),
         path_to_result=snakemake.output[0],
     )

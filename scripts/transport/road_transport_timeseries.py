@@ -61,7 +61,6 @@ def create_road_transport_demand_timeseries(
         .tz_localize(None)
         .rename_axis("utc-timestamp")
     )
-
     assert not df_timeseries.isna().any(
         axis=None
     ), "There are NaN values in the timeseries dataframe"
