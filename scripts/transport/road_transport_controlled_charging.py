@@ -2,9 +2,9 @@ import pandas as pd
 import pycountry
 
 
-def scale_to_regional_resolution(df, region_country_mapping, populations):
+def scale_to_subnational_resolution(df, region_country_mapping, populations):
     """
-    Create regional electricity demand for controlled charging.
+    Create subnational electricity demand for controlled charging.
     ASSUME all road transport is subnationally distributed in proportion to population.
     """
     df_population_share = (
@@ -98,7 +98,11 @@ if __name__ == "__main__":
     elif resolution == "national":
         df = scale_to_national_resolution(df)
     elif resolution == "regional":
-        df = scale_to_regional_resolution(
+        df = scale_to_subnational_resolution(
+            df, region_country_mapping=region_country_mapping, populations=populations
+        )
+    elif resolution == "ehighways":
+        df = scale_to_subnational_resolution(
             df, region_country_mapping=region_country_mapping, populations=populations
         )
     else:

@@ -15,7 +15,7 @@ def national_to_national_resolution(
     return annual_demand
 
 
-def national_to_regional_resolution(
+def national_to_subnational_resolution(
     annual_demand: pd.DataFrame,
     region_country_mapping: dict,
     populations: pd.DataFrame,
@@ -69,7 +69,9 @@ if __name__ == "__main__":
     elif resolution == "national":
         rescale_function = national_to_national_resolution
     elif resolution == "regional":
-        rescale_function = national_to_regional_resolution
+        rescale_function = national_to_subnational_resolution
+    elif resolution == "ehighways":
+        rescale_function = national_to_subnational_resolution
     else:
         raise ValueError(f"Unknown resolution {resolution}")
 

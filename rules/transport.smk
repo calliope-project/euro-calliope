@@ -49,8 +49,8 @@ rule create_controlled_road_transport_annual_demand:
     message: "Create annual demand for controlled charging at {wildcards.resolution} resolution"
     input:
         annual_controlled_demand = "build/data/transport/annual-road-transport-distance-demand-controlled.csv",
-        locations = "build/data/regional/units.csv",
-        populations = "build/data/regional/population.csv",
+        locations = "build/data/{resolution}/units.csv",
+        populations = "build/data/{resolution}/population.csv",
     params:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
