@@ -68,7 +68,7 @@ rule create_uncontrolled_road_transport_timeseries:
     message: "Create timeseries for road transport demand  (uncontrolled charging)"
     input:
         annual_data = "build/data/transport/annual-road-transport-distance-demand-uncontrolled.csv",
-        timeseries = "data/automatic/ramp-ev-consumption-profiles.csv.gz"
+        timeseries = "data/automatic/uncontrolled-charging-profiles.csv.gz"
     params:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
