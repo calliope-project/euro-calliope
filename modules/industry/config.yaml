@@ -4,6 +4,8 @@ industry:
         path-cat-names: config/energy-balances/energy-balance-category-names.csv
         path-carrier-names: config/energy-balances/energy-balance-carrier-names.csv
     outputs:
+        placeholder-out1:
+        placeholder-out2:
     params:
         year-range: [2000, 2018]  # Start and end year for JRC data parsing
         steel:

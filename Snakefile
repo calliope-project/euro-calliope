@@ -6,12 +6,16 @@ from snakemake.utils import validate, min_version, makedirs
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
 
-# Include modules
+# >>>>>> Include modules >>>>>>
+# Industry
 configfile: "modules/industry/config.yaml"
+validate(config["industry"], "modules/industry/schema.yaml")
+
 module module_industry:
     snakefile: "modules/industry/industry.smk"
     config: config["industry"]
 use rule * from module_industry as module_industry_*
+# <<<<<< Include modules <<<<<<
 
 
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
