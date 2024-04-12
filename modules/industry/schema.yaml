@@ -1,49 +1,53 @@
 $schema: https://json-schema.org/draft/2020-12/schema
 type: object
-additionalProperties: false
-description: Inputs, outputs and parameters used by the industry module.
+additionalProperties: true
 properties:
-    inputs:
+    industry:
+        description: Module subsection to ensure no name conflicts are possible between modules.
         type: object
         additionalProperties: false
-        description: Inputs are paths of prerequired files.
         properties:
-            path-energy-balances:
-                type: string
-                description: |
-                    Annual energy balance file.
-                    Columns [cat_code,carrier_code,unit,country,year,value].
-            path-cat-names:
-                type: string
-                description: |
-                    Category mapping file.
-                    Columns [cat_code,top_cat,sub_cat_contribution,sub_cat_1,sub_cat_2,jrc_idees].
-            path-carrier-names:
-                type: string
-                description: |
-                    Carrier mapping file.
-                    Columns [carrier_code,carrier_name,hh_carrier_name,com_carrier_name,ind_carrier_name,oth_carrier_name].
-    outputs:
-        type: object
-        description: Outputs are paths for the files produced by the module.
-    params:
-        type: object
-        additionalProperties: false
-        description: Parameters allow users to configure module behaviour.
-        properties:
-            year-range:
-                type: array
-                description: Initial and final year to parse.
-                prefixItems:
-                - type: "integer"
-                - type: "integer"
-            steel:
+            inputs:
                 type: object
                 additionalProperties: false
-                description: "Parameters specific to the 'Iron and steel' industry category."
+                description: Inputs are paths of prerequired files.
                 properties:
-                    recycled-steel-share:
-                        type: number
-                        description: "Share of recycled metal in the H-DRI steel process."
-                        minimum: 0
-                        maximum: 1
+                    path-energy-balances:
+                        type: string
+                        description: |
+                            Annual energy balance file.
+                            Columns [cat_code,carrier_code,unit,country,year,value].
+                    path-cat-names:
+                        type: string
+                        description: |
+                            Category mapping file.
+                            Columns [cat_code,top_cat,sub_cat_contribution,sub_cat_1,sub_cat_2,jrc_idees].
+                    path-carrier-names:
+                        type: string
+                        description: |
+                            Carrier mapping file.
+                            Columns [carrier_code,carrier_name,hh_carrier_name,com_carrier_name,ind_carrier_name,oth_carrier_name].
+            outputs:
+                type: object
+                description: Outputs are paths for the files produced by the module.
+            params:
+                type: object
+                additionalProperties: false
+                description: Parameters allow users to configure module behaviour.
+                properties:
+                    year-range:
+                        type: array
+                        description: Initial and final year to parse.
+                        prefixItems:
+                        - type: "integer"
+                        - type: "integer"
+                    steel:
+                        type: object
+                        additionalProperties: false
+                        description: "Parameters specific to the 'Iron and steel' industry category."
+                        properties:
+                            recycled-steel-share:
+                                type: number
+                                description: "Share of recycled metal in the H-DRI steel process."
+                                minimum: 0
+                                maximum: 1

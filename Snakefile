@@ -9,7 +9,7 @@ validate(config, "config/schema.yaml")
 # >>>>>> Include modules >>>>>>
 # Industry
 configfile: "modules/industry/config.yaml"
-validate(config["industry"], "modules/industry/schema.yaml")
+validate(config, "modules/industry/schema.yaml")
 
 module module_industry:
     snakefile: "modules/industry/industry.smk"

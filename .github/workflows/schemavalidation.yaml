@@ -33,4 +33,4 @@ jobs:
               run: python ./tests/validate_schema.py ./tests/resources/schema.yaml
             # Modules
             - name: Validate industry config
-              run: python ./tests/validate_schema.py ./modules/industry/config.yaml --config ./modules/industry/config.yaml
+              run: python ./tests/validate_schema.py ./modules/industry/schema.yaml --config ./modules/industry/config.yaml
