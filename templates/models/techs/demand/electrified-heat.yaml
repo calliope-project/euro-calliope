@@ -14,7 +14,7 @@ techs:
             carrier: electricity
         constraints:
             resource: file=demand/heat-demand-historic-electrification.csv
-            resource_min_use: 1
+            force_resource: true
 
 overrides:
     keep-historic-electricity-demand-from-heat:
