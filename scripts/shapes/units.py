@@ -15,16 +15,15 @@ def remix_units(
     path_to_gadm: str,
     path_to_output: str,
     resolution,
-    layer_config,
+    resolution_config,
     all_countries,
     path_to_statistical_to_custom_units,
 ):
     """Remixes NUTS, LAU, and GADM data to form the units of the analysis."""
-    # TODO: do I need to understand the validation functions?
     source_layers = _read_source_layers(path_to_nuts, path_to_gadm)
     _validate_source_layers(source_layers)
-    _validate_layer_config(all_countries, layer_config, resolution)
-    units = _build_layer(layer_config, source_layers)
+    _validate_resolution_config(all_countries, resolution_config, resolution)
+    units = _build_layer(resolution_config, source_layers)
     _validate_layer(units, resolution, all_countries)
     if resolution == "continental":
         # sum all of the units together into one block
@@ -37,7 +36,7 @@ def remix_units(
 
 
 def _custom_layer(base_units, path_to_statistical_to_custom_units):
-    """Combine the lower-level statistical units (aspecified in layer_config)
+    """Combine the lower-level statistical units (aspecified in resolution_config)
     into the custom units, according to statistical_to_custom_units, using _merge_units
     function.
 
@@ -45,7 +44,7 @@ def _custom_layer(base_units, path_to_statistical_to_custom_units):
     - path_to_statistical_to_custom_units: csv file that specifies which NUTS and GADM
         units contribute to each custom unit
     - layer: the GeoDataFrame covering the whole scope, where each country is formed
-        from units corresponding to the resolution specified in layer_config
+        from units corresponding to the resolution specified in resolution_config
     Outputs:
     -
 
@@ -105,23 +104,23 @@ def _merge_units(base_units, locations):
     return units
 
 
-def _build_layer(layer_config, source_layers):
+def _build_layer(resolution_config, source_layers):
     """
     Inputs:
-    - layer_config: a mapping of which statistical unit resolution each country should use as its base
+    - resolution_config: a mapping of which statistical unit resolution each country should use as its base
     - source_layers: a dict with keys as each statistical unit type (nuts[0-3] or gadmn[0-3])
         and values as a GeoDataFrame representing the collection of those units
     Returns:
     - layer: the GeoDataFrame covering the whole scope in source_layers, where each
         country is formed from units corresponding to the resolution specified in
-        layer_config
+        resolution_config
     """
     crs = [layer.crs for layer in source_layers.values()][0]
     layer = pd.concat([
         source_layers[source_layer][
             source_layers[source_layer].country_code == _iso3(country)
         ]
-        for country, source_layer in layer_config.items()
+        for country, source_layer in resolution_config.items()
     ])
     assert isinstance(layer, pd.DataFrame)
     return gpd.GeoDataFrame(layer, crs=crs)
@@ -150,8 +149,8 @@ def _validate_source_layers(source_layers):
     ), "Source layers have different crs. They must match."
 
 
-def _validate_layer_config(all_countries, layer_config, layer_name):
-    assert all(country in layer_config for country in all_countries), (
+def _validate_resolution_config(all_countries, resolution_config, layer_name):
+    assert all(country in resolution_config for country in all_countries), (
         f"Layer {layer_name} is not correctly " "defined."
     )
 
@@ -189,7 +188,7 @@ if __name__ == "__main__":
         path_to_gadm=snakemake.input.gadm,
         path_to_output=snakemake.output[0],
         all_countries=snakemake.params.all_countries,
-        layer_config=snakemake.params.layer_configs[resolution],
+        resolution_config=snakemake.params.resolution_configs[resolution],
         resolution=resolution,
         path_to_statistical_to_custom_units=snakemake.input.statistical_to_custom_units,
     )

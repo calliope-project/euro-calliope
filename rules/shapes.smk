@@ -86,7 +86,7 @@ rule units: # for original resolutions of regional, national, continental
         statistical_to_custom_units = lambda wildcards: config["data-pre-processing"]["statistical-to-custom-units"].get(wildcards.resolution, []) # returns[] if no mapping exists for chosen resolution
     params:
         all_countries = config["scope"]["spatial"]["countries"],
-        layer_configs = config["shapes"], # mapping between countries and their statistical unit resolution (e.g., DE: nuts0)
+        resolution_configs = config["shapes"], # mapping between countries and their statistical unit resolution (e.g., DE: nuts0)
     output: "build/data/{resolution}/units.geojson"
     conda: "../envs/geo.yaml"
     script: "../scripts/shapes/units.py"
