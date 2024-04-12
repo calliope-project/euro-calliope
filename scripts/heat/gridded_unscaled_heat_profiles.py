@@ -23,6 +23,13 @@ def get_unscaled_heat_profiles(
     out_path: str,
     year: Union[str, int],
 ) -> None:
+    """
+    Produces time series of heat demand profiles with the correct shape, and consistent
+    within themselves, but without meaningful units.
+    The profiles need to be scaled so their magnitude matches annual heat demand data
+    in a subsequent step.
+
+    """
     population = xr.open_dataarray(path_to_population)
     temperature_ds = xr.open_dataset(path_to_temperature).rename({
         lon_name: "x",
