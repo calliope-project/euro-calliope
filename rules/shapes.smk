@@ -92,6 +92,17 @@ rule units:
     script: "../scripts/shapes/units.py"
 
 
+rule units_without_shape_ehighways:
+    message: "Dataset of units on resolution ehighways without geo information."
+    input:
+        units = rules.units.output[0]
+    wildcard_constraints:
+        resolution = "ehighways"
+    output: "build/data/ehighways/units.csv"
+    # conda: "../envs/geo.yaml"
+    script: "cp data/ehighways/units.csv {output}"
+
+
 rule units_without_shape:
     message: "Dataset of units on resolution {wildcards.resolution} without geo information."
     input:
