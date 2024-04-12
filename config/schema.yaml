@@ -700,7 +700,7 @@ properties:
                         description: Region code
     shapes:
         description: >-
-            Source for the lowest-level spatial units of all locations. 
+            Source for the lowest-level spatial units of all locations.
             The config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
         # TODO: replace zenodo link with Bryn's new one, which includes the potentials for ehighways
         type: object
