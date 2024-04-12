@@ -31,8 +31,8 @@ def remix_units(
         # sum all of the units together into one block
         units = _continental_layer(units)
     elif path_to_statistical_to_custom_units != []:
-        _validate_nuts_year(nuts_year)
-        units.to_file("layer_debug.geojson")  # debug
+        # _validate_nuts_year(nuts_year)
+        units.to_file("layer_debug.geojson", driver=DRIVER)  # debug
         # sum units together according to custom mapping
         units = _custom_layer(units, path_to_statistical_to_custom_units, nuts_year)
     _write_layer(units, path_to_output)
@@ -74,6 +74,8 @@ def _custom_layer(base_units, path_to_statistical_to_custom_units, nuts_year):
         )
     )
 
+    # breakpoint()
+    base_units.to_file("layer_pre_merge.geojson", driver=DRIVER)  # debug
     units = _merge_units(base_units, locations)
     return units
 
@@ -301,7 +303,7 @@ if __name__ == "__main__":
         },
         resolution="ehighways",
         path_to_statistical_to_custom_units="config/shapes/statistical-to-ehighways-units.csv",
-        nuts_year="2006",
+        nuts_year="2013",
     )
     # ----------------------------------------------------------------------------------
 
