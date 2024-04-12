@@ -7,7 +7,7 @@ rule download_transport_timeseries:
     params:
         url = config["data-sources"]["controlled-ev-data"]
     conda: "../envs/shell.yaml"
-    output: 
+    output:
         protected("data/automatic/ramp-ev-{dataset}.csv.gz")
     wildcard_constraints:
         dataset = "consumption-profiles|plugin-profiles"
