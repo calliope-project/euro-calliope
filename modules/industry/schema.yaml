@@ -27,6 +27,14 @@ properties:
                         description: |
                             Carrier mapping file.
                             Columns [carrier_code,carrier_name,hh_carrier_name,com_carrier_name,ind_carrier_name,oth_carrier_name].
+                    path-jrc-industry-energy:
+                        type: string
+                        description: |
+                            JRC processed industry energy demand .nc file.
+                    path-jrc-industry-production:
+                        type: string
+                        description: |
+                            JRC processed industrial production .nc file.
             outputs:
                 type: object
                 description: Outputs are paths for the files produced by the module.

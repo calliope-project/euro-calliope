@@ -49,7 +49,7 @@ def fill_missing_data(
         .sum(level="cat_code", min_count=1)
         .stack("country")
         .rename_axis(index=["cat_name", "country_code"])
-        .apply(ec_utils.tj_to_ktoe)
+        .apply(ec_utils.tj_to_twh)
     )
 
     country_codes = subsector_energy_consumption_df.index.get_level_values(

@@ -15,7 +15,7 @@ def get_auxiliary_electricity_consumption(
     )
     specific_consumption = consumption.div(jrc_prod_df.loc[process].droplevel("unit"))
     specific_consumption.index = specific_consumption.index.set_levels(
-        ["ktoe/kt"], level="unit"
+        ["twh/kt"], level="unit"
     )
     return specific_consumption.fillna(0)
 
@@ -45,7 +45,7 @@ def get_specific_electricity_consumption(
     )
 
     specific_consumption = specific_demand.div(electrical_efficiency).rename(
-        index={"ktoe": "ktoe/kt"}
+        index={"twh": "twh/kt"}
     )
     assert (
         (

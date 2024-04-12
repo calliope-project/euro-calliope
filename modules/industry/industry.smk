@@ -22,8 +22,8 @@ rule steel_industry:
         path_energy_balances = config["inputs"]["path-energy-balances"],
         path_cat_names = config["inputs"]["path-cat-names"],
         path_carrier_names = config["inputs"]["path-carrier-names"],
-        path_jrc_energy = f"{DATA_PATH}/jrc_idees_processed_energy.csv.gz",
-        path_jrc_production = f"{DATA_PATH}/jrc_idees_processed_production.csv.gz",
+        path_jrc_industry_energy = config["inputs"]["path-jrc-industry-energy"],
+        path_jrc_industry_production = config["inputs"]["path-jrc-industry-production"],
     output:
         path_output = f"{BUILD_PATH}/annual_demand_steel.csv"
     script: f"{SCRIPT_PATH}/steel_industry.py"

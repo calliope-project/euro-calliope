@@ -2,13 +2,14 @@ from typing import Optional
 
 import eurocalliopelib.utils as ec_utils
 import pandas as pd
+import xarray as xr
 from utils import formatting
 from utils import jrc_idees_parser as jrc
 
 CAT_NAME_STEEL = "Iron and steel"
 
-H2_LHV_KTOE = 2.863  # 0.0333 TWh/kt LHV -> 2.863ktoe/kt
-HDRI_CONSUMPTION = 0.0116  # H-DRI: 135kWh_e/t = 0.0116ktoe/kt
+H2_LHV_KTOE = 0.0333  # 0.0333 TWh/kt LHV
+HDRI_CONSUMPTION = 135e-6  # H-DRI: 135kWh_e/t
 
 
 def _get_h2_to_steel(recycled_steel_share: float) -> float:
@@ -23,8 +24,8 @@ def get_steel_demand_df(
     path_energy_balances: str,
     path_cat_names: str,
     path_carrier_names: str,
-    path_jrc_energy: str,
-    path_jrc_production: str,
+    path_jrc_industry_energy: str,
+    path_jrc_industry_production: str,
     path_output: Optional[str] = None,
 ) -> pd.DataFrame:
     """Execute the data processing pipeline for the "Iron and steel" sub-sector.
@@ -34,8 +35,8 @@ def get_steel_demand_df(
         path_energy_balances (str): country energy balances (usually from eurostat).
         path_cat_names (str): eurostat category mapping file.
         path_carrier_names (str): eurostat carrier name mapping file.
-        path_jrc_energy (str): jrc country-specific industrial energy demand file.
-        path_jrc_production (str): jrc country-specific industrial production file.
+        path_jrc_industry_energy (str): jrc country-specific industrial energy demand file.
+        path_jrc_industry_production (str): jrc country-specific industrial production file.
         path_output (str): location of steel demand output file.
 
     Returns:
@@ -49,8 +50,18 @@ def get_steel_demand_df(
     )
     cat_names_df = pd.read_csv(path_cat_names, header=0, index_col=0)
     carrier_names_df = pd.read_csv(path_carrier_names, header=0, index_col=0)
-    energy_df = pd.read_csv(path_jrc_energy, index_col=[0, 1, 2, 3, 4, 5, 6])
-    prod_df = pd.read_csv(path_jrc_production, index_col=[0, 1, 2, 3])
+
+    energy_df = xr.open_dataset(path_jrc_industry_energy).to_dataframe().unstack("year")
+    energy_df["unit"] = "twh"
+    energy_df = energy_df.set_index("unit", append=True)
+    energy_df.columns = energy_df.columns.droplevel()
+    prod_df = (
+        xr.open_dataset(path_jrc_industry_production).to_dataframe().unstack("year")
+    )
+    prod_df["unit"] = "twh"
+    prod_df = prod_df.set_index("unit", append=True)
+    prod_df.columns = prod_df.columns.droplevel()
+
     # Ensure dataframes only have data specific to this industry
     cat_names_df = cat_names_df[cat_names_df["jrc_idees"] == CAT_NAME_STEEL]
     energy_df = energy_df.xs(CAT_NAME_STEEL, level="cat_name", drop_level=False)
@@ -211,7 +222,7 @@ def process_steel_energy_consumption(
         .assign(carrier="space_heat")
         .set_index("carrier", append=True)
         .sum(level=total_specific_consumption.index.names)
-        .rename(index={"ktoe": "ktoe/kt"})
+        .rename(index={"twh": "twh/kt"})
     )
     total_specific_consumption = total_specific_consumption.append(
         space_heat_specific_demand
@@ -220,7 +231,7 @@ def process_steel_energy_consumption(
     steel_consumption = total_specific_consumption.mul(
         jrc_prod_df.xs("Iron and steel", level="cat_name").sum(level="country_code"),
         level="country_code",
-    ).rename(index={"ktoe/kt": "ktoe"})
+    ).rename(index={"twh/kt": "twh"})
 
     return steel_consumption
 
@@ -232,7 +243,7 @@ if __name__ == "__main__":
         path_energy_balances=snakemake.input.path_energy_balances,
         path_cat_names=snakemake.input.path_cat_names,
         path_carrier_names=snakemake.input.path_carrier_names,
-        path_jrc_energy=snakemake.input.path_jrc_energy,
-        path_jrc_production=snakemake.input.path_jrc_production,
+        path_jrc_industry_energy=snakemake.input.path_jrc_industry_energy,
+        path_jrc_industry_production=snakemake.input.path_jrc_industry_production,
         path_output=snakemake.output.path_output,
     )
