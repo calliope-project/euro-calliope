@@ -270,7 +270,7 @@ sea-connections:
         - [EST.7_1, EST.2_1] # Lääne and Hiiu
         - [EST.7_1, EST.12_1] # Lääne and Saare
     ehighways:
-        - [UKJ22, IRL]  # Dummy for testing. TODO: replace with real data
+        - [GBR_1, IRL_1]  # Dummy for testing. TODO: replace with real data
 scope:
     spatial:
         countries:
