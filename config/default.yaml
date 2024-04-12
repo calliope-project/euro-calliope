@@ -39,7 +39,8 @@ data-pre-processing:
             MNE: [HRV]
             SRB: [HUN]
             CYP: [ROU]
-    statistical-to-custom-units: # this is picked up by rule `units` to build custom spatial units
+    statistical-to-custom-units:
+        # FYI: E-highways were initially defined using NUTS3 units from 2006, but this mapping was manually created to map NUTS units from any year up to 2016 to E-highways. This is picked up by rule `units` to build custom spatial units.
         ehighways: config/shapes/statistical-to-ehighways-units.csv
 root-directory: .
 cluster-sync:
