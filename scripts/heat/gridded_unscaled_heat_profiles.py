@@ -24,12 +24,10 @@ def get_unscaled_heat_profiles(
     year: Union[str, int],
 ) -> None:
     population = xr.open_dataarray(path_to_population)
-    temperature_ds = xr.open_dataset(path_to_temperature).rename(
-        {
-            lon_name: "x",
-            lat_name: "y",
-        }
-    )
+    temperature_ds = xr.open_dataset(path_to_temperature).rename({
+        lon_name: "x",
+        lat_name: "y",
+    })
     # Only need site-wide mean wind speed for this analysis
     wind_ds = xr.open_dataset(path_to_wind_speed).rename({lon_name: "x", lat_name: "y"})
     average_wind_speed = wind_ds["wind_speed"].mean("time")
