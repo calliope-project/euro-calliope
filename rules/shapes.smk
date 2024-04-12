@@ -87,7 +87,6 @@ rule units: # for original resolutions of regional, national, continental
     params:
         all_countries = config["scope"]["spatial"]["countries"],
         layer_configs = config["shapes"], # mapping between countries and their statistical unit resolution (e.g., DE: nuts0)
-        nuts_year = config["parameters"].get("nuts-year", []) # returns None if no nuts-year
     wildcard_constraints:
         resolution = "continental|national|regional|ehighways" # extend for new resolutions
     output: "build/data/{resolution}/units.geojson"

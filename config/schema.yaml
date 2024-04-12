@@ -148,8 +148,8 @@ properties:
                     (i.e., NUTS and GADM) are combined to form units of a custom
                     resolutions (e.g., ehighways).
                     Columns must include: country_code, NUTS3_<year>, Source, id
-                    There may be multiple columns of NUTS3_<year>, but <year> must
-                    include the year specified in default.yaml: parameters: nuts-year
+                    There may be multiple columns of NUTS3_<year>, so that in future,
+                    flexibility in choosing the year could be implemented.
                 additionalProperties: false
                 patternProperties:
                     ^[a-zA-Z]+.*$:

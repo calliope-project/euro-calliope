@@ -18,7 +18,6 @@ def remix_units(
     layer_config,
     all_countries,
     path_to_statistical_to_custom_units,
-    nuts_year: str,
 ):
     """Remixes NUTS, LAU, and GADM data to form the units of the analysis."""
     # TODO: do I need to understand the validation functions?
@@ -31,14 +30,12 @@ def remix_units(
         # sum all of the units together into one block
         units = _continental_layer(units)
     elif path_to_statistical_to_custom_units != []:
-        # _validate_nuts_year(nuts_year)
-        units.to_file("layer_debug.geojson", driver=DRIVER)  # debug
         # sum units together according to custom mapping
-        units = _custom_layer(units, path_to_statistical_to_custom_units, nuts_year)
+        units = _custom_layer(units, path_to_statistical_to_custom_units)
     _write_layer(units, path_to_output)
 
 
-def _custom_layer(base_units, path_to_statistical_to_custom_units, nuts_year):
+def _custom_layer(base_units, path_to_statistical_to_custom_units):
     """Combine the lower-level statistical units (aspecified in layer_config)
     into the custom units, according to statistical_to_custom_units, using _merge_units
     function.
@@ -46,7 +43,6 @@ def _custom_layer(base_units, path_to_statistical_to_custom_units, nuts_year):
     Inputs:
     - path_to_statistical_to_custom_units: csv file that specifies which NUTS and GADM
         units contribute to each custom unit
-    - nuts_year: string of year used for the NUTS units in statistical_to_custom_units
     - layer: the GeoDataFrame covering the whole scope, where each country is formed
         from units corresponding to the resolution specified in layer_config
     Outputs:
@@ -58,6 +54,7 @@ def _custom_layer(base_units, path_to_statistical_to_custom_units, nuts_year):
     """
 
     stat_to_custom_units_df = pd.read_csv(path_to_statistical_to_custom_units, header=0)
+    nuts_year = 2013  # This was a variable in Bryn's SC EC, but hardcoded to 2013 in EC. Consider that the year needs to match for both the (downloaded nuts units) and (nuts to custom region mapping)
     nuts_year_string = f"NUTS3_{nuts_year}"
 
     # locations is a series indexed by the statistical unit (NUTS or GADM) with values of the id (e.g., the ehighways unit)
@@ -74,8 +71,6 @@ def _custom_layer(base_units, path_to_statistical_to_custom_units, nuts_year):
         )
     )
 
-    # breakpoint()
-    base_units.to_file("layer_pre_merge.geojson", driver=DRIVER)  # debug
     units = _merge_units(base_units, locations)
     return units
 
@@ -147,25 +142,6 @@ def _read_source_layers(path_to_nuts, path_to_gadm):
     return source_layers
 
 
-def _validate_nuts_year(nuts_year: str):
-    """Parameters:
-    - nuts_year (str or list): The year to be validated. Expected to be a string that can
-      be converted to an integer. If nuts_year is an empty list `[]`, it is considered
-      invalid.
-    """
-
-    # Check if nuts_year is a string of an integer as it should be
-    is_valid = isinstance(nuts_year, str)
-    if is_valid:
-        try:
-            int(nuts_year)
-        except ValueError:
-            is_valid = False
-
-    err_msg = "For custom units, nuts-year must be given in the config file parameters as a string."
-    assert is_valid, err_msg
-
-
 def _validate_source_layers(source_layers):
     crs = [layer.crs for layer in source_layers.values()]
     assert not crs or crs.count(crs[0]) == len(
@@ -206,106 +182,6 @@ def _write_layer(gdf, path_to_file):
 
 
 if __name__ == "__main__":
-    # DEBUG ----------------------------------------------------------------------------
-    # breakpoint()
-
-    # building national resolution units (with layer_config a bit varied) - works fine!
-    # resolution = "national"
-    # remix_units(
-    #     path_to_nuts="build/data/administrative-borders-nuts.gpkg",
-    #     path_to_gadm="build/data/administrative-borders-gadm.gpkg",
-    #     path_to_output="build/data/national/units.geojson",
-    #     all_countries=["Ireland", "United Kingdom"],
-    #     layer_config={
-    #         "Ireland": "nuts0",
-    #         "United Kingdom": "nuts0",
-    #         "Austria": "nuts0",
-    #         "Belgium": "nuts0",
-    #         "Bulgaria": "nuts0",
-    #         "Croatia": "nuts0",
-    #         "Cyprus": "nuts0",
-    #         "Czech Republic": "nuts0",
-    #         "Denmark": "nuts0",
-    #         "Estonia": "nuts0",
-    #         "Finland": "nuts0",
-    #         "France": "nuts0",
-    #         "Germany": "nuts0",
-    #         "Greece": "nuts0",
-    #         "Hungary": "nuts0",
-    #         "Italy": "nuts0",
-    #         "Latvia": "nuts0",
-    #         "Lithuania": "nuts0",
-    #         "Luxembourg": "nuts0",
-    #         "Netherlands": "nuts0",
-    #         "Poland": "nuts0",
-    #         "Portugal": "nuts0",
-    #         "Romania": "nuts0",
-    #         "Slovakia": "nuts0",
-    #         "Slovenia": "nuts0",
-    #         "Spain": "nuts0",
-    #         "Sweden": "nuts0",
-    #         "Albania": "gadm0",
-    #         "Bosnia and Herzegovina": "gadm0",
-    #         "Macedonia, Republic of": "gadm0",
-    #         "Montenegro": "gadm0",
-    #         "Norway": "nuts0",
-    #         "Serbia": "gadm0",
-    #         "Switzerland": "nuts0",
-    #     },
-    #     resolution="national",
-    #     statistical_to_custom_units=[],
-    #     nuts_year=[],
-    # )
-
-    # building ehighways
-    resolution = "ehighways"
-    remix_units(
-        path_to_nuts="build/data/administrative-borders-nuts.gpkg",
-        path_to_gadm="build/data/administrative-borders-gadm.gpkg",
-        path_to_output="build/data/ehighways/units.geojson",
-        all_countries=["Ireland", "United Kingdom"],
-        layer_config={
-            "Austria": "nuts3",
-            "Belgium": "nuts0",
-            "Bulgaria": "nuts0",
-            "Croatia": "nuts0",
-            "Cyprus": "nuts0",
-            "Czech Republic": "nuts3",
-            "Denmark": "nuts3",
-            "Estonia": "nuts0",
-            "Finland": "nuts3",
-            "France": "nuts3",
-            "Germany": "nuts3",
-            "Greece": "nuts3",
-            "Hungary": "nuts0",
-            "Ireland": "nuts0",
-            "Italy": "nuts3",
-            "Latvia": "nuts0",
-            "Lithuania": "nuts0",
-            "Luxembourg": "nuts0",
-            "Netherlands": "nuts0",
-            "Poland": "nuts3",
-            "Portugal": "nuts3",
-            "Romania": "nuts3",
-            "Slovakia": "nuts0",
-            "Slovenia": "nuts0",
-            "Spain": "nuts3",
-            "Sweden": "nuts3",
-            "United Kingdom": "nuts3",
-            "Albania": "gadm0",
-            "Bosnia and Herzegovina": "gadm0",
-            "Macedonia, Republic of": "gadm0",
-            "Montenegro": "gadm0",
-            "Norway": "nuts3",
-            "Serbia": "gadm0",
-            "Switzerland": "nuts3",
-            "Iceland": "nuts0",
-        },
-        resolution="ehighways",
-        path_to_statistical_to_custom_units="config/shapes/statistical-to-ehighways-units.csv",
-        nuts_year="2013",
-    )
-    # ----------------------------------------------------------------------------------
 
     resolution = snakemake.wildcards[0]
     remix_units(
@@ -316,5 +192,4 @@ if __name__ == "__main__":
         layer_config=snakemake.params.layer_configs[resolution],
         resolution=resolution,
         path_to_statistical_to_custom_units=snakemake.input.statistical_to_custom_units,
-        nuts_year=snakemake.params.nuts_year,
-    )
+        )
