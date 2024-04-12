@@ -110,7 +110,7 @@ properties:
             uncontrolled-ev-data:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
-                description: Web address of electric vehicle data.
+                description: Web address of electric light-duty vehicle uncontrolled charging.
     data-pre-processing:
         type: object
         description: Parameters for the pre-processing of raw data.
