@@ -15,10 +15,7 @@ rule download_transport_timeseries:
 rule jrc_idees_transport_processed:
     message: "Process {wildcards.dataset} transport data from JRC-IDEES to be used in understanding current and future transport demand"
     input:
-        data = expand(
-            "build/data/jrc-idees/transport/unprocessed/{country_code}.xlsx",
-            country_code=JRC_IDEES_SCOPE
-        )
+        data = "build/data/jrc-idees/transport/unprocessed"
     output: "build/data/jrc-idees/transport/processed-{dataset}.csv"
     params:
         vehicle_type_names = config["parameters"]["transport"]["vehicle-type-names"],

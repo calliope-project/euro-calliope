@@ -28,6 +28,7 @@ techs_template_dir = f"{model_template_dir}techs/"
 
 include: "./rules/shapes.smk"
 include: "./rules/data.smk"
+include: "./rules/jrc-idees.smk"
 include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
@@ -37,6 +38,7 @@ include: "./rules/nuclear.smk"
 include: "./rules/transport.smk"
 include: "./rules/sync.smk"
 include: "./rules/heat.smk"
+
 min_version("7.8")
 localrules: all, clean
 wildcard_constraints:
