@@ -146,9 +146,9 @@ properties:
                 description: >-
                     Path to a csv file which defines how lower-level statistical units
                     (i.e., NUTS and GADM) are combined to form units of a custom
-                    resolutions (e.g., ehighways). FYI: E-highways were initially 
-                    defined using NUTS3 units from 2006, but this mapping was manually 
-                    created to map NUTS units from any year up to 2016 to E-highways. 
+                    resolutions (e.g., ehighways). FYI: E-highways were initially
+                    defined using NUTS3 units from 2006, but this mapping was manually
+                    created to map NUTS units from any year up to 2016 to E-highways.
                     This is picked up by rule `units` to build custom spatial units.
                     Columns must include: country_code, NUTS3_<year>, Source, id
                     There may be multiple columns of NUTS3_<year>, so that in future,
