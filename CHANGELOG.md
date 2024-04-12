@@ -58,6 +58,7 @@
 * **FIX** fixed optimisation tolerance of hydro power plants from xtol to xatol (#266).
 * **FIX** source of Exclusive Economic Zones (EEZ) to use a cache on [zenodo](https://sandbox.zenodo.org/records/45135) so that we can keep using v11 (#332).  FIXME: update to actual zenodo record before next Euro-Calliope release.
 * **FIX** fixed rule `download_basins_database`, which previously failed on some linux and mac machines, by requiring a more recent curl in the environment `envs/shell.yaml` (#267).
+* **FIX** pin `h5py` and `hdf5` in all environments which rely on `xarray`, to prevent issues on linux-x86.
 
 ## 1.1.0 (2021-12-22)
 
