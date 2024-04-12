@@ -63,7 +63,7 @@ overrides:
                 constraints:
                     demand_shape_per_month_min_time_varying: file=demand/demand-shape-min-ev.csv
                     demand_shape_per_month_max_time_varying: file=demand/demand-shape-max-ev.csv
-    
+
     monthly_transport_demand_equality:
         techs:
             demand_road_transport_electrified_controlled:
@@ -78,7 +78,7 @@ overrides:
         locations:
     {% for location in locations.index %}
             {{ location }}:
-                techs: 
+                techs:
                     road_transport_controlled_dummy:
                         constraints:
                             energy_cap_max: {{ locations.loc[location, year] }} # {{ (1 / scaling_factors.transport) | unit("Mio km") }}
