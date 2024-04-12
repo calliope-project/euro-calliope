@@ -107,7 +107,7 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of electric vehicle data.
-            charging-ev-data:
+            uncontrolled-ev-data:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of electric vehicle data.

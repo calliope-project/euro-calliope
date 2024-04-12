@@ -16,13 +16,13 @@ def create_road_transport_demand_timeseries(
     path_to_output: str,
 ) -> None:
     # Read annual road transport distance into panda dataframe
+
     df_annual = (
         pd.read_csv(path_to_annual_data, index_col=[0, 1, 2], parse_dates=[2])
         .squeeze()
         .xs(vehicle_type)
         .xs(slice(str(first_year), str(final_year + 1)), level="year", drop_level=False)
         .unstack("country_code")
-        .tz_localize("UTC")
         .resample("H")
         .ffill()
         .iloc[:-1]
@@ -58,7 +58,6 @@ def create_road_transport_demand_timeseries(
             1 if historic else -1
         )  # historic demand is actually a supply to avoid double counting
         .loc[:, country_codes]
-        .tz_localize(None)
         .rename_axis("utc-timestamp")
     )
     assert not df_timeseries.isna().any(
@@ -69,7 +68,8 @@ def create_road_transport_demand_timeseries(
 
 def fill_empty_country(df, country_neighbour_dict):
     for country, neighbours in country_neighbour_dict.items():
-        assert country not in df.columns
+        if country in df.columns:
+            continue
         df[country] = df[neighbours].mean(axis=1)
     return df
 
