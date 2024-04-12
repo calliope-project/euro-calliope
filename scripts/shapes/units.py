@@ -182,7 +182,6 @@ def _write_layer(gdf, path_to_file):
 
 
 if __name__ == "__main__":
-
     resolution = snakemake.wildcards[0]
     remix_units(
         path_to_nuts=snakemake.input.nuts,
@@ -192,4 +191,4 @@ if __name__ == "__main__":
         layer_config=snakemake.params.layer_configs[resolution],
         resolution=resolution,
         path_to_statistical_to_custom_units=snakemake.input.statistical_to_custom_units,
-        )
+    )
