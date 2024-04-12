@@ -80,7 +80,7 @@ def extract_national_ev_charging_potentials(
         .squeeze()
         .droplevel(["vehicle_subtype", "section"])
     )
-    assert df_ev_numbers.isnull().values.any() == False
+    assert not df_ev_numbers.isnull().values.any()
     # Compute max. distance travelled per full battery for one EV [in Mio km / vehicle]
     battery_size = pd.DataFrame.from_dict(
         {
