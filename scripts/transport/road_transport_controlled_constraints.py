@@ -53,16 +53,18 @@ def get_national_ev_profiles(
         .xs(slice(first_year, final_year), level="year")
         .unstack("country_code")
         .droplevel(level=0, axis="columns")
-        .groupby(by=lambda idx: idx.year)
-        .transform(lambda x: x / x.sum())
-        .pipe(fill_empty_country, country_neighbour_dict)
-        .loc[:, country_codes]
     )
     if "demand" in dataset_name:
-        df = df_timeseries.mul(demand_range[dataset_name.split("-")[-1]])
+        # Normalise demand and create min-max-equals timeseries
+        df = (
+            df_timeseries.groupby(by=lambda idx: idx.year)
+            .transform(lambda x: x / x.sum())
+            .mul(demand_range[dataset_name.split("-")[-1]])
+        )
     elif "plugin" in dataset_name:
+        # plugin-profiles are already normalised
         df = df_timeseries
-    return df
+    return df.pipe(fill_empty_country, country_neighbour_dict).loc[:, country_codes]
 
 
 def fill_empty_country(df, country_neighbour_dict):
