@@ -172,9 +172,9 @@ class TestRenameAndGroupby:
         ("de", "DEU", "alpha3"),
         ("Germany", "DE", "alpha2"),
         ("United Kingdom", "GB", "alpha2"),
-        ("United Kingdom", "UK", "alpha2_eurostat"),
+        ("United Kingdom", "UK", "alpha2_eu"),
         ("Greece", "GR", "alpha2"),
-        ("Greece", "EL", "alpha2_eurostat"),
+        ("Greece", "EL", "alpha2_eu"),
         ("bh", "BA", "alpha2"),
     ],
 )
@@ -219,4 +219,4 @@ def test_valid_list_of_country_codes(countries, expected_output):
     [("uk", "UK"), ("el", "EL"), ("de", "DE"), ("Germany", "DE"), ("Greece", "EL")],
 )
 def test_conversion_to_eu_alpha2(input, alpha2):
-    assert convert_country_code(input, "alpha2_eurostat") == alpha2
+    assert convert_country_code(input, "alpha2_eu") == alpha2

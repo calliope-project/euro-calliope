@@ -21,7 +21,7 @@ def convert_country_code(input_country, output="alpha3"):
     Converts input country code or name into either either a 2- or 3-letter code.
 
     ISO alpha2: alpha2
-    ISO alpha2 with Eurostat codes: alpha2_eurostat
+    ISO alpha2 with EU codes: alpha2_eu
     ISO alpha3: alpha3
 
     """
@@ -38,7 +38,7 @@ def convert_country_code(input_country, output="alpha3"):
     if output == "alpha2":
         return pycountry.countries.lookup(input_country).alpha_2
 
-    if output == "alpha2_eurostat":
+    if output == "alpha2_eu":
         result = pycountry.countries.lookup(input_country).alpha_2
         if result == "GB":
             return "UK"
