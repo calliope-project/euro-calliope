@@ -22,7 +22,7 @@ data-sources:
     ev-data: https://zenodo.org/record/6579421/files/ramp-ev-consumption-profiles.csv.gz?download=1
     gridded-temperature-data: https://zenodo.org/records/6557643/files/temperature.nc?download=1
     gridded-10m-windspeed-data: https://zenodo.org/records/6557643/files/wind10m.nc?download=1
-    when2heat-params: https://raw.githubusercontent.com/oruhnau/when2heat/351bd1a2f9392ed50a7bdb732a103c9327c51846/input/bgw_bdew/{dataset}
+    when2heat-params: https://zenodo.org/records/10965295/files/{dataset}?download=1
     population: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/JRC_GRID_2018.zip
 data-pre-processing:
     fill-missing-values:
