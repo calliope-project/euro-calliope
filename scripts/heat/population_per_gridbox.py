@@ -12,28 +12,31 @@ GRIDBOX_SIZE = 25000  # MERRA-2 grid
 idx = pd.IndexSlice
 
 
-# FIXME this will most likely be entirely replaced once a more generalised way to deal
+# TODO this will most likely be entirely replaced once a more generalised way to deal
 # with spatial units is available
-def gridded_weather_population(
-    path_to_population,
-    path_to_locations,
-    path_to_wind_speed,  # FIXME: this is used to get the coordinates, but nothing else
-    lat_name,
-    lon_name,
-    out_path,
-):
-    # preprocessed weather data is gridded across Europe with WGS84 projection and
-    # includes hourly temperature (in K), average wind speed (in m/s) at every grid point.
-    wind_speed_ds = xr.open_dataset(path_to_wind_speed)
+def population_on_weather_grid(
+    path_to_population: str,
+    path_to_locations: str,
+    path_to_coordinates: str,
+    lat_name: str,
+    lon_name: str,
+    out_path: str,
+) -> None:
+    # We need the coordinates. This can be any file with gridded data across Europe
+    # with WGS84 projection which will be used to generate which the grid
+    # At minimum, the dataset must contain the `site` coordinate and latitude and
+    # longitude variables
+    coordinate_ds = xr.open_dataset(path_to_coordinates)
 
-    # Locations are shapefiles at the resolution of interest (e.g. countries for resolution `national`)
+    # Locations are shapefiles at the resolution of interest
+    # (e.g. countries for resolution `national`)
     locations = gpd.read_file(path_to_locations)
 
     gridbox_points = gpd.GeoDataFrame(
         geometry=gpd.points_from_xy(
-            wind_speed_ds[lon_name].values, wind_speed_ds[lat_name].values
+            coordinate_ds[lon_name].values, coordinate_ds[lat_name].values
         ),
-        index=wind_speed_ds.site.to_index(),
+        index=coordinate_ds.site.to_index(),
         crs=WGS84,
     )
     # To go from a grid of points to a grid of boxes filling the entire space,
@@ -51,13 +54,13 @@ def gridded_weather_population(
     )
 
     with rasterio.open(path_to_population) as src:
-        array = src.read(1)
+        population = src.read(1)
         meta = src.meta
         affine = src.transform
 
         population_per_complete_or_partial_gridbox_polygon = zonal_stats(
             gridboxes_mapped_to_locations.to_crs(meta["crs"]),
-            array,
+            population,
             affine=affine,
             stats="sum",
             nodata=meta["nodata"],
@@ -66,14 +69,14 @@ def gridded_weather_population(
             i["sum"] for i in population_per_complete_or_partial_gridbox_polygon
         ]
 
-        population_per_country = zonal_stats(
+        population_per_zone = zonal_stats(
             locations.to_crs(meta["crs"]),
-            array,
+            population,
             affine=affine,
             stats="sum",
             nodata=meta["nodata"],
         )
-        locations["population"] = [i["sum"] for i in population_per_country]
+        locations["population"] = [i["sum"] for i in population_per_zone]
 
     # Confirm that the total population is valid (i.e. we haven't picked up or lost regions).
     # This is a test that the gridboxes cover all land with population that we are interested in.
@@ -90,10 +93,10 @@ def gridded_weather_population(
 
 
 if __name__ == "__main__":
-    gridded_weather_population(
+    population_on_weather_grid(
         path_to_population=snakemake.input.population,
         path_to_locations=snakemake.input.locations,
-        path_to_wind_speed=snakemake.input.wind_speed,
+        path_to_coordinates=snakemake.input.wind_speed,
         lat_name=snakemake.params.lat_name,
         lon_name=snakemake.params.lon_name,
         out_path=snakemake.output[0],

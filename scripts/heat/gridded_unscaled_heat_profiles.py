@@ -1,9 +1,12 @@
 """
-Use weather data to simulate hourly heat profiles using When2Heat (https://github.com/oruhnau/when2heat) data processing pipline.
-Functions attributable to When2Heat are explictily referenced as such in the function docstring.
+Use weather data to simulate hourly heat profiles using When2Heat
+(https://github.com/oruhnau/when2heat) data processing pipeline.
+Functions attributable to When2Heat are explictily referenced as such
+in the function docstring.
 """
 
 import os
+from typing import Callable, Union
 
 import numpy as np
 import pandas as pd
@@ -11,23 +14,25 @@ import xarray as xr
 
 
 def get_unscaled_heat_profiles(
-    path_to_population,
-    path_to_wind_speed,
-    path_to_temperature,
-    path_to_when2heat_params,
-    lat_name,
-    lon_name,
-    out_path,
-    year,
-):
+    path_to_population: str,
+    path_to_wind_speed: str,
+    path_to_temperature: str,
+    path_to_when2heat_params: str,
+    lat_name: str,
+    lon_name: str,
+    out_path: str,
+    year: Union[str, int],
+) -> None:
     population = xr.open_dataarray(path_to_population)
-    temperature_ds = xr.open_dataset(path_to_temperature).rename({
-        lon_name: "x",
-        lat_name: "y",
-    })
+    temperature_ds = xr.open_dataset(path_to_temperature).rename(
+        {
+            lon_name: "x",
+            lat_name: "y",
+        }
+    )
     # Only need site-wide mean wind speed for this analysis
     wind_ds = xr.open_dataset(path_to_wind_speed).rename({lon_name: "x", lat_name: "y"})
-    wind_da = wind_ds["wind_speed"].mean("time")
+    average_wind_speed = wind_ds["wind_speed"].mean("time")
 
     # Subset temperature to the selected year extended by a couple of days either end,
     # so we don't compute values for years we don't need, but keep a buffer for the shifts
@@ -51,7 +56,9 @@ def get_unscaled_heat_profiles(
     hourly_params = read_hourly_parameters(path_to_when2heat_params)
 
     # Get daily demand
-    daily_heat = get_daily_heat_demand(reference_temperature, wind_da, daily_params)
+    daily_heat = get_daily_heat_demand(
+        reference_temperature, average_wind_speed, daily_params
+    )
 
     # Map profiles to daily demand
     hourly_heat = get_hourly_heat_profiles(
@@ -71,7 +78,11 @@ def get_unscaled_heat_profiles(
     grouped_hourly_heat.to_netcdf(out_path)
 
 
-def get_hourly_heat_profiles(reference_temperature, daily_heat, hourly_params):
+def get_hourly_heat_profiles(
+    reference_temperature: Union[int, float],
+    daily_heat: xr.DataArray,
+    hourly_params: pd.DataFrame,
+) -> xr.DataArray:
     """
     reference_temperature: temperature in degrees C
 
@@ -103,7 +114,7 @@ def get_hourly_heat_profiles(reference_temperature, daily_heat, hourly_params):
     return hourly_heat
 
 
-def hour_and_day_to_datetime(da):
+def hour_and_day_to_datetime(da: xr.DataArray) -> xr.DataArray:
     da = da.stack(new_time=["time", "hour"])
     new_time = da.new_time.to_index()
     da.coords["new_time"] = new_time.get_level_values(0) + pd.to_timedelta(
@@ -112,13 +123,13 @@ def hour_and_day_to_datetime(da):
     return da.rename({"new_time": "time"})
 
 
-def read_daily_parameters(input_path):
+def read_daily_parameters(input_path: str) -> pd.DataFrame:
     # Direct copy from https://github.com/oruhnau/when2heat/blob/351bd1a2f9392ed50a7bdb732a103c9327c51846/scripts/read.py
     file = os.path.join(input_path, "daily_demand.csv")
     return pd.read_csv(file, sep=";", decimal=",", header=[0, 1], index_col=0)
 
 
-def read_hourly_parameters(input_path):
+def read_hourly_parameters(input_path: str) -> pd.DataFrame:
     # Modified from https://github.com/oruhnau/when2heat/blob/351bd1a2f9392ed50a7bdb732a103c9327c51846/scripts/read.py
     # to set columns as integer
     parameters = {}
@@ -152,7 +163,7 @@ def read_hourly_parameters(input_path):
     return combined_df.stack()
 
 
-def get_reference_temperature(temperature: xr.DataArray, time_dim="time"):
+def get_reference_temperature(temperature: xr.DataArray, time_dim: str = "time"):
     # Modified from https://github.com/oruhnau/when2heat/blob/351bd1a2f9392ed50a7bdb732a103c9327c51846/scripts/demand.py
     # to expect xarray not pandas
 
@@ -165,7 +176,9 @@ def get_reference_temperature(temperature: xr.DataArray, time_dim="time"):
     ) / sum(0.5**i for i in range(4))
 
 
-def get_daily_heat_demand(temperature, wind, all_parameters):
+def get_daily_heat_demand(
+    temperature: xr.DataArray, average_wind: xr.DataArray, all_parameters: pd.DataFrame
+) -> xr.DataArray:
     # Direct copy from https://github.com/oruhnau/when2heat/blob/351bd1a2f9392ed50a7bdb732a103c9327c51846/scripts/demand.py
 
     def heat_function(t, parameters):
@@ -185,10 +198,15 @@ def get_daily_heat_demand(temperature, wind, all_parameters):
 
         return sigmoid + linear
 
-    return daily(temperature, wind, all_parameters, heat_function)
+    return daily(temperature, average_wind, all_parameters, heat_function)
 
 
-def daily(temperature, wind, all_parameters, func):
+def daily(
+    temperature: xr.DataArray,
+    wind: xr.DataArray,
+    all_parameters: pd.DataFrame,
+    func: Callable,
+) -> xr.DataArray:
     """
     Modified from https://github.com/oruhnau/when2heat/blob/351bd1a2f9392ed50a7bdb732a103c9327c51846/scripts/demand.py to not prescribe index level names.
     All locations are separated by the average wind speed with the threshold 4.4 m/s

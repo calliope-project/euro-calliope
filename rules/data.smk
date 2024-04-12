@@ -90,34 +90,6 @@ JRC_IDEES_SCOPE = [
     "SE", "SI", "SK", "UK"
 ]
 
-rule download_gridded_temperature_data:
-    message: "Download gridded temperature data"
-    params: url = config["data-sources"]["gridded-temperature-data"]
-    output: protected("data/automatic/gridded-weather/temperature.nc")
-    conda: "../envs/shell.yaml"
-    localrule: True
-    shell: "curl -sSLo {output} '{params.url}'"
-
-
-rule download_gridded_10m_windspeed_data:
-    message: "Download gridded 10m wind speed data"
-    params: url = config["data-sources"]["gridded-10m-windspeed-data"]
-    output: protected("data/automatic/gridded-weather/wind10m.nc")
-    conda: "../envs/shell.yaml"
-    localrule: True
-    shell: "curl -sSLo {output} '{params.url}'"
-
-
-rule download_when2heat_params:
-    message: "Get parameters for heat demand profiles from the When2Heat project repository"
-    output: directory("data/automatic/when2heat")
-    params:
-        url = lambda wildcards: config["data-sources"]["when2heat-params"].format(dataset=
-            "{" + ",".join(["daily_demand.csv", "hourly_factors_COM.csv", "hourly_factors_MFH.csv", "hourly_factors_SFH.csv"]) + "}"
-        )
-    conda: "../envs/shell.yaml"
-    shell: "mkdir -p {output} && curl -sSLo '{output}/#1' '{params.url}'"
-
 rule download_raw_population_zipped:
     message: "Download population data."
     output:
