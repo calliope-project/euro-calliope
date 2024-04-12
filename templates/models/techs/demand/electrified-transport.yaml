@@ -28,12 +28,13 @@ techs:
     road_transport_controlled_dummy:
         exists: false
         essentials:
-            name: 'Dummy tech for controlled road transport demand -- required for max potential charging'
+            name: 'Dummy tech for controlled road transport demand -- required for max potential charging and demand shape'
             parent: conversion
             carrier_in: electricity
             carrier_out: electricity
         constraints:
             energy_eff: 1
+            energy_cap_max_time_varying: file=demand/plugin-profiles-ev.csv
 
 overrides:
     keep-historic-electricity-demand-from-road-transport:
@@ -60,15 +61,15 @@ overrides:
         techs:
             demand_road_transport_electrified_controlled:
                 constraints:
-                    demand_shape_per_month_min: file=demand/demand-shape-min-ev.csv
-                    demand_shape_per_month_max: file=demand/demand-shape-max-ev.csv
+                    demand_shape_per_month_min_time_varying: file=demand/demand-shape-min-ev.csv
+                    demand_shape_per_month_max_time_varying: file=demand/demand-shape-max-ev.csv
     
     monthly_transport_demand_equality:
         techs:
             demand_road_transport_electrified_controlled:
                 constraints:
-                    demand_shape_per_month_equals: file=demand/demand-shape-equals-ev.csv
-    
+                    demand_shape_per_month_equals_time_varying: file=demand/demand-shape-equals-ev.csv
+
     {% for year in locations.columns %}
     {% if "charging" in year %}
     {{ year }}_max_ev_potential:

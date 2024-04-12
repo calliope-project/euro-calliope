@@ -122,7 +122,6 @@ if __name__ == "__main__":
         battery_sizes,
         country_codes,
     )
-    breakpoint()
     if resolution == "continental":
         df = scale_to_continental_resolution(df)
     elif resolution == "national":
@@ -133,5 +132,4 @@ if __name__ == "__main__":
         )
     else:
         raise ValueError("Input resolution is not recognised")
-    breakpoint()
     df.T.to_csv(path_to_output, index_label=["id"])
