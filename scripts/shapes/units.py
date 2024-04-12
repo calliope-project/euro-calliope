@@ -30,6 +30,7 @@ def remix_units(
         # sum all of the units together into one block
         units = _continental_layer(units)
     elif path_to_statistical_to_custom_units != []:
+        # this code is only executed if there is a [statistical-to-custom-units file corresponding to the chosen resolution] in the config
         # sum units together according to custom mapping
         units = _custom_layer(units, path_to_statistical_to_custom_units)
     _write_layer(units, path_to_output)
