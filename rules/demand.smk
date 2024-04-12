@@ -28,7 +28,7 @@ rule electricity_load_national:
 rule electricity_load:
     message: "Generate electricity load time series for every location on {wildcards.resolution} resolution."
     input:
-        units = rules.units.output[0],
+        units = "build/data/{resolution}/units.geojson",
         demand_per_unit = rules.potentials.output.demand,
         national_load = rules.electricity_load_national.output[0]
     params:
