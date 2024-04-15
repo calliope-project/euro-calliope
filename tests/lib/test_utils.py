@@ -12,156 +12,202 @@ from eurocalliopelib.utils import (
 class TestRenameAndGroupby:
     @pytest.fixture
     def da(self, request):
-        data = [1, 2, 3, 4, 5]
         if request.param == "single_index":
-            index = pd.Index(["A", "B", "C", "D", "E"], name="foo")
+            data = [1, 2, 3, 4, 5]
+            index = pd.Index(["FRA", "DEU", "GBR", "ITA", "ESP"], name="country_code")
         elif request.param == "multi_index":
-            data += data
+            # Same values on both "other_dim" levels, which allows us to use
+            # `np.testing.assert_array_equal` for both `multi_index` and `single_index`
+            # because both `np.testing.assert_array_equal([1], 1)` and `np.testing.assert_array_equal([1, 1], 1)`
+            # are valid matches.
+            data = [1, 2, 3, 4, 5, 1, 2, 3, 4, 5]
             index = pd.MultiIndex.from_product(
-                [["X", "Y"], ["A", "B", "C", "D", "E"]], names=["bar", "foo"]
+                [["X", "Y"], ["FRA", "DEU", "GBR", "ITA", "ESP"]],
+                names=["other_dim", "country_code"],
             )
         return pd.Series(data, index=index).to_xarray()
 
     @pytest.fixture
     def da_with_nan(self):
-        data = [1, np.nan, np.nan, 4, 5]
-        data += reversed(data)
+        # Only country with NaN in both "other_dim" values is GBR.
+        data = [1, np.nan, np.nan, 4, 5, 5, 4, np.nan, np.nan, 1]
         index = pd.MultiIndex.from_product(
-            [["X", "Y"], ["A", "B", "C", "D", "E"]], names=["bar", "foo"]
+            [["X", "Y"], ["FRA", "DEU", "GBR", "ITA", "ESP"]],
+            names=["other_dim", "country_code"],
         )
         return pd.Series(data, index=index).to_xarray()
 
+    @staticmethod
+    def assert_expected_dims_and_dim_vals(new_da: xr.DataArray, expected: dict):
+        # check that the dimension items have been appropriately renamed
+        assert (
+            new_da.coords["country_code"]
+            .to_index()
+            .symmetric_difference(expected.keys())
+            .empty
+        )
+        # check that the values associated with each dimension item have been appropriated grouped
+        for dim_item, da_data in expected.items():
+            np.testing.assert_array_equal(new_da.sel(country_code=dim_item), da_data)
+
     @pytest.mark.parametrize(
         ("rename_dict", "expected"),
         [
             (
-                {"A": "A1", "B": "B1", "C": "C1", "D": "D1", "E": "E1"},
-                {"A1": 1, "B1": 2, "C1": 3, "D1": 4, "E1": 5},
+                {"FRA": "FR", "DEU": "DE", "GBR": "GB", "ITA": "IT", "ESP": "ES"},
+                {"FR": 1, "DE": 2, "GB": 3, "IT": 4, "ES": 5},
             ),
-            ({"A": "A1", "B": "A1", "C": "A1", "D": "A1", "E": "A1"}, {"A1": 15}),
             (
-                {"A": "A1", "B": "A1", "C": "B1", "D": "B1", "E": "E1"},
-                {"A1": 3, "B1": 7, "E1": 5},
+                {"FRA": "FR", "DEU": "FR", "GBR": "FR", "ITA": "FR", "ESP": "FR"},
+                {"FR": 15},
             ),
-            ({"A": "A1", "B": "B1"}, {"A1": 1, "B1": 2}),
-            ({"A": "A1", "B": "B1", "C": "B1"}, {"A1": 1, "B1": 5}),
+            (
+                {"FRA": "FR", "DEU": "FR", "GBR": "DE", "ITA": "DE", "ESP": "ES"},
+                {"FR": 3, "DE": 7, "ES": 5},
+            ),
         ],
     )
     @pytest.mark.parametrize("da", ["single_index", "multi_index"], indirect=True)
-    def test_rename_groupby(self, rename_dict, expected, da):
+    @pytest.mark.parametrize("drop_other_dim_items", [True, False])
+    def test_rename_groupby(self, rename_dict, expected, da, drop_other_dim_items):
+        "`drop_other_dim_items` doesn't do anything in these examples as all dimension items are explicitly referenced"
         new_da = rename_and_groupby(
-            da, rename_dict, keep_non_renamed=False, dropna=False, dim_name="foo"
+            da,
+            rename_dict,
+            drop_other_dim_items=drop_other_dim_items,
+            dropna=False,
+            dim_name="country_code",
         )
-
-        assert (
-            new_da.coords["foo"].to_index().symmetric_difference(expected.keys()).empty
-        )
-        for dim_item, da_data in expected.items():
-            np.testing.assert_array_equal(new_da.sel(foo=dim_item), da_data)
+        self.assert_expected_dims_and_dim_vals(new_da, expected)
 
     @pytest.mark.parametrize(
         ("rename_dict", "expected"),
         [
-            (
-                {"A": "A1", "B": "B1", "C": "C1", "D": "D1", "E": "E1"},
-                {"A1": 1, "B1": 2, "C1": 3, "D1": 4, "E1": 5},
-            ),
-            ({"A": "A1", "B": "A1", "C": "A1", "D": "A1", "E": "A1"}, {"A1": 15}),
-            (
-                {"A": "A1", "B": "A1", "C": "B1", "D": "B1", "E": "E1"},
-                {"A1": 3, "B1": 7, "E1": 5},
-            ),
-            ({"A": "A1", "B": "B1"}, {"A1": 1, "B1": 2, "C": 3, "D": 4, "E": 5}),
-            ({"A": "A1", "B": "B1", "C": "B1"}, {"A1": 1, "B1": 5, "D": 4, "E": 5}),
+            ({"FRA": "FR", "DEU": "DE"}, {"FR": 1, "DE": 2}),
+            ({"FRA": "FR", "DEU": "DE", "GBR": "DE"}, {"FR": 1, "DE": 5}),
         ],
     )
     @pytest.mark.parametrize("da", ["single_index", "multi_index"], indirect=True)
-    def test_rename_groupby_keep_renamed(self, rename_dict, expected, da):
+    def test_rename_groupby_drop_other_dim_items(self, rename_dict, expected, da):
         new_da = rename_and_groupby(
-            da, rename_dict, keep_non_renamed=True, dim_name="foo"
+            da,
+            rename_dict,
+            drop_other_dim_items=True,
+            dropna=False,
+            dim_name="country_code",
         )
-
-        assert (
-            new_da.coords["foo"].to_index().symmetric_difference(expected.keys()).empty
-        )
-        for dim_item, da_data in expected.items():
-            np.testing.assert_array_equal(new_da.sel(foo=dim_item), da_data)
+        self.assert_expected_dims_and_dim_vals(new_da, expected)
 
     @pytest.mark.parametrize(
         ("rename_dict", "expected"),
         [
             (
-                {"A": "A1", "B": "B1", "C": "C1", "D": "D1", "E": "E1"},
-                {"A1": [1, 5], "B1": [np.nan, 4], "D1": [4, np.nan], "E1": [5, 1]},
+                {"FRA": "FR", "DEU": "DE"},
+                {"FR": 1, "DE": 2, "GBR": 3, "ITA": 4, "ESP": 5},
             ),
-            ({"A": "A1", "B": "A1", "C": "A1", "D": "A1", "E": "A1"}, {"A1": [10, 10]}),
             (
-                {"A": "A1", "B": "A1", "C": "B1", "D": "B1", "E": "E1"},
-                {"A1": [1, 9], "B1": [4, np.nan], "E1": [5, 1]},
+                {"FRA": "FR", "DEU": "DE", "GBR": "DE"},
+                {"FR": 1, "DE": 5, "ITA": 4, "ESP": 5},
             ),
-            ({"A": "A1", "B": "B1"}, {"A1": [1, 5], "B1": [np.nan, 4]}),
-            ({"A": "A1", "B": "B1", "C": "B1"}, {"A1": [1, 5], "B1": [np.nan, 4]}),
         ],
     )
-    def test_rename_groupby_dropna(self, da_with_nan, rename_dict, expected):
+    @pytest.mark.parametrize("da", ["single_index", "multi_index"], indirect=True)
+    def test_rename_groupby_keep_other_dim_items(self, rename_dict, expected, da):
         new_da = rename_and_groupby(
-            da_with_nan, rename_dict, dim_name="foo", dropna=True
+            da, rename_dict, drop_other_dim_items=False, dim_name="country_code"
         )
-
-        assert (
-            new_da.coords["foo"].to_index().symmetric_difference(expected.keys()).empty
-        )
-        for dim_item, da_data in expected.items():
-            np.testing.assert_array_equal(new_da.sel(foo=dim_item), da_data)
+        self.assert_expected_dims_and_dim_vals(new_da, expected)
 
     @pytest.mark.parametrize(
         ("rename_dict", "expected"),
         [
             (
-                {"A": "A1", "B": "B1", "C": "C1", "D": "D1", "E": "E1"},
+                {"FRA": "FR", "DEU": "FR", "GBR": "FR", "ITA": "FR", "ESP": "FR"},
+                # Multiple values expected now as we have different values on the "other_dim" dimension.
+                {"FR": [10, 10]},
+            ),
+            (
+                {"FRA": "FR", "DEU": "FR", "GBR": "DE", "ITA": "DE", "ESP": "ES"},
+                {"FR": [1, 9], "DE": [4, np.nan], "ES": [5, 1]},
+            ),
+            ({"FRA": "FR", "DEU": "DE"}, {"FR": [1, 5], "DE": [np.nan, 4]}),
+            (
+                {"FRA": "FR", "DEU": "DE", "GBR": "DE"},
+                {"FR": [1, 5], "DE": [np.nan, 4]},
+            ),
+        ],
+    )
+    @pytest.mark.parametrize("dropna", [True, False])
+    def test_rename_groupby_with_na(self, da_with_nan, rename_dict, expected, dropna):
+        "dropna doesn't do anything in these examples as `how=all` in the underlying call"
+        new_da = rename_and_groupby(
+            da_with_nan, rename_dict, dim_name="country_code", dropna=dropna
+        )
+        self.assert_expected_dims_and_dim_vals(new_da, expected)
+
+    @pytest.mark.parametrize(
+        ("rename_dict", "expected"),
+        [
+            (
+                {"FRA": "FR", "DEU": "DE", "GBR": "GB", "ITA": "IT", "ESP": "ES"},
+                # GB dimension dropped
+                {"FR": [1, 5], "DE": [np.nan, 4], "IT": [4, np.nan], "ES": [5, 1]},
+            ),
+        ],
+    )
+    def test_rename_groupby_dropna_removes_dim(
+        self, da_with_nan, rename_dict, expected
+    ):
+        new_da = rename_and_groupby(
+            da_with_nan, rename_dict, dim_name="country_code", dropna=True
+        )
+        self.assert_expected_dims_and_dim_vals(new_da, expected)
+
+    @pytest.mark.parametrize(
+        ("rename_dict", "expected"),
+        [
+            (
+                {"FRA": "FR", "DEU": "DE", "GBR": "GB", "ITA": "IT", "ESP": "ES"},
                 {
-                    "A1": [1, 5],
-                    "B1": [np.nan, 4],
-                    "C1": [np.nan, np.nan],
-                    "D1": [4, np.nan],
-                    "E1": [5, 1],
+                    "FR": [1, 5],
+                    "DE": [np.nan, 4],
+                    "GB": [np.nan, np.nan],  # this dimension stays
+                    "IT": [4, np.nan],
+                    "ES": [5, 1],
                 },
             ),
-            ({"A": "A1", "B": "A1", "C": "A1", "D": "A1", "E": "A1"}, {"A1": [10, 10]}),
-            (
-                {"A": "A1", "B": "A1", "C": "B1", "D": "B1", "E": "E1"},
-                {"A1": [1, 9], "B1": [4, np.nan], "E1": [5, 1]},
-            ),
-            ({"A": "A1", "B": "B1"}, {"A1": [1, 5], "B1": [np.nan, 4]}),
-            ({"A": "A1", "B": "B1", "C": "B1"}, {"A1": [1, 5], "B1": [np.nan, 4]}),
         ],
     )
-    def test_rename_groupby_no_dropna(self, da_with_nan, rename_dict, expected):
+    def test_rename_groupby_no_dropna_keeps_dim(
+        self, da_with_nan, rename_dict, expected
+    ):
         new_da = rename_and_groupby(
-            da_with_nan, rename_dict, dim_name="foo", dropna=False
+            da_with_nan, rename_dict, dim_name="country_code", dropna=False
         )
-
-        assert (
-            new_da.coords["foo"].to_index().symmetric_difference(expected.keys()).empty
-        )
-        for dim_item, da_data in expected.items():
-            np.testing.assert_array_equal(new_da.sel(foo=dim_item), da_data)
+        self.assert_expected_dims_and_dim_vals(new_da, expected)
 
     @pytest.mark.parametrize("da", ["single_index", "multi_index"], indirect=True)
     def test_rename_dim(self, da):
-        rename_dict = {"A": "A1", "B": "B1", "C": "C1", "D": "D1", "E": "E1"}
-        expected = {"A1": 1, "B1": 2, "C1": 3, "D1": 4, "E1": 5}
+        rename_dict = {"FRA": "FR", "DEU": "DE", "GBR": "GB", "ITA": "IT", "ESP": "ES"}
+        expected = {"FR": 1, "DE": 2, "GB": 3, "IT": 4, "ES": 5}
         new_da = rename_and_groupby(
-            da, rename_dict, dim_name="foo", new_dim_name="baz", dropna=False
+            da,
+            rename_dict,
+            dim_name="country_code",
+            new_dim_name="country",
+            dropna=False,
         )
 
-        assert "baz" in new_da.coords
-        assert "foo" not in new_da.coords
+        assert "country" in new_da.coords
+        assert "country_code" not in new_da.coords
         assert (
-            new_da.coords["baz"].to_index().symmetric_difference(expected.keys()).empty
+            new_da.coords["country"]
+            .to_index()
+            .symmetric_difference(expected.keys())
+            .empty
         )
         for dim_item, da_data in expected.items():
-            np.testing.assert_array_equal(new_da.sel(baz=dim_item), da_data)
+            np.testing.assert_array_equal(new_da.sel(country=dim_item), da_data)
 
 
 @pytest.mark.parametrize(

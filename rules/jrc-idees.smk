@@ -53,7 +53,7 @@ rule jrc_idees_unzipped:
         infill_country_config = config["data-pre-processing"]["fill-missing-values"]["jrc-idees"],
         countries = config["scope"]["spatial"]["countries"]
     wildcard_constraints:
-        sector = "((industry)|(transport)|(tertiary))"
+        sector = "industry|transport|tertiary"
     output: temp(directory("build/data/jrc-idees/{sector}/unprocessed"))
     conda: "../envs/shell.yaml"
     shell:
@@ -70,7 +70,7 @@ rule jrc_idees_industry_processed:
         unprocessed_data = "build/data/jrc-idees/industry/unprocessed"
     output: "build/data/jrc-idees/industry/processed-{dataset}.nc"
     wildcard_constraints:
-        dataset = "((energy)|(production))"
+        dataset = "energy|production"
     conda: "../envs/default.yaml"
-    threads: config["max-threads"]
+    threads: 4
     script: "../scripts/jrc-idees/industry.py"

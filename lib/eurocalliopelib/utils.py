@@ -1,5 +1,7 @@
 """Utility functions."""
 
+from typing import Optional
+
 import pandas as pd
 import pycountry
 import xarray as xr
@@ -18,7 +20,7 @@ def eu_country_code_to_iso3(eu_country_code):
 
 def convert_country_code(input_country, output="alpha3"):
     """
-    Converts input country code or name into either either a 2- or 3-letter code.
+    Converts input country code or name into either a 2- or 3-letter code.
 
     ISO alpha2: alpha2
     ISO alpha2 with EU codes: alpha2_eu
@@ -73,7 +75,7 @@ def convert_valid_countries(country_codes: list, output: str = "alpha3") -> dict
                 country_code, output=output
             )
         except LookupError:
-            print(f"Skipping country/region {country_code} in annual energy balances")
+            print(f"Skipping country/region {country_code}")
             continue
     return mapped_codes
 
@@ -82,35 +84,33 @@ def rename_and_groupby(
     da: xr.DataArray,
     rename_dict: dict,
     dim_name: str,
-    new_dim_name: str = None,
+    new_dim_name: Optional[str] = None,
     dropna: bool = False,
-    keep_non_renamed: bool = False,
+    drop_other_dim_items: bool = True,
 ) -> xr.DataArray:
     """
-    Take an xarray dataarray and rename the contents of a given dimension
-    as well as (optionally) rename that dimension.
-    If renaming the contents has some overlap (e.g. {'foo' : 'A', 'bar': 'A'})
-    then the returned dataarray will be grouped over the new dimension items
-    (by summing the data).
+    Take an xarray dataarray and rename the contents of a given dimension as well as (optionally) rename that dimension.
+    If renaming the contents has some overlap (e.g. {'FRA': 'DEU', 'CHE': 'DEU'}),
+    then the returned dataarray will be grouped over the new dimension items and summed.
 
     Args:
         da (xr.DataArray):
-            Input dataarray with the dimension "dim_name".
+            Input dataarray with the dimension `dim_name`.
         rename_dict (dict):
-            Dictionary to map items in the dimension "dim_name" to new names ({"old_item_name": "new_item_name"}).
+            Dictionary to map items in the dimension `dim_name` to new names ({"old_item_name": "new_item_name"}).
         dim_name (str):
             Dimension on which to rename items.
-        new_dim_name (str, optional): Defaults to None.
+        new_dim_name (Optional[str], optional): Defaults to None.
             If not None, rename the dimension "dim_name" to the given string.
         dropna (bool, optional): Defaults to False.
             If True, drop any items in "dim_name" after renaming/grouping which have all NaN values along all other dimensions.
-        keep_non_renamed (bool, optional): Defaults to False.
-            If False, any item in "dim_name" that is not referred to in "rename_dict" will be removed from that dimension in the returned array.
+        drop_other_dim_items (bool, optional): Defaults to True.
+            If True, any dimension items _not_ referenced in `rename_dict` keys will be removed from that dimension in the returned array.
     Returns:
         (xr.DataArray): Same as "da" but with the items in "dim_name" renamed and possibly a. grouped, b. "dim_name" itself renamed.
     """
     rename_series = pd.Series(rename_dict).rename_axis(index=dim_name)
-    if keep_non_renamed is True:
+    if drop_other_dim_items is False:
         existing_dim_items = da[dim_name].to_series()
         rename_series = rename_series.reindex(existing_dim_items).fillna(
             existing_dim_items

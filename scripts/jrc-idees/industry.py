@@ -1,6 +1,8 @@
+import logging
 from itertools import product
 from multiprocessing import Pool
 from pathlib import Path
+from typing import Callable, Literal, Union
 
 import numpy as np
 import pandas as pd
@@ -10,6 +12,8 @@ from styleframe import StyleFrame
 idx = pd.IndexSlice
 
 SHEETS = ["ISI", "NFM", "CHI", "NMM", "PPA", "FBT", "TRE", "MAE", "TEL", "WWP", "OIS"]
+
+LOGGER = logging.getLogger(__name__)
 
 ENERGY_SHEET_COLORS = {
     "section": ["FFC00000"],
@@ -26,13 +30,23 @@ ENERGY_SHEET_CARRIERS = {
 }
 
 
-def process_jrc_industry_data(data_dir, dataset, threads, out_path):
+def process_jrc_industry_data(
+    data_dir: str, dataset: Literal["energy", "production"], threads: int, out_path: str
+):
+    """Process human-readable JRC-IDEES Excel files into machine-readable datasets.
+
+    Args:
+        data_dir (str): Directory in which files are stored
+        dataset (Literal[energy, production]): Data to process from those files.
+        threads (int): Number of multi-processing threads to use.
+        out_path (str): Path to which machine-readable data will be stored.
+    """
     data_filepaths = list(Path(data_dir).glob("*.xlsx"))
     if dataset == "energy":
-        processed_data = process_energy(data_filepaths, threads)
+        processed_data = process_sheets(data_filepaths, threads, get_jrc_idees_energy)
         unit = "twh"
     elif dataset == "production":
-        processed_data = process_production(data_filepaths)
+        processed_data = process_sheets(data_filepaths, 1, get_jrc_idees_production)
         unit = "kt"
 
     processed_data.columns = processed_data.columns.rename("year").astype(int)
@@ -47,38 +61,48 @@ def process_jrc_industry_data(data_dir, dataset, threads, out_path):
     processed_da.assign_attrs(unit=unit).to_netcdf(out_path)
 
 
-def process_energy(data_filepaths, threads):
+def process_sheets(
+    data_filepaths: list[Path], threads: int, processing_script: Callable
+) -> pd.DataFrame:
+    "Process energy sheet in data files across multiple threads"
     with Pool(int(threads)) as pool:
-        demand_consumption = pool.starmap(
-            get_jrc_idees_demand_consumption, product(SHEETS, data_filepaths)
-        )
+        dfs = pool.starmap(processing_script, product(SHEETS, data_filepaths))
 
-    processed_data = pd.concat(demand_consumption).sort_index()
-    processed_data = processed_data.apply(utils.ktoe_to_twh)
+    processed_df = pd.concat(dfs).sort_index()
 
-    return processed_data
+    return processed_df
 
 
-def process_production(data_filepaths):
-    all_dfs = []
-    for file in data_filepaths:
-        xls = pd.ExcelFile(file)
-        all_dfs.extend([get_jrc_idees_production_sheet(sheet, xls) for sheet in SHEETS])
-
-    return pd.concat(all_dfs)
-
-
-def get_jrc_idees_demand_consumption(sheet, file):
-    print(sheet, file)
+def get_jrc_idees_production(sheet_name: str, file: Union[str, Path]) -> pd.DataFrame:
     xls = pd.ExcelFile(file)
-    consumption = get_jrc_idees_energy_sheet(f"{sheet}_fec", xls)
-    demand = get_jrc_idees_energy_sheet(f"{sheet}_ued", xls)
-    return pd.concat(
-        [consumption, demand], names=["energy"], keys=["consumption", "demand"]
+    df = pd.read_excel(xls, sheet_name=sheet_name, index_col=0)
+    start = df.filter(regex="Physical output", axis=0)
+    end = df.filter(regex="Installed capacity", axis=0)
+
+    return (
+        df.loc[start.index[0] : end.index[0]]
+        .iloc[1:-1]
+        .dropna(how="all")
+        .assign(
+            country_code=df.index.name.split(":")[0],
+            cat_name=df.index.name.split(": ")[1],
+        )
+        .rename_axis(index="produced_material")
+        .set_index(["country_code", "cat_name"], append=True)
     )
 
 
-def get_jrc_idees_energy_sheet(sheet_name, xls):
+def get_jrc_idees_energy(sheet: str, file: str) -> pd.DataFrame:
+    LOGGER.info(f"Processing file: {file}, sheet: {sheet}")
+    xls = pd.ExcelFile(file)
+    final_energy = _get_jrc_idees_energy_sheet(f"{sheet}_fec", xls)
+    useful_energy = _get_jrc_idees_energy_sheet(f"{sheet}_ued", xls)
+    return pd.concat(
+        [final_energy, useful_energy], names=["energy"], keys=["final", "useful"]
+    )
+
+
+def _get_jrc_idees_energy_sheet(sheet_name: str, xls: Union[str, Path]) -> pd.DataFrame:
     """
     This sheet needs to be parsed both based on the colour of the cell and the indent
     level of the text inside the cell.
@@ -90,24 +114,26 @@ def get_jrc_idees_energy_sheet(sheet_name, xls):
     last_index_of_data = int(
         style_df[style_df[column_names].str.find("Market shares") > -1].item()
     )
-    df = assign_section_level_based_on_colour(
+    df = _assign_section_level_based_on_colour(
         style_df, df, column_names, last_index_of_data
     )
-    df, total_to_check = slice_on_indent(style_df, df, column_names, last_index_of_data)
-    df = rename_carriers(df)
-    df = assign_category_country_information(df, column_names)
+    df, total_to_check = _slice_on_indent(
+        style_df, df, column_names, last_index_of_data
+    )
+    df = _rename_carriers(df)
+    df = _assign_category_country_information(df, column_names)
 
     # Check that we haven't lost some data
     assert np.allclose(
         total_to_check.reindex(df.columns).astype(float), df.sum().astype(float)
     )
 
-    return df
+    return df.apply(utils.ktoe_to_twh)
 
 
-def assign_section_level_based_on_colour(
-    style_df, df, column_names, last_index_of_data
-):
+def _assign_section_level_based_on_colour(
+    style_df: StyleFrame, df: pd.DataFrame, column_names: str, last_index_of_data: int
+) -> pd.DataFrame:
     for section_level, colours in ENERGY_SHEET_COLORS.items():
         idx = (
             style_df[column_names]
@@ -122,7 +148,9 @@ def assign_section_level_based_on_colour(
     return df
 
 
-def slice_on_indent(style_df, df, column_names, last_index_of_data):
+def _slice_on_indent(
+    style_df: StyleFrame, df: pd.DataFrame, column_names: str, last_index_of_data: int
+) -> tuple[pd.DataFrame, pd.Series]:
     df = df.loc[:last_index_of_data]
     df = df.assign(
         indent=style_df[column_names].style.indent.loc[:last_index_of_data].astype(int)
@@ -148,7 +176,7 @@ def slice_on_indent(style_df, df, column_names, last_index_of_data):
     return df, total_to_check
 
 
-def rename_carriers(df):
+def _rename_carriers(df: pd.DataFrame) -> pd.DataFrame:
     for carrier_search_string, carrier_group in ENERGY_SHEET_CARRIERS.items():
         df.loc[
             df.end_use.str.lower().str.contains(
@@ -162,7 +190,9 @@ def rename_carriers(df):
     return df
 
 
-def assign_category_country_information(df, column_names):
+def _assign_category_country_information(
+    df: pd.DataFrame, column_names: str
+) -> pd.DataFrame:
     index = ["section", "subsection", "carrier_name", "country_code", "cat_name"]
     return (
         df.assign(
@@ -172,24 +202,6 @@ def assign_category_country_information(df, column_names):
         .set_index(index)
         .drop([column_names, "indent", "end_use"], axis="columns")
         .sum(level=index)
-    )
-
-
-def get_jrc_idees_production_sheet(sheet_name, xls):
-    df = pd.read_excel(xls, sheet_name=sheet_name, index_col=0)
-    start = df.filter(regex="Physical output", axis=0)
-    end = df.filter(regex="Installed capacity", axis=0)
-
-    return (
-        df.loc[start.index[0] : end.index[0]]
-        .iloc[1:-1]
-        .dropna(how="all")
-        .assign(
-            country_code=df.index.name.split(":")[0],
-            cat_name=df.index.name.split(": ")[1],
-        )
-        .rename_axis(index="produced_material")
-        .set_index(["country_code", "cat_name"], append=True)
     )
 
 
