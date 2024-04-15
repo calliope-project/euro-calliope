@@ -13,19 +13,13 @@ You can, for example, change the temporal and spatial scope of the data and mode
 
 The configuration builds on Snakemake's configuration mechanism and consists of two parts: a default configuration `./config/default.yaml` and a schema declaring all configuration parameters `./config/schema.yaml`.
 To override configuration parameters, you can add another configuration file with just your updates or change parameter values on the command line when calling `snakemake`.
-For details on how the configuration mechanism works, please read [Snakemake's documention](https://snakemake.readthedocs.io/en/v6.1.1/snakefiles/configuration.html).
-
-!!! warning
-    When you change configuration parameters, please consider this important caveat of Snakemake:
-    While Snakemake does understand that parameters have changed, it will not rerun rules with updated parameters by default (see also this [feature request](https://github.com/snakemake/snakemake/issues/976)).
-    To ensure that your configuration parameters are used, you must manually rerun all rules that use the updated parameter.
-    The easiest is to start the build process from scratch by running `snakemake clean`.
+For details on how the configuration mechanism works, please read [Snakemake's documention](https://snakemake.readthedocs.io/en/v8.10.7/snakefiles/configuration.html).
 
 ## Adaptation
 
 Beyond configuration through parameters, you can adapt and extend the workflow in any possible way.
 You can adapt the data pre-processing steps and the way model files are generated, but you can also extend the model by adding your own model files or overrides.
-Customising Euro-Calliope in this way requires a solid understanding of the workflow management system [Snakemake](https://snakemake.readthedocs.io/en/v6.1.1/index.html) that we use.
+Customising Euro-Calliope in this way requires a solid understanding of the workflow management system [Snakemake](https://snakemake.readthedocs.io/en/v8.10.7/index.html) that we use.
 
 Whenever we applied Euro-Calliope in our research we made use of this option.
 Below you will find a list of publications in which we applied Euro-Calliope models.

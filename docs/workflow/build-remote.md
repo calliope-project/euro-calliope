@@ -1,7 +1,7 @@
 # Build on a cluster
 
 You may want to build the model on a cluster.
-While you can build Euro-Calliope on [any cluster that is supported by Snakemake](https://snakemake.readthedocs.io/en/v6.1.1/executing/cluster.html), our default configuration is targeted at, and tested on, ETH's Euler cluster.
+While you can build Euro-Calliope on [any cluster that is supported by Snakemake](https://snakemake.readthedocs.io/en/v8.10.7/tutorial/additional_features.html#cluster-or-cloud-execution), our default configuration is targeted at, and tested on, ETH's Euler cluster.
 
 ## Build
 
@@ -11,7 +11,7 @@ To build the model on Euler, use the following command:
 snakemake --profile profiles/euler
 ```
 
-If you want to run on another cluster, read [snakemake's documentation on cluster execution](https://snakemake.readthedocs.io/en/stable/executing/cluster.html) and take `profiles/euler` as a starting point.
+If you want to run on another cluster, read [snakemake's documentation on cluster execution](https://snakemake.readthedocs.io/en/v8.10.7/tutorial/additional_features.html#cluster-or-cloud-execution) and take `profiles/euler` as a starting point.
 
 ## Work local, build on remote
 
