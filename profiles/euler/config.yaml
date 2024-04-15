@@ -3,7 +3,7 @@ jobs: 999
 local-cores: 1
 latency-wait: 60
 use-envmodules: True
-use-conda: True
+software-deployment-method: conda
 conda-prefix: ../envs/snakemake/euro-calliope/
 default-resources: [
     "runtime=10",

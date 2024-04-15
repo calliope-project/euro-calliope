@@ -42,15 +42,16 @@ ALL_CF_TECHNOLOGIES = [
 
 
 def ensure_lib_folder_is_linked():
-    if not workflow.conda_prefix:
+    if not (hasattr(workflow, "deployment_settings") and not
+            hasattr(workflow.deployment_settings, "conda_prefix")):
         return
-    link = Path(workflow.conda_prefix) / "lib"
+    link = Path(workflow.deployment_settings.conda_prefix) / "lib"
     if not link.exists():
         # Link either does not exist or is an invalid symlink
         print("Creating link from conda env dir to eurocalliopelib.")
         if link.is_symlink():  # Deal with existing but invalid symlink
             shell(f"rm {link}")
-        makedirs(workflow.conda_prefix)
+        makedirs(workflow.deployment_settings.conda_prefix)
         shell(f"ln -s {workflow.basedir}/lib {link}")
 
 
@@ -226,7 +227,7 @@ rule dag:
         "dot -Tpdf {input} -o build/dag.pdf"
 
 
-rule clean: # removes all generated results
+rule clean:  # removes all generated results
     shell:
         """
         rm -r build/
