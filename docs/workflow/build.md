@@ -42,6 +42,8 @@ Execute the workflow like so:
 snakemake
 ```
 
+This will use Snakemake run parameters from the default `workflow-profile` in `profiles/default`. You may change these parameters and/or use a user defined profile using `--profile=<user-profile>`; see [Snakemake's documentation on profiles](https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles).
+
 ## Run
 
 The build step creates all individual components of Euro-Calliope, like technologies and time series.
