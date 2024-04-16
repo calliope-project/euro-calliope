@@ -118,13 +118,18 @@ Be aware that you can publish a release only if you are a maintainer of the GitH
         * [./lib/eurocalliopelib/__init__.py](./lib/eurocalliopelib/__init__.py)
         * [./templates/README.md](./templates/README.md)
         * [./docs/index.md](./docs/index.md)
-    2. Verify consistent versions of Snakemake and Calliope.
-    Their versions are spread over the entire repository (including urls in the documentation).
-    Use search and replace to make sure all versions are consistent.
-    3. Update the changelog and add the release date.
-    4. Update the release date in [./CITATION.cff](./CITATION.cff).
-    5. (If necessary) Update [./LICENSE.md](./LICENSE.md).
-    6. (If necessary) Update `docs/img/spatial-scope-and-resolutions.png` by running `snakemake -s rules/doc.smk docs/img/spatial-scope-and-resolutions.png`. Inspect the result visually. Check it in if it changed; check out the old version if it did not change. The figure will change when the spatial scope or resolution has changed.
+    2. Verify consistent versions of Snakemake.
+        * [./environment.yaml](./environment.yaml)
+        * [./requirements-docs.yaml](./requirements-docs.yaml)
+    3. Verify consistent versions of Calliope.
+        * [./envs/test.yaml](./envs/test.yaml)
+        * [./templates/environment.yaml](./templates/environment.yaml)
+        * [./templates/models/example-model.yaml](./templates/models/example-model.yaml)
+        * [./mkdocs.yaml](./mkdocs.yaml)
+    4. Update the changelog and add the release date.
+    5. Update the release date in [./CITATION.cff](./CITATION.cff).
+    6. (If necessary) Update [./LICENSE.md](./LICENSE.md).
+    7. (If necessary) Update `docs/img/spatial-scope-and-resolutions.png` by running `snakemake -s rules/doc.smk docs/img/spatial-scope-and-resolutions.png`. Inspect the result visually. Check it in if it changed; check out the old version if it did not change. The figure will change when the spatial scope or resolution has changed.
 2. Build the pre-builts and test everything using the `all_tests` rule. Make sure you start with a clean workflow folder: delete `./build` *and* `./data/automatic` should they exist.
 3. Commit, open a pull request onto `develop`, and merge the release branch into both `develop` and `main` after successful review.
 4. Add a `vX.Y.Z` release tag to `main`, push it, and add a release on GitHub.

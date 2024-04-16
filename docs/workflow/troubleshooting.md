@@ -7,7 +7,7 @@ running into these problems is completely normal and in many cases a solution is
 Here are some steps we advise you to go through:
 
 1. Read through our frequently asked questions below.
-2. If you did not find an answer to your question, check [Snakemake's documentation](https://snakemake.readthedocs.io/en/v8.10.7/).
+2. If you did not find an answer to your question, check [Snakemake's documentation](https://snakemake.readthedocs.io/en/v{{ snakemake_version }}/).
 3. If you still did not find an answer to your question, [open an issue](https://github.com/calliope-project/euro-calliope/issues/new/choose) on our issue tracker.
 
 ## Frequently Asked Questions
