@@ -45,33 +45,29 @@ def get_steel_demand_df(
     # -------------------------------------------------------------------------
     # Prepare data files
     # -------------------------------------------------------------------------
+    # Read data
     energy_balances_df = pd.read_csv(
         path_energy_balances, index_col=[0, 1, 2, 3, 4], squeeze=True
     )
     cat_names_df = pd.read_csv(path_cat_names, header=0, index_col=0)
     carrier_names_df = pd.read_csv(path_carrier_names, header=0, index_col=0)
+    jrc_energy = xr.open_dataset(path_jrc_industry_energy)
+    jrc_prod = xr.open_dataset(path_jrc_industry_production)
 
-    energy_df = xr.open_dataset(path_jrc_industry_energy).to_dataframe().unstack("year")
-    energy_df["unit"] = "twh"
-    energy_df = energy_df.set_index("unit", append=True)
-    energy_df.columns = energy_df.columns.droplevel()
-    prod_df = (
-        xr.open_dataset(path_jrc_industry_production).to_dataframe().unstack("year")
-    )
-    prod_df["unit"] = "twh"
-    prod_df = prod_df.set_index("unit", append=True)
-    prod_df.columns = prod_df.columns.droplevel()
+    # TODO: fix weird naming convention forced by the JRC module.
+    jrc_energy = jrc_energy.rename({"jrc-idees-industry-twh": "value"})
+    jrc_prod = jrc_prod.rename({"jrc-idees-industry-twh": "value"})
 
     # Ensure dataframes only have data specific to this industry
     cat_names_df = cat_names_df[cat_names_df["jrc_idees"] == CAT_NAME_STEEL]
-    energy_df = energy_df.xs(CAT_NAME_STEEL, level="cat_name", drop_level=False)
-    prod_df = prod_df.xs(CAT_NAME_STEEL, level="cat_name", drop_level=False)
+    jrc_energy = jrc_energy.sel(cat_name=CAT_NAME_STEEL)
+    jrc_prod = jrc_prod.sel(cat_name=CAT_NAME_STEEL)
 
     # -------------------------------------------------------------------------
     # Process data
     # -------------------------------------------------------------------------
     steel_energy_consumption = process_steel_energy_consumption(
-        energy_df, prod_df, cnf_steel
+        jrc_energy, jrc_prod, cnf_steel
     )
 
     # -------------------------------------------------------------------------
@@ -105,8 +101,8 @@ def get_steel_demand_df(
 
 
 def process_steel_energy_consumption(
-    jrc_energy_df: pd.DataFrame, jrc_prod_df: pd.DataFrame, cnf_steel: dict
-) -> pd.DataFrame:
+    jrc_energy: xr.Dataset, jrc_prod: xr.Dataset, cnf_steel: dict
+) -> xr.Dataset:
     """Processing of steel energy demand for different carriers.
 
     Calculates energy consumption in the iron and steel industry based on expected
@@ -127,85 +123,90 @@ def process_steel_energy_consumption(
     demand by total steel production (by both EAF and BF-BOF routes).
 
     Args:
-        jrc_energy_df (pd.DataFrame): jrc country-specific steel energy demand.
-        jrc_prod_df (pd.DataFrame): jrc country-specific steel production.
+        jrc_energy_df (xr.Dataset): jrc country-specific steel energy demand.
+        jrc_prod_df (xr.Dataset): jrc country-specific steel production.
         cnf_steel (dict): configuration for the steel industry.
 
     Returns:
-        pd.DataFrame: processed dataframe with the expected steel energy consumption.
+        xr.Dataset: processed dataframe with the expected steel energy consumption.
     """
 
     # sintering/pelletising
-    sintering_specific_consumption = jrc.get_specific_electricity_consumption(
+    sintering_specific_demand = jrc.get_specific_final_demand_electric(
         "Integrated steelworks",
         "Steel: Sinter/Pellet making",
-        jrc_energy_df,
-        jrc_prod_df,
+        jrc_energy,
+        jrc_prod,
     )
     # smelters
-    eaf_smelting_specific_consumption = jrc.get_specific_electricity_consumption(
-        "Electric arc", "Steel: Smelters", jrc_energy_df, jrc_prod_df
+    eaf_smelting_specific_demand = jrc.get_specific_final_demand_electric(
+        "Electric arc", "Steel: Smelters", jrc_energy, jrc_prod
     )
     # EAF
-    eaf_specific_consumption = jrc.get_specific_electricity_consumption(
-        "Electric arc", "Steel: Electric arc", jrc_energy_df, jrc_prod_df
+    eaf_specific_demand = jrc.get_specific_final_demand_electric(
+        "Electric arc", "Steel: Electric arc", jrc_energy, jrc_prod
     )
     # Rolling & refining
-    refining_specific_consumption = jrc.get_specific_electricity_consumption(
+    refining_specific_demand = jrc.get_specific_final_demand_electric(
         "Electric arc",
         "Steel: Furnaces, Refining and Rolling",
-        jrc_energy_df,
-        jrc_prod_df,
+        jrc_energy,
+        jrc_prod,
     )
-    finishing_specific_consumption = jrc.get_specific_electricity_consumption(
-        "Electric arc", "Steel: Products finishing", jrc_energy_df, jrc_prod_df
-    )
-    # Auxiliaries (lighting, motors, etc.)
-    auxiliary_specific_consumption = jrc.get_auxiliary_electricity_consumption(
-        "Electric arc", jrc_energy_df, jrc_prod_df
+    finishing_specific_demand = jrc.get_specific_final_demand_electric(
+        "Electric arc", "Steel: Products finishing", jrc_energy, jrc_prod
     )
 
-    # Total electricity consumption
-    #   If the country produces steel from Iron ore (assuming 50% recycling):
+    # Auxiliaries (lighting, motors, etc.)
+    auxiliary_specific_demand = jrc.get_specific_final_demand_electric_auxiliary(
+        "Electric arc", jrc_energy, jrc_prod
+    )
+
+    # Total electricity consumption:
+    #   If the country produces steel from Iron ore (smelting):
     #   sintering/pelletizing * iron_ore_% + smelting * recycled_steel_% + H-DRI + EAF + refining/rolling + finishing + auxiliaries
     #   If the country only recycles steel:
     #   smelting + EAF + refining/rolling + finishing + auxiliaries
 
-    recycled_steel_share = cnf_steel["recycled-steel-share"]
+    recycled_share = cnf_steel["recycled-steel-share"]
 
-    total_specific_consumption = (
-        sintering_specific_consumption.mul(1 - recycled_steel_share)
-        .add(
-            eaf_smelting_specific_consumption
-            # if no sintering, this country/year recycles 100% of steel
-            .where(sintering_specific_consumption == 0)
-            # if there is sintering, update smelting consumption to equal our assumed 2050 recycling rate
-            # and add weighted H-DRI consumption to process the remaining iron ore
-            .fillna(
-                eaf_smelting_specific_consumption.mul(recycled_steel_share).add(
-                    HDRI_CONSUMPTION
-                )
-            )
-        )
-        .add(eaf_specific_consumption)
-        .add(refining_specific_consumption)
-        .add(finishing_specific_consumption)
-        .add(auxiliary_specific_consumption)
+    # Limit sintering by the share non-recycled steel
+    updated_sintering = sintering_specific_demand * (1 - recycled_share)
+
+    # Update smelting consumption to equal assumed recycling rate
+    # and add weighted H-DRI consumption to process the remaining iron ore
+    eaf_smelting_recycled = (
+        eaf_smelting_specific_demand * recycled_share + HDRI_CONSUMPTION
     )
+    # Countries with no sintering recycle 100% of steel
+    updated_eaf_smelting = eaf_smelting_specific_demand.where(
+        sintering_specific_demand == 0
+    ).fillna(eaf_smelting_recycled)
+
+    total_specific_demand = (
+        updated_sintering
+        + updated_eaf_smelting
+        + eaf_specific_demand
+        + refining_specific_demand
+        + finishing_specific_demand
+        + auxiliary_specific_demand
+    )
+
+    breakpoint()
     # In case our model now says a country does produce steel,
     # we give them the average of energy consumption of all other countries
     total_specific_consumption = (
-        total_specific_consumption.where(total_specific_consumption > 0)
-        .fillna(total_specific_consumption.mean())
+        total_specific_demand.where(total_specific_demand > 0)
+        .fillna(total_specific_demand.mean())
         .assign(carrier="electricity")
         .set_index("carrier", append=True)
     )
 
     # Hydrogen consumption for H-DRI, only for those country/year combinations that handle iron ore
     # and don't recycle all their steel
-    h2_specific_consumption = H2_LHV_KTOE * _get_h2_to_steel(recycled_steel_share)
+    h2_specific_consumption = H2_LHV_KTOE * _get_h2_to_steel(recycled_share)
     total_specific_h2_consumption = (
-        total_specific_consumption.where(sintering_specific_consumption > 0)
+        total_specific_consumption.where(sintering_specific_demand > 0)
         .fillna(0)
         .where(lambda x: x == 0)
         .fillna(h2_specific_consumption)
@@ -217,8 +218,8 @@ def process_steel_energy_consumption(
 
     # Space heat
     space_heat_specific_demand = (
-        jrc_energy_df.xs(("demand", "Electric arc", "Low enthalpy heat"))
-        .div(jrc_prod_df.xs("Electric arc").droplevel("unit"))
+        jrc_energy.xs(("demand", "Electric arc", "Low enthalpy heat"))
+        .div(jrc_prod.xs("Electric arc").droplevel("unit"))
         .assign(carrier="space_heat")
         .set_index("carrier", append=True)
         .sum(level=total_specific_consumption.index.names)
@@ -229,7 +230,7 @@ def process_steel_energy_consumption(
     )
 
     steel_consumption = total_specific_consumption.mul(
-        jrc_prod_df.xs("Iron and steel", level="cat_name").sum(level="country_code"),
+        jrc_prod.xs("Iron and steel", level="cat_name").sum(level="country_code"),
         level="country_code",
     ).rename(index={"twh/kt": "twh"})
 
