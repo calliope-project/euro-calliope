@@ -1,41 +1,40 @@
+from typing import Union
+
 import pandas as pd
 import xarray as xr
 
 MAX_YEAR = 2015
 
 
-def get_specific_final_demand_electric_auxiliary(
-    section: str, jrc_energy: xr.Dataset, jrc_prod: xr.Dataset
-) -> pd.DataFrame:
-    """Get auxiliary electricity consumption for auxiliary processes."""
-    # Extract relevant sector/subsector data
-    auxiliaries = ["Lighting", "Air compressors", "Motor drives", "Fans and pumps"]
-    final_demand = jrc_energy.sel(
-        energy="consumption",
-        carrier_name="Electricity",
-        section=section,
-        subsection=auxiliaries,
-    )
-    production = jrc_prod.sel(produced_material=section)
-
-    # Calculate specific final demand (twh/kt) of auxiliary processes
-    final_demand = final_demand.sum(dim="subsection")
-    specific_final_demand = final_demand / production
-
-    specific_final_demand = specific_final_demand["value"].assign_attrs({
-        "units": "twh/kt"
-    })
-
-    return specific_final_demand.fillna(0)
-
-
-def get_specific_final_demand_electric(
+def get_auxiliary_electric_final_intensity(
     section: str,
-    subsection: str,
+    material: str,
     jrc_energy: xr.Dataset,
     jrc_prod: xr.Dataset,
-) -> pd.DataFrame:
-    """Get specific electricity consumption for a given JRC section -> subsection."""
+    fill_empty: bool = False,
+) -> xr.Dataset:
+    """Wrapper for auxiliary electrical processes."""
+    auxiliaries = ["Lighting", "Air compressors", "Motor drives", "Fans and pumps"]
+    auxiliary_intensity = sum(
+        get_subsection_final_intensity(
+            section, aux, material, "Electricity", jrc_energy, jrc_prod, fill_empty
+        )
+        for aux in auxiliaries
+    )
+
+    return auxiliary_intensity
+
+
+def get_subsection_final_intensity(
+    section: str,
+    subsection: Union[str, list[str]],
+    material: str,
+    carrier_name: str,
+    jrc_energy: xr.Dataset,
+    jrc_prod: xr.Dataset,
+    fill_empty: bool = False,
+) -> xr.Dataset:
+    """Get final energy intensity of a given JRC section/subsection/material."""
     # Extract relevant section and subsection data.
     final_demand = jrc_energy.sel(
         energy="consumption", section=section, subsection=subsection
@@ -43,26 +42,50 @@ def get_specific_final_demand_electric(
     useful_demand = jrc_energy.sel(
         energy="demand", section=section, subsection=subsection
     )
-    production = jrc_prod.sel(produced_material=section)
+    production = jrc_prod.sel(produced_material=material)
 
-    # Calculate electrical efficiency and fill empty values
-    # First by country avg. over all years, then by year avg. over all countries.
-    eff = useful_demand / final_demand
-    eff_electric = eff.where(eff > 0).sel(carrier_name="Electricity")
-    eff_electric = eff_electric.fillna(eff_electric.mean(dim="year"))
-    eff_electric = eff_electric.fillna(eff_electric.mean(dim="country_code"))
+    total_eff = useful_demand / final_demand
+    carrier_eff = total_eff.where(total_eff > 0).sel(carrier_name=carrier_name)
+    if fill_empty:
+        # First by country avg. (all years), then by year avg. (all countries).
+        carrier_eff = carrier_eff.fillna(carrier_eff.mean(dim="year"))
+        carrier_eff = carrier_eff.fillna(carrier_eff.mean(dim="country_code"))
 
-    # Get the useful energy demand per production method (e.g., twh/kt_steel)
-    specific_useful_demand = useful_demand.sum(dim=["carrier_name"]) / production
-    # Use the efficiency to determine final electrical demand.
-    specific_final_demand = specific_useful_demand / eff_electric
-    specific_final_demand = specific_final_demand["value"].assign_attrs({
-        "units": "twh/kt"
-    })
+    # Get the useful energy intensity of all production (e.g., twh/kt_steel)
+    useful_intensity = useful_demand.sum(dim="carrier_name") / production
+    # Then reconstruct final intensity.
+    final_intensity = useful_intensity / carrier_eff
 
-    assert specific_final_demand >= specific_useful_demand, "Creating energy!"
+    # Prettify
+    coords = ["energy", "section", "subsection", "produced_material", "carrier_name"]
+    final_intensity = final_intensity.drop(coords)
+    final_intensity["value"].attrs["units"] = "twh/kt"
 
-    return specific_final_demand.fillna(0)
+    assert final_intensity >= useful_intensity, "Creating energy!"
+
+    return final_intensity.fillna(0)
+
+
+def get_subsection_useful_intensity(
+    section: str,
+    subsection: str,
+    material: str,
+    jrc_energy: xr.Dataset,
+    jrc_prod: xr.Dataset,
+):
+    """Get useful energy intensity of a given section/subsection/material."""
+    useful_demand = jrc_energy.sel(
+        energy="demand", section=section, subsection=subsection
+    )
+    production = jrc_prod.sel(produced_material=material)
+    useful_intensity = (useful_demand / production).sum("carrier_name")
+
+    # Prettify
+    coords = ["energy", "section", "subsection", "produced_material"]
+    useful_intensity = useful_intensity.drop(coords)
+    useful_intensity["value"].attrs["units"] = "twh/kt"
+
+    return useful_intensity.fillna(0)
 
 
 # TODO: fix me!
