@@ -42,9 +42,6 @@ def get_steel_demand_df(
     Returns:
         pd.DataFrame: dataframe with steel demand per country.
     """
-    # -------------------------------------------------------------------------
-    # Prepare data files
-    # -------------------------------------------------------------------------
     # Read data
     energy_balances_df = pd.read_csv(
         path_energy_balances, index_col=[0, 1, 2, 3, 4], squeeze=True
@@ -66,41 +63,34 @@ def get_steel_demand_df(
     # -------------------------------------------------------------------------
     # Process data
     # -------------------------------------------------------------------------
-    steel_energy_consumption = process_steel_energy_consumption(
+    new_jrc_steel_demand = transform_jrc_subsector_demand(
         jrc_energy, jrc_prod, cnf_steel
     )
-
+    new_filled_demand = formatting.fill_missing_countries_years(
+        energy_balances_df, cat_names_df, carrier_names_df, new_jrc_steel_demand
+    )
     # -------------------------------------------------------------------------
     # Format the final output
     # -------------------------------------------------------------------------
-    steel_energy_consumption.columns = steel_energy_consumption.columns.astype(
-        int
-    ).rename("year")
-    filled_consumption_df = formatting.fill_missing_data(
-        energy_balances_df,
-        cat_names_df,
-        carrier_names_df,
-        steel_energy_consumption,
-        year_range,
-    )
 
-    units = filled_consumption_df.index.get_level_values("unit")
-    filled_consumption_df.loc[units == "ktoe"] = filled_consumption_df.loc[
+    # TODO: fix below!
+    units = new_filled_demand.index.get_level_values("unit")
+    new_filled_demand.loc[units == "ktoe"] = new_filled_demand.loc[
         units == "ktoe"
     ].apply(ec_utils.ktoe_to_twh)
-    filled_consumption_df = filled_consumption_df.rename({"ktoe": "twh"}, level="unit")
-    filled_consumption_df.index = filled_consumption_df.index.set_names(
+    new_filled_demand = new_filled_demand.rename({"ktoe": "twh"}, level="unit")
+    new_filled_demand.index = new_filled_demand.index.set_names(
         "subsector", level="cat_name"
     )
-    filled_consumption_df = filled_consumption_df.stack()
+    new_filled_demand = new_filled_demand.stack()
 
     if path_output is not None:
-        filled_consumption_df.reorder_levels(formatting.LEVEL_ORDER).to_csv(path_output)
+        new_filled_demand.reorder_levels(formatting.LEVEL_ORDER).to_csv(path_output)
 
-    return filled_consumption_df
+    return new_filled_demand
 
 
-def process_steel_energy_consumption(
+def transform_jrc_subsector_demand(
     jrc_energy: xr.Dataset, jrc_prod: xr.Dataset, cnf_steel: dict
 ) -> xr.Dataset:
     """Processing of steel energy demand for different carriers.
@@ -214,7 +204,7 @@ def process_steel_energy_consumption(
     electric_intensity = electric_intensity.where(
         electric_intensity > 0, other=mean_demand_per_year
     )
-    electric_intensity = electric_intensity.assign_coords(carrier="electricity")
+    electric_intensity = electric_intensity.assign_coords(carrier_name="electricity")
 
     # Hydrogen consumption for H-DRI:
     # only for country/year that handle iron ore and don't recycle all their steel
@@ -222,21 +212,22 @@ def process_steel_energy_consumption(
 
     h2_intensity = electric_intensity.where(sintering_intensity > 0).fillna(0)
     h2_intensity = h2_intensity.where(h2_intensity == 0, h_dri_h2_intensity)
-    h2_intensity = h2_intensity.assign_coords(carrier="hydrogen")
+    h2_intensity = h2_intensity.assign_coords(carrier_name="hydrogen")
 
-    # Space heat
-    space_heat_intensity = jrc.get_subsection_useful_intensity(
+    # Low heat
+    low_heat_intensity = jrc.get_subsection_useful_intensity(
         "Electric arc", "Low enthalpy heat", "Electric arc", jrc_energy, jrc_prod
     )
-    space_heat_intensity = space_heat_intensity.assign_coords(carrier="space_heat")
+    low_heat_intensity = low_heat_intensity.assign_coords(carrier_name="space_heat")
 
+    # Combine and transform to energy demand
     total_intensity = xr.concat(
-        [electric_intensity, h2_intensity, space_heat_intensity], dim="carrier"
+        [electric_intensity, h2_intensity, low_heat_intensity], dim="carrier_name"
     )
-
     steel_energy_demand = total_intensity * jrc_prod.sum("produced_material")
-    steel_energy_demand["value"].attrs["units"] = "twh/kt"
-    breakpoint()
+
+    steel_energy_demand["value"].attrs["units"] = "twh"
+
     return steel_energy_demand
 
 

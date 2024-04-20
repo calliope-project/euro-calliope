@@ -1,9 +1,18 @@
-from typing import Union
-
 import pandas as pd
 import xarray as xr
 
-MAX_YEAR = 2015
+STANDARD_COORDS = ["cat_name", "year", "country_code", "carrier_name"]
+
+
+def ensure_standard_coordinates(ds: xr.Dataset):
+    """Remove all coordinates that do not match a predefined standard."""
+    removed_coords = [i for i in ds.coords if i not in STANDARD_COORDS]
+    removed_dims = [i for i in ds.dims if i in removed_coords]
+    if any(removed_dims):
+        raise ValueError(f"Cannot ensure standard coordinates for {removed_dims}.")
+
+    ds = ds.drop(removed_coords)
+    return ds
 
 
 def get_auxiliary_electric_final_intensity(
@@ -27,7 +36,7 @@ def get_auxiliary_electric_final_intensity(
 
 def get_subsection_final_intensity(
     section: str,
-    subsection: Union[str, list[str]],
+    subsection: str,
     material: str,
     carrier_name: str,
     jrc_energy: xr.Dataset,
@@ -57,8 +66,7 @@ def get_subsection_final_intensity(
     final_intensity = useful_intensity / carrier_eff
 
     # Prettify
-    coords = ["energy", "section", "subsection", "produced_material", "carrier_name"]
-    final_intensity = final_intensity.drop(coords)
+    final_intensity = ensure_standard_coordinates(final_intensity)
     final_intensity["value"].attrs["units"] = "twh/kt"
 
     assert final_intensity >= useful_intensity, "Creating energy!"
@@ -81,8 +89,7 @@ def get_subsection_useful_intensity(
     useful_intensity = (useful_demand / production).sum("carrier_name")
 
     # Prettify
-    coords = ["energy", "section", "subsection", "produced_material"]
-    useful_intensity = useful_intensity.drop(coords)
+    useful_intensity = ensure_standard_coordinates(useful_intensity)
     useful_intensity["value"].attrs["units"] = "twh/kt"
 
     return useful_intensity.fillna(0)
