@@ -1,6 +1,5 @@
 from typing import Optional
 
-import eurocalliopelib.utils as ec_utils
 import pandas as pd
 import xarray as xr
 from utils import formatting
@@ -19,7 +18,6 @@ def _get_h2_to_steel(recycled_steel_share: float) -> float:
 
 
 def get_steel_demand_df(
-    year_range: list,
     cnf_steel: dict,
     path_energy_balances: str,
     path_cat_names: str,
@@ -31,7 +29,7 @@ def get_steel_demand_df(
     """Execute the data processing pipeline for the "Iron and steel" sub-sector.
 
     Args:
-        year_range (list): years to include and interpolate.
+        cnf_steel (dict): steel sector configuration.
         path_energy_balances (str): country energy balances (usually from eurostat).
         path_cat_names (str): eurostat category mapping file.
         path_carrier_names (str): eurostat carrier name mapping file.
@@ -40,9 +38,9 @@ def get_steel_demand_df(
         path_output (str): location of steel demand output file.
 
     Returns:
-        pd.DataFrame: dataframe with steel demand per country.
+        xr.Dataset: dataframe with steel demand per country.
     """
-    # Read data
+    # Load data
     energy_balances_df = pd.read_csv(
         path_energy_balances, index_col=[0, 1, 2, 3, 4], squeeze=True
     )
@@ -51,7 +49,7 @@ def get_steel_demand_df(
     jrc_energy = xr.open_dataset(path_jrc_industry_energy)
     jrc_prod = xr.open_dataset(path_jrc_industry_production)
 
-    # TODO: fix weird naming convention forced by the JRC module.
+    # TODO: fix naming convention forced by the JRC module.
     jrc_energy = jrc_energy.rename({"jrc-idees-industry-twh": "value"})
     jrc_prod = jrc_prod.rename({"jrc-idees-industry-twh": "value"})
 
@@ -60,34 +58,16 @@ def get_steel_demand_df(
     jrc_energy = jrc_energy.sel(cat_name=CAT_NAME_STEEL)
     jrc_prod = jrc_prod.sel(cat_name=CAT_NAME_STEEL)
 
-    # -------------------------------------------------------------------------
     # Process data
-    # -------------------------------------------------------------------------
-    new_jrc_steel_demand = transform_jrc_subsector_demand(
-        jrc_energy, jrc_prod, cnf_steel
+    new_steel_demand = transform_jrc_subsector_demand(jrc_energy, jrc_prod, cnf_steel)
+    new_steel_demand = formatting.fill_missing_countries_years(
+        energy_balances_df, cat_names_df, carrier_names_df, new_steel_demand
     )
-    new_filled_demand = formatting.fill_missing_countries_years(
-        energy_balances_df, cat_names_df, carrier_names_df, new_jrc_steel_demand
-    )
-    # -------------------------------------------------------------------------
-    # Format the final output
-    # -------------------------------------------------------------------------
-
-    # TODO: fix below!
-    units = new_filled_demand.index.get_level_values("unit")
-    new_filled_demand.loc[units == "ktoe"] = new_filled_demand.loc[
-        units == "ktoe"
-    ].apply(ec_utils.ktoe_to_twh)
-    new_filled_demand = new_filled_demand.rename({"ktoe": "twh"}, level="unit")
-    new_filled_demand.index = new_filled_demand.index.set_names(
-        "subsector", level="cat_name"
-    )
-    new_filled_demand = new_filled_demand.stack()
 
     if path_output is not None:
-        new_filled_demand.reorder_levels(formatting.LEVEL_ORDER).to_csv(path_output)
+        new_steel_demand.to_netcdf(path_output)
 
-    return new_filled_demand
+    return new_steel_demand
 
 
 def transform_jrc_subsector_demand(
@@ -233,7 +213,6 @@ def transform_jrc_subsector_demand(
 
 if __name__ == "__main__":
     get_steel_demand_df(
-        year_range=snakemake.params.year_range,
         cnf_steel=snakemake.params.cnf_steel,
         path_energy_balances=snakemake.input.path_energy_balances,
         path_cat_names=snakemake.input.path_cat_names,

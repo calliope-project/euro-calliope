@@ -16,7 +16,6 @@ rule steel_industry:
     message: "Calculate energy demand for the 'Iron and steel' sector in JRC-IDEES."
     conda: CONDA_PATH
     params:
-        year_range = config["params"]["year-range"],
         cnf_steel = config["params"]["steel"]
     input:
         path_energy_balances = config["inputs"]["path-energy-balances"],
@@ -25,7 +24,7 @@ rule steel_industry:
         path_jrc_industry_energy = config["inputs"]["path-jrc-industry-energy"],
         path_jrc_industry_production = config["inputs"]["path-jrc-industry-production"],
     output:
-        path_output = f"{BUILD_PATH}/annual_demand_steel.csv"
+        path_output = f"{BUILD_PATH}/annual_demand_steel.nc"
     script: f"{SCRIPT_PATH}/steel_industry.py"
 
 rule chemical_industry:

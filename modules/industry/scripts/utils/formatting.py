@@ -2,8 +2,7 @@ import eurocalliopelib.utils as ec_utils
 import numpy as np
 import pandas as pd
 import xarray as xr
-
-LEVEL_ORDER = ["subsector", "country_code", "unit", "carrier", "year"]
+from utils import jrc_idees_parser as jrc
 
 
 def fill_missing_countries_years(
@@ -95,6 +94,26 @@ def fill_missing_countries_years(
     _to_fill = _to_fill.bfill(dim="year")
     all_filled = _to_fill.ffill(dim="year")
 
+    all_filled = jrc.ensure_standard_coordinates(all_filled)
     all_filled["value"].attrs["units"] = "twh"
 
     return all_filled
+
+
+def to_calliope_style(subsector_demand: xr.Dataset) -> pd.DataFrame:
+    """Reformat data to fit the Calliope style."""
+    # TODO: converting from JRC carrier names to calliope style here makes sense.
+    # energy-balance-category-names.csv does not support this at the moment.
+    preprocessing = jrc.ensure_standard_coordinates(subsector_demand)
+    dimensions = {"cat_name": "subsector", "carrier_name": "carrier"}
+    preprocessing = preprocessing.rename(dimensions)
+
+    unit = subsector_demand["value"].attrs["units"]
+    preprocessing = preprocessing.expand_dims(dim={"unit": [unit]})
+
+    calliope_style = preprocessing.to_dataframe()
+    level_order = ["subsector", "country_code", "unit", "carrier", "year"]
+    calliope_style = calliope_style.reorder_levels(level_order)
+    calliope_style = calliope_style.sort_index()
+
+    return calliope_style

@@ -1,4 +1,3 @@
-import pandas as pd
 import xarray as xr
 
 STANDARD_COORDS = ["cat_name", "year", "country_code", "carrier_name"]
@@ -96,17 +95,17 @@ def get_subsection_useful_intensity(
 
 
 # TODO: fix me!
-def get_carrier_demand(
-    carrier: str, all_demand_df: pd.DataFrame, jrc_energy: xr.Dataset
-) -> pd.DataFrame:
-    """
-    Get demand for a specific carrier, assuming all end use demand that could consume
-    that carrier are completely met by that carrier.
-    """
-    energy = jrc_energy.xs(carrier, level="carrier_name")
-    energy_efficiency = energy.xs("demand").div(energy.xs("consumption"))
-    # Fill NaNs (where there is demand, but no consumption in that country)
-    # with the average efficiency a. from the country, b. from all countries
-    energy_efficiency = energy_efficiency.fillna(energy_efficiency.mean())
+# def get_carrier_demand(
+#     carrier: str, all_demand_df: pd.DataFrame, jrc_energy: xr.Dataset
+# ) -> pd.DataFrame:
+#     """
+#     Get demand for a specific carrier, assuming all end use demand that could consume
+#     that carrier are completely met by that carrier.
+#     """
+#     energy = jrc_energy.xs(carrier, level="carrier_name")
+#     energy_efficiency = energy.xs("demand").div(energy.xs("consumption"))
+#     # Fill NaNs (where there is demand, but no consumption in that country)
+#     # with the average efficiency a. from the country, b. from all countries
+#     energy_efficiency = energy_efficiency.fillna(energy_efficiency.mean())
 
-    return all_demand_df.reindex(energy_efficiency.index).div(energy_efficiency)
+#     return all_demand_df.reindex(energy_efficiency.index).div(energy_efficiency)

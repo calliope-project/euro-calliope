@@ -9,6 +9,5 @@ industry:
         placeholder-out1:
         placeholder-out2:
     params:
-        year-range: [2000, 2018]  # Start and end year for JRC data parsing
         steel:
             recycled-steel-share: 0.5  # % of recycled scrap steel for H-DRI
