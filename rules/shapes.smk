@@ -21,7 +21,7 @@ rule download_raw_gadm_administrative_borders:
     params: url = lambda wildcards: config["data-sources"]["gadm"].format(country_code=wildcards.country_code)
     output: protected("data/automatic/raw-gadm/{country_code}.zip")
     conda: "../envs/shell.yaml"
-    shell: "curl -sLo {output} '{params.url}'"
+    shell: "curl -sSLo {output} '{params.url}'"
 
 
 rule raw_gadm_administrative_borders:
@@ -57,7 +57,7 @@ rule download_raw_nuts_units:
     params: url = config["data-sources"]["nuts"]
     output: protected("data/automatic/raw-nuts-units.zip")
     conda: "../envs/shell.yaml"
-    shell: "curl -sLo {output} '{params.url}'"
+    shell: "curl -sSLo {output} '{params.url}'"
 
 
 rule administrative_borders_nuts:
@@ -103,10 +103,10 @@ rule units_without_shape:
 
 rule download_eez:
     message: "Download Exclusive Economic Zones as zip"
-    output: protected("data/automatic/eez.zip")
+    output: protected("data/automatic/eez.gpkg.zip")
     params: url = config["data-sources"]["eez"]
     conda: "../envs/shell.yaml"
-    shell: "curl -sLo {output} '{params.url}'"
+    shell: "curl -sSLo {output} '{params.url}'"
 
 
 rule eez:
@@ -121,7 +121,7 @@ rule eez:
     shell:
         """
         fio cat --bbox {params.bounds} "zip://{input}"\
-        | fio filter "f.properties.territory1 in [{params.countries}]"\
+        | fio filter "f.properties.TERRITORY1 in [{params.countries}]"\
         | fio collect > {output}
         """
 

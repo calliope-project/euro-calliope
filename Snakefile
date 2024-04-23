@@ -6,13 +6,17 @@ from snakemake.utils import validate, min_version, makedirs
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
 
-# Include modules
+# >>>>>> Include modules >>>>>>
+# Industry
 configfile: "modules/industry/config.yaml"
+validate(config, "modules/industry/schema.yaml")
+
 module module_industry:
     snakefile: "modules/industry/industry.smk"
     config: config["industry"]
 use rule * from module_industry as module_industry_*
-#
+# <<<<<< Include modules <<<<<<
+
 
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
@@ -24,6 +28,7 @@ techs_template_dir = f"{model_template_dir}techs/"
 
 include: "./rules/shapes.smk"
 include: "./rules/data.smk"
+include: "./rules/jrc-idees.smk"
 include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
@@ -33,6 +38,7 @@ include: "./rules/nuclear.smk"
 include: "./rules/transport.smk"
 include: "./rules/sync.smk"
 include: "./rules/heat.smk"
+
 min_version("7.8")
 localrules: all, clean
 wildcard_constraints:
@@ -40,6 +46,7 @@ wildcard_constraints:
 
 ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
 ruleorder: bio_techs_and_locations_template > techs_and_locations_template
+ruleorder: create_controlled_road_transport_annual_demand > dummy_tech_locations_template
 
 ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
@@ -47,14 +54,19 @@ ALL_CF_TECHNOLOGIES = [
     "hydro-reservoir"
 ]
 
+
 def ensure_lib_folder_is_linked():
     if not workflow.conda_prefix:
         return
     link = Path(workflow.conda_prefix) / "lib"
     if not link.exists():
+        # Link either does not exist or is an invalid symlink
         print("Creating link from conda env dir to eurocalliopelib.")
+        if link.is_symlink():  # Deal with existing but invalid symlink
+            shell(f"rm {link}")
         makedirs(workflow.conda_prefix)
-        shell(f"ln -s {workflow.basedir}/lib {workflow.conda_prefix}/lib")
+        shell(f"ln -s {workflow.basedir}/lib {link}")
+
 
 ensure_lib_folder_is_linked()
 
@@ -76,7 +88,9 @@ rule all:
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",
-        "build/models/build-metadata.yaml",
+        "build/models/continental/build-metadata.yaml",
+        "build/models/national/build-metadata.yaml",
+        "build/models/regional/build-metadata.yaml",
         "build/models/regional/summary-of-potentials.nc",
         "build/models/regional/summary-of-potentials.csv",
         "build/models/national/summary-of-potentials.nc",
@@ -103,7 +117,7 @@ rule all_tests:
 
 
 rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_template` with a locational CSV linked to each technology that has no location-specific data to define.
-    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."
+    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."  # Update ruleorder at the top of the file if you instead want the techs_and_locations_template rule to be used to generate a file
     input: rules.locations_template.output.csv
     output: "build/data/{resolution}/{tech_group}/{tech}.csv"
     conda: "envs/shell.yaml"
@@ -180,8 +194,8 @@ rule model_template:
         ),
         demand_timeseries_data = (
             "build/models/{resolution}/timeseries/demand/electricity.csv",
-            "build/models/{resolution}/timeseries/demand/electrified-road-transport.csv",
-            "build/models/{resolution}/timeseries/demand/road-transport-historic-electrification.csv",
+            "build/models/{resolution}/timeseries/demand/uncontrolled-electrified-road-transport.csv",
+            "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv",
             "build/models/{resolution}/timeseries/demand/electrified-heat-demand.csv",
             "build/models/{resolution}/timeseries/demand/heat-demand-historic-electrification.csv",
         ),
@@ -201,13 +215,11 @@ rule model_template:
 rule build_metadata:
     message: "Generate build metadata."
     input:
-        "build/models/continental/example-model.yaml",
-        "build/models/national/example-model.yaml",
-        "build/models/regional/example-model.yaml",
+        "build/models/{resolution}/example-model.yaml",
     params:
         config = config,
         version = __version__
-    output: "build/models/build-metadata.yaml"
+    output: "build/models/{resolution}/build-metadata.yaml"
     conda: "envs/default.yaml"
     script: "scripts/metadata.py"
 

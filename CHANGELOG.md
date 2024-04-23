@@ -12,12 +12,12 @@
 
 ### Added (models)
 
-* **ADD** industry module and steel industry energy demand processing. NOT CONNECTED TO THE MAIN WORKFLOW. Industry sectors pending: chemical, "other".
+* **ADD** industry module and steel industry energy demand processing. NOT CONNECTED TO THE MAIN WORKFLOW. Industry sectors pending: chemical, "other" (#308, #310).
 
 ### Added (models)
 * **ADD** fully-electrified heat demand (#284).
 
-* **ADD** fully-electrified road transportation (#270), (#271).
+* **ADD** fully-electrified road transportation (#270), (#271). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (PR #338).
 
 * **ADD** nuclear power plant technology with capacity limits. Capacity limits can be equal to today or be bound by a minimum and maximum capacity to represent an available range in future. In either case, capacities are allocated at a subnational resolution based on linear scaling from current capacity geolocations, using the JRC power plant database (#78).
 
@@ -55,7 +55,7 @@
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
 * **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264).
-* **UPDATE** default conda prefix directory including consistent handling of the path to eurocalliopelib (#264).
+* **UPDATE** default conda prefix directory including consistent handling of the path to eurocalliopelib (#264, #331).
 
 ### Fixed (models)
 
@@ -68,6 +68,8 @@
 ### Fixed (workflow)
 
 * **FIX** fixed optimisation tolerance of hydro power plants from xtol to xatol (#266).
+* **FIX** source of Exclusive Economic Zones (EEZ) to use a cache on [zenodo](https://sandbox.zenodo.org/records/45135) so that we can keep using v11 (#332).  FIXME: update to actual zenodo record before next Euro-Calliope release.
+* **FIX** fixed rule `download_basins_database`, which previously failed on some linux and mac machines, by requiring a more recent curl in the environment `envs/shell.yaml` (#267).
 
 ## 1.1.0 (2021-12-22)
 
@@ -99,7 +101,7 @@ In the following, we split additions, fixes, and updates between those which aff
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
 * **ADD** minimal configuration to be able to test the entire workflow more quickly (#60).
-* **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59).
+* **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59, #267).
 * **ADD** sync infrastructure to easily send and receive files to and from a cluster (#74).
 * **ADD** parameter `station-nearest-basin-max-km` controlling the mapping of hydro power stations to basins (#138).
 * **ADD** optional email notifications whenever builds fail or succeed (#92).

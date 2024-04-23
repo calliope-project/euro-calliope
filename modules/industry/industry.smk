@@ -1,11 +1,10 @@
 # Paths dependent on main Snakefile
 MODULE_PATH = "modules/industry"
-TMP_PATH = f"{MODULE_PATH}/tmp"
-OUT_PATH = f"{MODULE_PATH}/out"
+BUILD_PATH = f"{MODULE_PATH}/build"
 DATA_PATH = f"{MODULE_PATH}/raw_data"
 
 # Paths relative to this snakefile (snakemake behaviour is inconsitent)
-SRC_PATH = "src"  # scripts are called relative to this file
+SCRIPT_PATH = "scripts"  # scripts are called relative to this file
 CONDA_PATH = "./env_industry.yaml"
 
 # TODO:
@@ -15,35 +14,27 @@ CONDA_PATH = "./env_industry.yaml"
 # Otherwise commands like "rules.rulename.output" won't work!
 if "Iron and steel" in config["params"]["specific-industries"]:
     rule steel_industry:
-        message: "Calculate energy demand for the 'Iron and steel' sector in JRC-IDEES."
-        conda: CONDA_PATH
-        params:
-            year_range = config["params"]["year-range"]
-        input:
-            path_energy_balances = config["inputs"]["path-energy-balances"],
-            path_cat_names = config["inputs"]["path-cat-names"],
-            path_carrier_names = config["inputs"]["path-carrier-names"],
-            path_jrc_energy = f"{DATA_PATH}/jrc_idees_processed_energy.csv.gz",
-            path_jrc_production = f"{DATA_PATH}/jrc_idees_processed_production.csv.gz",
-        output:
-            path_output = f"{TMP_PATH}/annual_demand_steel.csv"
-        script: f"{SRC_PATH}/steel_industry.py"
+    message: "Calculate energy demand for the 'Iron and steel' sector in JRC-IDEES."
+    conda: CONDA_PATH
+    params:
+        cnf_steel = config["params"]["steel"]
+    input:
+        path_energy_balances = config["inputs"]["path-energy-balances"],
+        path_cat_names = config["inputs"]["path-cat-names"],
+        path_carrier_names = config["inputs"]["path-carrier-names"],
+        path_jrc_industry_energy = config["inputs"]["path-jrc-industry-energy"],
+        path_jrc_industry_production = config["inputs"]["path-jrc-industry-production"],
+    output:
+        path_output = f"{BUILD_PATH}/annual_demand_steel.nc"
+    script: f"{SCRIPT_PATH}/steel_industry.py"
 
-if "Chemicals Industry" in config["params"]["specific-industries"]:
-    rule chemicals_industry:
-        message: "Calculate energy demand for the 'Chemicals Industry' sector in JRC-IDEES."
-        conda: CONDA_PATH
-        params:
-            year_range = config["params"]["year-range"],
-        input:
-            path_energy_balances = config["inputs"]["path-energy-balances"],
-            path_cat_names = config["inputs"]["path-cat-names"],
-            path_carrier_names = config["inputs"]["path-carrier-names"],
-            path_jrc_energy = f"{DATA_PATH}/jrc_idees_processed_energy.csv.gz",
-            path_jrc_production = f"{DATA_PATH}/jrc_idees_processed_production.csv.gz",
-        output:
-            path_output = f"{TMP_PATH}/annual_demand_chemicals.csv"
-        script: f"{SRC_PATH}/chemicals_industry.py"
+rule chemical_industry:
+    message: "."
+    conda: CONDA_PATH
+    params:
+    input:
+    output:
+    script: f"{SCRIPT_PATH}/chemicals.py"
 
 rule other_industry:
     message: "Calculate energy demand for all other industry sectors in JRC-IDEES."

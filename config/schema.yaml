@@ -144,6 +144,9 @@ properties:
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.
+    max-threads:
+        type: integer
+        description: maximum available threads for multiprocessing, in those rules that are able to accept multiple threads.
     cluster-sync:
         type: object
         description: Configuration for the "work local, build on remote" workflow.
@@ -348,6 +351,9 @@ properties:
                             motorcycles:
                                 type: string
                                 description: JRC-IDEES name of motorcycles.
+                    uncontrolled-ev-charging-share:
+                        type: number
+                        description: Share of uncontrolled charging.
             entsoe-tyndp:
                 type: object
                 description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/
