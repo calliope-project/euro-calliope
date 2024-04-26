@@ -1,141 +1,164 @@
 from typing import Optional
 
-import eurocalliopelib.utils as ec_utils
 import pandas as pd
-from utils import formatting as fmt
+import xarray as xr
+from utils import formatting
 from utils import jrc_idees_parser as jrc
+
+# TODO: this should be defined externally via a .csv file.
+JRC_TO_CALLIOPE = {
+    "Electricity": "electricity",
+    "Natural gas (incl. biogas)": "methane",
+    "Diesel oil (incl. biofuels)": "diesel",
+    "Low enthalpy heat": "space_heat",
+}
 
 
 def get_other_demand(
-    year_range: list,
-    specific_industries: list[str],
+    config_params: dict,
     path_energy_balances: str,
     path_cat_names: str,
     path_carrier_names: str,
-    path_jrc_energy: str,
-    path_jrc_production: str,
+    path_jrc_industry_energy: str,
+    path_jrc_industry_production: str,
     path_output: Optional[str] = None,
 ) -> pd.DataFrame:
     """Execute the default data processing pipeline all non-specific industries.
 
     Args:
-        year_range (list): years to include and interpolate.
-        specific_industries (list[str]): individually processed industries (omitted).
+        config_params (dict): all industry configuration parameters.
         path_energy_balances (str): country energy balances (usually from eurostat).
         path_cat_names (str): eurostat category mapping file.
         path_carrier_names (str): eurostat carrier name mapping file.
-        path_jrc_energy (str): jrc country-specific industrial energy demand file.
-        path_jrc_production (str): jrc country-specific industrial production file.
+        path_jrc_industry_energy (str): jrc country-specific industrial energy demand file.
+        path_jrc_industry_production (str): jrc country-specific industrial production file.
         path_output (str): location of steel demand output file.
 
     Returns:
         pd.DataFrame: dataframe with industrial demand per country.
     """
-    # -------------------------------------------------------------------------
-    # Prepare data files
-    # -------------------------------------------------------------------------
+    # Load data
     energy_balances_df = pd.read_csv(
         path_energy_balances, index_col=[0, 1, 2, 3, 4], squeeze=True
     )
     cat_names_df = pd.read_csv(path_cat_names, header=0, index_col=0)
     carrier_names_df = pd.read_csv(path_carrier_names, header=0, index_col=0)
-    jrc_energy_df = pd.read_csv(path_jrc_energy, index_col=[0, 1, 2, 3, 4, 5, 6])
-    jrc_prod_df = pd.read_csv(path_jrc_production, index_col=[0, 1, 2, 3])
+    jrc_energy = xr.open_dataset(path_jrc_industry_energy)
+    jrc_prod = xr.open_dataset(path_jrc_industry_production)
+
+    # TODO: fix naming convention forced by the JRC module.
+    jrc_energy = jrc_energy.rename({"jrc-idees-industry-twh": "value"})
+    jrc_prod = jrc_prod.rename({"jrc-idees-industry-twh": "value"})
+
     # Remove data from all specifically processed industries
+    specific_industries = config_params["specific-industries"]
     cat_names_df = cat_names_df[~cat_names_df["jrc_idees"].isin(specific_industries)]
-    jrc_energy_df = jrc_energy_df.drop(specific_industries, level="cat_name")
-    jrc_prod_df = jrc_prod_df.drop(specific_industries, level="cat_name")
+    jrc_energy = jrc_energy.drop_sel(cat_name=specific_industries)
+    jrc_prod = jrc_prod.drop_sel(cat_name=specific_industries)
 
-    # -------------------------------------------------------------------------
-    # Process data
-    # -------------------------------------------------------------------------
-    levels_to_sum = ["section", "subsection", "country_code", "cat_name", "unit"]
-    demand = jrc_energy_df.xs("demand").sum(level=levels_to_sum)
+    # Process data:
+    # Extract useful dem. -> remove useful dem. from rest -> extract final dem.
+    selected_useful = config_params["other"]["useful-demands"]
+    other_useful_demand = extract_aggregated_useful_demand(jrc_energy, selected_useful)
+    other_useful_demand = other_useful_demand.rename({"subsection": "carrier_name"})
 
-    # TODO: this should be specified in the configuration file
-
-    # if it can be met by electricity (exclusively or otherwise),
-    # then it's an end-use electricity demand
-    electrical_consumption = (
-        jrc.get_carrier_demand("Electricity", demand, jrc_energy_df)
-        .assign(carrier="electricity")
-        .set_index("carrier", append=True)
-    )
-    # If it can only be met by natural gas (steam heating) then it's natural gas
-    nat_gas_consumption = (
-        jrc.get_carrier_demand("Natural gas (incl. biogas)", demand, jrc_energy_df)
-        .drop(electrical_consumption.droplevel("carrier").index, errors="ignore")
-        .assign(carrier="methane")
-        .set_index("carrier", append=True)
-    )
-    # If it can only be met by diesel (backup generators) then it's diesel
-    diesel_consumption = (
-        jrc.get_carrier_demand("Diesel oil (incl. biofuels)", demand, jrc_energy_df)
-        .drop(nat_gas_consumption.droplevel("carrier").index, errors="ignore")
-        .drop(electrical_consumption.droplevel("carrier").index, errors="ignore")
-        .assign(carrier="diesel")
-        .set_index("carrier", append=True)
-    )
-
-    # Combine carrier files, removing space heating
-    other_consumption_carrier_based = pd.concat([
-        i.drop("Low enthalpy heat", level="subsection", errors="ignore").sum(
-            level=["cat_name", "country_code", "unit", "carrier"]
+    selected_final = config_params["other"]["final-energy-carriers"]
+    final_method = config_params["other"]["final-energy-method"]
+    jrc_energy_clean = jrc_energy.drop_sel(subsection=selected_useful)
+    if final_method == "priority":
+        other_final_demand = extract_final_demand_by_priority(
+            jrc_energy_clean, selected_final
         )
-        for i in [electrical_consumption, nat_gas_consumption, diesel_consumption]
-    ])
-    other_consumption_use_based = (
-        demand.xs("Low enthalpy heat", level="subsection")
-        .sum(level=["cat_name", "country_code", "unit"])
-        .assign(carrier="space_heat")
-        .set_index("carrier", append=True)
+    else:
+        raise ValueError(f"Unsupported final energy method: {final_method}.")
+
+    # Combine and fill missing countries
+    other_demand = xr.concat(
+        [other_useful_demand, other_final_demand], dim="carrier_name"
+    )
+    other_demand = formatting.fill_missing_countries_years(
+        energy_balances_df, cat_names_df, carrier_names_df, other_demand
     )
 
-    all_other_consumption = pd.concat([
-        other_consumption_carrier_based,
-        other_consumption_use_based,
-    ])
+    # Fix the naming
+    for carrier in JRC_TO_CALLIOPE:
+        other_demand["carrier_name"] = other_demand["carrier_name"].where(
+            lambda x, i=carrier: x != i, JRC_TO_CALLIOPE[carrier]
+        )
+    other_demand = jrc.ensure_standard_coordinates(other_demand)
+    other_demand["value"].attrs["units"] = "twh"
 
-    # -------------------------------------------------------------------------
-    # Format the final output
-    # -------------------------------------------------------------------------
-    all_other_consumption.columns = all_other_consumption.columns.astype(int).rename(
-        "year"
-    )
-    all_other_consumption_filled = fmt.fill_missing_data(
-        energy_balances_df,
-        cat_names_df,
-        carrier_names_df,
-        all_other_consumption,
-        year_range,
-    )
-
-    units = all_other_consumption_filled.index.get_level_values("unit")
-    all_other_consumption_filled.loc[units == "ktoe"] = (
-        all_other_consumption_filled.loc[units == "ktoe"].apply(ec_utils.ktoe_to_twh)
-    )
-    all_other_consumption_filled = all_other_consumption_filled.rename(
-        {"ktoe": "twh"}, level="unit"
-    )
-    all_other_consumption_filled.index = all_other_consumption_filled.index.set_names(
-        "subsector", level="cat_name"
-    )
-    all_other_consumption_filled = all_other_consumption_filled.stack()
-    breakpoint()
     if path_output:
-        all_other_consumption_filled.reorder_levels(fmt.LEVEL_ORDER).to_csv(path_output)
+        other_demand.to_netcdf(path_output)
 
-    return all_other_consumption_filled
+    return other_demand
+
+
+def extract_aggregated_useful_demand(
+    jrc_energy: xr.Dataset, subsections: list[str]
+) -> xr.Dataset:
+    """Gather useful demand of specific subsections and aggregate them.
+
+    Args:
+        jrc_energy (xr.Dataset): JRC energy dataset.
+        subsections (list[str]): subsections to take.
+
+    Returns:
+        xr.Dataset: dataset with [subsection, cat_name, year, country_code] dimensions.
+    """
+    useful_dem_total = jrc_energy.sel(energy="demand").sum("carrier_name")
+
+    useful_dem_extracted = useful_dem_total.sel(subsection=subsections)
+    useful_dem_extracted = useful_dem_extracted.sum("section").drop("energy")
+
+    return useful_dem_extracted
+
+
+def extract_final_demand_by_priority(
+    jrc_energy: xr.Dataset, carrier_priority: list[str]
+):
+    """Gather final demand of all sectors giving priority to certain carriers.
+
+    For the given carriers: drop overlapping consumption so that any demand
+    is met by carriers with the given priority.
+    E.g., if carrier priority is [Electricity, Natural gas, Diesel] then:
+    - Electricity: if met exclusively or otherwise, it's final electrical demand.
+    - Natural gas: if met exclusively or otherwise, EXCEPT for overlapping cases with the above.
+    - Diesel: if met exclusively or otherwise, EXCEPT for overlapping cases with all the above.
+
+    Args:
+        jrc_energy (xr.Dataset): JRC energy dataset.
+        carrier_priority (list[str]): carriers to take in order of priority.
+
+    Returns:
+        xr.Dataset: dataset filled with demands for the given carriers.
+    """
+    useful_dem = jrc_energy.sel(energy="demand").sum("carrier_name")
+
+    final_dem_carrier = {}
+    for carrier in carrier_priority:
+        dem_current = jrc.get_carrier_final_demand(carrier, useful_dem, jrc_energy)
+        dem_current = dem_current.to_dataframe().dropna()
+        for dem_prev in final_dem_carrier.values():
+            dem_current = dem_current.drop(dem_prev.index, errors="ignore")
+        final_dem_carrier[carrier] = dem_current
+
+    for carrier, df in final_dem_carrier.items():
+        final_dem_carrier[carrier] = df.to_xarray().assign_coords(carrier_name=carrier)
+
+    final_dem = xr.concat(final_dem_carrier.values(), dim="carrier_name")
+    final_dem = final_dem.sum(["section", "subsection"])
+
+    return final_dem
 
 
 if __name__ == "__main__":
     get_other_demand(
-        year_range=snakemake.params.year_range,
-        specific_industries=snakemake.params.specific_industries,
+        config_params=snakemake.params.config_params,
         path_energy_balances=snakemake.input.path_energy_balances,
         path_cat_names=snakemake.input.path_cat_names,
         path_carrier_names=snakemake.input.path_carrier_names,
-        path_jrc_energy=snakemake.input.path_jrc_energy,
-        path_jrc_production=snakemake.input.path_jrc_production,
+        path_jrc_industry_energy=snakemake.input.path_jrc_industry_energy,
+        path_jrc_industry_production=snakemake.input.path_jrc_industry_production,
         path_output=snakemake.output.path_output,
     )

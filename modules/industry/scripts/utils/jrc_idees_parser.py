@@ -94,18 +94,28 @@ def get_subsection_useful_intensity(
     return useful_intensity.fillna(0)
 
 
-# TODO: fix me!
-# def get_carrier_demand(
-#     carrier: str, all_demand_df: pd.DataFrame, jrc_energy: xr.Dataset
-# ) -> pd.DataFrame:
-#     """
-#     Get demand for a specific carrier, assuming all end use demand that could consume
-#     that carrier are completely met by that carrier.
-#     """
-#     energy = jrc_energy.xs(carrier, level="carrier_name")
-#     energy_efficiency = energy.xs("demand").div(energy.xs("consumption"))
-#     # Fill NaNs (where there is demand, but no consumption in that country)
-#     # with the average efficiency a. from the country, b. from all countries
-#     energy_efficiency = energy_efficiency.fillna(energy_efficiency.mean())
+def get_carrier_final_demand(
+    carrier: str,
+    all_useful_demand: xr.Dataset,
+    jrc_energy: xr.Dataset,
+    fill_empty: bool = True,
+) -> xr.Dataset:
+    """
+    Get demand for a specific carrier, assuming all end use demand that could consume
+    that carrier are completely met by that carrier.
+    """
+    carrier_total = jrc_energy.sel(carrier_name=carrier)
+    carrier_eff = carrier_total.sel(energy="demand") / carrier_total.sel(
+        energy="consumption"
+    )
+    # Fill NaNs (where there is demand, but no consumption in that country)
+    if fill_empty:
+        # First by country avg. (all years), then by year avg. (all countries).
+        carrier_eff = carrier_eff.fillna(carrier_eff.mean(dim="year"))
+        carrier_eff = carrier_eff.fillna(carrier_eff.mean(dim="country_code"))
 
-#     return all_demand_df.reindex(energy_efficiency.index).div(energy_efficiency)
+    carrier_final_demand = all_useful_demand / carrier_eff
+    carrier_final_demand = carrier_final_demand.dropna(dim="subsection", how="all")
+    carrier_final_demand = carrier_final_demand.drop(["energy", "carrier_name"])
+
+    return carrier_final_demand

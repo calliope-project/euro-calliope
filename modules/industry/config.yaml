@@ -9,6 +9,10 @@ industry:
         placeholder-out1:
         placeholder-out2:
     params:
-        specific-industries: ["Iron and steel"]
+        specific-industries: ["Iron and steel", "Chemicals Industry"]
         steel:
             recycled-steel-share: 0.5  # % of recycled scrap steel for H-DRI
+        other:
+            final-energy-method: "priority"
+            final-energy-carriers: ["Electricity", "Natural gas (incl. biogas)", "Diesel oil (incl. biofuels)"]
+            useful-demands: ["Low enthalpy heat"]

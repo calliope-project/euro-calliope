@@ -43,6 +43,13 @@ properties:
                 additionalProperties: false
                 description: Parameters allow users to configure module behaviour.
                 properties:
+                    specific-industries:
+                        type: array
+                        description: "Unique processing steps to activate."
+                        uniqueItems: true
+                        items:
+                            type: string
+                            enum: ["Iron and steel", "Chemicals Industry"]
                     steel:
                         type: object
                         additionalProperties: false
@@ -53,3 +60,23 @@ properties:
                                 description: "Share of recycled metal in the H-DRI steel process."
                                 minimum: 0
                                 maximum: 1
+                    other:
+                        type: object
+                        additionalProperties: false
+                        description: "Parameters determining the processing of energy in all other sectors."
+                        properties:
+                            final-energy-method:
+                                description: "Processing method for final-demand."
+                                type: string
+                            final-energy-carriers:
+                                type: array
+                                description: "Final energy carriers to take, if relevant."
+                                uniqueItems: true
+                                items:
+                                    type: string
+                            useful-demands:
+                                type: array
+                                description: "Useful subsection demands to take (always removed from final demands)."
+                                uniqueItems: true
+                                items:
+                                    type: string
