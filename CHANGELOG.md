@@ -2,10 +2,6 @@
 
 ## 1.2.0 (unpublished)
 
-### Added (files)
-
-* **ADD** pyproject.toml file to centralize python/project details (#365).
-
 ### Added (models)
 * **ADD** fully-electrified heat demand (#284).
 
