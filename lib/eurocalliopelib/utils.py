@@ -107,7 +107,7 @@ def rename_and_groupby(
         drop_other_dim_items (bool, optional): Defaults to True.
             If True, any dimension items _not_ referenced in `rename_dict` keys will be removed from that dimension in the returned array.
     Returns:
-        (xr.DataArray): Same as "da" but with the items in "dim_name" renamed and possibly a. grouped, b. "dim_name" itself renamed.
+        (xr.DataArray): Same as "da" but with the items in "dim_name" renamed and possibly a. grouped and summed, b. "dim_name" itself renamed.
     """
     rename_series = pd.Series(rename_dict).rename_axis(index=dim_name)
     if drop_other_dim_items is False:

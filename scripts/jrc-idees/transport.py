@@ -39,14 +39,13 @@ ROAD_CARRIERS = {
 
 
 def process_jrc_transport_data(
-    path_to_data: str,
-    dataset: object,
+    paths_to_data: list[Path],
+    dataset: str,
     out_path: str,
     vehicle_type_names: dict[str, str],
 ) -> None:
     processed_data = pd.concat([
-        read_transport_excel(path, **DATASET_PARAMS[dataset])
-        for path in Path(path_to_data).glob("*.xlsx")
+        read_transport_excel(path, **DATASET_PARAMS[dataset]) for path in paths_to_data
     ])
     if DATASET_PARAMS[dataset]["unit"] == "ktoe":
         processed_data = processed_data.apply(utils.ktoe_to_twh)
@@ -184,7 +183,7 @@ def remove_of_which(
 
 if __name__ == "__main__":
     process_jrc_transport_data(
-        path_to_data=snakemake.input.data,
+        paths_to_data=snakemake.input.data,
         dataset=snakemake.wildcards.dataset,
         out_path=snakemake.output[0],
         vehicle_type_names={

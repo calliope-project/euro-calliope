@@ -11,19 +11,6 @@ rule download_transport_timeseries:
     shell: "curl -sSLo {output} {params.url}"
 
 
-rule jrc_idees_transport_processed:
-    message: "Process {wildcards.dataset} transport data from JRC-IDEES to be used in understanding current and future transport demand"
-    input:
-        data = "build/data/jrc-idees/transport/unprocessed"
-    output: "build/data/jrc-idees/transport/processed-{dataset}.csv"
-    params:
-        vehicle_type_names = config["parameters"]["transport"]["vehicle-type-names"],
-    wildcard_constraints:
-        dataset = "road-energy|road-distance|road-vehicles"
-    conda: "../envs/default.yaml"
-    script: "../scripts/transport/jrc_idees.py"
-
-
 rule annual_transport_demand:
     message: "Calculate future transport energy demand based on JRC IDEES"
     input:

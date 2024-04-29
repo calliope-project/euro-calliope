@@ -2,10 +2,11 @@ import logging
 from itertools import product
 from multiprocessing import Pool
 from pathlib import Path
-from typing import Callable, Literal, Union
+from typing import Callable, Literal, Optional, Union
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 from eurocalliopelib import utils
 from styleframe import StyleFrame
 
@@ -31,7 +32,10 @@ ENERGY_SHEET_CARRIERS = {
 
 
 def process_jrc_industry_data(
-    data_dir: str, dataset: Literal["energy", "production"], threads: int, out_path: str
+    paths_to_data: list[Path],
+    dataset: Literal["energy", "production"],
+    threads: int,
+    out_path: str,
 ):
     """Process human-readable JRC-IDEES Excel files into machine-readable datasets.
 
@@ -41,24 +45,36 @@ def process_jrc_industry_data(
         threads (int): Number of multi-processing threads to use.
         out_path (str): Path to which machine-readable data will be stored.
     """
-    data_filepaths = list(Path(data_dir).glob("*.xlsx"))
+
     if dataset == "energy":
-        processed_data = process_sheets(data_filepaths, threads, get_jrc_idees_energy)
+        processed_data = process_sheets(paths_to_data, threads, get_jrc_idees_energy)
         unit = "twh"
+        variable_col = "energy"
     elif dataset == "production":
-        processed_data = process_sheets(data_filepaths, 1, get_jrc_idees_production)
+        processed_data = process_sheets(paths_to_data, 1, get_jrc_idees_production)
         unit = "kt"
+        variable_col = None
 
-    processed_data.columns = processed_data.columns.rename("year").astype(int)
-    processed_da = processed_data.stack().rename("jrc-idees-industry-twh").to_xarray()
-    country_code_mapping = utils.convert_valid_countries(
-        processed_da.country_code.values
-    )
-    processed_da = utils.rename_and_groupby(
-        processed_da, country_code_mapping, dim_name="country_code"
+    processed_xr_data = df_to_xr(processed_data, variable_col, unit)
+    processed_xr_data.to_netcdf(out_path)
+
+
+def df_to_xr(
+    df: pd.DataFrame, variable_col: Optional[str], unit: str
+) -> Union[xr.Dataset, xr.DataArray]:
+    df.columns = df.columns.rename("year").astype(int)
+
+    if variable_col is not None:
+        xr_data = df.stack().unstack(variable_col).to_xarray()
+    else:
+        xr_data = df.stack().to_xarray()
+
+    country_code_mapping = utils.convert_valid_countries(xr_data.country_code.values)
+    xr_data = utils.rename_and_groupby(
+        xr_data, country_code_mapping, dim_name="country_code"
     )
 
-    processed_da.assign_attrs(unit=unit).to_netcdf(out_path)
+    return xr_data.assign_attrs(unit=unit)
 
 
 def process_sheets(
@@ -78,8 +94,7 @@ def get_jrc_idees_production(sheet_name: str, file: Union[str, Path]) -> pd.Data
     df = pd.read_excel(xls, sheet_name=sheet_name, index_col=0)
     start = df.filter(regex="Physical output", axis=0)
     end = df.filter(regex="Installed capacity", axis=0)
-
-    return (
+    df_processed = (
         df.loc[start.index[0] : end.index[0]]
         .iloc[1:-1]
         .dropna(how="all")
@@ -88,8 +103,13 @@ def get_jrc_idees_production(sheet_name: str, file: Union[str, Path]) -> pd.Data
             cat_name=df.index.name.split(": ")[1],
         )
         .rename_axis(index="produced_material")
-        .set_index(["country_code", "cat_name"], append=True)
     )
+    df_processed.index = (
+        df_processed.index.str.replace("(kt)", "", regex=False)
+        .str.replace("(kt ", "(", regex=False)
+        .str.strip()
+    )
+    return df_processed.set_index(["country_code", "cat_name"], append=True)
 
 
 def get_jrc_idees_energy(sheet: str, file: str) -> pd.DataFrame:
@@ -207,7 +227,7 @@ def _assign_category_country_information(
 
 if __name__ == "__main__":
     process_jrc_industry_data(
-        data_dir=snakemake.input.unprocessed_data,
+        paths_to_data=snakemake.input.data,
         dataset=snakemake.wildcards.dataset,
         threads=snakemake.threads,
         out_path=snakemake.output[0],

@@ -30,9 +30,11 @@ CARRIER_NAMES = {
 }
 
 
-def process_jrc_heat_tertiary_sector_data(path_to_national_data: str, out_path: str):
+def process_jrc_heat_tertiary_sector_data(
+    paths_to_national_data: list[Path], out_path: str
+):
     dfs = []
-    for file in Path(path_to_national_data).glob("*.xlsx"):
+    for file in paths_to_national_data:
         df_final_energy = pd.read_excel(file, sheet_name="SER_hh_fec", index_col=0)
         df_useful_energy = pd.read_excel(file, sheet_name="SER_hh_tes", index_col=0)
         df_summary = pd.read_excel(file, sheet_name="SER_summary", index_col=0)
@@ -90,5 +92,5 @@ def clean_df(df: pd.DataFrame, energy_type: str):
 
 if __name__ == "__main__":
     process_jrc_heat_tertiary_sector_data(
-        path_to_national_data=snakemake.input.data, out_path=snakemake.output[0]
+        paths_to_national_data=snakemake.input.data, out_path=snakemake.output[0]
     )
