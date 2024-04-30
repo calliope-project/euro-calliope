@@ -20,7 +20,11 @@ ENERGY_SHEET_COLORS = {
     "section": ["FFC00000"],
     "subsection": ["FF0070C0", "4f6228", "953735"],
     "end_use": ["984807"],
-    "carrier_name": ["808080", "e46c0a", "000000", "dc9e9c"],
+    "carrier_name": ["808080", "e46c0a", "000000", "dc9e9c", "d99694"],
+    "skip_": [  # we have these to ensure we know what all sheet colours refer to
+        "FF002060",  # general descriptor of sheet data, e.g. "Detailed split of energy consumption by subsector (ktoe)"
+        "10253f",  # top row year references
+    ],
 }
 
 ENERGY_SHEET_CARRIERS = {
@@ -38,6 +42,8 @@ def process_jrc_industry_data(
     out_path: str,
 ):
     """Process human-readable JRC-IDEES Excel files into machine-readable datasets.
+    This requires using the colour of Excel cell contents to classify rows.
+    The classification of colours in `ENERGY_SHEET_COLORS` has been undertaken manually.
 
     Args:
         data_dir (str): Directory in which files are stored
@@ -140,6 +146,7 @@ def _get_jrc_idees_energy_sheet(sheet_name: str, xls: Union[str, Path]) -> pd.Da
     df, total_to_check = _slice_on_indent(
         style_df, df, column_names, last_index_of_data
     )
+
     df = _rename_carriers(df)
     df = _assign_category_country_information(df, column_names)
 
@@ -154,7 +161,12 @@ def _get_jrc_idees_energy_sheet(sheet_name: str, xls: Union[str, Path]) -> pd.Da
 def _assign_section_level_based_on_colour(
     style_df: StyleFrame, df: pd.DataFrame, column_names: str, last_index_of_data: int
 ) -> pd.DataFrame:
+    all_colours = set(style_df[column_names].style.font_color.loc[:last_index_of_data])
+
     for section_level, colours in ENERGY_SHEET_COLORS.items():
+        all_colours.difference_update(colours)
+        if section_level == "skip_":
+            continue
         idx = (
             style_df[column_names]
             .style.font_color.isin(colours)
@@ -164,6 +176,10 @@ def _assign_section_level_based_on_colour(
             style_df.loc[idx[idx].index, column_names]
             .astype(str)
             .where(lambda x: x != "nan")
+        )
+    if all_colours:
+        raise AssertionError(
+            f"Some rows in {df.columns[0]} have not been allocated to index levels as they have unexpected colour(s): {all_colours}"
         )
     return df
 
@@ -197,16 +213,23 @@ def _slice_on_indent(
 
 
 def _rename_carriers(df: pd.DataFrame) -> pd.DataFrame:
+    # ASSUME: if end uses / subsections without end use disaggregation do not have carrier disaggregation,
+    # then their name gives us enough of a clue as to the energy carrier their energy values refer to.
+    # E.g., microwave == electricity, thermal == gas powered, mention of "diesel" == diesel oil.
     for carrier_search_string, carrier_group in ENERGY_SHEET_CARRIERS.items():
         df.loc[
-            df.end_use.str.lower().str.contains(
-                carrier_search_string, regex=True, na=False
-            ),
+            df.end_use.fillna(df.subsection)
+            .str.lower()
+            .str.contains(carrier_search_string, regex=True, na=False),
             "carrier_name",
         ] = carrier_group
-    df.loc[df.end_use.isnull(), "carrier_name"] = df.loc[
-        df.end_use.isnull(), "carrier_name"
-    ].fillna("Electricity")
+    # ASSUME: if we cannot infer anything from the end use / subsection name, the carrier is electricity
+    to_fill = df[df.carrier_name.isnull()]
+    if not to_fill.empty:
+        LOGGER.info(
+            f"Filling the following rows in {df.columns[0]} with the carrier 'Electricity': {set(to_fill.iloc[:, 0].values)} "
+        )
+        df.carrier_name.fillna("Electricity", inplace=True)
     return df
 
 
