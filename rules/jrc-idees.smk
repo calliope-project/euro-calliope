@@ -15,29 +15,6 @@ rule download_jrc_idees_zipped:
     localrule: True
     shell: "curl -sSLo {output} '{params.url}'"
 
-def get_countries_to_unzip(countries: list[str], missing_value_mapping: dict[str, list]) -> set:
-    """Get all countries whose JRC-IDEES files are to be unzipped.
-
-    Includes primary configured countries and any neighbours of those countries required for data infilling.
-    """
-    primary_countries = [
-        pycountry.countries.lookup(country).alpha_2
-        for country in config["scope"]["spatial"]["countries"]
-    ]
-
-    infill_country_config = config["data-pre-processing"]["fill-missing-values"]["jrc-idees"]
-    infill_countries = [
-        country for country in primary_countries
-        for infill_country in infill_country_config.get(pycountry.countries.lookup(country).alpha_3, [])
-    ]
-
-    # Convert ISO standard country codes to their EU equivalents
-    all_countries = [
-        i.replace("GB", "UK").replace("GR", "EL")
-        for i in set(primary_countries).union(infill_countries)
-    ]
-
-    return set(all_countries).intersection(JRC_IDEES_SPATIAL_SCOPE)
 
 rule jrc_idees_unzipped:
     message: "Unzip JRC-IDEES {wildcards.sector} sector data for {wildcards.country_code}"
@@ -57,10 +34,7 @@ rule jrc_idees_industry_processed:
     input:
         data = expand(
             "build/data/jrc-idees/industry/unprocessed/{country_code}.xlsx",
-            country_code=get_countries_to_unzip(
-                config["scope"]["spatial"]["countries"],
-                config["data-pre-processing"]["fill-missing-values"]["jrc-idees"]
-            )
+            country_code=JRC_IDEES_SPATIAL_SCOPE
         )
     output: "build/data/jrc-idees/industry/processed-{dataset}.nc"
     wildcard_constraints:
@@ -70,17 +44,14 @@ rule jrc_idees_industry_processed:
     script: "../scripts/jrc-idees/industry.py"
 
 
-rule jrc_idees_heat_processed:
+rule jrc_idees_tertiary_processed:
     message: "Process tertiary heat data from JRC-IDEES"
     input:
         data = expand(
-            "build/data/jrc-idees/heat/unprocessed/{country_code}.xlsx",
-            country_code=get_countries_to_unzip(
-                config["scope"]["spatial"]["countries"],
-                config["data-pre-processing"]["fill-missing-values"]["jrc-idees"]
-            )
+            "build/data/jrc-idees/tertiary/unprocessed/{country_code}.xlsx",
+            country_code=JRC_IDEES_SPATIAL_SCOPE
         )
-    output: "build/data/jrc-idees/heat/tertiary/processed.csv"
+    output: "build/data/jrc-idees/tertiary/processed.csv"
     conda: "../envs/default.yaml"
     script: "../scripts/jrc-idees/heat.py"
 
@@ -90,10 +61,7 @@ rule jrc_idees_transport_processed:
     input:
         data = expand(
             "build/data/jrc-idees/transport/unprocessed/{country_code}.xlsx",
-            country_code=get_countries_to_unzip(
-                config["scope"]["spatial"]["countries"],
-                config["data-pre-processing"]["fill-missing-values"]["jrc-idees"]
-            )
+            country_code=JRC_IDEES_SPATIAL_SCOPE
         )
     output: "build/data/jrc-idees/transport/processed-{dataset}.csv"
     params:

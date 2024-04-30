@@ -4,7 +4,7 @@ rule annual_heat_demand:
         hh_end_use = "data/automatic/eurostat-hh-end-use.tsv.gz",
         ch_end_use = "data/automatic/ch-end-use.xlsx",
         energy_balance = rules.annual_energy_balances.output[0],
-        commercial_demand = "build/data/jrc-idees/heat/commercial/processed.csv",
+        commercial_demand = "build/data/jrc-idees/tertiary/processed.csv",
         carrier_names = "config/energy-balances/energy-balance-carrier-names.csv"
     params:
         heat_tech_params = config["parameters"]["heat"],
