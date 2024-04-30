@@ -1,14 +1,13 @@
+[tool.ruff]
 line-length = 88
 preview = true # required to activate many pycodestyle errors and warnings as of 2024-03-13
 builtins = ["snakemake"]
-
-[format]
+[tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
 docstring-code-format = false
 line-ending = "auto"
-
-[lint]
+[tool.ruff.lint]
 select = [
     # pycodestyle errors
     "E",
@@ -33,4 +32,19 @@ ignore = [
     "E111",
     "E114",
     "E117",
+]
+
+[tool.pytest.ini_options]
+norecursedirs = [
+    ".git",
+    ".snakemake",
+    "tests/model", # by default, don't execute tests requiring build results
+]
+testpaths = [
+    "tests/lib",
+    "tests/scripts",
+]
+pythonpath = [
+    ".",
+    "./scripts"
 ]
