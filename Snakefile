@@ -26,7 +26,6 @@ include: "./rules/transport.smk"
 include: "./rules/sync.smk"
 include: "./rules/heat.smk"
 min_version("7.8")
-localrules: all, clean
 wildcard_constraints:
         resolution = "continental|national|regional"
 
@@ -69,6 +68,7 @@ onerror:
 
 rule all:
     message: "Generate euro-calliope pre-built models and run tests."
+    localrule: True
     input:
         "build/logs/continental/test.success",
         "build/logs/national/test.success",
@@ -228,6 +228,7 @@ rule dag:
 
 
 rule clean:  # removes all generated results
+    localrule: True
     shell:
         """
         rm -r build/
