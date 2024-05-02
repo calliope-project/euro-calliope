@@ -44,9 +44,9 @@
 
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
-* **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264).
+* **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264, #268).
 * **UPDATE** default conda prefix directory including consistent handling of the path to eurocalliopelib (#264, #331).
-* **UPDATE** snakemake to v8.10.6 (#330), which ensures that conda environment builds ignore default package specifications (#289).
+* **UPDATE** snakemake to v8.10.7 (#330), which ensures that conda environment builds ignore default package specifications (#289).
 
 ### Fixed (models)
 
