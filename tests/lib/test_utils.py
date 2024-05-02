@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -243,21 +245,41 @@ def test_country_code_conversion_no_output_specified(input_country, iso3166):
 
 
 @pytest.mark.parametrize(
-    ["countries", "expected_output"],
+    ["countries", "expected_output", "expected_log"],
     [
-        (["uk", "fr"], {"uk": "GBR", "fr": "FRA"}),
-        (["el", "ba"], {"el": "GRC", "ba": "BIH"}),
-        (["foo", "bar"], {}),
-        (["Germany", "foo"], {"Germany": "DEU"}),
+        (["uk", "fr"], {"uk": "GBR", "fr": "FRA"}, False),
+        (["el", "ba"], {"el": "GRC", "ba": "BIH"}, False),
+        (["foo", "bar"], {}, True),
+        (["Germany", "foo"], {"Germany": "DEU"}, True),
         (
             xr.DataArray(pd.Index(["Germany", "foo"], name="bar")).bar.values,
             {"Germany": "DEU"},
+            True,
         ),
     ],
 )
-def test_valid_list_of_country_codes(countries, expected_output):
-    mapped_countries = convert_valid_countries(countries)
+def test_valid_list_of_country_codes(caplog, countries, expected_output, expected_log):
+    caplog.set_level(logging.INFO)
+    mapped_countries = convert_valid_countries(countries, errors="ignore")
     assert mapped_countries == expected_output
+    assert ("Skipping country/region" in caplog.text) is expected_log
+
+
+@pytest.mark.parametrize(
+    ["countries", "expected_error"],
+    [
+        (["uk", "fr"], False),
+        (["el", "ba"], False),
+        (["foo", "bar"], True),
+        (["Germany", "foo"], True),
+    ],
+)
+def test_valid_list_of_country_codes_catch_errors(countries, expected_error):
+    if expected_error:
+        with pytest.raises(LookupError):
+            convert_valid_countries(countries, errors="raise")
+    else:
+        convert_valid_countries(countries, errors="raise")
 
 
 @pytest.mark.parametrize(

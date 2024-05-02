@@ -3,6 +3,7 @@
 ## 1.2.0 (unpublished)
 
 ### Added (models)
+
 * **ADD** fully-electrified heat demand (#284).
 
 * **ADD** fully-electrified road transportation (#270), (#271).
@@ -11,6 +12,7 @@
 
 ### Added (workflow)
 
+* **ADD** Module to process JRC-IDEES Excel spreadsheets (#354).
 * **ADD** Ruff as our default linter and formatter (#285).
 * **ADD** DAG rule that generates a visualisation of Snakemake's directed acyclic graph (#208).
 * **ADD** IPython debugger to all conda environments to ease debugging (#254).

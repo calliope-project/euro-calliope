@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 from eurocalliopelib import utils
@@ -39,7 +37,7 @@ ROAD_CARRIERS = {
 
 
 def process_jrc_transport_data(
-    paths_to_data: list[Path],
+    paths_to_data: list[str],
     dataset: str,
     out_path: str,
     vehicle_type_names: dict[str, str],
@@ -61,7 +59,7 @@ def process_jrc_transport_data(
 
 
 def read_transport_excel(
-    path: Path, sheet_name: str, idx_start_str: str, idx_end_str: str, **kwargs: object
+    path: str, sheet_name: str, idx_start_str: str, idx_end_str: str, **kwargs: object
 ) -> pd.DataFrame:
     xls = pd.ExcelFile(path)
     style_df = StyleFrame.read_excel(xls, read_style=True, sheet_name=sheet_name)

@@ -1,10 +1,13 @@
 """Utility functions."""
 
-from typing import Optional
+import logging
+from typing import Literal, Optional
 
 import pandas as pd
 import pycountry
 import xarray as xr
+
+LOGGER = logging.getLogger(__name__)
 
 
 def eu_country_code_to_iso3(eu_country_code):
@@ -53,17 +56,24 @@ def convert_country_code(input_country, output="alpha3"):
         return pycountry.countries.lookup(input_country).alpha_3
 
 
-def convert_valid_countries(country_codes: list, output: str = "alpha3") -> dict:
+def convert_valid_countries(
+    country_codes: list,
+    output: str = "alpha3",
+    errors: Literal["raise", "ignore"] = "raise",
+) -> dict:
     """
-    Convert a list of country codes / names to a list of uniform ISO coded country
-    codes. If an input item isn't a valid country (e.g. "EU27") then print the code and
-    continue, instead of raising an exception
+    Convert a list of country codes / names to a list of uniform ISO coded country codes.
+    If an input item isn't a valid country (e.g. "EU27") then raise an error or skip and print the code and continue.
 
     Args:
         country_codes (list):
-            Strings defining country codes / names
-            (["France", "FRA", "FR"] will all be treated the same)
-
+            Strings defining country codes / names (["France", "FRA", "FR"] will all be treated the same)
+        output (str, optional):
+            pycountry output type, e.g. `alpha3` for 3-letter ISO standard.
+            Defaults to "alpha3".
+        errors (Literal["raise", "ignore"], optional).
+            If country code is not valid, `raise` an error and stop or `ignore` the error and continue with only logging the code.
+            Defaults to "ignore".
     Returns:
         dict: Mapping from input country code/name to output country code for all valid input countries
     """
@@ -74,9 +84,12 @@ def convert_valid_countries(country_codes: list, output: str = "alpha3") -> dict
             mapped_codes[country_code] = convert_country_code(
                 country_code, output=output
             )
-        except LookupError:
-            print(f"Skipping country/region {country_code}")
-            continue
+        except LookupError as err:
+            if errors == "raise":
+                raise err
+            elif errors == "ignore":
+                LOGGER.info(f"Skipping country/region {country_code}")
+                continue
     return mapped_codes
 
 

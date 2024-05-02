@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
@@ -31,7 +29,7 @@ CARRIER_NAMES = {
 
 
 def process_jrc_heat_tertiary_sector_data(
-    paths_to_national_data: list[Path], out_path: str
+    paths_to_national_data: list[str], out_path: str
 ):
     dfs = []
     for file in paths_to_national_data:

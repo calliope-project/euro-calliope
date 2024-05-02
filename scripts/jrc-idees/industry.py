@@ -1,7 +1,6 @@
 import logging
 from itertools import product
 from multiprocessing import Pool
-from pathlib import Path
 from typing import Callable, Literal, Optional, Union
 
 import numpy as np
@@ -36,7 +35,7 @@ ENERGY_SHEET_CARRIERS = {
 
 
 def process_jrc_industry_data(
-    paths_to_data: list[Path],
+    paths_to_data: list[str],
     dataset: Literal["energy", "production"],
     threads: int,
     out_path: str,
@@ -75,7 +74,9 @@ def df_to_xr(
     else:
         xr_data = df.stack().to_xarray()
 
-    country_code_mapping = utils.convert_valid_countries(xr_data.country_code.values)
+    country_code_mapping = utils.convert_valid_countries(
+        xr_data.country_code.values, errors="ignore"
+    )
     xr_data = utils.rename_and_groupby(
         xr_data, country_code_mapping, dim_name="country_code"
     )
@@ -84,7 +85,7 @@ def df_to_xr(
 
 
 def process_sheets(
-    data_filepaths: list[Path], threads: int, processing_script: Callable
+    data_filepaths: list[str], threads: int, processing_script: Callable
 ) -> pd.DataFrame:
     "Process energy sheet in data files across multiple threads"
     with Pool(int(threads)) as pool:
@@ -95,7 +96,7 @@ def process_sheets(
     return processed_df
 
 
-def get_jrc_idees_production(sheet_name: str, file: Union[str, Path]) -> pd.DataFrame:
+def get_jrc_idees_production(sheet_name: str, file: str) -> pd.DataFrame:
     xls = pd.ExcelFile(file)
     df = pd.read_excel(xls, sheet_name=sheet_name, index_col=0)
     start = df.filter(regex="Physical output", axis=0)
@@ -128,7 +129,7 @@ def get_jrc_idees_energy(sheet: str, file: str) -> pd.DataFrame:
     )
 
 
-def _get_jrc_idees_energy_sheet(sheet_name: str, xls: Union[str, Path]) -> pd.DataFrame:
+def _get_jrc_idees_energy_sheet(sheet_name: str, xls: str) -> pd.DataFrame:
     """
     This sheet needs to be parsed both based on the colour of the cell and the indent
     level of the text inside the cell.
