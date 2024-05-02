@@ -16,6 +16,7 @@ techs_template_dir = f"{model_template_dir}techs/"
 
 include: "./rules/shapes.smk"
 include: "./rules/data.smk"
+include: "./rules/jrc-idees.smk"
 include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
