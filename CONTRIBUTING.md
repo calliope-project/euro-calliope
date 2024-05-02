@@ -121,6 +121,7 @@ Be aware that you can publish a release only if you are a maintainer of the GitH
     2. Verify consistent versions of Snakemake.
         * [./environment.yaml](./environment.yaml)
         * [./requirements-docs.yaml](./requirements-docs.yaml)
+        * [./Snakefile](./Snakefile)
     3. Verify consistent versions of Calliope.
         * [./envs/test.yaml](./envs/test.yaml)
         * [./templates/environment.yaml](./templates/environment.yaml)
