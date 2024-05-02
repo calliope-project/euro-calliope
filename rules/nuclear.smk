@@ -1,10 +1,9 @@
-localrules: jrc_power_plant_database_zipped
-
 rule jrc_power_plant_database_zipped:
     message: "Download and unzip jrc power plant database."
     params: url = config["data-sources"]["jrc-ppdb"]
     output:  "data/automatic/jrc_power_plant_database.zip"
     conda: "../envs/shell.yaml"
+    localrule: True
     shell: "curl -sSLo {output[0]} '{params.url}'"
 
 

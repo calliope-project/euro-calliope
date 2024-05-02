@@ -1,7 +1,5 @@
 """Rules related to wind and solar."""
 
-localrules: download_potentials, download_capacity_factors_wind_and_solar
-
 ALL_WIND_AND_SOLAR_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
     "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat"
@@ -13,6 +11,7 @@ rule download_potentials:
     params: url = config["data-sources"]["potentials"]
     output: protected("data/automatic/raw-potentials.zip")
     conda: "../envs/shell.yaml"
+    localrule: True
     shell: "curl -sSLo {output} '{params.url}'"
 
 
@@ -37,6 +36,7 @@ rule download_capacity_factors_wind_and_solar:
     params: url = lambda wildcards: config["data-sources"]["capacity-factors"].format(filename=wildcards.filename)
     output: protected("data/automatic/capacityfactors/{filename}")
     conda: "../envs/shell.yaml"
+    localrule: True
     shell: "curl -sSLo {output} '{params.url}'"
 
 
