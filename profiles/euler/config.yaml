@@ -1,10 +1,10 @@
+# These parameter are considered additional to ./profiles/default/config.yaml.
+# Apply them using the `--profile="profiles/euler` cli option.
 cluster: bsub -oo build/logs/{rule}.{wildcards}.log -W {resources.runtime} -n {resources.cores} -R "rusage[mem={resources.memory}]" -J {rule}.{wildcards} <
 jobs: 999
 local-cores: 1
 latency-wait: 60
 use-envmodules: True
-software-deployment-method: conda
-conda-prefix: ../envs/snakemake/euro-calliope/
 default-resources: [
     "runtime=10",
     "cores=1",

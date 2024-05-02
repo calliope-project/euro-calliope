@@ -30,8 +30,8 @@ markdown_extensions:
         permalink: "#"
 plugins:
     - search
+    - macros
     - dag:
-        path_to_snakefile: ./Snakefile
         path_to_src_dir: ./build/.docs
         path_to_png_relative_to_site: ./img/dag.png
     - schema:
@@ -43,3 +43,6 @@ plugins:
         path_to_src_dir: .
 
 extra_css: [./css/extras.css]
+extra:
+    snakemake_version: !!python/name:snakemake.__version__
+    calliope_version: 0.6.10

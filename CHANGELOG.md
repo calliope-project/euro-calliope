@@ -3,6 +3,7 @@
 ## 1.2.0 (unpublished)
 
 ### Added (models)
+
 * **ADD** fully-electrified heat demand (#284).
 
 * **ADD** fully-electrified road transportation (#270), (#271). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (PR #338).
@@ -11,6 +12,7 @@
 
 ### Added (workflow)
 
+* **ADD** Module to process JRC-IDEES Excel spreadsheets (#354).
 * **ADD** Ruff as our default linter and formatter (#285).
 * **ADD** DAG rule that generates a visualisation of Snakemake's directed acyclic graph (#208).
 * **ADD** IPython debugger to all conda environments to ease debugging (#254).
@@ -42,9 +44,9 @@
 
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
-* **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264).
+* **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264, #268).
 * **UPDATE** default conda prefix directory including consistent handling of the path to eurocalliopelib (#264, #331).
-* **UPDATE** snakemake to v8.10.7 (#330)
+* **UPDATE** Snakemake to v8.10.7 (#330)
     * Ensures that conda environment builds ignore default package specifications (#289).
     * Fixes localrules through integration of new `localrule` directive (#368).
 
