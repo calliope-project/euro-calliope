@@ -141,23 +141,6 @@ properties:
                                     type: string
                                     pattern: ^[A-Z][A-Z][A-Z]$
                                     description: Country to fill missing values from.
-            statistical-to-custom-units:
-                type: object
-                description: >-
-                    Path to a csv file which defines how lower-level statistical units
-                    (i.e., NUTS and GADM) are combined to form units of a custom
-                    resolutions (e.g., ehighways). FYI: E-highways were initially
-                    defined using NUTS3 units from 2006, but this mapping was manually
-                    created to map NUTS units from any year up to 2016 to E-highways.
-                    This is picked up by rule `units` to build custom spatial units.
-                    Columns must include: country_code, NUTS3_<year>, Source, id
-                    There may be multiple columns of NUTS3_<year>, so that in future,
-                    flexibility in choosing the year could be implemented.
-                additionalProperties: false
-                patternProperties:
-                    ^[a-zA-Z]+.*$:
-                        type: string
-                        pattern: .*\.csv$
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.
@@ -398,9 +381,9 @@ properties:
                 description: Nuclear technology capacity scenario. "current" will use today's capacities based on the JRC power plant database (PPDB). All other scenario names should point to a configuration CSV file specifying minimum and maximum capacities per country in MW with non-zero capacities (columns=[country, min, max]).
                 pattern: ^(current)|(\w+.csv)$
             nuts-year:
-                description: Version of the Nomenclature of territorial units for statistics to use in creating spatial units (see https://ec.europa.eu/eurostat/web/nuts/history for more info)
+                description: Version of the Nomenclature of Territorial Units for Statistics to use in creating spatial units (see https://ec.europa.eu/eurostat/web/nuts/history for more info).
                 type: number
-                enum: [2006, 2010, 2013, 2016]
+                enum: [2013]  # FIXME: enable other years
             heat:
                 type: object
                 description: Parameters for heat sector model.
