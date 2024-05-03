@@ -103,7 +103,7 @@ rule units_without_shape:
 
 rule download_eez:
     message: "Download Exclusive Economic Zones as zip"
-    output: protected("data/automatic/eez.zip")
+    output: protected("data/automatic/eez.gpkg.zip")
     params: url = config["data-sources"]["eez"]
     conda: "../envs/shell.yaml"
     shell: "curl -sSLo {output} '{params.url}'"
@@ -121,7 +121,7 @@ rule eez:
     shell:
         """
         fio cat --bbox {params.bounds} "zip://{input}"\
-        | fio filter "f.properties.territory1 in [{params.countries}]"\
+        | fio filter "f.properties.TERRITORY1 in [{params.countries}]"\
         | fio collect > {output}
         """
 

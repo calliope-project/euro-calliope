@@ -42,13 +42,17 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
     === "Technologies"
 
-        **demand_road_transport_electrified**: Electrified road transport demand
+        **demand_road_transport_electrified_uncontrolled**: Share of electrified road transport demand which is uncontrolled.
 
-        **demand_road_transport_historic_electrified**: Removes historically electrified road transport demand to avoid double counting
+        **demand_road_transport_historic_electrified_uncontrolled**: Removes historically electrified road transport demand to avoid double counting. It is assumed uncontrolled.
+
+        **demand_road_transport_electrified_controlled**: Share of electrified road transport demand whose charging is optimised by the solver.
 
     === "Overrides"
 
         **keep-historic-electricity-demand-from-road-transport**: Keep historically electrified road transport demand. Historically electrified road transport demand is deleted by default, as it is already considered in historic electricity demand and would thus be counted twice. Using this override together with Euro-Calliope's default electricity demand is not advised.
+
+        **(year)_transport_controlled_electrified_demand**: Total electrified road transport demand whose charging is optimised by the solver.
 
 ??? note "demand/electrified-heat.yaml"
 
@@ -57,6 +61,7 @@ Here, we describe each module in terms of the technologies they contain (`callio
         **demand_heat_electrified**: Electrified heat demand
 
         **demand_heat_historic_electrified**: Removes historically electrified heat demand to avoid double counting
+
 
     === "Overrides"
 

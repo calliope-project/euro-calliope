@@ -365,6 +365,9 @@ properties:
                             motorcycles:
                                 type: string
                                 description: JRC-IDEES name of motorcycles.
+                    uncontrolled-ev-charging-share:
+                        type: number
+                        description: Share of uncontrolled charging.
             entsoe-tyndp:
                 type: object
                 description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/
