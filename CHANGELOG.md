@@ -37,7 +37,7 @@
 
 ### Updated (workflow)
 
-* **UPDATED** YAML templates and parametrisation restructured:
+* **UPDATE** YAML templates and parametrisation restructured:
     * Parametrisation moved to eurocalliopelib.
     * Rules to parametrise split into smaller technology-specific rules, to ensure inputs are directly relevant to the files being parametrised.
     * YAML templates restructured to match structure of final model (see `Updated (models) above`);
@@ -49,6 +49,8 @@
 * **UPDATE** Snakemake to v8.10.7 (#330)
     * Ensures that conda environment builds ignore default package specifications (#289).
     * Fixes localrules through integration of new `localrule` directive (#368).
+
+* **UPDATE** source of fraction of shared coast for offshore wind capacity factor distribution from a fixed shape download to an internal rule which can handle ad hoc shapes (partial #238).
 
 ### Fixed (models)
 
