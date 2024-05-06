@@ -7,9 +7,8 @@ Based on `scripts/shared_coast.py` from  https://github.com/calliope-project/sol
 from functools import partial
 from multiprocessing import Pool
 
-import pandas as pd
 import geopandas as gpd
-
+import pandas as pd
 from eurocalliopelib.geo import EPSG3035
 
 
@@ -20,7 +19,7 @@ def allocate_eezs(
     threads: int,
     polygon_area_share_threshold: float,
     resolution: str,
-    path_to_output: str
+    path_to_output: str,
 ):
     """
     Allocate Exclusive Economic Zones (EEZs) to Euro-Calliope units.
@@ -63,13 +62,13 @@ def allocate_eezs(
             index=pd.MultiIndex.from_product(
                 (["EUR"], eez.mrgid.unique()), names=["id", "mrgid"]
             ),
-            data=1
+            data=1,
         )
 
     elif resolution == "national":
         share = pd.Series(
             index=eez.set_index(["iso_ter1", "mrgid"]).index.rename(["id", "mrgid"]),
-            data=1
+            data=1,
         )
     else:
         eez.geometry = eez.geometry.map(_buffer_if_necessary)
@@ -81,23 +80,23 @@ def allocate_eezs(
                     eez=eez,
                     units=units,
                     continental_units=continental_units,
-                    polygon_area_share_threshold=polygon_area_share_threshold
+                    polygon_area_share_threshold=polygon_area_share_threshold,
                 ),
-                eez.iso_ter1.unique()
+                eez.iso_ter1.unique(),
             )
         share = pd.concat(share_of_coast_length)
 
     share.index = share.index.set_levels(
         levels=(
             share.index.levels[0].map(lambda x: x.replace(".", "-")),
-            share.index.levels[1].astype(int)
+            share.index.levels[1].astype(int),
         ),
-        level=[0, 1]
+        level=[0, 1],
     )
 
     share_sum = share.groupby(level="mrgid").sum().reindex(eez.mrgid.unique()).fillna(0)
     assert (
-        ((share_sum > 0.99) & (share_sum < 1.01))  # ensure we haven't missed any area
+        (share_sum > 0.99) & (share_sum < 1.01)  # ensure we haven't missed any area
     ).all(), share_sum
 
     share.rename("shared_coast_fraction").to_csv(path_to_output)
@@ -106,7 +105,7 @@ def allocate_eezs(
 def _get_coastal_units_as_linestrings(
     units: gpd.GeoDataFrame,
     continental_units: gpd.GeoDataFrame,
-    polygon_area_share_threshold: float
+    polygon_area_share_threshold: float,
 ):
     """
     Get the outline of all Euro-Calliope units which sit on the coast
@@ -125,7 +124,9 @@ def _get_coastal_units_as_linestrings(
     )
 
     # Return the boundary of the polygons
-    return gpd.GeoDataFrame(geometry=simplified_coastal_geometries.boundary, crs=EPSG3035)
+    return gpd.GeoDataFrame(
+        geometry=simplified_coastal_geometries.boundary, crs=EPSG3035
+    )
 
 
 def _simplify_geometries(units, polygon_area_share_threshold):
@@ -136,8 +137,7 @@ def _simplify_geometries(units, polygon_area_share_threshold):
     """
     all_polygons = units.geometry.explode()
     return (
-        all_polygons
-        .where(
+        all_polygons.where(
             all_polygons.area.div(all_polygons.area.groupby(level="id").sum())
             > polygon_area_share_threshold
         )
@@ -159,18 +159,16 @@ def _share_of_coast_length(
     coastal_unit_boundaries = _get_coastal_units_as_linestrings(
         units[units.country_code == country].copy(),
         continental_units,
-        polygon_area_share_threshold
+        polygon_area_share_threshold,
     )
     unit_intersection = gpd.overlay(
         coastal_unit_boundaries.reset_index(),
         eez.loc[eez.iso_ter1 == country, ["mrgid", "geometry"]],
-        how="intersection"
+        how="intersection",
     )
     coast_length_ratio = (
-        unit_intersection
-        .set_index(["id", "mrgid"])
-        .length
-        .groupby("mrgid")
+        unit_intersection.set_index(["id", "mrgid"])
+        .length.groupby("mrgid")
         .transform(lambda x: x / x.sum())
     )
 
@@ -198,5 +196,5 @@ if __name__ == "__main__":
         threads=int(snakemake.threads),
         polygon_area_share_threshold=snakemake.params.polygon_area_share_threshold,
         resolution=snakemake.wildcards.resolution,
-        path_to_output=snakemake.output[0]
+        path_to_output=snakemake.output[0],
     )
