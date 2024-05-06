@@ -1,4 +1,3 @@
-software-deployment-method: conda
+# These parameter are considered additional to ./profiles/default/config.yaml.
+# Apply them using the `--profile="profiles/conda` cli option.
 conda-frontend: conda
-cores: 2
-conda-prefix: ../envs/snakemake/euro-calliope/

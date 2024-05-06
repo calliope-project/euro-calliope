@@ -12,15 +12,13 @@ SCHEMA_UNITS = {
     "geometry": "MultiPolygon"
 }
 
-localrules: download_raw_gadm_administrative_borders, raw_gadm_administrative_borders, download_raw_nuts_units
-localrules: download_eez
-
 
 rule download_raw_gadm_administrative_borders:
     message: "Download administrative borders for {wildcards.country_code} as zip."
     params: url = lambda wildcards: config["data-sources"]["gadm"].format(country_code=wildcards.country_code)
     output: protected("data/automatic/raw-gadm/{country_code}.zip")
     conda: "../envs/shell.yaml"
+    localrule: True
     shell: "curl -sSLo {output} '{params.url}'"
 
 
@@ -29,6 +27,7 @@ rule raw_gadm_administrative_borders:
     input: rules.download_raw_gadm_administrative_borders.output[0]
     output: temp("build/data/raw-gadm/gadm36_{country_code}.gpkg")
     conda: "../envs/shell.yaml"
+    localrule: True
     shell: "unzip -o {input} -d build/data/raw-gadm"
 
 
@@ -57,6 +56,7 @@ rule download_raw_nuts_units:
     params: url = config["data-sources"]["nuts"]
     output: protected("data/automatic/raw-nuts-units.zip")
     conda: "../envs/shell.yaml"
+    localrule: True
     shell: "curl -sSLo {output} '{params.url}'"
 
 
@@ -106,6 +106,7 @@ rule download_eez:
     output: protected("data/automatic/eez.gpkg.zip")
     params: url = config["data-sources"]["eez"]
     conda: "../envs/shell.yaml"
+    localrule: True
     shell: "curl -sSLo {output} '{params.url}'"
 
 
