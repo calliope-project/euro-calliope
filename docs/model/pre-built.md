@@ -23,7 +23,7 @@ conda activate euro-calliope
 
 ## Run
 
-There are three models in the directory of the pre-builts -- one for each of the three spatial resolutions continental, national, and regional.
+There are three models in the directory of the pre-builts -- one for each of the four spatial resolutions continental, national, ehighways, and regional.
 You can run all three models out-of-the-box, but you may want to modify the model.
 By default, the model runs for the first day of January only.
 To run the example model on the continental resolution type:

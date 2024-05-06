@@ -1,8 +1,10 @@
-"""Remixes NUTS, LAU, GADM, and E-Highways shapes to form the units of the analysis."""
+"""Aggregates NUTS3 regions into shapes defined in the E-Highways 2050 project."""
+
+from typing import Union
 
 import geopandas as gpd
 import pandas as pd
-import shapely
+import shapely.geometry
 
 OUTPUT_DRIVER = "GPKG"
 
@@ -18,7 +20,7 @@ def create_ehighways_shapes(
     Args:
         path_to_nuts (str): CSV file that specifies NUTS shape data.
         path_to_unit_mapping (str): CSV file containing a mapping between NUTS shapes and ehighways shapes.
-        nuts_year (int): The NUTS reference year used in `path_to_nuts_units`.
+        nuts_year (int): The NUTS reference year used in `path_to_nuts`.
         path_to_output (str): Path to which ehighways shapes will be saved.
 
     Assumes:
@@ -45,11 +47,13 @@ def create_ehighways_shapes(
     ehighways_units.to_file(path_to_output, driver=OUTPUT_DRIVER, layer="ehighways")
 
 
-def _to_multi_polygon(geometry):
+def _to_multi_polygon(
+    geometry: Union[dict, shapely.geometry.Polygon, shapely.geometry.MultiPolygon],
+):
     "Handles result of dissolving geometries that don't share a border by converting them to multipolygons"
     if isinstance(geometry, dict):
         geometry = shapely.geometry.shape(geometry)
-    if isinstance(geometry, shapely.geometry.polygon.Polygon):
+    if isinstance(geometry, shapely.geometry.Polygon):
         return shapely.geometry.MultiPolygon(polygons=[geometry])
     else:
         return geometry

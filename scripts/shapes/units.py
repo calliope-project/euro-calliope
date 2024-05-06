@@ -25,9 +25,8 @@ def remix_units(
     _verify_all_countries_captured(all_countries, units, resolution)
     if resolution == "continental":
         # sum all of the units together into one block
-        units = _continental_layer(units)
+        units = _merge_national_shapes_to_continental_layer(units)
     elif resolution == "ehighways":
-        # sum all of the units together into one block
         units = _rename_ehighways_countries(units)
     units.to_file(path_to_output, driver=DRIVER)
 
@@ -102,9 +101,10 @@ def _iso3(country_name: str) -> str:
     return utils.convert_country_code(country_name, output="alpha3")
 
 
-def _continental_layer(units: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def _merge_national_shapes_to_continental_layer(
+    units: gpd.GeoDataFrame,
+) -> gpd.GeoDataFrame:
     "For the continental resolution, dissolve all"
-    #
     units = units.assign(all=1).dissolve("all")
     index = units.index[0]
     units.loc[index, "id"] = "EUR"

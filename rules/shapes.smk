@@ -90,7 +90,7 @@ rule borders_ehighways:
     conda: "../envs/geo.yaml"
     script: "../scripts/shapes/ehighways.py"
 
-rule units: # for original resolutions of regional, national, continental
+rule units:
     message: "Form units of resolution {wildcards.resolution} by remixing NUTS and GADM."
     input:
         nuts = rules.administrative_borders_nuts.output[0],
@@ -98,7 +98,7 @@ rule units: # for original resolutions of regional, national, continental
         ehighways = rules.borders_ehighways.output[0]
     params:
         all_countries = config["scope"]["spatial"]["countries"],
-        # mapping between countries and their statistical unit resolution (e.g., DE: nuts0)
+        # mapping between countries and a shape source at a given resolution (e.g., Germany: nuts0, Austria: gadm1)
         resolution_config = lambda wildcards: config["shapes"][wildcards.resolution],
     output: "build/data/{resolution}/units.geojson"
     conda: "../envs/geo.yaml"

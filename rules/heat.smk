@@ -22,8 +22,8 @@ rule rescale_annual_heat_demand_to_resolution:
     input:
         annual_demand = rules.annual_heat_demand.output["total_demand"],
         electricity = rules.annual_heat_demand.output["electricity"],
-        locations = "build/data/regional/units.csv",
-        populations = "build/data/regional/population.csv"
+        locations = "build/data/{resolution}/units.csv",
+        populations = "build/data/{resolution}/population.csv"
     conda: "../envs/default.yaml"
     output:
         total_demand = "build/data/heat/{resolution}/annual-heat-demand-twh.csv",
