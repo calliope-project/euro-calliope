@@ -21,6 +21,6 @@ dependencies:
     - hdf5=1.10
     - h5py=3.1.0
     - libnetcdf=4.7
-    - scipy=1.9.1
+    - scipy=1.9.1  # sub-dependency of atlite. Update when updating numpy.
     - pip:
         - -e ./lib[geo]
