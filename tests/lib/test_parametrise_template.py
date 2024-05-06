@@ -1,9 +1,8 @@
 import filecmp
 
+import jinja2
 import pandas as pd
 import pytest
-import jinja2
-
 from eurocalliopelib.template import parametrise_template
 
 TEMPLATE_NO_PARAMS = """
@@ -80,6 +79,7 @@ def template_to_file_obj(tmpdir_factory):
         path_obj = tmpdir_factory.mktemp("model").join("no_params.yaml")
         path_obj.write(template)
         return path_obj
+
     return _template_to_file_obj
 
 
@@ -91,23 +91,17 @@ def out_file_obj(tmpdir_factory):
 
 @pytest.fixture(scope="module")
 def scaling_factors():
-    return {
-        "power": 0.5,
-        "monetary": 2
-    }
+    return {"power": 0.5, "monetary": 2}
 
 
 @pytest.fixture(scope="module")
 def locations():
-    return pd.DataFrame({
-        "foo": {"A.B": 1.0}
-    })
+    return pd.DataFrame({"foo": {"A.B": 1.0}})
+
 
 @pytest.fixture(scope="module")
 def links():
-    return pd.DataFrame({
-        "foo": {"A.B,C.D": 1.0}
-    })
+    return pd.DataFrame({"foo": {"A.B,C.D": 1.0}})
 
 
 def test_template_no_params(template_to_file_obj, out_file_obj):
@@ -135,10 +129,7 @@ def test_template_params(template_to_file_obj, out_file_obj, param1, param2):
     template_obj = template_to_file_obj(TEMPLATE_PARAMS)
     expected = TEMPLATE_PARAMS_EXPECTED.format(param1=param1, param2=param2)
 
-    parametrise_template(
-        template_obj, out_file_obj,
-        param1=param1, param2=param2
-    )
+    parametrise_template(template_obj, out_file_obj, param1=param1, param2=param2)
     assert expected == out_file_obj.read()
 
 
@@ -146,10 +137,7 @@ def test_template_scaling_factors(template_to_file_obj, out_file_obj, scaling_fa
     template_obj = template_to_file_obj(TEMPLATE_SCALING_FACTOR_IN_PARAMS)
     expected = TEMPLATE_SCALING_FACTOR_IN_PARAMS_EXPECTED
 
-    parametrise_template(
-        template_obj, out_file_obj,
-        scaling_factors=scaling_factors
-    )
+    parametrise_template(template_obj, out_file_obj, scaling_factors=scaling_factors)
 
     assert expected == out_file_obj.read()
 
@@ -158,10 +146,7 @@ def test_template_locations(template_to_file_obj, out_file_obj, locations):
     template_obj = template_to_file_obj(TEMPLATE_LOCATIONS_IN_PARAMS)
     expected = TEMPLATE_LOCATIONS_LINKS_IN_PARAMS_EXPECTED
 
-    parametrise_template(
-        template_obj, out_file_obj,
-        locations=locations
-    )
+    parametrise_template(template_obj, out_file_obj, locations=locations)
 
     assert expected == out_file_obj.read()
 
@@ -170,10 +155,7 @@ def test_template_links(template_to_file_obj, out_file_obj, links):
     template_obj = template_to_file_obj(TEMPLATE_LINKS_IN_PARAMS)
     expected = TEMPLATE_LOCATIONS_LINKS_IN_PARAMS_EXPECTED
 
-    parametrise_template(
-        template_obj, out_file_obj,
-        links=links
-    )
+    parametrise_template(template_obj, out_file_obj, links=links)
 
     assert expected == out_file_obj.read()
 
@@ -181,19 +163,13 @@ def test_template_links(template_to_file_obj, out_file_obj, links):
 def test_template_wrong_locations(template_to_file_obj, out_file_obj, locations):
     template_obj = template_to_file_obj(TEMPLATE_WRONG_LOCATIONS_IN_PARAMS)
     with pytest.raises(jinja2.exceptions.UndefinedError, match=r".*('A.B', 'foo')"):
-        parametrise_template(
-            template_obj, out_file_obj,
-            locations=locations
-        )
+        parametrise_template(template_obj, out_file_obj, locations=locations)
 
 
 def test_template_locations_iterate(template_to_file_obj, out_file_obj, locations):
     template_obj = template_to_file_obj(TEMPLATE_LOCATIONS_ITERATE)
     expected = TEMPLATE_LOCATIONS_ITERATE_EXPECTED
 
-    parametrise_template(
-        template_obj, out_file_obj,
-        locations=locations
-    )
+    parametrise_template(template_obj, out_file_obj, locations=locations)
 
     assert expected == out_file_obj.read()

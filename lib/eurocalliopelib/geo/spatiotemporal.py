@@ -1,12 +1,13 @@
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 import xarray as xr
-from shapely.geometry import Point
 from geopandas.tools import overlay
+from shapely.geometry import Point
 
-
-DEPRECATED_GRID_SIZE_IN_M = 50000 # old style capacity factors are on a grid of 50km size
+DEPRECATED_GRID_SIZE_IN_M = (
+    50000  # old style capacity factors are on a grid of 50km size
+)
 
 WGS84_EPSG = 4326
 WGS84 = f"EPSG:{WGS84_EPSG}"
@@ -25,7 +26,7 @@ def area_weighted_time_series(shapes, spatiotemporal, gridcell_overlap_threshold
     stacked_spatiotemporal = spatiotemporal.stack(xy=["x", "y"])
     weights_and_values = xr.Dataset({
         "value": stacked_spatiotemporal,
-        "weight": weights_between_shape_and_xy(shapes, stacked_spatiotemporal)
+        "weight": weights_between_shape_and_xy(shapes, stacked_spatiotemporal),
     })
     return pd.DataFrame(
         index=spatiotemporal.timestep.to_index(),
@@ -34,13 +35,13 @@ def area_weighted_time_series(shapes, spatiotemporal, gridcell_overlap_threshold
                 weights_and_values.sel(shape_id=shape_id), gridcell_overlap_threshold
             )
             for shape_id in shapes.shape_id
-        }
+        },
     )
 
 
 def assert_correct_form(shapes, spatiotemporal):
     assert shapes.crs
-    assert "crs" in spatiotemporal.attrs.keys()
+    assert "crs" in spatiotemporal.attrs
     assert shapes.crs == gpd.tools.crs.CRS(spatiotemporal.attrs["crs"])
     assert "y" in spatiotemporal.dims, "Expect dimension 'y'"
     assert "x" in spatiotemporal.dims, "Expect dimension 'x'"
@@ -50,38 +51,35 @@ def assert_correct_form(shapes, spatiotemporal):
 def weights_between_shape_and_xy(shapes, stacked_spatiotemporal):
     x, y = zip(*stacked_spatiotemporal.xy.values)
     grid_gdf = (
-        gpd
-        .GeoSeries(
-            gpd.points_from_xy(x=x, y=y, crs=stacked_spatiotemporal.crs),
-            crs=shapes.crs
+        gpd.GeoSeries(
+            gpd.points_from_xy(x=x, y=y, crs=stacked_spatiotemporal.crs), crs=shapes.crs
         )
         .buffer(infer_resolution(stacked_spatiotemporal.unstack("xy")) / 2)
         .envelope
     )
     index_gdf = gpd.GeoDataFrame(
-        geometry=grid_gdf,
-        data={"xy": stacked_spatiotemporal.xy},
-        crs=shapes.crs
+        geometry=grid_gdf, data={"xy": stacked_spatiotemporal.xy}, crs=shapes.crs
     )
     overlaid = overlay(index_gdf, shapes, how="intersection")
     overlaid["area"] = overlaid.area
-    overlaid["weight"] = overlaid.groupby("shape_id").area.transform(lambda area: area / area.sum())
+    overlaid["weight"] = overlaid.groupby("shape_id").area.transform(
+        lambda area: area / area.sum()
+    )
     weights = (
-        overlaid
-        .set_index(["xy", "shape_id"])
+        overlaid.set_index(["xy", "shape_id"])
         .loc[:, "weight"]
         .to_xarray()
-        .reindex_like(stacked_spatiotemporal) # add all xy's even without overlay
-        .fillna(0) # xy's without overlay have 0 weight
+        .reindex_like(stacked_spatiotemporal)  # add all xy's even without overlay
+        .fillna(0)  # xy's without overlay have 0 weight
     )
     return weights
 
 
 def weighted_time_series(weights_and_values, gridcell_overlap_threshold):
     ds = (  # drop all locations with weight == 0 or value == np.nan
-        weights_and_values
-        .where(weights_and_values.weight > 0)
-        .dropna(subset=["weight", "value"], dim="xy", how="any")
+        weights_and_values.where(weights_and_values.weight > 0).dropna(
+            subset=["weight", "value"], dim="xy", how="any"
+        )
     )
     assert ds.weight.sum() >= gridcell_overlap_threshold, ds.weight.sum()
     if ds.weight.sum().round(5) != 1:
@@ -126,21 +124,27 @@ def convert_old_style_capacity_factor_time_series(ts):
     deprecated and should be removed as soon as the published data is updated with the new format.
     """
     site_id_map = {
-        site_id.item(): (ts["lon"].sel(site_id=site_id).item(), ts["lat"].sel(site_id=site_id).item())
+        site_id.item(): (
+            ts["lon"].sel(site_id=site_id).item(),
+            ts["lat"].sel(site_id=site_id).item(),
+        )
         for site_id in ts.site_id
     }
     gdf = (
-        gpd
-        .GeoDataFrame(
-            data={"site_id": [site_id for site_id in site_id_map.keys()]},
+        gpd.GeoDataFrame(
+            data={"site_id": [site_id for site_id in site_id_map]},
             geometry=[Point(lon, lat) for lon, lat in site_id_map.values()],
-            crs=WGS84
+            crs=WGS84,
         )
         .set_index("site_id")
         .to_crs(EPSG3035)
     )
-    gdf["x"] = [round(point.coords[0][0], ndigits=0) for point in gdf.geometry] # round to meter
-    gdf["y"] = [round(point.coords[0][1], ndigits=0) for point in gdf.geometry] # round to meter
+    gdf["x"] = [
+        round(point.coords[0][0], ndigits=0) for point in gdf.geometry
+    ]  # round to meter
+    gdf["y"] = [
+        round(point.coords[0][1], ndigits=0) for point in gdf.geometry
+    ]  # round to meter
     ts["x"] = gdf["x"]
     ts["y"] = gdf["y"]
     ts = ts.set_index(site_id=["x", "y"]).unstack("site_id")
@@ -149,11 +153,15 @@ def convert_old_style_capacity_factor_time_series(ts):
     # make sure the resolution is uniform
     x = ts.x
     y = ts.y
-    assert ((x.diff("x") == DEPRECATED_GRID_SIZE_IN_M).sum() / x.count()).item() > 0.9 # most are fine
-    assert ((y.diff("y") == DEPRECATED_GRID_SIZE_IN_M).sum() / x.count()).item() > 0.9 # most are fine
+    assert (
+        (x.diff("x") == DEPRECATED_GRID_SIZE_IN_M).sum() / x.count()
+    ).item() > 0.9  # most are fine
+    assert (
+        (y.diff("y") == DEPRECATED_GRID_SIZE_IN_M).sum() / x.count()
+    ).item() > 0.9  # most are fine
     ts = ts.reindex(
         x=np.arange(x[0], x[-1] + 1, step=DEPRECATED_GRID_SIZE_IN_M),
-        y=np.arange(y[0], y[-1] + 1, step=DEPRECATED_GRID_SIZE_IN_M)
+        y=np.arange(y[0], y[-1] + 1, step=DEPRECATED_GRID_SIZE_IN_M),
     )
     ts.attrs["crs"] = EPSG3035
     return ts

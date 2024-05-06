@@ -16,14 +16,21 @@ Within each resolution-specific model directory, there is a subdirectory for tec
 |   |   |   └── capacityfactors-{technology}.csv            <- Timeseries of capacityfactors of all renewables.
 |   |   └── demand
 |   |   |   └── electricity.csv                             <- Timeseries of electricity demand on each node.
+|   |   |   └── electrified-road-transport.csv              <- Timeseries of road transport demand electrified on each node.
+|   |   |   └── electrified-heat-demand.csv                 <- Timeseries of heat demand electrified on each node.
+|   |   |   └── road-transport-historic-electrification.csv <- Timeseries of historically electrified road transport demand on each node.
+|   |   |   └── heat-demand-historic-electrification.csv    <- Timeseries of historically electrified heat demand on each node.
 |   ├── techs                                               <- All technology definition YAML files.
 |   |   |── {technology-class}                              <- Calliope base technology classes (one of `supply`, `demand`, `storage`, `transmission`).
-|   |   |   └── {technology-group}.csv                      <- Definition of a technology (or group of technologies) relevant to the base technology, and the allocation of that technology to nodes in the model.
+|   |   |   └── {technology-group}.yaml                     <- Definition of a technology (or group of technologies) relevant to the base technology, and the allocation of that technology to nodes in the model.
+│   ├── build-metadata.yaml                                 <- Metadata of the build process.
 │   ├── example-model.yaml                                  <- Calliope example model definition. Only the technology definition YAML files imported here (under the "import" key) will be available in the model. By default no transmission technology definition files are imported.
 |   ├── interest-rate.yaml                                  <- Interest rates of all capacity investments.
 |   ├── scenarios.yaml                                      <- Scenario names which can be used to override the base model configuration.
-│   └── locations.yaml                                      <- Defines all nodes in the model, including the coordinates defining their centroids.
-├── build-metadata.yaml                                     <- Metadata of the build process.
+|   ├── locations.yaml                                      <- Defines all nodes in the model, including the coordinates defining their centroids.
+│   ├── locations.csv                                       <- Lists all nodes in the model, including their abbreviation codes.
+|   ├── summary-of-potentials.csv                           <- Lists the potentials of each technology at each node as stacked list (.csv format)
+│   └── summary-of-potentials.nc                            <- Lists the potentials of each technology at each node as 3D array (.nc format)
 ├── environment.yaml                                        <- Conda file defining an environment to run the model in.
 └── README.md                                               <- Basic documentation.
 ```
@@ -42,7 +49,7 @@ While they may be unusual, these units lead to a numerical model that is well su
 The units are tuned so as to work best for models with a time resolution of a few hours and a duration of one year.
 For other types of problems, or other solution algorithms, the units may need to be changed to avoid numerical issues within the solver.
 
-When you run the workflow, you can easily change the units and scale all values using the `scaling-factor` configuration parameters, see [Configuration](./customisation.md#configuration).
+When you run the workflow, you can easily change the units and scale all values using the `scaling-factor` configuration parameters, see [Configuration](../workflow/customisation.md#configuration).
 The base units on which the scaling factors are applied are `1 MW`, `1 MWh`, `EUR`, and `km2`.
 So for example, the default unit for energy (100 GWh) is derived by scaling the base unit (1 MWh) with a scaling factor of `0.00001`.
 

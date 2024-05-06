@@ -3,13 +3,13 @@
 If you want an easy entry into using and exploring Euro-Calliope, our pre-built models provide the jump start you need.
 The pre-built models are ordinary Calliope models that you can use like any other.
 If you are unfamiliar with Calliope, we'll show you below how to run the model.
-After going through these first steps, we advise you to head over to [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/) to learn its basic usage.
+After going through these first steps, we advise you to head over to [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.10/) to learn its basic usage.
 
 ## Prepare
 
 1. Download the pre-built models: [![pre-built models DOI](https://img.shields.io/badge/prebuilts-10.5281%2Fzenodo.3949552-blue)](https://doi.org/10.5281/zenodo.3949552).
 
-2. Install a Gurobi license on your computer ([academic license](https://www.gurobi.com/downloads/end-user-license-agreement-academic/) comes at no cost), or [choose a different solver](./customisation.md#manual).
+2. Install a Gurobi license on your computer ([academic license](https://www.gurobi.com/downloads/end-user-license-agreement-academic/) comes at no cost), or [choose a different solver](./customisation.md#manual-changes).
 
 3. Install Calliope and all required dependencies.
 The easiest way to do so is using [conda](https://conda.io/) or [mamba](https://mamba.readthedocs.io/).

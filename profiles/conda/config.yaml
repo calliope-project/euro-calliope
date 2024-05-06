@@ -1,0 +1,4 @@
+software-deployment-method: conda
+conda-frontend: conda
+cores: 2
+conda-prefix: ../envs/snakemake/euro-calliope/

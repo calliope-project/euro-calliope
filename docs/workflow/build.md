@@ -20,16 +20,16 @@ We recommend `mamba`, as it's a faster drop-in replacement for `conda`.
 Using either one, you can create the environment:
 
         # using mamba
-        mamba env create -f environment.yaml
+        mamba env create -f environment.yaml --no-default-packages
         conda activate euro-calliope
-        snakemake --use-conda --list # test your installation
+        snakemake --list-rules # test your installation
 
         # using conda
-        conda env create -f environment.yaml
+        conda env create -f environment.yaml --no-default-packages
         conda activate euro-calliope
-        snakemake --use-conda --conda-frontend conda --list # test your installation
+        snakemake --profile profiles/conda --list-rules # test your installation
 
-3. Install a Gurobi license on your computer ([academic license](https://www.gurobi.com/downloads/end-user-license-agreement-academic/) comes at no cost), or [choose a different solver](./customisation.md#manual).
+3. Install a Gurobi license on your computer ([academic license](https://www.gurobi.com/downloads/end-user-license-agreement-academic/) comes at no cost), or [choose a different solver](../model/customisation.md#manual-changes).
 
 4. Create an account at the Copernicus Climate Data Service and a `$HOME/.cdsapirc` file with your credentials; see their [How To](https://cds.climate.copernicus.eu/api-how-to) (you do not need to manually install the client).
 
@@ -39,12 +39,8 @@ By default, the entire model will be built in the `./build/model` folder when yo
 Execute the workflow like so:
 
 ```bash
-snakemake --use-conda --cores <N_CORES>
+snakemake
 ```
-
-`N_CORES` is the number of cores of your machine you want to use.
-It can be anything between `1` and `all`.
-Please have a look at [Snakemake's documentation](https://snakemake.readthedocs.io) for more information.
 
 ## Run
 
@@ -57,7 +53,7 @@ It is a complete Calliope model and can be used like any other, for example like
 calliope run ./build/models/national/example-model.yaml
 ```
 
-For more information on how to use Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.7/).
+For more information on how to use Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.10/).
 
 ## Customise
 

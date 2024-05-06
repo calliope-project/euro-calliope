@@ -1,0 +1,5 @@
+name: dag
+channels:
+    - conda-forge
+dependencies:
+    - graphviz=2.50.0

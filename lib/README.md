@@ -12,7 +12,7 @@ The following assumes you are in the root folder of this repository, i.e. the pa
 
 Best install `eurocalliopelib` from the conda environment:
 
-    $ conda env create -f test-requirements.yaml
+    $ conda env create -f requirements-test.yaml
     $ conda activate test-eurocalliope
 
 ### Run the test suite

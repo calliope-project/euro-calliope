@@ -2,22 +2,26 @@ name: geo
 channels:
     - conda-forge
 dependencies:
-    - python=3.8
+    - python=3.9
+    - ipdb=0.13.13
     - numpy=1.20.2
     - scipy=1.6.2
     - pandas=1.2.3
-    - gdal=3.2.1
-    - libgdal=3.2.1
-    - fiona=1.8.18
-    - rasterio=1.2.1
+    - gdal=3.3.1
+    - libgdal=3.3.1
+    - fiona=1.8.20
+    - rasterio=1.2.6
     - rasterstats=0.14.0
     - geos=3.9.1
     - geopandas=0.9.0
     - netcdf4=1.5.6
     - xarray=0.17.0
     - jinja2=2.11.3
-    - networkx=2.2
+    - networkx=2.5
     - pycountry=18.12.8
     - pip=21.0.1
+    - hdf5=1.10
+    - h5py=3.1.0
+    - libnetcdf=4.7
     - pip:
-        - -e ../../lib[geo]
+        - -e ./lib[geo]

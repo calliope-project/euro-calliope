@@ -4,7 +4,7 @@ import:
     {% endfor %}
 model:
     name: 'Example model'
-    calliope_version: 0.6.7
+    calliope_version: 0.6.10
     timeseries_data_path: ./timeseries
     subset_time: ['{{ year }}-01-01', '{{ year }}-01-01']
 run:

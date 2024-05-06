@@ -8,13 +8,12 @@ rule download_biofuel_potentials_and_costs:
     params: url = config["data-sources"]["biofuel-potentials-and-costs"]
     output: protected("data/automatic/raw-biofuel-potentials-and-costs.xlsx")
     conda: "../envs/shell.yaml"
-    shell: "curl -sLo {output} '{params.url}'"
+    shell: "curl -sSLo {output} '{params.url}'"
 
 
 rule preprocess_biofuel_potentials_and_cost:
     message: "Extract national potentials and cost from raw biofuel data."
     input:
-        script = script_dir + "biofuels/extract.py",
         potentials_and_costs = rules.download_biofuel_potentials_and_costs.output[0]
     params:
         feedstocks = {
@@ -32,7 +31,6 @@ rule preprocess_biofuel_potentials_and_cost:
 rule biofuels:
     message: "Determine biofuels potential on {wildcards.resolution} resolution for scenario {wildcards.scenario}."
     input:
-        script = script_dir + "biofuels/allocate.py",
         units = rules.units_without_shape.output[0],
         land_cover = rules.potentials.output.land_cover,
         population = rules.potentials.output.population,
@@ -58,7 +56,6 @@ rule biofuels:
 rule bio_techs_and_locations_template:
     message: "Create biofuel tech definition file from template."
     input:
-        script = script_dir + "biofuels/template_bio.py",
         template = techs_template_dir + "supply/biofuel.yaml",
         biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
             scenario=config["parameters"]["jrc-biofuel"]["scenario"]

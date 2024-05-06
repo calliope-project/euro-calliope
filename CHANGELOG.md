@@ -4,13 +4,27 @@
 
 ### Added (models)
 
-* **ADD** top level model configuration file `scenarios.yaml` which can act as the focal point to consolidate all available overrides in the model (#209).
-* **ADD** nuclear power plant technology with capacity limits. Capacity limits can be equals to today or be bound by a minimum and maximum capacity to represent an available range in future. In either case, capacities are allocated at a subnational resolution based on linear scaling from current capacity geolocations, using the JRC power plant database (#78).
+* **ADD** fully-electrified heat demand (#284).
+
+* **ADD** fully-electrified road transportation (#270), (#271). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (PR #338).
+
+* **ADD** nuclear power plant technology with capacity limits. Capacity limits can be equal to today or be bound by a minimum and maximum capacity to represent an available range in future. In either case, capacities are allocated at a subnational resolution based on linear scaling from current capacity geolocations, using the JRC power plant database (#78).
 
 ### Added (workflow)
 
+* **ADD** Module to process JRC-IDEES Excel spreadsheets (#354).
+* **ADD** Ruff as our default linter and formatter (#285).
+* **ADD** DAG rule that generates a visualisation of Snakemake's directed acyclic graph (#208).
+* **ADD** IPython debugger to all conda environments to ease debugging (#254).
+* **ADD** a default Snakemake profile to run on local machines in addition to the existing profile for Euler (#211).
+* **ADD** a Snakemake profile to run using conda instead of mamba (#211).
 * **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality (#152).
 * **ADD** nuclear technology capacity allocation workflow which uses the configuration parameter `nuclear-capacity-scenario` to select whether today's capacities define limits in the model definition ("current") or whether ranges set bounds on future capacity (by linking to a configuration CSV file) (#78).
+* **ADD** a Snakemake rule that generates a .csv and .nc file that provide an summary of the potentials (= per-tech constraints) for each technology and location (#250).
+* **ADD** ability to run on Apple silicon devices (#263).
+    * Updated geo packages from gdal 3.2 -> 3.3.
+* **ADD** re-execution triggers based on config and env changes (#264).
+
 ### Updated (models)
 
 * **UPDATED** Final model configuration and data files structure (#145) to:
@@ -18,6 +32,8 @@
     * split technology definitions into self-explanatory files and into subdirectories named after Calliope abstract technology groups (e.g., `supply/wind-offshore.yaml` for offshore wind supply technology). This enables technologies to be added to or removed from the model by simply changing the model configuration file import list.;
     * keep technology definitions and their allocations to locations in the model in the same file; and
     * separate tech config YAML files from data CSV files. The former are found in the `techs` subdirectory, while the latter are in `timeseries`.
+* **UPDATE** to most recent JRC Hydro-Power database v10 (#248).
+* **UPDATE** Calliope version from 0.6.7 to [0.6.10](https://calliope.readthedocs.io/en/v0.6.10/history.html#id1) (#263).
 
 ### Updated (workflow)
 
@@ -27,6 +43,10 @@
     * YAML templates restructured to match structure of final model (see `Updated (models) above`);
 
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
+* **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
+* **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264).
+* **UPDATE** default conda prefix directory including consistent handling of the path to eurocalliopelib (#264, #331).
+* **UPDATE** snakemake to v8.10.6 (#330), which ensures that conda environment builds ignore default package specifications (#289).
 
 * **UPDATE** source of fraction of shared coast for offshore wind capacity factor distribution from a fixed shape download to an internal rule which can handle ad hoc shapes (partial #238).
 
@@ -37,6 +57,13 @@
 ### Fixed (documentation)
 
 * **FIX** links in the documention to always point to the most recent version of the pre-builts (#218).
+
+### Fixed (workflow)
+
+* **FIX** fixed optimisation tolerance of hydro power plants from xtol to xatol (#266).
+* **FIX** source of Exclusive Economic Zones (EEZ) to use a cache on [zenodo](https://sandbox.zenodo.org/records/45135) so that we can keep using v11 (#332).  FIXME: update to actual zenodo record before next Euro-Calliope release.
+* **FIX** fixed rule `download_basins_database`, which previously failed on some linux and mac machines, by requiring a more recent curl in the environment `envs/shell.yaml` (#267).
+* **FIX** pin `h5py`, `hdf5` and `libnetcdf` in all environments which rely on `xarray`, to prevent issues on linux-x86 (#357).
 
 ## 1.1.0 (2021-12-22)
 
@@ -68,7 +95,7 @@ In the following, we split additions, fixes, and updates between those which aff
 * **ADD** ability to move working directory (#45).
 * **ADD** schema that automatically validates configuration files (#45).
 * **ADD** minimal configuration to be able to test the entire workflow more quickly (#60).
-* **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59).
+* **ADD** installation of `curl` and `unzip` from conda-forge, to increase portability (#59, #267).
 * **ADD** sync infrastructure to easily send and receive files to and from a cluster (#74).
 * **ADD** parameter `station-nearest-basin-max-km` controlling the mapping of hydro power stations to basins (#138).
 * **ADD** optional email notifications whenever builds fail or succeed (#92).

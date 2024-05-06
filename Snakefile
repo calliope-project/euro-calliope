@@ -1,14 +1,13 @@
 import glob
 from pathlib import Path
 
-from snakemake.utils import validate
+from snakemake.utils import validate, min_version, makedirs
 
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
 
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
-script_dir = f"{root_dir}scripts/"
 test_dir = f"{root_dir}tests/"
 model_test_dir = f"{test_dir}model"
 template_dir = f"{root_dir}templates/"
@@ -16,26 +15,49 @@ model_template_dir = f"{template_dir}models/"
 techs_template_dir = f"{model_template_dir}techs/"
 
 include: "./rules/shapes.smk"
+include: "./rules/data.smk"
+include: "./rules/jrc-idees.smk"
 include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
 include: "./rules/transmission.smk"
 include: "./rules/demand.smk"
 include: "./rules/nuclear.smk"
+include: "./rules/transport.smk"
 include: "./rules/sync.smk"
+include: "./rules/heat.smk"
+
+min_version("7.8")
 localrules: all, clean
 wildcard_constraints:
         resolution = "continental|national|regional"
 
 ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
 ruleorder: bio_techs_and_locations_template > techs_and_locations_template
+ruleorder: create_controlled_road_transport_annual_demand > dummy_tech_locations_template
 
 ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
     "rooftop-pv", "rooftop-pv-n", "rooftop-pv-e-w", "rooftop-pv-s-flat", "hydro-run-of-river",
     "hydro-reservoir"
 ]
-ALL_DEMAND_CARRIERS = ["electricity"]
+
+
+def ensure_lib_folder_is_linked():
+    if not (hasattr(workflow, "deployment_settings") and not
+            hasattr(workflow.deployment_settings, "conda_prefix")):
+        return
+    link = Path(workflow.deployment_settings.conda_prefix) / "lib"
+    if not link.exists():
+        # Link either does not exist or is an invalid symlink
+        print("Creating link from conda env dir to eurocalliopelib.")
+        if link.is_symlink():  # Deal with existing but invalid symlink
+            shell(f"rm {link}")
+        makedirs(workflow.deployment_settings.conda_prefix)
+        shell(f"ln -s {workflow.basedir}/lib {link}")
+
+
+ensure_lib_folder_is_linked()
 
 onstart:
     shell("mkdir -p build/logs")
@@ -50,12 +72,20 @@ onerror:
 rule all:
     message: "Generate euro-calliope pre-built models and run tests."
     input:
-        "build/logs/continental/test-report.html",
-        "build/logs/national/test-report.html",
+        "build/logs/continental/test.success",
+        "build/logs/national/test.success",
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",
-        "build/models/build-metadata.yaml"
+        "build/models/continental/build-metadata.yaml",
+        "build/models/national/build-metadata.yaml",
+        "build/models/regional/build-metadata.yaml",
+        "build/models/regional/summary-of-potentials.nc",
+        "build/models/regional/summary-of-potentials.csv",
+        "build/models/national/summary-of-potentials.nc",
+        "build/models/national/summary-of-potentials.csv",
+        "build/models/continental/summary-of-potentials.nc",
+        "build/models/continental/summary-of-potentials.csv"
 
 
 rule all_tests:
@@ -64,14 +94,20 @@ rule all_tests:
         "build/models/continental/example-model.yaml",
         "build/models/national/example-model.yaml",
         "build/models/regional/example-model.yaml",
-        "build/logs/continental/test-report.html",
-        "build/logs/national/test-report.html",
-        "build/logs/regional/test-report.html",
-        "build/models/build-metadata.yaml"
+        "build/logs/continental/test.success",
+        "build/logs/national/test.success",
+        "build/logs/regional/test.success",
+        "build/models/build-metadata.yaml",
+        "build/models/regional/summary-of-potentials.nc",
+        "build/models/regional/summary-of-potentials.csv",
+        "build/models/national/summary-of-potentials.nc",
+        "build/models/national/summary-of-potentials.csv",
+        "build/models/continental/summary-of-potentials.nc",
+        "build/models/continental/summary-of-potentials.csv"
 
 
 rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_template` with a locational CSV linked to each technology that has no location-specific data to define.
-    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."
+    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."  # Update ruleorder at the top of the file if you instead want the techs_and_locations_template rule to be used to generate a file
     input: rules.locations_template.output.csv
     output: "build/data/{resolution}/{tech_group}/{tech}.csv"
     conda: "envs/shell.yaml"
@@ -81,7 +117,6 @@ rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_te
 rule techs_and_locations_template:
     message: "Create {wildcards.resolution} definition file for the {wildcards.tech_group} tech `{wildcards.tech}`."
     input:
-        script = script_dir + "template_techs.py",
         template = techs_template_dir + "{tech_group}/{tech}.yaml",
         locations = "build/data/{resolution}/{tech_group}/{tech}.csv"
     params:
@@ -101,7 +136,7 @@ rule no_params_model_template:
         template = model_template_dir + "{template}",
     output: "build/models/{resolution}/{template}"
     wildcard_constraints:
-        template = "interest-rate.yaml|scenarios.yaml"
+        template = "interest-rate.yaml"
     conda: "envs/shell.yaml"
     shell: "cp {input.template} {output}"
 
@@ -120,7 +155,6 @@ rule no_params_template:
 rule model_template:
     message: "Generate top-level {wildcards.resolution} model configuration file from template"
     input:
-        script = script_dir + "template_model.py",
         template = model_template_dir + "example-model.yaml",
         non_model_files = expand(
             "build/models/{template}", template=["environment.yaml", "README.md"]
@@ -130,8 +164,9 @@ rule model_template:
             input_file=[
                 "interest-rate.yaml",
                 "locations.yaml",
-                "scenarios.yaml",
                 "techs/demand/electricity.yaml",
+                "techs/demand/electrified-transport.yaml",
+                "techs/demand/electrified-heat.yaml",
                 "techs/storage/electricity.yaml",
                 "techs/storage/hydro.yaml",
                 "techs/supply/biofuel.yaml",
@@ -147,9 +182,12 @@ rule model_template:
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_CF_TECHNOLOGIES
         ),
-        demand_timeseries_data = expand(
-            "build/models/{{resolution}}/timeseries/demand/{energy_carrier}.csv",
-            energy_carrier=ALL_DEMAND_CARRIERS
+        demand_timeseries_data = (
+            "build/models/{resolution}/timeseries/demand/electricity.csv",
+            "build/models/{resolution}/timeseries/demand/uncontrolled-electrified-road-transport.csv",
+            "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv",
+            "build/models/{resolution}/timeseries/demand/electrified-heat-demand.csv",
+            "build/models/{resolution}/timeseries/demand/heat-demand-historic-electrification.csv",
         ),
         optional_input_files = lambda wildcards: expand(
             f"build/models/{wildcards.resolution}/{{input_file}}",
@@ -157,7 +195,6 @@ rule model_template:
                 "techs/transmission/electricity-linked-neighbours.yaml",
             ] + ["techs/transmission/electricity-entsoe.yaml" for i in [None] if wildcards.resolution == "national"]
         )
-
     params:
         year = config["scope"]["temporal"]["first-year"]
     conda: "envs/default.yaml"
@@ -168,19 +205,31 @@ rule model_template:
 rule build_metadata:
     message: "Generate build metadata."
     input:
-        script_dir + "metadata.py",
-        "build/models/continental/example-model.yaml",
-        "build/models/national/example-model.yaml",
-        "build/models/regional/example-model.yaml",
+        "build/models/{resolution}/example-model.yaml",
     params:
         config = config,
         version = __version__
-    output: "build/models/build-metadata.yaml"
+    output: "build/models/{resolution}/build-metadata.yaml"
     conda: "envs/default.yaml"
     script: "scripts/metadata.py"
 
 
-rule clean: # removes all generated results
+rule dag_dot:
+    output: temp("build/dag.dot")
+    shell:
+        "snakemake --rulegraph > {output}"
+
+
+rule dag:
+    message: "Plot dependency graph of the workflow."
+    input: rules.dag_dot.output[0]
+    # Output is deliberatly omitted so rule is executed each time.
+    conda: "envs/dag.yaml"
+    shell:
+        "dot -Tpdf {input} -o build/dag.pdf"
+
+
+rule clean:  # removes all generated results
     shell:
         """
         rm -r build/
@@ -200,6 +249,24 @@ rule test:
         )
     params:
         config = config
-    output: "build/logs/{resolution}/test-report.html"
+    log: "build/logs/{resolution}/test-report.html"
+    output: "build/logs/{resolution}/test.success"
     conda: "./envs/test.yaml"
+    resources:
+        runtime = 240
     script: "./tests/model/test_runner.py"
+
+
+rule summarise_potentials:
+    message: "Generates netcdf and csv file with potentials for each technology."
+    input:
+        path_to_model = "build/models/{resolution}/example-model.yaml"
+    output:
+        netcdf = "build/models/{resolution}/summary-of-potentials.nc",
+        csv = "build/models/{resolution}/summary-of-potentials.csv"
+    params:
+        scaling_factors = config["scaling-factors"]
+    conda:
+        "./envs/test.yaml"
+    script:
+        "./scripts/summarise_potentials.py"

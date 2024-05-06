@@ -9,8 +9,9 @@ dependencies:
     - graphviz=2.48.0
     - pydot=1.4.2
     - pycountry=18.12.8
-    - snakemake-minimal=6.1.1
+    - pymdown-extensions=9.9.2
+    - snakemake-minimal=7.26.0
     - pip=21.0.1
     - pip:
         - jsonschema2md==0.2.1
-        - -e ../lib[docs]
+        - -e ./lib[docs]

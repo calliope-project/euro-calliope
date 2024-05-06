@@ -1,55 +1,50 @@
-from pathlib import Path
-import sys
-import yaml
 import os
+import sys
+from pathlib import Path
 
-import pytest
 import calliope
 import pandas as pd
+import pytest
+import yaml
 
 
-def run_test(
-    path_to_test_dir, path_to_output, path_to_example_model, paths_to_cf_timeseries,
-    config, resolution
-):
-    with open(os.path.join(path_to_test_dir, "..", "resources", "test.yaml")) as f:
+def run_test(snakemake):
+    with open(
+        os.path.join(snakemake.input.test_dir, "..", "resources", "test.yaml")
+    ) as f:
         test_config = yaml.safe_load(f)
 
-    override_dict = test_config["test-model"]["overrides"][resolution]
-    scenarios = test_config["test-model"]["scenarios"][resolution]
-    subset_time = test_config["test-model"]["subset_time"][resolution]
+    override_dict = test_config["test-model"]["overrides"][
+        snakemake.wildcards.resolution
+    ]
+    scenarios = test_config["test-model"]["scenarios"][snakemake.wildcards.resolution]
+    subset_time = test_config["test-model"]["subset_time"][
+        snakemake.wildcards.resolution
+    ]
 
     exit_code = pytest.main(
         [
-            path_to_test_dir,
-            f"--html={path_to_output}",
+            snakemake.input.test_dir,
+            f"--html={snakemake.log[0]}",
             "--self-contained-html",
             "--verbose",
         ],
         plugins=[
-            _create_config_plugin(
-                path_to_example_model=path_to_example_model,
-                paths_to_cf_timeseries=paths_to_cf_timeseries,
-                config=config,
-                override_dict=override_dict,
-                scenarios=scenarios,
-                subset_time=subset_time
-            )
-        ]
+            _create_config_plugin(snakemake, override_dict, scenarios, subset_time)
+        ],
     )
+    if exit_code == 0:
+        Path(snakemake.output[0]).touch()
     sys.exit(exit_code)
 
 
-def _create_config_plugin(
-    path_to_example_model, paths_to_cf_timeseries, config, override_dict, scenarios, subset_time
-):
+def _create_config_plugin(snakemake, override_dict, scenarios, subset_time):
     """Creates fixtures from Snakemake configuration."""
 
-    class SnakemakeConfigPlugin():
-
+    class SnakemakeConfigPlugin:
         @pytest.fixture(scope="session")
         def config(self):
-            return dict(config)
+            return snakemake.params.config
 
         @pytest.fixture(scope="session")
         def scaling_factors(self, config):
@@ -66,9 +61,9 @@ def _create_config_plugin(
         @pytest.fixture(scope="session")
         def model(self, scenario, override_dict):
             return calliope.Model(
-                path_to_example_model,
+                snakemake.input.example_model,
                 scenario=",".join(scenarios[scenario]),
-                override_dict=override_dict
+                override_dict=override_dict,
             )
 
         @pytest.fixture(scope="session")
@@ -78,23 +73,31 @@ def _create_config_plugin(
 
         @pytest.fixture(scope="session")
         def energy_cap(self, optimised_model, scaling_factors):
-            return optimised_model.get_formatted_array("energy_cap") / scaling_factors["power"]
+            return (
+                optimised_model.get_formatted_array("energy_cap")
+                / scaling_factors["power"]
+            )
 
-        @pytest.fixture(scope="module", params=_read_locs(paths_to_cf_timeseries[0]))
+        @pytest.fixture(
+            scope="module",
+            params=_read_locs(snakemake.input.capacity_factor_timeseries[0]),
+        )
         def location(self, request):
             return request.param
 
         @pytest.fixture(scope="session")
         def optimised_example_model(self, override_dict):
             model = calliope.Model(
-                path_to_example_model,
+                snakemake.input.example_model,
                 override_dict=override_dict,
-                scenario=",".join(scenarios["default"])
+                scenario=",".join(scenarios["default"]),
             )
             model.run()
             return model
 
-        @pytest.fixture(scope="function", params=paths_to_cf_timeseries)
+        @pytest.fixture(
+            scope="function", params=snakemake.input.capacity_factor_timeseries
+        )
         def capacity_factor_timeseries(self, request):
             return pd.read_csv(request.param, index_col=0, parse_dates=True)
 
@@ -114,8 +117,11 @@ def _create_config_plugin(
             return pd.read_csv(path, index_col=0, parse_dates=True)
 
         def _select_capacity_factor_time_series(self, technology):
-            selected = [path for path in paths_to_cf_timeseries
-                        if Path(path).name == f"capacityfactors-{technology}.csv"]
+            selected = [
+                path
+                for path in snakemake.input.capacity_factor_timeseries
+                if Path(path).name == f"capacityfactors-{technology}.csv"
+            ]
             assert len(selected) == 1
             return selected[0]
 
@@ -127,11 +133,4 @@ def _read_locs(path_to_cf_timeseries):
 
 
 if __name__ == "__main__":
-    run_test(
-        path_to_test_dir=snakemake.input.test_dir,
-        path_to_example_model=snakemake.input.example_model,
-        paths_to_cf_timeseries=snakemake.input.capacity_factor_timeseries,
-        config=snakemake.params.config,
-        resolution=snakemake.wildcards.resolution,
-        path_to_output=snakemake.output[0]
-    )
+    run_test(snakemake)

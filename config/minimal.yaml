@@ -1,4 +1,6 @@
 # A simple config to allow for quick test runs of the workflow. It builds on `./default.yaml`.
+data-pre-processing:
+    fill-missing-values: {}
 quality-control:
     hydro:
         scale-phs-according-to-geth-et-al: True # switched on to test the Geth scaling
@@ -33,4 +35,3 @@ shapes: # This config must be consistent with data from https://doi.org/10.5281/
     regional:
         Ireland: gadm1
         United Kingdom: gadm1
-

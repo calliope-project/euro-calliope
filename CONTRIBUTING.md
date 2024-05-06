@@ -11,7 +11,10 @@ If you have found a bug in Euro-Calliope or you want to propose a new feature, p
 
 We welcome changes that you provide as [a pull request](https://github.com/calliope-project/euro-calliope/pulls).
 
-If you consider doing that, you need to know our branching model -- that is, which branches exist and what meaning they have.
+If you consider doing that, you need to know two things: our code guidelines and our branching model.
+Our code guidelines are implemented through automatic linting (code analysis) and formatting. For both, we employ the tool [Ruff](https://docs.astral.sh/ruff/). It is open-source and available as a [plug-in to many IDEs](https://docs.astral.sh/ruff/integrations/). All you need is to install the plug-in for your IDE and then you should see linting problems and you will be able to format the code automatically based on our guidelines. If you want more, you can use a [Git pre-commit-hook](https://pre-commit.com) but that step is optional.
+
+Next, let's talk about our branching model -- that is, which branches exist and what meaning they have.
 Do not worry, it is easy. Our branching model is a simplified version of _git-flow_. We are giving you a summary here that is likely sufficient for you.
 If you want more information, read the [blog entry](https://nvie.com/posts/a-successful-git-branching-model/) introducing git-flow.
 
@@ -47,8 +50,8 @@ The following subsections show you how to run the tests and how to write your ow
 Tests of models with continental and national resolution run automatically when you run the entire workflow. To run the tests of models with regional resolution too, do the following:
 
 ```bash
-snakemake --use-conda --cores <N_CORES> # builds all models and runs continental and national tests
-snakemake --use-conda --cores <N_CORES> all_tests # builds all models and runs continental, national, and regional tests
+snakemake # builds all models and runs continental and national tests
+snakemake all_tests # builds all models and runs continental, national, and regional tests
 ```
 
 ### Run the minimal workflow tests
@@ -57,7 +60,7 @@ As a developer, you may want to run the entire workflow often to spot errors ear
 For that, you can use a minimal test configuration that takes less time to run than the default configuration.
 
 ```bash
-snakemake --use-conda --cores <N_CORES> --configfile="config/minimal.yaml" all_tests
+snakemake --configfile="config/minimal.yaml" all_tests
 ```
 
 Make sure to run this in a clean working directory.
@@ -71,7 +74,7 @@ Here's how.
 First, create a test environment using mamba or conda:
 
 ```bash
-mamba env create -f test-requirements.yaml  # or replace mamba with conda
+mamba env create -f requirements-test.yaml --no-default-packages # or replace mamba with conda
 conda activate test-eurocalliope
 ```
 
@@ -121,7 +124,7 @@ Be aware that you can publish a release only if you are a maintainer of the GitH
     3. Update the changelog and add the release date.
     4. Update the release date in [./CITATION.cff](./CITATION.cff).
     5. (If necessary) Update [./LICENSE.md](./LICENSE.md).
-    6. (If necessary) Update `docs/img/spatial-scope-and-resolutions.png` by running `snakemake -j1 --use-conda -s rules/doc.smk docs/img/spatial-scope-and-resolutions.png`. Inspect the result visually. Check it in if it changed; check out the old version if it did not change. The figure will change when the spatial scope or resolution has changed.
+    6. (If necessary) Update `docs/img/spatial-scope-and-resolutions.png` by running `snakemake -s rules/doc.smk docs/img/spatial-scope-and-resolutions.png`. Inspect the result visually. Check it in if it changed; check out the old version if it did not change. The figure will change when the spatial scope or resolution has changed.
 2. Build the pre-builts and test everything using the `all_tests` rule. Make sure you start with a clean workflow folder: delete `./build` *and* `./data/automatic` should they exist.
 3. Commit, open a pull request onto `develop`, and merge the release branch into both `develop` and `main` after successful review.
 4. Add a `vX.Y.Z` release tag to `main`, push it, and add a release on GitHub.
