@@ -78,16 +78,15 @@ rule capacity_factors_onshore_wind_and_solar:
 
 
 rule shared_coast:
-    message: "Determine share of coast length between eez and {wildcards.resolution} units using {threads} threads."
+    message: "Determine share of coast length between EEZ and {wildcards.resolution} units using {threads} threads."
     input:
-        script = script_dir + "wind-and-solar/shared_coast.py",
         units = rules.units.output[0],
         continental_units = "build/data/continental/units.geojson",
         eez = rules.eez.output[0],
     params:
         polygon_area_share_threshold = config["quality-control"]["shared-coast-polygon-area-share-threshold"]
     output: "build/data/{resolution}/shared-coast.csv"
-    threads: config["snakemake"]["max-threads"]
+    threads: 4
     conda: "../envs/geo.yaml"
     script: "../scripts/wind-and-solar/shared_coast.py"
 

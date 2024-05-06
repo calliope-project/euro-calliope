@@ -4,8 +4,6 @@ data-pre-processing:
 quality-control:
     hydro:
         scale-phs-according-to-geth-et-al: True # switched on to test the Geth scaling
-snakemake:
-    max-threads: 1  # assume running on a local machine where multithreading jobs is already taking up user resources.
 sea-connections:
     continental: []
     national: # Source: https://www.entsoe.eu/data/map/

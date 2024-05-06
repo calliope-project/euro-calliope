@@ -9,6 +9,7 @@ from multiprocessing import Pool
 
 import geopandas as gpd
 import pandas as pd
+import shapely.geometry
 from eurocalliopelib.geo import EPSG3035
 
 
@@ -33,7 +34,7 @@ def allocate_eezs(
     Args:
         path_to_eez (str):
             Path to shapefile containing Exclusive Economic Zones. Must include the
-            columns "iso_ter1" (country IDs), "mrgid" (EEZ IDs), and "geometry".
+            columns "POL_TYPE" (polygon types), "ISO_TER1" (country IDs), "MRGID" (EEZ IDs), and "geometry".
         path_to_units (str):
             Path to shapefile containing Euro-Calliope units at specfied "resolution".
         path_to_continental_units (str):
@@ -48,26 +49,26 @@ def allocate_eezs(
             Resolution of the Euro-Calliope units in "path_to_units".
         path_to_output (str):
             Path to save pandas.Series with fraction of coast of each Euro-Calliope unit
-            ("id") for every EEZ polygon ("mrgid")
+            ("id") for every EEZ polygon ("MRGID")
     """
     eez = gpd.read_file(path_to_eez).to_crs(EPSG3035)
     units = gpd.read_file(path_to_units).to_crs(EPSG3035)
 
     # ASSUME: we can ignore EEZs shared by two countries
     # (these are very small far offshore, so removing them does not impact the results)
-    eez = eez[eez.pol_type.str.lower() != "joint regime"]
+    eez = eez[eez.POL_TYPE.str.lower() != "joint regime"]
 
     if resolution == "continental":
         share = pd.Series(
             index=pd.MultiIndex.from_product(
-                (["EUR"], eez.mrgid.unique()), names=["id", "mrgid"]
+                (["EUR"], eez.MRGID.unique()), names=["id", "MRGID"]
             ),
             data=1,
         )
 
     elif resolution == "national":
         share = pd.Series(
-            index=eez.set_index(["iso_ter1", "mrgid"]).index.rename(["id", "mrgid"]),
+            index=eez.set_index(["ISO_TER1", "MRGID"]).index.rename(["id", "MRGID"]),
             data=1,
         )
     else:
@@ -82,7 +83,7 @@ def allocate_eezs(
                     continental_units=continental_units,
                     polygon_area_share_threshold=polygon_area_share_threshold,
                 ),
-                eez.iso_ter1.unique(),
+                eez.ISO_TER1.unique(),
             )
         share = pd.concat(share_of_coast_length)
 
@@ -94,7 +95,7 @@ def allocate_eezs(
         level=[0, 1],
     )
 
-    share_sum = share.groupby(level="mrgid").sum().reindex(eez.mrgid.unique()).fillna(0)
+    share_sum = share.groupby(level="MRGID").sum().reindex(eez.MRGID.unique()).fillna(0)
     assert (
         (share_sum > 0.99) & (share_sum < 1.01)  # ensure we haven't missed any area
     ).all(), share_sum
@@ -106,7 +107,7 @@ def _get_coastal_units_as_linestrings(
     units: gpd.GeoDataFrame,
     continental_units: gpd.GeoDataFrame,
     polygon_area_share_threshold: float,
-):
+) -> gpd.GeoDataFrame:
     """
     Get the outline of all Euro-Calliope units which sit on the coast
     (i.e., will have some share of the EEZ assigned to them)
@@ -129,7 +130,9 @@ def _get_coastal_units_as_linestrings(
     )
 
 
-def _simplify_geometries(units, polygon_area_share_threshold):
+def _simplify_geometries(
+    units: gpd.GeoDataFrame, polygon_area_share_threshold: float
+) -> gpd.GeoDataFrame:
     """
     Remove tiny islands from units to speed up the later intersection.
     Any polygons in a multipolygon A with an area below
@@ -149,10 +152,14 @@ def _simplify_geometries(units, polygon_area_share_threshold):
 
 
 def _share_of_coast_length(
-    country, eez, units, continental_units, polygon_area_share_threshold
+    country: str,
+    eez: gpd.GeoDataFrame,
+    units: gpd.GeoDataFrame,
+    continental_units: gpd.GeoDataFrame,
+    polygon_area_share_threshold: float,
 ):
     """
-    Parallelisable sub-function which allocates a share of EEZ units ("mrgid") connected
+    Parallelisable sub-function which allocates a share of EEZ units ("MRGID") connected
     to a specfic country ("iso_ter1") to Euro-Calliope units ("id") in that same country
     ("country_code").
     """
@@ -163,20 +170,22 @@ def _share_of_coast_length(
     )
     unit_intersection = gpd.overlay(
         coastal_unit_boundaries.reset_index(),
-        eez.loc[eez.iso_ter1 == country, ["mrgid", "geometry"]],
+        eez.loc[country == eez.ISO_TER1, ["MRGID", "geometry"]],
         how="intersection",
     )
     coast_length_ratio = (
-        unit_intersection.set_index(["id", "mrgid"])
-        .length.groupby("mrgid")
+        unit_intersection.set_index(["id", "MRGID"])
+        .length.groupby("MRGID")
         .transform(lambda x: x / x.sum())
     )
 
     return coast_length_ratio
 
 
-# TODO: replace with shapely.make_valid (requires updating many geo.yaml env dependencies to udpate to shapely 1.8.2)
-def _buffer_if_necessary(shape):
+# TODO: replace with shapely.make_valid (requires updating many geo.yaml env dependencies to update to shapely 1.8.2)
+def _buffer_if_necessary(
+    shape: shapely.geometry.MultiPolygon,
+) -> shapely.geometry.MultiPolygon:
     """Fix the basins shapes which are invalid.
 
     Following the advice given here:
