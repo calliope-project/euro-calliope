@@ -212,7 +212,6 @@ quality-control:
         station-nearest-basin-max-km: 1
     capacity-factor-gridcell-overlap-threshold: 0.97 # Ceuta y Melilla has smallest overlap
     shared-coast-polygon-area-share-threshold: 0.01
-
 sea-connections:
     continental: []
     national: # Source: https://www.entsoe.eu/data/map/

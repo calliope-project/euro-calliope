@@ -24,11 +24,9 @@ overrides:
 
 locations:
     {% for id, location in locations.iterrows() %}
-    {% if location.eligibility_offshore_wind_mw > 0 %}
     {{ id }}:
         techs:
             wind_offshore:
                 constraints:
                     energy_cap_max: {{ location.eligibility_offshore_wind_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-    {% endif %}
     {% endfor %}

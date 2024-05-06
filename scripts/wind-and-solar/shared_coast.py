@@ -16,7 +16,6 @@ from eurocalliopelib.geo import EPSG3035
 def allocate_eezs(
     path_to_eez: str,
     path_to_units: str,
-    path_to_continental_units: str,
     threads: int,
     polygon_area_share_threshold: float,
     resolution: str,
@@ -36,10 +35,7 @@ def allocate_eezs(
             Path to shapefile containing Exclusive Economic Zones. Must include the
             columns "POL_TYPE" (polygon types), "ISO_TER1" (country IDs), "MRGID" (EEZ IDs), and "geometry".
         path_to_units (str):
-            Path to shapefile containing Euro-Calliope units at specfied "resolution".
-        path_to_continental_units (str):
-            Path to shapefile containing Euro-Calliope units at the continental
-            resolution.
+            Path to shapefile containing Euro-Calliope units at specified "resolution".
         threads (int):
             Maximum number of threads allowed for parallelisation of operations.
         polygon_area_share_threshold (float):
@@ -59,34 +55,39 @@ def allocate_eezs(
     eez = eez[eez.POL_TYPE.str.lower() != "joint regime"]
 
     if resolution == "continental":
+        # All coastal areas are linked to the one "EUR" region at the continental resolution
         share = pd.Series(
             index=pd.MultiIndex.from_product(
                 (["EUR"], eez.MRGID.unique()), names=["id", "MRGID"]
             ),
             data=1,
         )
-
     elif resolution == "national":
+        # Each EEZ area has one explicit country that it is linked to (since we removed "joint regimes")
         share = pd.Series(
             index=eez.set_index(["ISO_TER1", "MRGID"]).index.rename(["id", "MRGID"]),
             data=1,
         )
     else:
         eez.geometry = eez.geometry.map(_buffer_if_necessary)
-        continental_units = gpd.read_file(path_to_continental_units).to_crs(EPSG3035)
+        merged_units = units.assign(all=1).dissolve("all")
         with Pool(int(threads)) as pool:
             share_of_coast_length = pool.map(
                 partial(
                     _share_of_coast_length,
                     eez=eez,
                     units=units,
-                    continental_units=continental_units,
+                    merged_units=merged_units,
                     polygon_area_share_threshold=polygon_area_share_threshold,
                 ),
                 eez.ISO_TER1.unique(),
             )
         share = pd.concat(share_of_coast_length)
 
+    # Add back in non-coastal regions with coastal shares of zero
+    share = share.unstack("MRGID").reindex(units.id.values).fillna(0).stack()
+
+    # Clean up id and MRGID data
     share.index = share.index.set_levels(
         levels=(
             share.index.levels[0].map(lambda x: x.replace(".", "-")),
@@ -95,17 +96,16 @@ def allocate_eezs(
         level=[0, 1],
     )
 
+    # Ensure we haven't missed any EEZ areas
     share_sum = share.groupby(level="MRGID").sum().reindex(eez.MRGID.unique()).fillna(0)
-    assert (
-        (share_sum > 0.99) & (share_sum < 1.01)  # ensure we haven't missed any area
-    ).all(), share_sum
+    assert ((share_sum > 0.99) & (share_sum < 1.01)).all(), share_sum
 
     share.rename("shared_coast_fraction").to_csv(path_to_output)
 
 
 def _get_coastal_units_as_linestrings(
     units: gpd.GeoDataFrame,
-    continental_units: gpd.GeoDataFrame,
+    merged_units: gpd.GeoDataFrame,
     polygon_area_share_threshold: float,
 ) -> gpd.GeoDataFrame:
     """
@@ -114,8 +114,9 @@ def _get_coastal_units_as_linestrings(
     """
     # slightly increase the sub-continental polygon size so that those on the coast
     # slightly overlap the continent polygon boundary.
-    units["geometry"] = units.geometry.buffer(units.total_bounds.mean() * 1e-6)
-    non_coastal_units = gpd.sjoin(units, continental_units, op="within")
+    temp_units = units.copy()
+    temp_units["geometry"] = units.geometry.buffer(units.total_bounds.mean() * 1e-6)
+    non_coastal_units = gpd.sjoin(temp_units, merged_units, op="within")
     coastal_units = units.loc[~units.id.isin(non_coastal_units.id_left)].set_index("id")
 
     # Simplify geometries to get rid of tiny islands that slow down the computation and
@@ -136,7 +137,7 @@ def _simplify_geometries(
     """
     Remove tiny islands from units to speed up the later intersection.
     Any polygons in a multipolygon A with an area below
-    (polygon_area_share_threshold * A) will be removed.
+    (polygon_area_share_threshold * area(A)) will be removed.
     """
     all_polygons = units.geometry.explode()
     return (
@@ -155,17 +156,17 @@ def _share_of_coast_length(
     country: str,
     eez: gpd.GeoDataFrame,
     units: gpd.GeoDataFrame,
-    continental_units: gpd.GeoDataFrame,
+    merged_units: gpd.GeoDataFrame,
     polygon_area_share_threshold: float,
 ):
     """
     Parallelisable sub-function which allocates a share of EEZ units ("MRGID") connected
-    to a specfic country ("iso_ter1") to Euro-Calliope units ("id") in that same country
+    to a specific country ("iso_ter1") to Euro-Calliope units ("id") in that same country
     ("country_code").
     """
     coastal_unit_boundaries = _get_coastal_units_as_linestrings(
         units[units.country_code == country].copy(),
-        continental_units,
+        merged_units,
         polygon_area_share_threshold,
     )
     unit_intersection = gpd.overlay(
@@ -201,7 +202,6 @@ if __name__ == "__main__":
     allocate_eezs(
         path_to_eez=snakemake.input.eez,
         path_to_units=snakemake.input.units,
-        path_to_continental_units=snakemake.input.continental_units,
         threads=int(snakemake.threads),
         polygon_area_share_threshold=snakemake.params.polygon_area_share_threshold,
         resolution=snakemake.wildcards.resolution,

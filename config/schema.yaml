@@ -178,7 +178,6 @@ properties:
             monetary:
                 type: number
                 description: "Applied to all quantities of monetary cost (base: EUR)."
-
     parameters:
         type: object
         description: Parameter values of the models.
