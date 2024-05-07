@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 from eurocalliopelib import utils
@@ -39,14 +37,13 @@ ROAD_CARRIERS = {
 
 
 def process_jrc_transport_data(
-    path_to_data: str,
-    dataset: object,
+    paths_to_data: list[str],
+    dataset: str,
     out_path: str,
     vehicle_type_names: dict[str, str],
 ) -> None:
     processed_data = pd.concat([
-        read_transport_excel(path, **DATASET_PARAMS[dataset])
-        for path in Path(path_to_data).glob("*.xlsx")
+        read_transport_excel(path, **DATASET_PARAMS[dataset]) for path in paths_to_data
     ])
     if DATASET_PARAMS[dataset]["unit"] == "ktoe":
         processed_data = processed_data.apply(utils.ktoe_to_twh)
@@ -62,7 +59,7 @@ def process_jrc_transport_data(
 
 
 def read_transport_excel(
-    path: Path, sheet_name: str, idx_start_str: str, idx_end_str: str, **kwargs: object
+    path: str, sheet_name: str, idx_start_str: str, idx_end_str: str, **kwargs: object
 ) -> pd.DataFrame:
     xls = pd.ExcelFile(path)
     style_df = StyleFrame.read_excel(xls, read_style=True, sheet_name=sheet_name)
@@ -184,7 +181,7 @@ def remove_of_which(
 
 if __name__ == "__main__":
     process_jrc_transport_data(
-        path_to_data=snakemake.input.data,
+        paths_to_data=snakemake.input.data,
         dataset=snakemake.wildcards.dataset,
         out_path=snakemake.output[0],
         vehicle_type_names={

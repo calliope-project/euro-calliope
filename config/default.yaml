@@ -20,6 +20,10 @@ data-sources:
     swiss-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/gesamtenergiestatistik.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvNzUxOQ==.html
     swiss-industry-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/teilstatistiken.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODc4OA==.html
     ev-data: https://zenodo.org/record/6579421/files/ramp-ev-consumption-profiles.csv.gz?download=1
+    gridded-temperature-data: https://zenodo.org/records/6557643/files/temperature.nc?download=1
+    gridded-10m-windspeed-data: https://zenodo.org/records/6557643/files/wind10m.nc?download=1
+    when2heat-params: https://zenodo.org/records/10965295/files/{dataset}?download=1
+    population: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/JRC_GRID_2018.zip
 data-pre-processing:
     fill-missing-values:
         jrc-idees:
@@ -40,7 +44,6 @@ data-pre-processing:
             SRB: [HUN]
             CYP: [ROU]
 root-directory: .
-max-threads: 4
 cluster-sync:
     url: euler.ethz.ch
     send-ignore: .syncignore-send
@@ -212,6 +215,7 @@ quality-control:
         scale-phs-according-to-geth-et-al: false
         station-nearest-basin-max-km: 1
     capacity-factor-gridcell-overlap-threshold: 0.97 # Ceuta y Melilla has smallest overlap
+    shared-coast-polygon-area-share-threshold: 0.01
 sea-connections:
     continental: []
     national: # Source: https://www.entsoe.eu/data/map/
