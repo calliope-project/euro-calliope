@@ -24,6 +24,7 @@
 * **ADD** ability to run on Apple silicon devices (#263).
     * Updated geo packages from gdal 3.2 -> 3.3.
 * **ADD** re-execution triggers based on config and env changes (#264).
+* **ADD** continuous integration test of all conda environments on both ARM macOS and Linux (#369).
 
 ### Updated (models)
 
@@ -49,8 +50,8 @@
 * **UPDATE** Snakemake to v8.10.7 (#330)
     * Ensures that conda environment builds ignore default package specifications (#289).
     * Fixes localrules through integration of new `localrule` directive (#368).
-
 * **UPDATE** source of fraction of shared coast for offshore wind capacity factor distribution from a fixed shape download to an internal rule which can handle ad hoc shapes (partial #238).
+* **UPDATE** dropped support for Intel macOS. The workflow may still run on Intel macOS, but we do not actively maintain support (#369).
 
 ### Fixed (models)
 
