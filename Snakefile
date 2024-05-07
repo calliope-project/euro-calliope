@@ -16,6 +16,7 @@ techs_template_dir = f"{model_template_dir}techs/"
 
 include: "./rules/shapes.smk"
 include: "./rules/data.smk"
+include: "./rules/jrc-idees.smk"
 include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
@@ -25,7 +26,7 @@ include: "./rules/nuclear.smk"
 include: "./rules/transport.smk"
 include: "./rules/sync.smk"
 include: "./rules/heat.smk"
-min_version("7.8")
+min_version("8.10")
 localrules: all, clean
 wildcard_constraints:
         resolution = "continental|national|regional"
@@ -69,6 +70,7 @@ onerror:
 
 rule all:
     message: "Generate euro-calliope pre-built models and run tests."
+    localrule: True
     input:
         "build/logs/continental/test.success",
         "build/logs/national/test.success",
@@ -228,6 +230,7 @@ rule dag:
 
 
 rule clean:  # removes all generated results
+    localrule: True
     shell:
         """
         rm -r build/

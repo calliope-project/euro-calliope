@@ -1,13 +1,12 @@
 """Rules related to biofuels."""
 
-localrules: download_biofuel_potentials_and_costs
-
 
 rule download_biofuel_potentials_and_costs:
     message: "Download raw biofuel potential and cost data."
     params: url = config["data-sources"]["biofuel-potentials-and-costs"]
     output: protected("data/automatic/raw-biofuel-potentials-and-costs.xlsx")
     conda: "../envs/shell.yaml"
+    localrule: True
     shell: "curl -sSLo {output} '{params.url}'"
 
 

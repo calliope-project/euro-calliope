@@ -42,6 +42,8 @@ Execute the workflow like so:
 snakemake
 ```
 
+This will use Snakemake run parameters from the default `workflow-profile` in `profiles/default`. You may change these parameters and/or use a user defined profile using `--profile=<user-profile>`; see [Snakemake's documentation on profiles](https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles).
+
 ## Run
 
 The build step creates all individual components of Euro-Calliope, like technologies and time series.
@@ -53,7 +55,7 @@ It is a complete Calliope model and can be used like any other, for example like
 calliope run ./build/models/national/example-model.yaml
 ```
 
-For more information on how to use Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.10/).
+For more information on how to use Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io/en/v{{ calliope_version }}/).
 
 ## Customise
 
