@@ -16,6 +16,7 @@ techs_template_dir = f"{model_template_dir}techs/"
 
 include: "./rules/shapes.smk"
 include: "./rules/data.smk"
+include: "./rules/jrc-idees.smk"
 include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
@@ -25,13 +26,14 @@ include: "./rules/nuclear.smk"
 include: "./rules/transport.smk"
 include: "./rules/sync.smk"
 include: "./rules/heat.smk"
-min_version("7.8")
+min_version("8.10")
 localrules: all, clean
 wildcard_constraints:
         resolution = "continental|national|regional"
 
 ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
 ruleorder: bio_techs_and_locations_template > techs_and_locations_template
+ruleorder: create_controlled_road_transport_annual_demand > dummy_tech_locations_template
 
 ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
@@ -41,15 +43,16 @@ ALL_CF_TECHNOLOGIES = [
 
 
 def ensure_lib_folder_is_linked():
-    if not workflow.conda_prefix:
+    if not (hasattr(workflow, "deployment_settings") and not
+            hasattr(workflow.deployment_settings, "conda_prefix")):
         return
-    link = Path(workflow.conda_prefix) / "lib"
+    link = Path(workflow.deployment_settings.conda_prefix) / "lib"
     if not link.exists():
         # Link either does not exist or is an invalid symlink
         print("Creating link from conda env dir to eurocalliopelib.")
         if link.is_symlink():  # Deal with existing but invalid symlink
             shell(f"rm {link}")
-        makedirs(workflow.conda_prefix)
+        makedirs(workflow.deployment_settings.conda_prefix)
         shell(f"ln -s {workflow.basedir}/lib {link}")
 
 
@@ -67,6 +70,7 @@ onerror:
 
 rule all:
     message: "Generate euro-calliope pre-built models and run tests."
+    localrule: True
     input:
         "build/logs/continental/test.success",
         "build/logs/national/test.success",
@@ -103,7 +107,7 @@ rule all_tests:
 
 
 rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_template` with a locational CSV linked to each technology that has no location-specific data to define.
-    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."
+    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."  # Update ruleorder at the top of the file if you instead want the techs_and_locations_template rule to be used to generate a file
     input: rules.locations_template.output.csv
     output: "build/data/{resolution}/{tech_group}/{tech}.csv"
     conda: "envs/shell.yaml"
@@ -180,8 +184,8 @@ rule model_template:
         ),
         demand_timeseries_data = (
             "build/models/{resolution}/timeseries/demand/electricity.csv",
-            "build/models/{resolution}/timeseries/demand/electrified-road-transport.csv",
-            "build/models/{resolution}/timeseries/demand/road-transport-historic-electrification.csv",
+            "build/models/{resolution}/timeseries/demand/uncontrolled-electrified-road-transport.csv",
+            "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv",
             "build/models/{resolution}/timeseries/demand/electrified-heat-demand.csv",
             "build/models/{resolution}/timeseries/demand/heat-demand-historic-electrification.csv",
         ),
@@ -225,7 +229,8 @@ rule dag:
         "dot -Tpdf {input} -o build/dag.pdf"
 
 
-rule clean: # removes all generated results
+rule clean:  # removes all generated results
+    localrule: True
     shell:
         """
         rm -r build/

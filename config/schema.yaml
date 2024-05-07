@@ -364,6 +364,9 @@ properties:
                             motorcycles:
                                 type: string
                                 description: JRC-IDEES name of motorcycles.
+                    uncontrolled-ev-charging-share:
+                        type: number
+                        description: Share of uncontrolled charging.
             entsoe-tyndp:
                 type: object
                 description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/
@@ -637,7 +640,11 @@ properties:
                 description: Set the lower threshold of per-region land area covered by gridcells containing capacity factor timeseries data. Not all land area is covered by data because there are sometimes small islands linked to a region which are missed by the onshore wind / PV datasets. These islands are usually very small, consitituting less than 0.01% of a region.
                 minimum: 0
                 maximum: 1
-
+            shared-coast-polygon-area-share-threshold:
+                type: number
+                description: Set the fraction of a Euro-Calliope unit's area below which a component of the unit can be ignored (e.g. small islands) when assigning Exclusive Economic Zones to subnational Euro-Calliope units.
+                minimum: 0
+                maximum: 1
     capacity-factors:
         type: object
         description: Parameters related to average or time-dependent capacity factors of renewables.

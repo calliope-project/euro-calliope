@@ -26,17 +26,6 @@ rule download_when2heat_params:
     conda: "../envs/shell.yaml"
     shell: "mkdir -p {output} && curl -sSLo '{output}/#1' '{params.url}'"
 
-rule jrc_idees_heat_processed:
-    message: "Process tertiary heat data from JRC-IDEES"
-    input:
-        data = expand(
-            "build/data/jrc-idees/heat/unprocessed/{country_code}.xlsx",
-            country_code=JRC_IDEES_SCOPE
-        )
-    output: "build/data/jrc-idees/heat/commercial/processed.csv"
-    conda: "../envs/default.yaml"
-    script: "../scripts/heat/jrc_idees.py"
-
 
 rule annual_heat_demand:
     message: "Calculate national heat demand for household and commercial sectors"
@@ -44,7 +33,7 @@ rule annual_heat_demand:
         hh_end_use = "data/automatic/eurostat-hh-end-use.tsv.gz",
         ch_end_use = "data/automatic/ch-end-use.xlsx",
         energy_balance = rules.annual_energy_balances.output[0],
-        commercial_demand = "build/data/jrc-idees/heat/commercial/processed.csv",
+        commercial_demand = "build/data/jrc-idees/tertiary/processed.csv",
         carrier_names = "config/energy-balances/energy-balance-carrier-names.csv"
     params:
         heat_tech_params = config["parameters"]["heat"],

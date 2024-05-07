@@ -229,8 +229,23 @@ if __name__ == "__main__":
         .xs("electricity")
     )
 
-    # Create CSV Files for calculated data
-    total_road_distance.rename("value").to_csv(snakemake.output.distance)
-    total_historically_electrified_distance.rename("value").to_csv(
-        snakemake.output.distance_historic_electrification
+    # Separate uncontrolled and controlled charging demands and create csv files
+    uncontrolled_share = snakemake.params.uncontrolled_charging_share
+
+    road_distance_controlled = (
+        total_road_distance.rename("value")
+        .mul(1 - uncontrolled_share)
+        .to_csv(snakemake.output.road_distance_controlled)
+    )
+    road_distance_uncontrolled = (
+        total_road_distance.rename("value")
+        .mul(uncontrolled_share)
+        .sub(total_historically_electrified_distance.rename("value"), fill_value=0)
+        .to_csv(snakemake.output.road_distance_uncontrolled)
+    )
+    # ASSUME historically electrified road consumption is all uncontrolled
+    road_distance_historically_electrified = (
+        total_historically_electrified_distance.rename("value").to_csv(
+            snakemake.output.road_distance_historically_electrified
+        )
     )

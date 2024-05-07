@@ -1,7 +1,7 @@
 # For descriptions of the configuration values, see `./schema.yaml`.
 data-sources:
     biofuel-potentials-and-costs: https://cidportal.jrc.ec.europa.eu/ftp/jrc-opendata/ENSPRESO/ENSPRESO_BIOMASS.xlsx
-    eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
+    eez: https://sandbox.zenodo.org/records/45135/files/eez_v11.gpkg.zip?download=1  # FIXME: update to actual zenodo record before next Euro-Calliope release.
     hydro-generation: https://zenodo.org/record/5797549/files/hydro-generation.csv?download=1
     national-phs-storage-capacities: https://zenodo.org/record/5797549/files/pumped-hydro-storage-capacities-gwh.csv?download=1
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
@@ -14,8 +14,8 @@ data-sources:
     entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
     jrc-ppdb: https://zenodo.org/record/3574566/files/JRC-PPDB-OPEN.ver1.0.zip
     jrc-idees: https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/JRC-IDEES/JRC-IDEES-2015_v1/JRC-IDEES-2015_All_xlsx_{country_code}.zip
-    eurostat-energy-balance: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/eurostat/nrg_bal_c.tsv.gz # FIXME do not use cached data
-    eurostat-hh-end-use:  https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/eurostat/nrg_d_hhq.tsv.gz # FIXME do not use cached data
+    eurostat-energy-balance: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/eurostat/nrg_bal_c.tsv.gz # FIXME: move to zenodo
+    eurostat-hh-end-use:  https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/eurostat/nrg_d_hhq.tsv.gz # FIXME: move to zenodo
     swiss-end-use: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/energieverbrauch-nach-verwendungszweck.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvOTg1NA==.html
     swiss-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/gesamtenergiestatistik.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvNzUxOQ==.html
     swiss-industry-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/teilstatistiken.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODc4OA==.html
@@ -166,6 +166,7 @@ parameters:
             coaches-and-buses: Motor coaches, buses and trolley buses
             passenger-cars: Passenger cars
             motorcycles: Powered 2-wheelers
+        uncontrolled-ev-charging-share: 0.5
     entsoe-tyndp:
         scenario: National Trends
         grid: Reference
@@ -214,6 +215,7 @@ quality-control:
         scale-phs-according-to-geth-et-al: false
         station-nearest-basin-max-km: 1
     capacity-factor-gridcell-overlap-threshold: 0.97 # Ceuta y Melilla has smallest overlap
+    shared-coast-polygon-area-share-threshold: 0.01
 sea-connections:
     continental: []
     national: # Source: https://www.entsoe.eu/data/map/
