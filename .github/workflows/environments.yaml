@@ -1,0 +1,45 @@
+name: Tests of conda environments on both Linux and Mac
+
+on:
+    push:
+        branches:
+            - main
+            - develop
+    pull_request:
+
+jobs:
+  environments-are-installable:
+    name: Environments are installable
+    runs-on: ${{ matrix.os }}
+    strategy:
+        fail-fast: false
+        matrix:
+            os: ["ubuntu-latest", "macos-latest"]
+    defaults:
+        run:
+            shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+            miniconda-version: latest
+      - name: DAG env
+        run: conda env create -f ./envs/geo.yaml --dry-run
+      - name: Default env
+        run: conda env create -f ./envs/default.yaml --dry-run
+      - name: Geo env
+        run: conda env create -f ./envs/geo.yaml --dry-run
+      - name: Hydro env
+        run: conda env create -f ./envs/hydro.yaml --dry-run
+      - name: Shell env
+        run: conda env create -f ./envs/shell.yaml --dry-run
+      - name: Test env
+        run: conda env create -f ./envs/test.yaml -n test_env --dry-run
+      - name: Vis env
+        run: conda env create -f ./envs/vis.yaml --dry-run
+      - name: Requirements docs env
+        run: conda env create -f ./requirements-docs.yaml --dry-run
+      - name: Requirements test env
+        run: conda env create -f ./requirements-test.yaml --dry-run
+      - name: Model usage env
+        run: conda env create -f ./templates/environment.yaml --dry-run
