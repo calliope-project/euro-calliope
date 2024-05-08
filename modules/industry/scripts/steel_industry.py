@@ -42,16 +42,12 @@ def get_steel_demand_df(
     """
     # Load data
     energy_balances_df = pd.read_csv(
-        path_energy_balances, index_col=[0, 1, 2, 3, 4], squeeze=True
-    )
+        path_energy_balances, index_col=[0, 1, 2, 3, 4]
+    ).squeeze("columns")
     cat_names_df = pd.read_csv(path_cat_names, header=0, index_col=0)
     carrier_names_df = pd.read_csv(path_carrier_names, header=0, index_col=0)
     jrc_energy = xr.open_dataset(path_jrc_industry_energy)
     jrc_prod = xr.open_dataset(path_jrc_industry_production)
-
-    # TODO: fix naming convention forced by the JRC module.
-    jrc_energy = jrc_energy.rename({"jrc-idees-industry-twh": "value"})
-    jrc_prod = jrc_prod.rename({"jrc-idees-industry-twh": "value"})
 
     # Ensure dataframes only have data specific to this industry
     cat_names_df = cat_names_df[cat_names_df["jrc_idees"] == CAT_NAME_STEEL]
@@ -204,9 +200,11 @@ def transform_jrc_subsector_demand(
     total_intensity = xr.concat(
         [electric_intensity, h2_intensity, low_heat_intensity], dim="carrier_name"
     )
-    steel_energy_demand = total_intensity * jrc_prod.sum("produced_material")
+    steel_energy_demand = total_intensity * jrc_prod["demand"].sum("produced_material")
 
-    steel_energy_demand["value"].attrs["units"] = "twh"
+    # Prettify
+    steel_energy_demand = steel_energy_demand.assign_attrs(units="twh")
+    steel_energy_demand.name = "demand"
 
     return steel_energy_demand
 
