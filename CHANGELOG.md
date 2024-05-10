@@ -38,6 +38,19 @@
 
 ### Updated (workflow)
 
+* **UPDATE** environments to fix issues on Linux and Macos-arm64:
+    * libnetcdf=4.8.1
+    * netCDF4=1.6.2
+    * hdf5=1.12.2
+
+* **UPDATE** geo, hydro, and test-eurocalliope environments to handle libnetcdf=4.8.1:
+    * gdal=3.6.2
+    * libgdal=3.6.2
+    * fiona=1.9.1
+    * rasterio=1.3.6
+    * geopandas=0.13.2
+    * shapely=1.8.5
+
 * **UPDATE** YAML templates and parametrisation restructured:
     * Parametrisation moved to eurocalliopelib.
     * Rules to parametrise split into smaller technology-specific rules, to ensure inputs are directly relevant to the files being parametrised.
