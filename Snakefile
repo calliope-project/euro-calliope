@@ -84,7 +84,6 @@ rule all:
 rule all_tests:
     message: "Generate euro-calliope pre-built models and run all tests."
     input:
-        "build/models/build-metadata.yaml",
         expand(
             "build/logs/{resolution}/test.success",
             resolution=["continental", "national", "regional", "ehighways"],
