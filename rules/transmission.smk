@@ -1,13 +1,12 @@
 """Rules to generate electricity transmission lines between regions."""
 
-localrules: download_entsoe_tyndp_zip, entsoe_tyndp_xlsx
-
 
 rule download_entsoe_tyndp_zip:
     message: "Download ENTSO-E ten-year network development plan (TYNDP) 2020 scenario dataset"
     params: url = config["data-sources"]["entsoe-tyndp"]
     output: protected("data/automatic/raw-entsoe-tyndp.xlsx.zip")
     conda: "../envs/shell.yaml"
+    localrule: True
     shell: "curl -sSLo {output} '{params.url}'"
 
 
@@ -17,6 +16,7 @@ rule entsoe_tyndp_xlsx:
     shadow: "minimal"
     output: "build/data/national/TYNDP-2020-Scenario-Datafile.xlsx",
     conda: "../envs/shell.yaml"
+    localrule: True
     shell: "unzip -o {input} 'TYNDP-2020-Scenario-Datafile.xlsx' -d build/data/national"
 
 

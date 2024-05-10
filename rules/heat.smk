@@ -1,3 +1,32 @@
+rule download_gridded_temperature_data:
+    message: "Download gridded temperature data"
+    params: url = config["data-sources"]["gridded-temperature-data"]
+    output: protected("data/automatic/gridded-weather/temperature.nc")
+    conda: "../envs/shell.yaml"
+    localrule: True
+    shell: "curl -sSLo {output} '{params.url}'"
+
+
+rule download_gridded_10m_windspeed_data:
+    message: "Download gridded 10m wind speed data"
+    params: url = config["data-sources"]["gridded-10m-windspeed-data"]
+    output: protected("data/automatic/gridded-weather/wind10m.nc")
+    conda: "../envs/shell.yaml"
+    localrule: True
+    shell: "curl -sSLo {output} '{params.url}'"
+
+
+rule download_when2heat_params:
+    message: "Get parameters for heat demand profiles from the When2Heat project repository"
+    output: directory("data/automatic/when2heat")
+    params:
+        url = lambda wildcards: config["data-sources"]["when2heat-params"].format(dataset=
+            "{" + ",".join(["daily_demand.csv", "hourly_factors_COM.csv", "hourly_factors_MFH.csv", "hourly_factors_SFH.csv"]) + "}"
+        )
+    conda: "../envs/shell.yaml"
+    shell: "mkdir -p {output} && curl -sSLo '{output}/#1' '{params.url}'"
+
+
 rule annual_heat_demand:
     message: "Calculate national heat demand for household and commercial sectors"
     input:
@@ -57,3 +86,31 @@ use rule create_heat_demand_timeseries as create_heat_demand_timeseries_historic
         power_scaling_factor = config["scaling-factors"]["power"],
     output:
         "build/models/{resolution}/timeseries/demand/heat-demand-historic-electrification.csv",
+
+rule population_per_weather_gridbox:
+    message: "Get {wildcards.resolution} population information per weather data gridbox"
+    input:
+        wind_speed = rules.download_gridded_10m_windspeed_data.output[0],
+        population = rules.raw_population_unzipped.output[0],
+        locations = rules.units.output[0]
+    params:
+        lat_name = "lat",
+        lon_name = "lon",
+    conda: "../envs/geo.yaml"
+    output: "build/data/{resolution}/population.nc"
+    script: "../scripts/heat/population_per_gridbox.py"
+
+
+rule gridded_unscaled_heat_profiles:
+    message: "Generate gridded heat demand profile shapes for {wildcards.year} from weather and population data"
+    input:
+        population = rules.population_per_weather_gridbox.output[0],
+        wind_speed = rules.download_gridded_10m_windspeed_data.output[0],
+        temperature = rules.download_gridded_temperature_data.output[0],
+        when2heat = rules.download_when2heat_params.output[0]
+    params:
+        lat_name = "lat",
+        lon_name = "lon",
+    conda: "../envs/default.yaml"
+    output: "build/data/{resolution}/gridded_hourly_unscaled_heat_demand_{year}.nc"
+    script: "../scripts/heat/gridded_unscaled_heat_profiles.py"
