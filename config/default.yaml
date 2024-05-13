@@ -5,7 +5,7 @@ data-sources:
     hydro-generation: https://zenodo.org/record/5797549/files/hydro-generation.csv?download=1
     national-phs-storage-capacities: https://zenodo.org/record/5797549/files/pumped-hydro-storage-capacities-gwh.csv?download=1
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
-    gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
+    gadm: https://geodata.ucdavis.edu/gadm/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
     hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
     hydro-stations: https://zenodo.org/record/5215920/files/energy-modelling-toolkit/hydro-power-database-v10.zip?download=1
     load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
