@@ -16,6 +16,7 @@ techs_template_dir = f"{model_template_dir}techs/"
 
 include: "./rules/shapes.smk"
 include: "./rules/data.smk"
+include: "./rules/jrc-idees.smk"
 include: "./rules/wind-and-solar.smk"
 include: "./rules/biofuels.smk"
 include: "./rules/hydro.smk"
@@ -25,7 +26,7 @@ include: "./rules/nuclear.smk"
 include: "./rules/transport.smk"
 include: "./rules/sync.smk"
 include: "./rules/heat.smk"
-min_version("7.8")
+min_version("8.10")
 localrules: all, clean
 wildcard_constraints:
         resolution = "continental|national|regional"
@@ -42,15 +43,16 @@ ALL_CF_TECHNOLOGIES = [
 
 
 def ensure_lib_folder_is_linked():
-    if not workflow.conda_prefix:
+    if not (hasattr(workflow, "deployment_settings") and not
+            hasattr(workflow.deployment_settings, "conda_prefix")):
         return
-    link = Path(workflow.conda_prefix) / "lib"
+    link = Path(workflow.deployment_settings.conda_prefix) / "lib"
     if not link.exists():
         # Link either does not exist or is an invalid symlink
         print("Creating link from conda env dir to eurocalliopelib.")
         if link.is_symlink():  # Deal with existing but invalid symlink
             shell(f"rm {link}")
-        makedirs(workflow.conda_prefix)
+        makedirs(workflow.deployment_settings.conda_prefix)
         shell(f"ln -s {workflow.basedir}/lib {link}")
 
 
@@ -68,6 +70,7 @@ onerror:
 
 rule all:
     message: "Generate euro-calliope pre-built models and run tests."
+    localrule: True
     input:
         "build/logs/continental/test.success",
         "build/logs/national/test.success",
@@ -226,7 +229,8 @@ rule dag:
         "dot -Tpdf {input} -o build/dag.pdf"
 
 
-rule clean: # removes all generated results
+rule clean:  # removes all generated results
+    localrule: True
     shell:
         """
         rm -r build/

@@ -3,6 +3,7 @@
 ## 1.2.0 (unpublished)
 
 ### Added (models)
+
 * **ADD** fully-electrified heat demand (#284).
 
 * **ADD** fully-electrified road transportation (#270), (#271). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (PR #338).
@@ -11,6 +12,7 @@
 
 ### Added (workflow)
 
+* **ADD** Module to process JRC-IDEES Excel spreadsheets (#354).
 * **ADD** Ruff as our default linter and formatter (#285).
 * **ADD** DAG rule that generates a visualisation of Snakemake's directed acyclic graph (#208).
 * **ADD** IPython debugger to all conda environments to ease debugging (#254).
@@ -35,15 +37,20 @@
 
 ### Updated (workflow)
 
-* **UPDATED** YAML templates and parametrisation restructured:
+* **UPDATE** YAML templates and parametrisation restructured:
     * Parametrisation moved to eurocalliopelib.
     * Rules to parametrise split into smaller technology-specific rules, to ensure inputs are directly relevant to the files being parametrised.
     * YAML templates restructured to match structure of final model (see `Updated (models) above`);
 
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
-* **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264).
+* **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264, #268).
 * **UPDATE** default conda prefix directory including consistent handling of the path to eurocalliopelib (#264, #331).
+* **UPDATE** Snakemake to v8.10.7 (#330)
+    * Ensures that conda environment builds ignore default package specifications (#289).
+    * Fixes localrules through integration of new `localrule` directive (#368).
+
+* **UPDATE** source of fraction of shared coast for offshore wind capacity factor distribution from a fixed shape download to an internal rule which can handle ad hoc shapes (partial #238).
 
 ### Fixed (models)
 
@@ -58,6 +65,7 @@
 * **FIX** fixed optimisation tolerance of hydro power plants from xtol to xatol (#266).
 * **FIX** source of Exclusive Economic Zones (EEZ) to use a cache on [zenodo](https://sandbox.zenodo.org/records/45135) so that we can keep using v11 (#332).  FIXME: update to actual zenodo record before next Euro-Calliope release.
 * **FIX** fixed rule `download_basins_database`, which previously failed on some linux and mac machines, by requiring a more recent curl in the environment `envs/shell.yaml` (#267).
+* **FIX** pin `h5py`, `hdf5` and `libnetcdf` in all environments which rely on `xarray`, to prevent issues on linux-x86 (#357).
 
 ## 1.1.0 (2021-12-22)
 
