@@ -1,4 +1,3 @@
 software-deployment-method: conda
-conda-frontend: mamba
 cores: 2
 conda-prefix: ../envs/snakemake/euro-calliope/
