@@ -38,24 +38,21 @@
 
 ### Updated (workflow)
 
-* **UPDATE** environments to fix issues on Linux and Macos-arm64:
+* **UPDATE** environments to fix issues on Linux and Macos-arm64 (#357, #369):
     * libnetcdf=4.8.1
     * netCDF4=1.6.2
     * hdf5=1.12.2
-
-* **UPDATE** geo, hydro, and test-eurocalliope environments to handle libnetcdf=4.8.1:
+* **UPDATE** geo, hydro, and test-eurocalliope environments to handle libnetcdf=4.8.1 (#369):
     * gdal=3.6.2
     * libgdal=3.6.2
     * fiona=1.9.1
     * rasterio=1.3.6
     * geopandas=0.13.2
     * shapely=1.8.5
-
 * **UPDATE** YAML templates and parametrisation restructured:
     * Parametrisation moved to eurocalliopelib.
     * Rules to parametrise split into smaller technology-specific rules, to ensure inputs are directly relevant to the files being parametrised.
     * YAML templates restructured to match structure of final model (see `Updated (models) above`);
-
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
 * **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264, #268).
@@ -79,7 +76,6 @@
 * **FIX** fixed optimisation tolerance of hydro power plants from xtol to xatol (#266).
 * **FIX** source of Exclusive Economic Zones (EEZ) to use a cache on [zenodo](https://sandbox.zenodo.org/records/45135) so that we can keep using v11 (#332).  FIXME: update to actual zenodo record before next Euro-Calliope release.
 * **FIX** fixed rule `download_basins_database`, which previously failed on some linux and mac machines, by requiring a more recent curl in the environment `envs/shell.yaml` (#267).
-* **FIX** pin `hdf5` and `libnetcdf` in all environments which rely on `xarray`, to prevent issues on linux-x86 (#357, #369).
 
 ## 1.1.0 (2021-12-22)
 
