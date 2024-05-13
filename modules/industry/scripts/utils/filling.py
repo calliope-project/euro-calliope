@@ -20,11 +20,7 @@ def fill_missing_countries_years(
     Any other missing years are filled in based on average consumption of a country.
     """
     # Ensure countries follow our standard alpha3 convention.
-    jrc_countries = [
-        ec_utils.convert_country_code(i)
-        for i in jrc_subsector_demand.country_code.values
-    ]
-    jrc_subsector_demand["country_code"] = jrc_countries
+    jrc_countries = jrc_subsector_demand["country_code"].values
 
     # Build eurostat annual industry balances
     eurostat_industry_balances = (
@@ -44,28 +40,25 @@ def fill_missing_countries_years(
         .apply(ec_utils.tj_to_twh)
     )
     # If JRC-IDEES data exists, there will be data in 'energy_consumption' for that country
-    matched_balances = eurostat_industry_balances[
+    jrc_balances = eurostat_industry_balances[
         eurostat_industry_balances.index.get_level_values("country_code").isin(
             jrc_countries
         )
     ]
     # Otherwise, there will only be data for that country in annual energy balances
-    mismatch_balances = eurostat_industry_balances[
+    nonjrc_balances = eurostat_industry_balances[
         ~eurostat_industry_balances.index.get_level_values("country_code").isin(
             jrc_countries
         )
     ]
     # Obtain share of total energy demand in missing countries per year
-    nonjrc_subsector_share = mismatch_balances.div(
-        matched_balances.groupby("cat_name").sum()
-    )
+    nonjrc_subsector_share = nonjrc_balances.div(jrc_balances.groupby("cat_name").sum())
     nonjrc_subsector_share = nonjrc_subsector_share.stack().to_xarray()
 
     # Fill missing countries in relation to their total energy share.
     # E.g., if CHE consumes a total share of 1% -> assume it consumes 1% of total electricity
     total_annual_demand = jrc_subsector_demand.sum("country_code")
     nonjrc_subsector_demand = nonjrc_subsector_share * total_annual_demand
-
     all_subsector_demand = jrc_subsector_demand.combine_first(nonjrc_subsector_demand)
 
     # Sometimes JRC-IDEES has consumption, but Eurostat doesn't, leading to inf values
@@ -100,23 +93,7 @@ def fill_missing_countries_years(
     all_filled = jrc.ensure_standard_coordinates(all_filled)
     all_filled = all_filled.assign_attrs(units="twh")
 
+    assert ~all_filled.isnull().any(), "Filling failed, found null values."
+    assert ~np.isinf(all_filled).any(), "Filling failed, found inf values."
+
     return all_filled
-
-
-def to_calliope_style(subsector_demand: xr.Dataset) -> pd.DataFrame:
-    """Reformat data to fit the Calliope style."""
-    # TODO: converting from JRC carrier names to calliope style here makes sense.
-    # energy-balance-category-names.csv does not support this at the moment.
-    preprocessing = jrc.ensure_standard_coordinates(subsector_demand)
-    dimensions = {"cat_name": "subsector", "carrier_name": "carrier"}
-    preprocessing = preprocessing.rename(dimensions)
-
-    unit = subsector_demand["value"].attrs["units"]
-    preprocessing = preprocessing.expand_dims(dim={"unit": [unit]})
-
-    calliope_style = preprocessing.to_dataframe()
-    level_order = ["subsector", "country_code", "unit", "carrier", "year"]
-    calliope_style = calliope_style.reorder_levels(level_order)
-    calliope_style = calliope_style.sort_index()
-
-    return calliope_style

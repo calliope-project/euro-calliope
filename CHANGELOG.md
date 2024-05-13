@@ -8,10 +8,6 @@
 
 ### Added (models)
 
-* **ADD** industry module and steel industry energy demand processing. NOT CONNECTED TO THE MAIN WORKFLOW. Industry sectors pending: chemical, "other" (#308, #310).
-
-### Added (models)
-
 * **ADD** fully-electrified heat demand (#284).
 
 * **ADD** fully-electrified road transportation (#270), (#271). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (PR #338).

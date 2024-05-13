@@ -2,8 +2,9 @@ from typing import Optional
 
 import pandas as pd
 import xarray as xr
-from utils import formatting
 from utils import jrc_idees_parser as jrc
+
+from modules.industry.scripts.utils import filling
 
 CAT_NAME_STEEL = "Iron and steel"
 
@@ -18,18 +19,18 @@ def _get_h2_to_steel(recycled_steel_share: float) -> float:
 
 
 def get_steel_demand_df(
-    cnf_steel: dict,
+    config_steel: dict,
     path_energy_balances: str,
     path_cat_names: str,
     path_carrier_names: str,
     path_jrc_industry_energy: str,
     path_jrc_industry_production: str,
     path_output: Optional[str] = None,
-) -> pd.DataFrame:
+) -> xr.DataArray:
     """Execute the data processing pipeline for the "Iron and steel" sub-sector.
 
     Args:
-        cnf_steel (dict): steel sector configuration.
+        config_steel (dict): steel sector configuration.
         path_energy_balances (str): country energy balances (usually from eurostat).
         path_cat_names (str): eurostat category mapping file.
         path_carrier_names (str): eurostat carrier name mapping file.
@@ -38,7 +39,7 @@ def get_steel_demand_df(
         path_output (str): location of steel demand output file.
 
     Returns:
-        xr.Dataset: dataframe with steel demand per country.
+        xr.DataArray: steel demand per country.
     """
     # Load data
     energy_balances_df = pd.read_csv(
@@ -47,7 +48,7 @@ def get_steel_demand_df(
     cat_names_df = pd.read_csv(path_cat_names, header=0, index_col=0)
     carrier_names_df = pd.read_csv(path_carrier_names, header=0, index_col=0)
     jrc_energy = xr.open_dataset(path_jrc_industry_energy)
-    jrc_prod = xr.open_dataset(path_jrc_industry_production)
+    jrc_prod = xr.open_dataarray(path_jrc_industry_production)
 
     # Ensure dataframes only have data specific to this industry
     cat_names_df = cat_names_df[cat_names_df["jrc_idees"] == CAT_NAME_STEEL]
@@ -55,8 +56,10 @@ def get_steel_demand_df(
     jrc_prod = jrc_prod.sel(cat_name=CAT_NAME_STEEL)
 
     # Process data
-    new_steel_demand = transform_jrc_subsector_demand(jrc_energy, jrc_prod, cnf_steel)
-    new_steel_demand = formatting.fill_missing_countries_years(
+    new_steel_demand = transform_jrc_subsector_demand(
+        jrc_energy, jrc_prod, config_steel
+    )
+    new_steel_demand = filling.fill_missing_countries_years(
         energy_balances_df, cat_names_df, carrier_names_df, new_steel_demand
     )
 
@@ -67,7 +70,7 @@ def get_steel_demand_df(
 
 
 def transform_jrc_subsector_demand(
-    jrc_energy: xr.Dataset, jrc_prod: xr.Dataset, cnf_steel: dict
+    jrc_energy: xr.Dataset, jrc_prod: xr.Dataset, config_steel: dict
 ) -> xr.Dataset:
     """Processing of steel energy demand for different carriers.
 
@@ -91,7 +94,7 @@ def transform_jrc_subsector_demand(
     Args:
         jrc_energy_df (xr.Dataset): jrc country-specific steel energy demand.
         jrc_prod_df (xr.Dataset): jrc country-specific steel production.
-        cnf_steel (dict): configuration for the steel industry.
+        config_steel (dict): configuration for the steel industry.
 
     Returns:
         xr.Dataset: processed dataframe with the expected steel energy consumption.
@@ -152,7 +155,7 @@ def transform_jrc_subsector_demand(
     #   sintering/pelletizing * iron_ore_% + smelting * recycled_steel_% + H-DRI + EAF + refining/rolling + finishing + auxiliaries
     #   If the country only recycles steel:
     #   smelting + EAF + refining/rolling + finishing + auxiliaries
-    recycled_share = cnf_steel["recycled-steel-share"]
+    recycled_share = config_steel["recycled-steel-share"]
 
     # Limit sintering by the share non-recycled steel
     updated_sintering = sintering_intensity * (1 - recycled_share)
@@ -200,7 +203,7 @@ def transform_jrc_subsector_demand(
     total_intensity = xr.concat(
         [electric_intensity, h2_intensity, low_heat_intensity], dim="carrier_name"
     )
-    steel_energy_demand = total_intensity * jrc_prod["demand"].sum("produced_material")
+    steel_energy_demand = total_intensity * jrc_prod.sum("produced_material")
 
     # Prettify
     steel_energy_demand = steel_energy_demand.assign_attrs(units="twh")
@@ -211,7 +214,7 @@ def transform_jrc_subsector_demand(
 
 if __name__ == "__main__":
     get_steel_demand_df(
-        cnf_steel=snakemake.params.cnf_steel,
+        config_steel=snakemake.params.config_steel,
         path_energy_balances=snakemake.input.path_energy_balances,
         path_cat_names=snakemake.input.path_cat_names,
         path_carrier_names=snakemake.input.path_carrier_names,
