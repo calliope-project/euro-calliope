@@ -4,7 +4,7 @@
 rule download_transport_timeseries:
     message: "Get EV data from RAMP"
     params:
-        url = config["data-sources"]["ev-data"]
+        url = config["data-sources"]["controlled-ev-profiles"]
     conda: "../envs/shell.yaml"
     output: protected("data/automatic/ramp-ev-consumption-profiles.csv.gz")
     localrule: True
@@ -14,7 +14,7 @@ rule download_uncontrolled_timeseries:
     # TODO: move into rule download_transport_timeseries once PR 356 is merged
     message: "Get EV uncontrolled charging data from RAMP"
     params:
-        url = config["data-sources"]["uncontrolled-ev-data"]
+        url = config["data-sources"]["uncontrolled-ev-profiles"]
     conda: "../envs/shell.yaml"
     output: protected("data/automatic/ramp-ev-uncontrolled-charging-profiles.csv.gz")
     localrule: True
