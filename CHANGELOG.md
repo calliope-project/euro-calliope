@@ -16,8 +16,9 @@
 * **ADD** Ruff as our default linter and formatter (#285).
 * **ADD** DAG rule that generates a visualisation of Snakemake's directed acyclic graph (#208).
 * **ADD** IPython debugger to all conda environments to ease debugging (#254).
-* **ADD** a default Snakemake profile to run on local machines in addition to the existing profile for Euler (#211).
-* **ADD** a Snakemake profile to run using conda instead of mamba (#211).
+* **ADD** Snakemake profiles in addition to existing profile for Euler:
+    * default Snakemake workflow profile to run on local machines (#211, #268, #377)
+    * a conda profile for using conda instead of mamba (#211, #268, #377).
 * **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality (#152).
 * **ADD** nuclear technology capacity allocation workflow which uses the configuration parameter `nuclear-capacity-scenario` to select whether today's capacities define limits in the model definition ("current") or whether ranges set bounds on future capacity (by linking to a configuration CSV file) (#78).
 * **ADD** a Snakemake rule that generates a .csv and .nc file that provide an summary of the potentials (= per-tech constraints) for each technology and location (#250).
