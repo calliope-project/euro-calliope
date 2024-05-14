@@ -10,6 +10,9 @@ sea-connections:
         - [GBR, IRL]
     regional: # Source: https://www.entsoe.eu/data/map/
         - [GBR.4_1, IRL.17_1] # Wales and Meath
+    ehighways:
+        - [GBR_4, GBR_6]
+        - [GBR_3, IRL_1]
 scope:
     spatial:
         countries:

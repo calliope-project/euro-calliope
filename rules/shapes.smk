@@ -52,9 +52,10 @@ rule administrative_borders_gadm:
 
 
 rule download_raw_nuts_units:
-    message: "Download units as zip."
-    params: url = config["data-sources"]["nuts"]
-    output: protected("data/automatic/raw-nuts-units.zip")
+    message: "Download NUTS{wildcards.nuts_year} units as zip."
+    params:
+        url = lambda wildcards: config["data-sources"]["nuts"].format(nuts_year=wildcards.nuts_year)
+    output: protected("data/automatic/raw-nuts-units-{nuts_year}.zip")
     conda: "../envs/shell.yaml"
     localrule: True
     shell: "curl -sSLo {output} '{params.url}'"
@@ -63,7 +64,7 @@ rule download_raw_nuts_units:
 rule administrative_borders_nuts:
     message: "Normalise NUTS administrative borders."
     input:
-        zipped = rules.download_raw_nuts_units.output[0]
+        zipped = "data/automatic/raw-nuts-units-{}.zip".format(config["parameters"]["nuts-year"])
     params:
         crs = config["crs"],
         schema = SCHEMA_UNITS,
@@ -77,17 +78,29 @@ rule administrative_borders_nuts:
     conda: "../envs/geo.yaml"
     script: "../scripts/shapes/nuts.py"
 
+rule borders_ehighways:
+    message: "Merge NUTS administrative borders into boundaries that match those used in the E-Highways project."
+    input:
+        nuts = rules.administrative_borders_nuts.output[0],
+        nuts_to_ehighways_units = "config/shapes/nuts-to-ehighways-units.csv"
+    params:
+        nuts_year = config["parameters"]["nuts-year"]
+    output: "build/data/borders-eghighways.gpkg"
+    shadow: "minimal"
+    conda: "../envs/geo.yaml"
+    script: "../scripts/shapes/ehighways.py"
 
 rule units:
     message: "Form units of resolution {wildcards.resolution} by remixing NUTS and GADM."
     input:
         nuts = rules.administrative_borders_nuts.output[0],
-        gadm = rules.administrative_borders_gadm.output[0]
+        gadm = rules.administrative_borders_gadm.output[0],
+        ehighways = rules.borders_ehighways.output[0]
     params:
         all_countries = config["scope"]["spatial"]["countries"],
-        layer_configs = config["shapes"]
-    output:
-        "build/data/{resolution}/units.geojson"
+        # mapping between countries and a shape source at a given resolution (e.g., Germany: nuts0, Austria: gadm1)
+        resolution_config = lambda wildcards: config["shapes"][wildcards.resolution],
+    output: "build/data/{resolution}/units.geojson"
     conda: "../envs/geo.yaml"
     script: "../scripts/shapes/units.py"
 

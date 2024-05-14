@@ -4,6 +4,8 @@
 
 ### Added (models)
 
+* **ADD** Spatial resolution that aligns with the regions defined by the [e-Highway 2050 project](https://cordis.europa.eu/project/id/308908/reporting) (`ehighways`) (#370).
+
 * **ADD** fully-electrified heat demand (#284).
 
 * **ADD** fully-electrified road transportation (#270), (#271). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (PR #338).
@@ -38,7 +40,8 @@
 
 ### Updated (workflow)
 
-* **UPDATE** YAML templates and parametrisation restructured:
+* **UPDATED** to new Zenodo source of land-use potentials, to include potentials at the [e-Highway 2050 project](https://cordis.europa.eu/project/id/308908/reporting) resolution (`ehighways`) (#370).
+* **UPDATED** structure of YAML templates and parametrisation:
     * Parametrisation moved to eurocalliopelib.
     * Rules to parametrise split into smaller technology-specific rules, to ensure inputs are directly relevant to the files being parametrised.
     * YAML templates restructured to match structure of final model (see `Updated (models) above`);

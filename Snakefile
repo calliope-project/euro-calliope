@@ -29,7 +29,7 @@ include: "./rules/heat.smk"
 min_version("8.10")
 localrules: all, clean
 wildcard_constraints:
-        resolution = "continental|national|regional"
+    resolution = "continental|national|regional|ehighways"
 
 ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
 ruleorder: bio_techs_and_locations_template > techs_and_locations_template
@@ -74,36 +74,25 @@ rule all:
     input:
         "build/logs/continental/test.success",
         "build/logs/national/test.success",
-        "build/models/continental/example-model.yaml",
-        "build/models/national/example-model.yaml",
-        "build/models/regional/example-model.yaml",
-        "build/models/continental/build-metadata.yaml",
-        "build/models/national/build-metadata.yaml",
-        "build/models/regional/build-metadata.yaml",
-        "build/models/regional/summary-of-potentials.nc",
-        "build/models/regional/summary-of-potentials.csv",
-        "build/models/national/summary-of-potentials.nc",
-        "build/models/national/summary-of-potentials.csv",
-        "build/models/continental/summary-of-potentials.nc",
-        "build/models/continental/summary-of-potentials.csv"
+        expand(
+            "build/models/{resolution}/{file}",
+            resolution=["continental", "national", "regional", "ehighways"],
+            file=["example-model.yaml", "build-metadata.yaml", "summary-of-potentials.nc", "summary-of-potentials.csv"]
+        )
 
 
 rule all_tests:
     message: "Generate euro-calliope pre-built models and run all tests."
     input:
-        "build/models/continental/example-model.yaml",
-        "build/models/national/example-model.yaml",
-        "build/models/regional/example-model.yaml",
-        "build/logs/continental/test.success",
-        "build/logs/national/test.success",
-        "build/logs/regional/test.success",
-        "build/models/build-metadata.yaml",
-        "build/models/regional/summary-of-potentials.nc",
-        "build/models/regional/summary-of-potentials.csv",
-        "build/models/national/summary-of-potentials.nc",
-        "build/models/national/summary-of-potentials.csv",
-        "build/models/continental/summary-of-potentials.nc",
-        "build/models/continental/summary-of-potentials.csv"
+        expand(
+            "build/logs/{resolution}/test.success",
+            resolution=["continental", "national", "regional", "ehighways"],
+        ),
+        expand(
+            "build/models/{resolution}/{file}",
+            resolution=["continental", "national", "regional", "ehighways"],
+            file=["example-model.yaml", "build-metadata.yaml", "summary-of-potentials.nc", "summary-of-potentials.csv"]
+        )
 
 
 rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_template` with a locational CSV linked to each technology that has no location-specific data to define.
