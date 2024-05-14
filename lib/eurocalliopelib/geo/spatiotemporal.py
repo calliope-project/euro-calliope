@@ -1,6 +1,7 @@
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import pyproj
 import xarray as xr
 from geopandas.tools import overlay
 from shapely.geometry import Point
@@ -42,7 +43,7 @@ def area_weighted_time_series(shapes, spatiotemporal, gridcell_overlap_threshold
 def assert_correct_form(shapes, spatiotemporal):
     assert shapes.crs
     assert "crs" in spatiotemporal.attrs
-    assert shapes.crs == gpd.tools.crs.CRS(spatiotemporal.attrs["crs"])
+    assert shapes.crs == pyproj.CRS(spatiotemporal.attrs["crs"])
     assert "y" in spatiotemporal.dims, "Expect dimension 'y'"
     assert "x" in spatiotemporal.dims, "Expect dimension 'x'"
     assert "timestep" in spatiotemporal.dims, "Expect dimension 'timestep'"

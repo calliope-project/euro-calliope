@@ -15,22 +15,6 @@ rule download_transport_timeseries:
     shell: "curl -sSLo {output} {params.url}"
 
 
-rule jrc_idees_transport_processed:
-    message: "Process {wildcards.dataset} transport data from JRC-IDEES to be used in understanding current and future transport demand"
-    input:
-        data = expand(
-            "build/data/jrc-idees/transport/unprocessed/{country_code}.xlsx",
-            country_code=JRC_IDEES_SCOPE
-        )
-    output: "build/data/jrc-idees/transport/processed-{dataset}.csv"
-    params:
-        vehicle_type_names = config["parameters"]["transport"]["vehicle-type-names"],
-    wildcard_constraints:
-        dataset = "road-energy|road-distance|road-vehicles"
-    conda: "../envs/default.yaml"
-    script: "../scripts/transport/jrc_idees.py"
-
-
 rule annual_transport_demand:
     message: "Calculate future transport energy demand based on JRC IDEES"
     input:
@@ -56,6 +40,8 @@ rule create_controlled_road_transport_annual_demand_and_installed_capacities:
         jrc_road_distance = "build/data/jrc-idees/transport/processed-road-distance.csv",
         locations = "build/data/regional/units.csv",
         populations = "build/data/regional/population.csv",
+        locations = "build/data/{resolution}/units.csv",
+        populations = "build/data/{resolution}/population.csv",
     params:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
@@ -133,8 +119,8 @@ rule aggregate_timeseries: # TODO consider merge with other rules, as this is ti
             f'build/data/transport/timeseries/timeseries-uncontrolled-{vehicle_type}.csv'
             for vehicle_type in config["parameters"]["transport"]["road-transport-conversion-factors"].keys()
         ],
-        locations = "build/data/regional/units.csv",
-        populations = "build/data/regional/population.csv"
+        locations = "build/data/{resolution}/units.csv",
+        populations = "build/data/{resolution}/population.csv"
     conda: "../envs/default.yaml"
     output:
         "build/models/{resolution}/timeseries/demand/uncontrolled-electrified-road-transport.csv",
@@ -148,7 +134,7 @@ use rule aggregate_timeseries as aggregate_timeseries_historic_electrified with:
             "build/data/transport/timeseries/timeseries-uncontrolled-light-duty-vehicles-historic-electrification.csv",
             "build/data/transport/timeseries/timeseries-uncontrolled-coaches-and-buses-historic-electrification.csv",
             "build/data/transport/timeseries/timeseries-uncontrolled-passenger-cars-historic-electrification.csv"),
-        locations = "build/data/regional/units.csv",
-        populations = "build/data/regional/population.csv"
+        locations = "build/data/{resolution}/units.csv",
+        populations = "build/data/{resolution}/population.csv"
     output:
         "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv"
