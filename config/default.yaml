@@ -5,12 +5,12 @@ data-sources:
     hydro-generation: https://zenodo.org/record/5797549/files/hydro-generation.csv?download=1
     national-phs-storage-capacities: https://zenodo.org/record/5797549/files/pumped-hydro-storage-capacities-gwh.csv?download=1
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
-    gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
+    gadm: https://geodata.ucdavis.edu/gadm/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
     hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
     hydro-stations: https://zenodo.org/record/5215920/files/energy-modelling-toolkit/hydro-power-database-v10.zip?download=1
     load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
-    nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
-    potentials: https://zenodo.org/record/5112963/files/possibility-for-electricity-autarky.zip
+    nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_{nuts_year}_01M_SH.zip
+    potentials: https://zenodo.org/records/6600619/files/raw-potentials.zip?download=1
     entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
     jrc-ppdb: https://zenodo.org/record/3574566/files/JRC-PPDB-OPEN.ver1.0.zip
     jrc-idees: https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/JRC-IDEES/JRC-IDEES-2015_v1/JRC-IDEES-2015_All_xlsx_{country_code}.zip
@@ -20,6 +20,10 @@ data-sources:
     swiss-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/gesamtenergiestatistik.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvNzUxOQ==.html
     swiss-industry-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/teilstatistiken.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODc4OA==.html
     ev-data: https://zenodo.org/record/6579421/files/ramp-ev-consumption-profiles.csv.gz?download=1
+    gridded-temperature-data: https://zenodo.org/records/6557643/files/temperature.nc?download=1
+    gridded-10m-windspeed-data: https://zenodo.org/records/6557643/files/wind10m.nc?download=1
+    when2heat-params: https://zenodo.org/records/10965295/files/{dataset}?download=1
+    population: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/JRC_GRID_2018.zip
 data-pre-processing:
     fill-missing-values:
         jrc-idees:
@@ -170,6 +174,7 @@ parameters:
         ntc_limit: max
         energy_cap_limit: equals
     nuclear-capacity-scenario: current
+    nuts-year: 2013
     heat:
         space_heat:
             carnot-performance: 0.36  # [Nouvel_2015]
@@ -270,6 +275,37 @@ sea-connections:
         - [CYP.1_1, CYP.2_1] # Famagusta and Larnaca
         - [EST.7_1, EST.2_1] # Lääne and Hiiu
         - [EST.7_1, EST.12_1] # Lääne and Saare
+    ehighways:
+        - [ITA_3, ITA_6]
+        - [ITA_6, FRA_15]
+        - [ITA_2, FRA_15]
+        - [ITA_4, ITA_5]
+        - [ITA_3, MNE_1]
+        - [ITA_2, HRV_1]
+        - [ITA_4, ALB_1]
+        - [ITA_4, GRC_1]
+        - [CYP_1, GRC_2]
+        - [EST_1, FIN_2]
+        - [FIN_2, SWE_3]
+        - [LTU_1, SWE_3]
+        - [POL_5, SWE_4]
+        - [NOR_1, GBR_4]
+        - [GBR_4, GBR_6]
+        - [GBR_3, IRL_1]
+        - [FRA_8, IRL_1]
+        - [FRA_9, GBR_1]
+        - [FRA_9, GBR_1]
+        - [FRA_13, GBR_1]
+        - [BEL_1, GBR_1]
+        - [NLD_1, GBR_1]
+        - [NLD_1, NOR_1]
+        - [DEU_1, NOR_1]
+        - [DNK_1, DNK_2]
+        - [DNK_1, NOR_1]
+        - [DNK_1, SWE_3]
+        - [DEU_1, SWE_4]
+        # the following do not exist today
+        - [GRC_2, CYP_1]
 scope:
     spatial:
         countries:
@@ -316,6 +352,7 @@ scope:
         first-year: 2016
         final-year: 2016
 shapes: # This config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
+    # TODO: update this link to Bryn's new one, which includes the potentials for ehighways
     continental:
         Austria: nuts0
         Belgium: nuts0
@@ -425,3 +462,38 @@ shapes: # This config must be consistent with data from https://doi.org/10.5281/
         Norway: gadm1 # match 19
         Serbia: gadm1 # gadm1 25 regions; wiki 5 regions
         Switzerland: gadm1 # match 26
+    ehighways:
+        Austria: ehighways
+        Belgium: nuts0
+        Bulgaria: nuts0
+        Croatia: nuts0
+        Cyprus: nuts0
+        Czech Republic: ehighways
+        Denmark: ehighways
+        Estonia: nuts0
+        Finland: ehighways
+        France: ehighways
+        Germany: ehighways
+        Greece: ehighways
+        Hungary: nuts0
+        Ireland: nuts0
+        Italy: ehighways
+        Latvia: nuts0
+        Lithuania: nuts0
+        Luxembourg: nuts0
+        Netherlands: nuts0
+        Poland: ehighways
+        Portugal: ehighways
+        Romania: ehighways
+        Slovakia: nuts0
+        Slovenia: nuts0
+        Spain: ehighways
+        Sweden: ehighways
+        United Kingdom: ehighways
+        Albania: gadm0
+        Bosnia and Herzegovina: gadm0
+        Macedonia, Republic of: gadm0
+        Montenegro: gadm0
+        Norway: ehighways
+        Serbia: gadm0
+        Switzerland: ehighways

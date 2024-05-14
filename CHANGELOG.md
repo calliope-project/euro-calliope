@@ -4,6 +4,8 @@
 
 ### Added (models)
 
+* **ADD** Spatial resolution that aligns with the regions defined by the [e-Highway 2050 project](https://cordis.europa.eu/project/id/308908/reporting) (`ehighways`) (#370).
+
 * **ADD** fully-electrified heat demand (#284).
 
 * **ADD** fully-electrified road transportation (#270), (#271). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (PR #338).
@@ -16,8 +18,9 @@
 * **ADD** Ruff as our default linter and formatter (#285).
 * **ADD** DAG rule that generates a visualisation of Snakemake's directed acyclic graph (#208).
 * **ADD** IPython debugger to all conda environments to ease debugging (#254).
-* **ADD** a default Snakemake profile to run on local machines in addition to the existing profile for Euler (#211).
-* **ADD** a Snakemake profile to run using conda instead of mamba (#211).
+* **ADD** Snakemake profiles in addition to existing profile for Euler:
+    * default Snakemake workflow profile to run on local machines (#211, #268, #377)
+    * a conda profile for using conda instead of mamba (#211, #268, #377).
 * **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality (#152).
 * **ADD** nuclear technology capacity allocation workflow which uses the configuration parameter `nuclear-capacity-scenario` to select whether today's capacities define limits in the model definition ("current") or whether ranges set bounds on future capacity (by linking to a configuration CSV file) (#78).
 * **ADD** a Snakemake rule that generates a .csv and .nc file that provide an summary of the potentials (= per-tech constraints) for each technology and location (#250).
@@ -49,7 +52,8 @@
     * rasterio=1.3.6
     * geopandas=0.13.2
     * shapely=1.8.5
-* **UPDATE** YAML templates and parametrisation restructured:
+* **UPDATED** to new Zenodo source of land-use potentials, to include potentials at the [e-Highway 2050 project](https://cordis.europa.eu/project/id/308908/reporting) resolution (`ehighways`) (#370).
+* **UPDATED** structure of YAML templates and parametrisation:
     * Parametrisation moved to eurocalliopelib.
     * Rules to parametrise split into smaller technology-specific rules, to ensure inputs are directly relevant to the files being parametrised.
     * YAML templates restructured to match structure of final model (see `Updated (models) above`);
@@ -62,6 +66,7 @@
     * Fixes localrules through integration of new `localrule` directive (#368).
 * **UPDATE** source of fraction of shared coast for offshore wind capacity factor distribution from a fixed shape download to an internal rule which can handle ad hoc shapes (partial #238).
 * **UPDATE** dropped support for Intel macOS. The workflow may still run on Intel macOS, but we do not actively maintain support (#369).
+* **UPDATE** link to GADM data following changes upstream (#376).
 
 ### Fixed (models)
 

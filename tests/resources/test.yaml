@@ -22,6 +22,10 @@ test-model:
             default: ["connect_all_neighbours", "run_barrier_no_crossover"]
             all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
                             "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding"]
+        ehighways:
+            default: ["connect_all_neighbours", "run_barrier_no_crossover"]
+            all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
+                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding"]
     overrides:
         continental: {}
         national:
@@ -37,7 +41,14 @@ test-model:
                     - 'build/models/regional/techs/transmission/electricity-linked-neighbours.yaml'
             run_barrier_no_crossover:
                 run.solver_options: {Method: 2, Crossover: 0}
+        ehighways:
+            connect_all_neighbours:
+                import:
+                    - 'build/models/ehighways/techs/transmission/electricity-linked-neighbours.yaml'
+            run_barrier_no_crossover:
+                run.solver_options: {Method: 2, Crossover: 0}
     subset_time:
         continental: ['2016-01-01', '2016-01-02']
         national: ['2016-01-01', '2016-01-01']
         regional: ['2016-01-01 00:00', '2016-01-01 04:00']
+        ehighways: ['2016-01-01', '2016-01-07']

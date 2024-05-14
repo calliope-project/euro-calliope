@@ -43,3 +43,20 @@ rule annual_energy_balances:
         first_year = 2000
     conda: "../envs/default.yaml"
     script: "../scripts/data/annual_energy_balance.py"
+
+
+rule download_raw_population_zipped:
+    message: "Download population data."
+    output:
+        protected("data/automatic/raw-population-data.zip")
+    params: url = config["data-sources"]["population"]
+    conda: "../envs/shell.yaml"
+    shell: "curl -sSLo {output} '{params.url}'"
+
+
+rule raw_population_unzipped:
+    message: "Extract population data TIF."
+    input: rules.download_raw_population_zipped.output
+    output: temp("build/JRC_1K_POP_2018.tif")
+    conda: "../envs/shell.yaml"
+    shell: "unzip {input} '*.tif' -d ./build/"
