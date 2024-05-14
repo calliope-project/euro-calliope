@@ -9,7 +9,7 @@ def scale_to_resolution_and_create_file(
         df = df
     elif resolution == "continental":
         df = df.sum(axis=1).to_frame("EUR")
-    elif resolution == "regional":
+    elif resolution in ["regional", "ehighways"]:
         df = scale_national_to_regional(df, region_country_mapping, populations)
     else:
         raise ValueError(f"Resolution {resolution} is not supported")

@@ -57,9 +57,9 @@ rule create_controlled_road_transport_annual_demand_and_installed_capacities:
 rule create_controlled_ev_charging_parameters:
     message: "Create timeseries parameters {wildcards.dataset_name} for controlled EV charging at {wildcards.resolution} resolution"
     input:
-        locations = "build/data/regional/units.csv",
         ev_profiles = lambda wildcards: "data/automatic/ramp-ev-consumption-profiles.csv.gz" if "demand" in wildcards.dataset_name else f"data/automatic/ramp-ev-{wildcards.dataset_name}.csv.gz",
-        populations = "build/data/regional/population.csv",
+        locations = "build/data/{resolution}/units.csv",
+        populations = "build/data/{resolution}/population.csv",
     params:
         demand_range = config["parameters"]["transport"]["monthly-demand-bound-fraction"],
         first_year = config["scope"]["temporal"]["first-year"],
