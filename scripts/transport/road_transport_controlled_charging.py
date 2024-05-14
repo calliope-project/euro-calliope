@@ -45,7 +45,7 @@ def convert_annual_distance_to_electricity_demand(
     final_year: int,
     conversion_factors: dict[str, float],
     country_codes: list[str],
-):
+) -> pd.DataFrame:
     """
     Convert annual distance driven demand to electricity demand for
     controlled charging accounting for conversion factors.
@@ -73,7 +73,7 @@ def extract_national_ev_charging_potentials(
     conversion_factors: dict[str, float],
     battery_sizes: dict[str, float],
     country_codes: list[str],
-):
+) -> pd.DataFrame:
     # Extract number of EVs per vehicle type
     df_ev_numbers = (
         pd.read_csv(path_to_ev_numbers, index_col=[0, 1, 2, 3, 4])

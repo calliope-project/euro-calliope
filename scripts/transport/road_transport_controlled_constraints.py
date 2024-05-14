@@ -47,7 +47,7 @@ def get_national_ev_profiles(
     final_year: int,
     country_neighbour_dict: dict[str, list[str]],
     country_codes: list[str],
-):
+) -> pd.DataFrame:
     df_timeseries = (
         pd.read_csv(ev_profiles_path, index_col=[0, 1, 2], parse_dates=[0])
         .xs(slice(first_year, final_year), level="year")
