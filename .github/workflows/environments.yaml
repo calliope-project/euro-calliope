@@ -5,8 +5,15 @@ on:
         branches:
             - main
             - develop
+        paths:
+           - envs/*.yaml
+           - templates/environment.yaml
+           - requirements-*.yaml
     pull_request:
-
+        paths:
+           - envs/*.yaml
+           - templates/environment.yaml
+           - requirements-*.yaml
 jobs:
   environments-are-installable:
     name: Environments are installable
