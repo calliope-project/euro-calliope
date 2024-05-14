@@ -107,6 +107,22 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of electric vehicle data.
+            gridded-temperature-data:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: "Web address of gridded temperature data. Expecting a netCDF file with the coordinates [time, site], and the variables [temperature, lat, lon]."
+            gridded-10m-windspeed-data:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: "Web address of gridded 10m wind speed data. Expecting a netCDF file with the coordinates [time, site], and the variables [temperature, lat, lon]."
+            when2heat-params:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: "Web address of When2Heat parameters for heat demand profiles."
+            population:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: "Web address of population data."
     data-pre-processing:
         type: object
         description: Parameters for the pre-processing of raw data.
@@ -144,9 +160,6 @@ properties:
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.
-    max-threads:
-        type: integer
-        description: maximum available threads for multiprocessing, in those rules that are able to accept multiple threads.
     cluster-sync:
         type: object
         description: Configuration for the "work local, build on remote" workflow.
@@ -383,6 +396,10 @@ properties:
                 type: string
                 description: Nuclear technology capacity scenario. "current" will use today's capacities based on the JRC power plant database (PPDB). All other scenario names should point to a configuration CSV file specifying minimum and maximum capacities per country in MW with non-zero capacities (columns=[country, min, max]).
                 pattern: ^(current)|(\w+.csv)$
+            nuts-year:
+                description: Version of the Nomenclature of Territorial Units for Statistics to use in creating spatial units (see https://ec.europa.eu/eurostat/web/nuts/history for more info).
+                type: number
+                enum: [2013]  # FIXME: enable other years
             heat:
                 type: object
                 description: Parameters for heat sector model.
@@ -627,7 +644,11 @@ properties:
                 description: Set the lower threshold of per-region land area covered by gridcells containing capacity factor timeseries data. Not all land area is covered by data because there are sometimes small islands linked to a region which are missed by the onshore wind / PV datasets. These islands are usually very small, consitituting less than 0.01% of a region.
                 minimum: 0
                 maximum: 1
-
+            shared-coast-polygon-area-share-threshold:
+                type: number
+                description: Set the fraction of a Euro-Calliope unit's area below which a component of the unit can be ignored (e.g. small islands) when assigning Exclusive Economic Zones to subnational Euro-Calliope units.
+                minimum: 0
+                maximum: 1
     capacity-factors:
         type: object
         description: Parameters related to average or time-dependent capacity factors of renewables.
@@ -686,10 +707,12 @@ properties:
                         type: string
                         description: Region code
     shapes:
-        description: Source for geospatial shapes of all locations. The config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
+        description: >-
+            Source for the lowest-level spatial units of all locations.
+            The config must be consistent with data from https://zenodo.org/records/6600619.
         type: object
         propertyNames:
-            enum: [continental, national, regional]
+            enum: [continental, national, regional, ehighways]
         additionalProperties: false
         patternProperties:
             ^[a-zA-Z]+.*$:

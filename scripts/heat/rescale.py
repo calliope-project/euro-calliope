@@ -68,7 +68,7 @@ if __name__ == "__main__":
         rescale_function = national_to_continental_resolution
     elif resolution == "national":
         rescale_function = national_to_national_resolution
-    elif resolution == "regional":
+    elif resolution in ["regional", "ehighways"]:
         rescale_function = national_to_regional_resolution
     else:
         raise ValueError(f"Unknown resolution {resolution}")

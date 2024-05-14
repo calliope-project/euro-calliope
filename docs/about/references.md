@@ -64,3 +64,11 @@ Department for Business, Energy and Industrial Strategy (2016). <i>Electricity G
 ### @Mantzos:2017
 
 Mantzos, L., Wiesenthal, T., Matei, N. A., Tchung-Ming, S., Rozsai, M., Russ, P., & Ramirez, A. S. (2017). JRC-IDEES: Integrated Database of the European Energy Sector: Methodological note. JRC Research Reports, Article JRC108244. https://ideas.repec.org//p/ipt/iptwpa/jrc108244.html
+
+### @Ruhnau:2019
+
+Ruhnau, O., Hirth, L. & Praktiknjo, A. Time series of heat demand and heat pump efficiency for energy system modeling. Sci Data 6, 189 (2019). https://doi.org/10.1038/s41597-019-0199-y
+
+### @BDEW:2015
+
+German Association of Energy and Water Industries (BDEW), German Association of Local Utilities (VKU) & European Association of Loacal Energy Distributors (GEODE). Abwicklung von Standardlastprofilen Gas [Execution of Gas Standard Load Profiles]. Guidelines (BDEW, 2015). [https://www.bdew.de/media/documents/Leitfaden_20160630_Abwicklung-Standardlastprofile-Gas.pdf](https://www.bdew.de/media/documents/Leitfaden_20160630_Abwicklung-Standardlastprofile-Gas.pdf)

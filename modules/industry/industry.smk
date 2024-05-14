@@ -7,9 +7,6 @@ DATA_PATH = f"{MODULE_PATH}/raw_data"
 SCRIPT_PATH = "scripts"  # scripts are called relative to this file
 CONDA_PATH = "./env_industry.yaml"
 
-# TODO:
-# jrc_idees_processed* files in the raw_data folder should ideally be produced by a rule instead
-
 # Ensure rules are defined in order.
 # Otherwise commands like "rules.rulename.output" won't work!
 if "Iron and steel" in config["params"]["specific-industries"]:
@@ -17,7 +14,7 @@ if "Iron and steel" in config["params"]["specific-industries"]:
         message: "Calculate energy demand for the 'Iron and steel' sector in JRC-IDEES."
         conda: CONDA_PATH
         params:
-            cnf_steel = config["params"]["steel"]
+            config_steel = config["params"]["steel"]
         input:
             path_energy_balances = config["inputs"]["path-energy-balances"],
             path_cat_names = config["inputs"]["path-cat-names"],

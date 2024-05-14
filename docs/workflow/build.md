@@ -10,7 +10,7 @@ The build process will require an internet connection, several gigabytes of avai
 ## Prepare
 
 !!! Info
-    The workflow is developed on macOS, tested on macOS and Linux, but it cannot run natively on Windows.
+    The workflow is developed mostly on ARM macOS, tested on ARM macOS and Linux, but it cannot run natively on Windows.
 
 1. Download your copy of the latest Euro-Calliope release: [![workflow DOI](https://img.shields.io/badge/workflow-10.5281/zenodo.3949793-blue)](https://doi.org/10.5281/zenodo.3949793) (or [clone any version from GitHub](https://github.com/calliope-project/euro-calliope)).
 
@@ -22,12 +22,12 @@ Using either one, you can create the environment:
         # using mamba
         mamba env create -f environment.yaml --no-default-packages
         conda activate euro-calliope
-        snakemake --list # test your installation
+        snakemake --list-rules # test your installation
 
         # using conda
         conda env create -f environment.yaml --no-default-packages
         conda activate euro-calliope
-        snakemake --profile profiles/conda --list # test your installation
+        snakemake --profile profiles/conda --list-rules # test your installation
 
 3. Install a Gurobi license on your computer ([academic license](https://www.gurobi.com/downloads/end-user-license-agreement-academic/) comes at no cost), or [choose a different solver](../model/customisation.md#manual-changes).
 
@@ -42,6 +42,8 @@ Execute the workflow like so:
 snakemake
 ```
 
+This will use Snakemake run parameters from the default `workflow-profile` in `profiles/default`. You may change these parameters and/or use a user defined profile using `--profile=<user-profile>`; see [Snakemake's documentation on profiles](https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles).
+
 ## Run
 
 The build step creates all individual components of Euro-Calliope, like technologies and time series.
@@ -53,7 +55,7 @@ It is a complete Calliope model and can be used like any other, for example like
 calliope run ./build/models/national/example-model.yaml
 ```
 
-For more information on how to use Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io/en/v0.6.10/).
+For more information on how to use Calliope models, see [Calliope's documentation](https://calliope.readthedocs.io/en/v{{ calliope_version }}/).
 
 ## Customise
 

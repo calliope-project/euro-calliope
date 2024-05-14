@@ -1,0 +1,45 @@
+name: Tests of conda environments on both Linux and Mac
+
+on:
+    push:
+        branches:
+            - main
+            - develop
+        paths:
+           - envs/*.yaml
+           - templates/environment.yaml
+           - requirements-*.yaml
+    pull_request:
+        paths:
+           - envs/*.yaml
+           - templates/environment.yaml
+           - requirements-*.yaml
+jobs:
+  environments-are-installable:
+    name: Environments are installable
+    runs-on: ${{ matrix.os }}
+    strategy:
+        fail-fast: false
+        matrix:
+            os: [ubuntu-latest, macos-latest]
+            env:
+                - ./envs/geo.yaml
+                - ./envs/default.yaml
+                - ./envs/geo.yaml
+                - ./envs/hydro.yaml
+                - ./envs/shell.yaml
+                - ./envs/test.yaml
+                - ./envs/vis.yaml
+                - ./requirements-docs.yaml
+                - ./requirements-test.yaml
+                - ./templates/environment.yaml
+    defaults:
+        run:
+            shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+            miniconda-version: latest
+      - name:  ${{ matrix.env }} env
+        run: conda env create -f ${{ matrix.env }} -n environment_test --dry-run
