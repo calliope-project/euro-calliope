@@ -21,15 +21,26 @@ def eu_country_code_to_iso3(eu_country_code):
     return convert_country_code(eu_country_code, output="alpha3")
 
 
-def convert_country_code(input_country, output="alpha3"):
+def convert_country_code(
+    input_country: str,
+    output: Literal["alpha2", "alpha2_eu", "alpha3", "name"] = "alpha3",
+) -> str:
     """
-    Converts input country code or name into a 2- or 3-letter code or a normalised name.
+    Converts input country code or name into a 2- or 3-letter code or a normalised pycountry name.
 
-    ISO alpha2: alpha2
-    ISO alpha2 with EU codes: alpha2_eu
-    ISO alpha3: alpha3
-    name: country name
 
+    Args:
+        input_country (str): Country code/name to convert. Can accept an EU country code.
+        output (Literal[alpha2, alpha2_eu, alpha3, name], optional):
+            Output format. Defaults to "alpha3". Options:
+
+            - ISO alpha2: alpha2
+            - ISO alpha2 with EU codes: alpha2_eu
+            - ISO alpha3: alpha3
+            - country name: name
+
+    Returns:
+        str: Input country converted to output format.
     """
 
     if input_country.lower() == "el":

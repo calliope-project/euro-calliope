@@ -65,8 +65,8 @@ properties:
                 description: Web address of load data.
             nuts:
                 type: string
-                pattern: ^(https?|http?):\/\/.+
-                description: Web address of geospatial NUTS data.
+                pattern: ^(https?|http?):\/\/.+{nuts_year}.*
+                description: Web address of geospatial NUTS data. Must contain a {nuts_year} placeholder.
             potentials:
                 type: string
                 pattern: ^(https?|http?):\/\/.+

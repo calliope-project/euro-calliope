@@ -11,7 +11,12 @@ from eurocalliopelib import utils
 
 OUTPUT_DRIVER = "GPKG"
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger("nuts.py")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 def clean_nuts(
@@ -26,7 +31,7 @@ def clean_nuts(
 
     Args:
         path_to_nuts (str): Path to downloaded NUTS data.
-        path_to_output (str): Path to save output GeoPackage.
+        path_to_output (str): Path to which output GeoPackage will be saved.
         crs (str): Study CRS. Output data will be stored in this CRS.
         study_area (shapely.geometry.Polygon): Study area to which NUTS data will be clipped.
         all_countries (list[str]): List of countries to which NUTS data will be clipped.
@@ -34,22 +39,25 @@ def clean_nuts(
     """
     gdf_nuts = gpd.read_file(path_to_nuts)
 
-    gdf_nuts_clean = gpd.GeoDataFrame(
-        geometry=gdf_nuts.geometry.apply(_to_multi_polygon),
-        data={
-            "id": gdf_nuts.NUTS_ID,
-            "name": gdf_nuts.NAME_LATN,
-            "type": np.where(gdf_nuts.LEVL_CODE == 0, "country", np.nan),
-            "layer": "nuts" + gdf_nuts.LEVL_CODE.astype(str),
-            "proper": True,
-            "country_code": gdf_nuts.CNTR_CODE.apply(utils.eu_country_code_to_iso3),
-        },
-        crs=gdf_nuts.crs,
-    ).to_crs(crs)
-    gdf_nuts_clean = _fix_country_names(gdf_nuts_clean)
-    gdf_nuts_clean_clipped = _clip_nuts(gdf_nuts_clean, study_area, all_countries)
+    gdf_nuts_clean = (
+        gpd.GeoDataFrame(
+            geometry=gdf_nuts.geometry.apply(_to_multi_polygon),
+            data={
+                "id": gdf_nuts.NUTS_ID,
+                "name": gdf_nuts.NAME_LATN,
+                "type": np.where(gdf_nuts.LEVL_CODE == 0, "country", np.nan),
+                "layer": "nuts" + gdf_nuts.LEVL_CODE.astype(str),
+                "proper": True,
+                "country_code": gdf_nuts.CNTR_CODE.apply(utils.eu_country_code_to_iso3),
+            },
+            crs=gdf_nuts.crs,
+        )
+        .to_crs(crs)
+        .pipe(_fix_country_names)
+        .pipe(_clip_nuts, study_area, all_countries)
+    )
 
-    gdf_nuts_clean_clipped.groupby("layer").apply(
+    gdf_nuts_clean.groupby("layer").apply(
         _to_file, path_to_output=path_to_output, schema=schema
     )
 
@@ -66,7 +74,7 @@ def _clip_nuts(
     Remove:
     * countries not in study country codes
     * entire shapes is not in study area bounding box
-    * parts of multipolygons that are not in the study area (keeping the rest)
+    * parts of multipolygons that are not in the study area (e.g. remove Caribbean islands from the France country shape)
 
     """
     countries = utils.convert_valid_countries(all_countries, output="alpha3").values()
