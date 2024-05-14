@@ -71,7 +71,7 @@ rule create_controlled_road_transport_annual_demand_and_installed_capacities:
     script: "../scripts/transport/road_transport_controlled_charging.py"
 
 rule create_controlled_ev_charging_parameters:
-    message: "Create timeseries parameters for controlled EV charging"
+    message: "Create timeseries parameters {wildcards.dataset_name} for controlled EV charging at {wildcards.resolution} resolution"
     input:
         locations = "build/data/regional/units.csv",
         ev_profiles = lambda wildcards: "data/automatic/ramp-ev-consumption-profiles.csv.gz" if "demand" in wildcards.dataset_name else f"data/automatic/ramp-ev-{wildcards.dataset_name}.csv.gz",
@@ -82,6 +82,8 @@ rule create_controlled_ev_charging_parameters:
         final_year = config["scope"]["temporal"]["final-year"],
         country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],
         countries = config["scope"]["spatial"]["countries"],
+    wildcard_constraints:
+        dataset_name = "demand-shape-equals|demand-shape-max|demand-shape-min|plugin-profiles"
     conda: "../envs/default.yaml"
     output: "build/models/{resolution}/timeseries/demand/{dataset_name}-ev.csv"
     script: "../scripts/transport/road_transport_controlled_constraints.py"
