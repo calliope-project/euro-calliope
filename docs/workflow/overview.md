@@ -39,7 +39,8 @@ In the _model_ step, the models are composed out of all their components.
 In the _test_ step, the models are tested through a set of test routines.
 The final step _all_ is a Snakemake specificity and exists only to ensure the model and built steps ran through successfully.
 
-Some of the steps run more than once, but this hidden in the visualisation below. For example, the _model_ step runs three times: once for each model resolution continental, national, and regional.
+Some of the steps run more than once, but this hidden in the visualisation below.
+For example, the _model_ step runs four times: once for each model resolution continental, national, ehighways, and regional.
 
 ![All workflow steps and their connections forming a directed acyclic graph.](../img/dag.png){: id="dag" }
 

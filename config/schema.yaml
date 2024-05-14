@@ -396,6 +396,10 @@ properties:
                 type: string
                 description: Nuclear technology capacity scenario. "current" will use today's capacities based on the JRC power plant database (PPDB). All other scenario names should point to a configuration CSV file specifying minimum and maximum capacities per country in MW with non-zero capacities (columns=[country, min, max]).
                 pattern: ^(current)|(\w+.csv)$
+            nuts-year:
+                description: Version of the Nomenclature of Territorial Units for Statistics to use in creating spatial units (see https://ec.europa.eu/eurostat/web/nuts/history for more info).
+                type: number
+                enum: [2013]  # FIXME: enable other years
             heat:
                 type: object
                 description: Parameters for heat sector model.
@@ -703,10 +707,12 @@ properties:
                         type: string
                         description: Region code
     shapes:
-        description: Source for geospatial shapes of all locations. The config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
+        description: >-
+            Source for the lowest-level spatial units of all locations.
+            The config must be consistent with data from https://zenodo.org/records/6600619.
         type: object
         propertyNames:
-            enum: [continental, national, regional]
+            enum: [continental, national, regional, ehighways]
         additionalProperties: false
         patternProperties:
             ^[a-zA-Z]+.*$:

@@ -74,7 +74,7 @@ def _in_study_area(study_area):
 
 
 def _all_parts_in_study_area(feature, study_area):
-    unit = _to_multi_polygon(feature["geometry"])
+    unit = _to_multi_polygon(shapely.geometry.shape(feature["geometry"]))
     if not study_area.contains(unit):
         print(f"Removing parts of {_feature_name(feature)} outside of study area.")
         new_unit = shapely.geometry.MultiPolygon([

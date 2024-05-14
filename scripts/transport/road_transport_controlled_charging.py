@@ -97,7 +97,7 @@ if __name__ == "__main__":
         df = scale_to_continental_resolution(df)
     elif resolution == "national":
         df = scale_to_national_resolution(df)
-    elif resolution == "regional":
+    elif resolution in ["regional", "ehighways"]:
         df = scale_to_regional_resolution(
             df, region_country_mapping=region_country_mapping, populations=populations
         )

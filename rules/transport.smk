@@ -33,8 +33,8 @@ rule create_controlled_road_transport_annual_demand:
     message: "Create annual demand for controlled charging at {wildcards.resolution} resolution"
     input:
         annual_controlled_demand = "build/data/transport/annual-road-transport-distance-demand-controlled.csv",
-        locations = "build/data/regional/units.csv",
-        populations = "build/data/regional/population.csv",
+        locations = "build/data/{resolution}/units.csv",
+        populations = "build/data/{resolution}/population.csv",
     params:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
@@ -93,8 +93,8 @@ rule aggregate_timeseries: # TODO consider merge with other rules, as this is ti
             f'build/data/transport/timeseries/timeseries-uncontrolled-{vehicle_type}.csv'
             for vehicle_type in config["parameters"]["transport"]["road-transport-conversion-factors"].keys()
         ],
-        locations = "build/data/regional/units.csv",
-        populations = "build/data/regional/population.csv"
+        locations = "build/data/{resolution}/units.csv",
+        populations = "build/data/{resolution}/population.csv"
     conda: "../envs/default.yaml"
     output:
         "build/models/{resolution}/timeseries/demand/uncontrolled-electrified-road-transport.csv",
@@ -108,7 +108,7 @@ use rule aggregate_timeseries as aggregate_timeseries_historic_electrified with:
             "build/data/transport/timeseries/timeseries-uncontrolled-light-duty-vehicles-historic-electrification.csv",
             "build/data/transport/timeseries/timeseries-uncontrolled-coaches-and-buses-historic-electrification.csv",
             "build/data/transport/timeseries/timeseries-uncontrolled-passenger-cars-historic-electrification.csv"),
-        locations = "build/data/regional/units.csv",
-        populations = "build/data/regional/population.csv"
+        locations = "build/data/{resolution}/units.csv",
+        populations = "build/data/{resolution}/population.csv"
     output:
         "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv"

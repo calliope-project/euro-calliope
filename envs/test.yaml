@@ -13,6 +13,6 @@ dependencies:
     - pytest-html=3.2.0
     - calliope=0.6.10
     - pyomo=6.4.1
-    - hdf5=1.10
-    - h5py=3.1.0
-    - libnetcdf=4.7
+    - netCDF4=1.6.2
+    - hdf5=1.12.2
+    - libnetcdf=4.8.1

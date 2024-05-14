@@ -4,7 +4,7 @@ No matter whether you have downloaded Euro-Calliope's pre-builts or you have bui
 
 ## File structure
 
-By default, Euro-Calliope is a set of three models on different spatial resolutions: continental, national, and regional.
+By default, Euro-Calliope is a set of four models on different spatial resolutions: continental, national, ehighways, and regional.
 All files required to run each resolution-specific model are within subfolders named by the resolution.
 All files in the root directory are independent of the model configuration or data; they are not necessary to run a model.
 Within each resolution-specific model directory, there is a subdirectory for technology definitions (stored in human-readable YAML files) and a subdirectory for timeseries data (stored in CSV files).
