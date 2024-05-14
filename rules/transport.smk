@@ -5,7 +5,7 @@ rule download_transport_timeseries:
     # TODO have correct timeseries data once RAMP has generated the new charging profile and it's been put on Zenodo
     message: "Get EV data from RAMP"
     params:
-        url = config["data-sources"]["controlled-ev-data"]
+        url = config["data-sources"]["controlled-ev-profiles"]
     conda: "../envs/shell.yaml"
     output:
         protected("data/automatic/ramp-ev-{dataset}.csv.gz")

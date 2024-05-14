@@ -103,7 +103,7 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of Swiss industry energy balance data.
-            controlled-ev-data:
+            controlled-ev-profiles:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of electric vehicle data for controlled charging.
