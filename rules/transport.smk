@@ -77,7 +77,7 @@ rule create_controlled_ev_charging_parameters:
         ev_profiles = lambda wildcards: "data/automatic/ramp-ev-consumption-profiles.csv.gz" if "demand" in wildcards.dataset_name else f"data/automatic/ramp-ev-{wildcards.dataset_name}.csv.gz",
         populations = "build/data/regional/population.csv",
     params:
-        demand_range = config["parameters"]["transport"]["monthly_demand_ranges"],
+        demand_range = config["parameters"]["transport"]["monthly-demand-bound-fraction"],
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
         country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],

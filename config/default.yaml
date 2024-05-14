@@ -170,7 +170,7 @@ parameters:
             coaches-and-buses: 0.2  # own assumption based on HDVs from [EUCAR_2019]
             passenger-cars: 0.08  # average from [EUCAR_2019]
         uncontrolled-ev-charging-share: 0.5
-        monthly_demand_ranges:
+        monthly-demand-bound-fraction:
             min: 0.9
             max: 1.1
             equals: 1

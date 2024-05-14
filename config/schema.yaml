@@ -374,9 +374,9 @@ properties:
                     uncontrolled-ev-charging-share:
                         type: number
                         description: Share of uncontrolled charging.
-                    monthly_demand_ranges:
+                    monthly-demand-bound-fraction:
                         type: object
-                        description: Charging flexibility parameters.
+                        description: Charging flexibility parameter constraining the amount of monthly demand to be met.
                         additionalProperties: false
                         properties:
                             min:
