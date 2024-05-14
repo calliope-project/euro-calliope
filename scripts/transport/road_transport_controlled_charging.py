@@ -102,12 +102,15 @@ def extract_national_ev_charging_potentials(
         .unstack("year")
         .mul(transport_scaling_factor)
     )
-    df_ev_chargeable_distance = df_ev_chargeable_distance.assign(**{
-        str(year): df_ev_chargeable_distance[2015] for year in range(2016, 2019)
-    })
+
+    if final_year > 2015:
+        # ASSUME 2015 data is used for all years after 2015
+        df_ev_chargeable_distance = df_ev_chargeable_distance.assign(**{
+            str(year): df_ev_chargeable_distance[2015]
+            for year in range(2016, final_year + 1)
+        })
 
     df_ev_chargeable_distance.columns = df_ev_chargeable_distance.columns.astype(int)
-    # df_ev_chargeable_distance.index.name = None
 
     return df_ev_chargeable_distance[range(first_year, final_year + 1)].T
 
