@@ -167,3 +167,8 @@ def pj_to_twh(array):
 def tj_to_twh(array):
     """Convert TJ to TWh"""
     return pj_to_twh(array) / 1000
+
+
+def tj_to_ktoe(array):
+    """Convert TJ to Ktoe"""
+    return array * 23.88e-3

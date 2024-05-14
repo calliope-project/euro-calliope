@@ -1,7 +1,7 @@
 import logging
 from itertools import product
 from multiprocessing import Pool
-from typing import Callable, Literal, Optional, Union
+from typing import Callable, Literal, Union
 
 import numpy as np
 import pandas as pd
@@ -54,25 +54,18 @@ def process_jrc_industry_data(
     if dataset == "energy":
         processed_data = process_sheets(paths_to_data, threads, get_jrc_idees_energy)
         unit = "twh"
-        variable_col = "energy"
     elif dataset == "production":
         processed_data = process_sheets(paths_to_data, 1, get_jrc_idees_production)
         unit = "kt"
-        variable_col = None
 
-    processed_xr_data = df_to_xr(processed_data, variable_col, unit)
+    processed_xr_data = df_to_xr(processed_data, unit)
     processed_xr_data.to_netcdf(out_path)
 
 
-def df_to_xr(
-    df: pd.DataFrame, variable_col: Optional[str], unit: str
-) -> Union[xr.Dataset, xr.DataArray]:
+def df_to_xr(df: pd.DataFrame, unit: str) -> Union[xr.Dataset, xr.DataArray]:
     df.columns = df.columns.rename("year").astype(int)
 
-    if variable_col is not None:
-        xr_data = df.stack().unstack(variable_col).to_xarray()
-    else:
-        xr_data = df.stack().to_xarray()
+    xr_data = df.stack().unstack("variable").to_xarray()
 
     country_code_mapping = utils.convert_valid_countries(
         xr_data.country_code.values, errors="ignore"
@@ -81,7 +74,10 @@ def df_to_xr(
         xr_data, country_code_mapping, dim_name="country_code"
     )
 
-    return xr_data.assign_attrs(unit=unit)
+    for var in xr_data.data_vars:
+        xr_data[var] = xr_data[var].assign_attrs(units=unit)
+
+    return xr_data
 
 
 def process_sheets(
@@ -116,7 +112,8 @@ def get_jrc_idees_production(sheet_name: str, file: str) -> pd.DataFrame:
         .str.replace("(kt ", "(", regex=False)
         .str.strip()
     )
-    return df_processed.set_index(["country_code", "cat_name"], append=True)
+    df_processed = df_processed.assign(variable="production")
+    return df_processed.set_index(["variable", "country_code", "cat_name"], append=True)
 
 
 def get_jrc_idees_energy(sheet: str, file: str) -> pd.DataFrame:
@@ -125,7 +122,7 @@ def get_jrc_idees_energy(sheet: str, file: str) -> pd.DataFrame:
     final_energy = _get_jrc_idees_energy_sheet(f"{sheet}_fec", xls)
     useful_energy = _get_jrc_idees_energy_sheet(f"{sheet}_ued", xls)
     return pd.concat(
-        [final_energy, useful_energy], names=["energy"], keys=["final", "useful"]
+        [final_energy, useful_energy], names=["variable"], keys=["final", "useful"]
     )
 
 
