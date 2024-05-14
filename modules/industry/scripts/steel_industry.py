@@ -2,9 +2,8 @@ from typing import Optional
 
 import pandas as pd
 import xarray as xr
+from utils import filling
 from utils import jrc_idees_parser as jrc
-
-from modules.industry.scripts.utils import filling
 
 CAT_NAME_STEEL = "Iron and steel"
 
