@@ -38,8 +38,6 @@ rule create_controlled_road_transport_annual_demand_and_installed_capacities:
         annual_controlled_demand = "build/data/transport/annual-road-transport-distance-demand-controlled.csv",
         ev_vehicle_number = "build/data/jrc-idees/transport/processed-road-vehicles.csv",
         jrc_road_distance = "build/data/jrc-idees/transport/processed-road-distance.csv",
-        locations = "build/data/regional/units.csv",
-        populations = "build/data/regional/population.csv",
         locations = "build/data/{resolution}/units.csv",
         populations = "build/data/{resolution}/population.csv",
     params:
