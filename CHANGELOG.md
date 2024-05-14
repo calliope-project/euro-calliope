@@ -51,6 +51,7 @@
     * Fixes localrules through integration of new `localrule` directive (#368).
 
 * **UPDATE** source of fraction of shared coast for offshore wind capacity factor distribution from a fixed shape download to an internal rule which can handle ad hoc shapes (partial #238).
+* **UPDATE** link to GADM data following changes upstream (#376).
 
 ### Fixed (models)
 
