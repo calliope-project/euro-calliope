@@ -23,11 +23,12 @@ def eu_country_code_to_iso3(eu_country_code):
 
 def convert_country_code(input_country, output="alpha3"):
     """
-    Converts input country code or name into either a 2- or 3-letter code.
+    Converts input country code or name into a 2- or 3-letter code or a normalised name.
 
     ISO alpha2: alpha2
     ISO alpha2 with EU codes: alpha2_eu
     ISO alpha3: alpha3
+    name: country name
 
     """
 
@@ -40,20 +41,26 @@ def convert_country_code(input_country, output="alpha3"):
     ):  # this is a weird country code used in the biofuels dataset
         input_country = "ba"
 
+    lookup = pycountry.countries.lookup(input_country)
     if output == "alpha2":
-        return pycountry.countries.lookup(input_country).alpha_2
+        converted = lookup.alpha_2
 
     if output == "alpha2_eu":
-        result = pycountry.countries.lookup(input_country).alpha_2
-        if result == "GB":
-            return "UK"
-        elif result == "GR":
-            return "EL"
+        alpha2 = lookup.alpha_2
+        if alpha2 == "GB":
+            converted = "UK"
+        elif alpha2 == "GR":
+            converted = "EL"
         else:
-            return result
+            converted = alpha2
 
     if output == "alpha3":
-        return pycountry.countries.lookup(input_country).alpha_3
+        converted = lookup.alpha_3
+
+    if output == "name":
+        converted = lookup.name
+
+    return converted
 
 
 def convert_valid_countries(
@@ -62,7 +69,7 @@ def convert_valid_countries(
     errors: Literal["raise", "ignore"] = "raise",
 ) -> dict:
     """
-    Convert a list of country codes / names to a list of uniform ISO coded country codes.
+    Map a list of country codes / names to uniform ISO coded country codes / pycountry names.
     If an input item isn't a valid country (e.g. "EU27") then raise an error or skip and print the code and continue.
 
     Args:
