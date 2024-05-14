@@ -27,6 +27,7 @@
 * **ADD** ability to run on Apple silicon devices (#263).
     * Updated geo packages from gdal 3.2 -> 3.3.
 * **ADD** re-execution triggers based on config and env changes (#264).
+* **ADD** continuous integration test of all conda environments on both ARM macOS and Linux (#369).
 
 ### Updated (models)
 
@@ -40,12 +41,22 @@
 
 ### Updated (workflow)
 
+* **UPDATE** environments to fix issues on Linux and Macos-arm64 (#357, #369):
+    * libnetcdf=4.8.1
+    * netCDF4=1.6.2
+    * hdf5=1.12.2
+* **UPDATE** geo, hydro, and test-eurocalliope environments to handle libnetcdf=4.8.1 (#369):
+    * gdal=3.6.2
+    * libgdal=3.6.2
+    * fiona=1.9.1
+    * rasterio=1.3.6
+    * geopandas=0.13.2
+    * shapely=1.8.5
 * **UPDATED** to new Zenodo source of land-use potentials, to include potentials at the [e-Highway 2050 project](https://cordis.europa.eu/project/id/308908/reporting) resolution (`ehighways`) (#370).
 * **UPDATED** structure of YAML templates and parametrisation:
     * Parametrisation moved to eurocalliopelib.
     * Rules to parametrise split into smaller technology-specific rules, to ensure inputs are directly relevant to the files being parametrised.
     * YAML templates restructured to match structure of final model (see `Updated (models) above`);
-
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
 * **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264, #268).
@@ -53,8 +64,8 @@
 * **UPDATE** Snakemake to v8.10.7 (#330)
     * Ensures that conda environment builds ignore default package specifications (#289).
     * Fixes localrules through integration of new `localrule` directive (#368).
-
 * **UPDATE** source of fraction of shared coast for offshore wind capacity factor distribution from a fixed shape download to an internal rule which can handle ad hoc shapes (partial #238).
+* **UPDATE** dropped support for Intel macOS. The workflow may still run on Intel macOS, but we do not actively maintain support (#369).
 * **UPDATE** link to GADM data following changes upstream (#376).
 
 ### Fixed (models)
@@ -70,7 +81,6 @@
 * **FIX** fixed optimisation tolerance of hydro power plants from xtol to xatol (#266).
 * **FIX** source of Exclusive Economic Zones (EEZ) to use a cache on [zenodo](https://sandbox.zenodo.org/records/45135) so that we can keep using v11 (#332).  FIXME: update to actual zenodo record before next Euro-Calliope release.
 * **FIX** fixed rule `download_basins_database`, which previously failed on some linux and mac machines, by requiring a more recent curl in the environment `envs/shell.yaml` (#267).
-* **FIX** pin `h5py`, `hdf5` and `libnetcdf` in all environments which rely on `xarray`, to prevent issues on linux-x86 (#357).
 
 ## 1.1.0 (2021-12-22)
 

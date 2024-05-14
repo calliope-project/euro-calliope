@@ -98,7 +98,8 @@ def _fix_country_feature(feature):
 
 
 def _all_parts_in_study_area_and_crs(feature, src_crs, dst_crs, study_area):
-    unit = _to_multi_polygon(feature["geometry"])
+    unit = _to_multi_polygon(shapely.geometry.shape(feature["geometry"]))
+
     if not study_area.contains(unit):
         print(
             "Removing parts of {} outside of study area.".format(
