@@ -99,7 +99,7 @@ def transform_jrc_subsector_demand(
         xr.Dataset: processed dataframe with the expected steel energy consumption.
     """
     # Gather relevant industrial processes
-    sintering_intensity = jrc.get_subsection_final_intensity(
+    sintering_intensity = jrc.get_sec_subsec_final_intensity(
         "Integrated steelworks",
         "Steel: Sinter/Pellet making",
         "Integrated steelworks",
@@ -109,7 +109,7 @@ def transform_jrc_subsector_demand(
         fill_empty=True,
     )
 
-    eaf_smelting_intensity = jrc.get_subsection_final_intensity(
+    eaf_smelting_intensity = jrc.get_sec_subsec_final_intensity(
         "Electric arc",
         "Steel: Smelters",
         "Electric arc",
@@ -118,7 +118,7 @@ def transform_jrc_subsector_demand(
         jrc_prod,
         fill_empty=True,
     )
-    eaf_intensity = jrc.get_subsection_final_intensity(
+    eaf_intensity = jrc.get_sec_subsec_final_intensity(
         "Electric arc",
         "Steel: Electric arc",
         "Electric arc",
@@ -127,7 +127,7 @@ def transform_jrc_subsector_demand(
         jrc_prod,
         fill_empty=True,
     )
-    refining_intensity = jrc.get_subsection_final_intensity(
+    refining_intensity = jrc.get_sec_subsec_final_intensity(
         "Electric arc",
         "Steel: Furnaces, Refining and Rolling",
         "Electric arc",
@@ -136,7 +136,7 @@ def transform_jrc_subsector_demand(
         jrc_prod,
         fill_empty=True,
     )
-    finishing_intensity = jrc.get_subsection_final_intensity(
+    finishing_intensity = jrc.get_sec_subsec_final_intensity(
         "Electric arc",
         "Steel: Products finishing",
         "Electric arc",
@@ -145,7 +145,7 @@ def transform_jrc_subsector_demand(
         jrc_prod,
         fill_empty=True,
     )
-    auxiliary_intensity = jrc.get_auxiliary_electric_final_intensity(
+    auxiliary_intensity = jrc.get_sec_final_intensity_auxiliary_electric(
         "Electric arc", "Electric arc", jrc_energy, jrc_prod, fill_empty=True
     )
 
@@ -193,7 +193,7 @@ def transform_jrc_subsector_demand(
     h2_intensity = h2_intensity.assign_coords(carrier_name="hydrogen")
 
     # Low heat
-    low_heat_intensity = jrc.get_subsection_useful_intensity(
+    low_heat_intensity = jrc.get_sec_subsec_useful_intensity(
         "Electric arc", "Low enthalpy heat", "Electric arc", jrc_energy, jrc_prod
     )
     low_heat_intensity = low_heat_intensity.assign_coords(carrier_name="space_heat")

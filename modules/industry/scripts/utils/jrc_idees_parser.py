@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 import xarray as xr
@@ -6,18 +6,46 @@ import xarray as xr
 STANDARD_COORDS = ["cat_name", "year", "country_code", "carrier_name"]
 
 
-def ensure_standard_coordinates(ds: Union[xr.Dataset, xr.DataArray]):
-    """Remove all coordinates that do not match a predefined standard."""
-    removed_coords = set(ds.coords).difference(STANDARD_COORDS)
-    removed_dims = removed_coords.intersection(ds.dims)
+def standardize(
+    da: xr.DataArray, units: str, name: Optional[str] = None
+) -> xr.DataArray:
+    """Ensure JRC processing standard is met.
+
+    Three requirements:
+    1. coordinates must follow a given naming convention.
+    2. attribute for units must be set.
+    3. name must be set.
+
+    Args:
+        da (xr.DataArray): target xarray object to standardize.
+        units (str): units to set as attribute.
+        name (Optional[str], optional): name to set. Defaults to None.
+
+    Raises:
+        KeyError: If standard coordinates cannot be set.
+        ValueError: If name cannot be set.
+
+    Returns:
+        xr.DataArray: standardized xarray object.
+    """
+    # 1. coordinate standard
+    removed_coords = set(da.coords).difference(STANDARD_COORDS)
+    removed_dims = removed_coords.intersection(da.dims)
     if removed_dims:
-        raise ValueError(f"Cannot ensure standard coordinates for {removed_dims}.")
+        raise KeyError(f"Cannot ensure standard coordinates for {removed_dims}.")
+    da = da.drop(removed_coords)
+    # 2. units standard
+    da = da.assign_attrs(units=units)
+    # 3. name standard
+    if da.name is None and name is None:
+        raise ValueError("Name must be set for DataArrays without it.")
+    if name:
+        da.name = name
 
-    ds = ds.drop(removed_coords)
-    return ds
+    return da
 
 
-def get_auxiliary_electric_final_intensity(
+def get_sec_final_intensity_auxiliary_electric(
     section: str,
     material: str,
     jrc_energy: xr.Dataset,
@@ -27,7 +55,7 @@ def get_auxiliary_electric_final_intensity(
     """Wrapper for auxiliary electrical processes."""
     auxiliaries = ["Lighting", "Air compressors", "Motor drives", "Fans and pumps"]
     auxiliary_intensity = sum(
-        get_subsection_final_intensity(
+        get_sec_subsec_final_intensity(
             section, aux, material, "Electricity", jrc_energy, jrc_prod, fill_empty
         )
         for aux in auxiliaries
@@ -36,7 +64,7 @@ def get_auxiliary_electric_final_intensity(
     return auxiliary_intensity
 
 
-def get_subsection_final_intensity(
+def get_sec_subsec_final_intensity(
     section: str,
     subsection: str,
     material: str,
@@ -64,8 +92,7 @@ def get_subsection_final_intensity(
     final_intensity = useful_intensity / carrier_eff
 
     # Prettify
-    final_intensity = ensure_standard_coordinates(final_intensity)
-    final_intensity = final_intensity.assign_attrs(units="twh/kt")
+    final_intensity = standardize(final_intensity, "twh/kt", name="final_intensity")
     final_intensity.name = "final_intensity"
 
     assert final_intensity.sum() >= useful_intensity.sum(), "Creating energy!"
@@ -73,7 +100,7 @@ def get_subsection_final_intensity(
     return final_intensity.fillna(0)
 
 
-def get_subsection_useful_intensity(
+def get_sec_subsec_useful_intensity(
     section: str,
     subsection: str,
     material: str,
@@ -86,9 +113,7 @@ def get_subsection_useful_intensity(
     useful_intensity = (useful_demand / production).sum("carrier_name")
 
     # Prettify
-    useful_intensity = ensure_standard_coordinates(useful_intensity)
-    useful_intensity = useful_intensity.assign_attrs(units="twh/kt")
-    useful_intensity.name = "useful_intensity"
+    useful_intensity = standardize(useful_intensity, "twh/kt", name="useful_intensity")
 
     assert ~np.isinf(
         useful_intensity
@@ -97,28 +122,67 @@ def get_subsection_useful_intensity(
     return useful_intensity.fillna(0)
 
 
-def get_carrier_final_demand(
+def replace_final_demand_by_carrier(
     carrier: str,
-    all_useful_demand: xr.Dataset,
     jrc_energy: xr.Dataset,
-    fill_empty: bool = True,
-) -> xr.Dataset:
-    """
-    Get demand for a specific carrier, assuming all end use demand that could consume
-    that carrier are completely met by that carrier.
-    """
-    carrier_total = jrc_energy.sel(carrier_name=carrier)
-    carrier_eff = carrier_total.sel(energy="demand") / carrier_total.sel(
-        energy="consumption"
-    )
-    # Fill NaNs (where there is demand, but no consumption in that country)
-    if fill_empty:
-        # First by country avg. (all years), then by year avg. (all countries).
-        carrier_eff = carrier_eff.fillna(carrier_eff.mean(dim="year"))
-        carrier_eff = carrier_eff.fillna(carrier_eff.mean(dim="country_code"))
+) -> xr.DataArray:
+    """Assume that all demand that could consume a carrier is completely met by that carrier.
 
-    carrier_final_demand = all_useful_demand / carrier_eff
+    Uses the end-use demand and conversion efficiencies as proxy for filling.
+
+    Args:
+        carrier (str): carrier to use as replacement.
+        jrc_energy (xr.Dataset): JRC energy dataset.
+
+    Returns:
+        xr.DataArray: final demand data met using the specified carrier.
+    """
+    useful_dem_tot = jrc_energy["useful"].sum("carrier_name")
+
+    carrier_tot = jrc_energy.sel(carrier_name=carrier)
+    carrier_eff = carrier_tot["useful"] / carrier_tot["final"]
+
+    # Fill NaNs (where there is demand, but no consumption in that country)
+    # First by country avg. (all years), then by year avg. (all countries).
+    carrier_eff = carrier_eff.fillna(carrier_eff.mean(dim="year"))
+    carrier_eff = carrier_eff.fillna(carrier_eff.mean(dim="country_code"))
+
+    carrier_final_demand = useful_dem_tot / carrier_eff
     carrier_final_demand = carrier_final_demand.dropna(dim="subsection", how="all")
-    carrier_final_demand = carrier_final_demand.drop(["energy", "carrier_name"])
+
+    # Prettify
+    carrier_final_demand = carrier_final_demand.drop(["carrier_name"])
+    carrier_final_demand = carrier_final_demand.assign_attrs(units="twh")
+    carrier_final_demand.name = "final"
+
+    assert useful_dem_tot.sum() < carrier_final_demand.sum(), "Creating energy!"
 
     return carrier_final_demand
+
+
+def convert_subsec_demand_to_carrier(
+    jrc_energy: xr.Dataset,
+    subsection: Union[str, list[str]],
+    demand_type: str = "useful",
+) -> xr.DataArray:
+    """Converts a subsection into a carrier by aggregating all demand for it.
+
+    Args:
+        jrc_energy (xr.Dataset): JRC energy dataset.
+        subsection (Union[str, list[str]]): subsections to transform into carriers.
+        demand_type (str, optional): demand type of the carrier. Defaults to "useful".
+
+    Returns:
+        xr.DataArray: new carrier data in standard coordinate format.
+    """
+    subsec_useful_dem = jrc_energy.sel(subsection=subsection)[demand_type]
+
+    new_carrier_useful_dem = subsec_useful_dem.sum(["carrier_name", "section"])
+    new_carrier_useful_dem = new_carrier_useful_dem.rename({
+        "subsection": "carrier_name"
+    })
+
+    # Prettify
+    new_carrier_useful_dem = standardize(new_carrier_useful_dem, "twh")
+
+    return new_carrier_useful_dem
