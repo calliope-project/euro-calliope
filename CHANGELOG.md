@@ -4,11 +4,13 @@
 
 ### Added (models)
 
+* **ADD** industry module and steel industry energy demand processing. NOT CONNECTED TO THE MAIN WORKFLOW. Industry sectors pending: chemical, "other". (Fixes #308, #310, #347, #345 and #346)
+
 * **ADD** Spatial resolution that aligns with the regions defined by the [e-Highway 2050 project](https://cordis.europa.eu/project/id/308908/reporting) (`ehighways`) (#370).
 
 * **ADD** fully-electrified heat demand (#284).
 
-* **ADD** fully-electrified road transportation (#270), (#271). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (PR #338).
+* **ADD** fully-electrified road transportation (#270, #271, #358). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (#338).
 
 * **ADD** nuclear power plant technology with capacity limits. Capacity limits can be equal to today or be bound by a minimum and maximum capacity to represent an available range in future. In either case, capacities are allocated at a subnational resolution based on linear scaling from current capacity geolocations, using the JRC power plant database (#78).
 
@@ -24,7 +26,7 @@
 * **ADD** configuration option to build model timeseries data over multiple years, using `first-year` and `final-year` temporal scopes. Available years are 2010-2016 at time of implementing functionality (#152).
 * **ADD** nuclear technology capacity allocation workflow which uses the configuration parameter `nuclear-capacity-scenario` to select whether today's capacities define limits in the model definition ("current") or whether ranges set bounds on future capacity (by linking to a configuration CSV file) (#78).
 * **ADD** a Snakemake rule that generates a .csv and .nc file that provide an summary of the potentials (= per-tech constraints) for each technology and location (#250).
-* **ADD** ability to run on Apple silicon devices (#263).
+* **ADD** ability to run on Apple silicon devices (#263).Fixes #308, #310, #347, #345 and #346.
     * Updated geo packages from gdal 3.2 -> 3.3.
 * **ADD** re-execution triggers based on config and env changes (#264).
 * **ADD** continuous integration test of all conda environments on both ARM macOS and Linux (#369).

@@ -2,7 +2,6 @@
 
 
 rule download_transport_timeseries:
-    # TODO have correct timeseries data once RAMP has generated the new charging profile and it's been put on Zenodo
     message: "Get EV data from RAMP"
     params:
         url = config["data-sources"]["controlled-ev-profiles"]
@@ -11,6 +10,16 @@ rule download_transport_timeseries:
         protected("data/automatic/ramp-ev-{dataset}.csv.gz")
     wildcard_constraints:
         dataset = "consumption-profiles|plugin-profiles"
+    localrule: True
+    shell: "curl -sSLo {output} {params.url}"
+
+rule download_uncontrolled_timeseries:
+    # TODO: move into rule download_transport_timeseries once PR 356 is merged
+    message: "Get EV uncontrolled charging data from RAMP"
+    params:
+        url = config["data-sources"]["uncontrolled-ev-profiles"]
+    conda: "../envs/shell.yaml"
+    output: protected("data/automatic/ramp-ev-uncontrolled-charging-profiles.csv.gz")
     localrule: True
     shell: "curl -sSLo {output} {params.url}"
 
@@ -76,7 +85,7 @@ rule create_uncontrolled_road_transport_timeseries:
     message: "Create timeseries for road transport demand  (uncontrolled charging)"
     input:
         annual_data = "build/data/transport/annual-road-transport-distance-demand-uncontrolled.csv",
-        timeseries = "data/automatic/ramp-ev-consumption-profiles.csv.gz"
+        timeseries = "data/automatic/ramp-ev-uncontrolled-charging-profiles.csv.gz"
     params:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
@@ -97,7 +106,7 @@ use rule create_uncontrolled_road_transport_timeseries as create_uncontrolled_ro
     message: "Create timeseries for historic electrified road transport demand (uncontrolled charging)"
     input:
         annual_data = "build/data/transport/annual-road-transport-distance-demand-historic-electrification.csv",
-        timeseries = "data/automatic/ramp-ev-consumption-profiles.csv.gz",
+        timeseries = "data/automatic/ramp-ev-uncontrolled-charging-profiles.csv.gz",
     params:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
