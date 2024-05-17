@@ -103,10 +103,14 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of Swiss industry energy balance data.
-            ev-data:
+            controlled-ev-profiles:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of electric vehicle data.
+            uncontrolled-ev-profiles:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of electric light-duty vehicle uncontrolled charging.
             gridded-temperature-data:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
