@@ -69,6 +69,7 @@
 * **UPDATE** source of fraction of shared coast for offshore wind capacity factor distribution from a fixed shape download to an internal rule which can handle ad hoc shapes (partial #238).
 * **UPDATE** dropped support for Intel macOS. The workflow may still run on Intel macOS, but we do not actively maintain support (#369).
 * **UPDATE** link to GADM data following changes upstream (#376).
+* **UPDATE** link to NUTS data to allow for different NUTS years (#380, #382).
 
 ### Fixed (models)
 
