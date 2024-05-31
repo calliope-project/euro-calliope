@@ -1,5 +1,5 @@
 import pandas as pd
-import pycountry
+from eurocalliopelib import utils
 
 
 def scale_to_resolution_and_create_file(
@@ -89,9 +89,9 @@ if __name__ == "__main__":
         first_year=snakemake.params.first_year,
         final_year=snakemake.params.final_year,
         country_neighbour_dict=snakemake.params.country_neighbour_dict,
-        country_codes=([
-            pycountry.countries.lookup(c).alpha_3 for c in snakemake.params.countries
-        ]),
+        country_codes=utils.convert_valid_countries(
+            snakemake.params.countries
+        ).values(),
     )
 
     scale_to_resolution_and_create_file(

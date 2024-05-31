@@ -373,7 +373,7 @@ properties:
                                 description: JRC-IDEES name of motorcycles.
                     ev-battery-sizes:
                         type: object
-                        description: EV battery size per vehicle type.
+                        description: EV battery size per vehicle type in MWh.
                         additionalProperties: false
                         properties:
                             light-duty-vehicles:

@@ -168,7 +168,7 @@ parameters:
             coaches-and-buses: Motor coaches, buses and trolley buses
             passenger-cars: Passenger cars
             motorcycles: Powered 2-wheelers
-        ev-battery-sizes:  # MWh
+        ev-battery-sizes:
             heavy-duty-vehicles: 0.2  # average from [EUCAR_2019]
             light-duty-vehicles: 0.1  # own assumption based on passenger cars from [EUCAR_2019]
             motorcycles: 0.01  # own assumption
