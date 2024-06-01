@@ -6,18 +6,6 @@ from snakemake.utils import validate, min_version, makedirs
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
 
-# >>>>>> Include modules >>>>>>
-# Industry
-configfile: "modules/industry/config.yaml"
-validate(config, "modules/industry/schema.yaml")
-
-module module_industry:
-    snakefile: "modules/industry/industry.smk"
-    config: config["industry"]
-use rule * from module_industry as module_industry_*
-# <<<<<< Include modules <<<<<<
-
-
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
 test_dir = f"{root_dir}tests/"
@@ -38,6 +26,7 @@ include: "./rules/nuclear.smk"
 include: "./rules/transport.smk"
 include: "./rules/sync.smk"
 include: "./rules/heat.smk"
+include: "./rules/modules.smk"
 min_version("8.10")
 localrules: all, clean
 wildcard_constraints:
@@ -83,6 +72,7 @@ onerror:
 rule all:
     message: "Generate euro-calliope pre-built models and run tests."
     localrule: True
+    default_target: True
     input:
         "build/logs/continental/test.success",
         "build/logs/national/test.success",
