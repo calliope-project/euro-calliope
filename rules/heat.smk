@@ -101,8 +101,8 @@ rule population_per_weather_gridbox:
     script: "../scripts/heat/population_per_gridbox.py"
 
 
-rule gridded_unscaled_heat_profiles:
-    message: "Generate gridded heat demand profile shapes for {wildcards.year} from weather and population data"
+rule unscaled_heat_profiles:
+    message: "Generate {wildcards.resolution} heat demand profile shapes per for {wildcards.year} from weather and population data"
     input:
         population = rules.population_per_weather_gridbox.output[0],
         wind_speed = rules.download_gridded_10m_windspeed_data.output[0],
@@ -112,5 +112,5 @@ rule gridded_unscaled_heat_profiles:
         lat_name = "lat",
         lon_name = "lon",
     conda: "../envs/default.yaml"
-    output: "build/data/{resolution}/gridded_hourly_unscaled_heat_demand_{year}.nc"
-    script: "../scripts/heat/gridded_unscaled_heat_profiles.py"
+    output: "build/data/{resolution}/hourly_unscaled_heat_demand_{year}.nc"
+    script: "../scripts/heat/unscaled_heat_profiles.py"

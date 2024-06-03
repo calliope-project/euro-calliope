@@ -64,29 +64,53 @@ def get_unscaled_heat_profiles(
     daily_heat = get_daily_heat_demand(
         reference_temperature, average_wind_speed, daily_params
     )
+    daily_hot_water = get_daily_hot_water_demand(
+        reference_temperature, average_wind_speed, daily_params
+    )
 
     # Map profiles to daily demand
     hourly_heat = get_hourly_heat_profiles(
         reference_temperature, daily_heat, hourly_params
     )
 
+    # As per When2Heat, we assume the reference temperature is always 30C for hot water demand calcs
+    hourly_hot_water = get_hourly_heat_profiles(
+        reference_temperature.clip(min=30), daily_hot_water, hourly_params
+    )
+
+    # Space heating demand = total heating demand - hot water demand
+    hourly_space = (hourly_heat - hourly_hot_water).clip(min=0)
+
+    # Sanity check that there is more space heating demand in winter than summer
+    hourly_space_monthly = hourly_space.groupby("time.month").sum()
+    hourly_space_winter = hourly_space_monthly.sel(month=[12, 1, 2]).sum("month")
+    hourly_space_summer = hourly_space_monthly.sel(month=[6, 7, 8]).sum("month")
+    assert (hourly_space_winter > hourly_space_summer).all()
+
     # population weighted profiles.
     # NOTE: profile magnitude is now only consistent within each region, not between them
     weight = population / population.sum(["site"])
-    # `hourly_heat` has dims [x, y, datetime], `weight` has dims [x, y, id],
-    # we want a final array with dims [id, datetime]
-    grouped_hourly_heat = xr.concat(
-        [(hourly_heat * weight.sel({"id": id})).sum(["site"]) for id in weight.id],
-        dim="id",
-    )
+    grouped_hourly_space = group_gridcells(hourly_space, weight).rename("space_heat")
+    grouped_hourly_water = group_gridcells(hourly_hot_water, weight).rename("hot_water")
 
+    grouped_hourly_heat = xr.merge([grouped_hourly_space, grouped_hourly_water])
     grouped_hourly_heat.to_netcdf(out_path)
 
 
+def group_gridcells(gridded_data: xr.DataArray, weight: xr.DataArray) -> xr.DataArray:
+    # `hourly_heat` has dims [x, y, datetime], `weight` has dims [x, y, id],
+    # we want a final array with dims [id, datetime]
+
+    return xr.concat(
+        [(gridded_data * weight.sel({"id": id})).sum(["site"]) for id in weight.id],
+        dim="id",
+    )
+
+
 def get_hourly_heat_profiles(
-    reference_temperature: Union[int, float],
+    reference_temperature: xr.DataArray,
     daily_heat: xr.DataArray,
-    hourly_params: pd.DataFrame,
+    hourly_params: pd.Series,
 ) -> xr.DataArray:
     """
     reference_temperature: temperature in degrees C
@@ -107,11 +131,17 @@ def get_hourly_heat_profiles(
         .assign(weekday=temperature_increments.index.get_level_values("time").dayofweek)
         .set_index(["temperature", "weekday"], append=True)
     )
-    aligned_increment_to_params = hourly_params.align(increment_index)[0]
+    aligned_increment_to_params = pd.merge(
+        hourly_params.rename("param"),
+        increment_index,
+        left_index=True,
+        right_index=True,
+    ).squeeze()
+
     hourly_params_at_all_locations = xr.DataArray.from_series(
         aligned_increment_to_params.droplevel(["weekday", "temperature"])
     )
-    # daily heat is multiplied by the hourly paramater value to get the relative heat demand for that hour
+    # daily heat is multiplied by the hourly parameter value to get the relative heat demand for that hour
     hourly_heat = hourly_params_at_all_locations * daily_heat
 
     hourly_heat = hour_and_day_to_datetime(hourly_heat)
@@ -188,7 +218,8 @@ def get_daily_heat_demand(
 
     def heat_function(t, parameters):
         # BDEW et al. 2015 describes this function combining parameters
-        celsius = t - 273.15  # The temperature input is in Kelvin
+        # Handle situation where the temperature input is in Kelvin
+        celsius = t - 273.15 if (t > 100).all() else t
 
         sigmoid = (
             parameters["A"]
@@ -204,6 +235,28 @@ def get_daily_heat_demand(
         return sigmoid + linear
 
     return daily(temperature, average_wind, all_parameters, heat_function)
+
+
+def get_daily_hot_water_demand(
+    temperature: xr.DataArray, average_wind: xr.DataArray, all_parameters: pd.DataFrame
+) -> xr.DataArray:
+    """
+    A function for the daily water heating demand is derived from BDEW et al. 2015
+    This is implemented in the following and passed to the general daily function
+
+    Direct copy from https://github.com/oruhnau/when2heat/blob/351bd1a2f9392ed50a7bdb732a103c9327c51846/scripts/demand.py
+    """
+
+    def water_function(t, parameters):
+        # Handle situation where the temperature input is in Kelvin
+        celsius = t - 273.15 if (t > 100).all() else t
+
+        # Below 15 °C, the water heating demand is not defined and assumed to stay constant
+        celsius_clipped = celsius.clip(min=15)
+
+        return parameters["m_w"] * celsius_clipped + parameters["b_w"] + parameters["D"]
+
+    return daily(temperature, average_wind, all_parameters, water_function)
 
 
 def daily(
