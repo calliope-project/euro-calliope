@@ -97,30 +97,17 @@ rule create_uncontrolled_road_transport_timeseries_historic_electrification:
     script: "../scripts/transport/road_transport_historic_electrification.py"
 
 
-
-rule aggregate_timeseries: # TODO consider merge with other rules, as this is tiny atm
+rule aggregate_timeseries_historic_electrified: # TODO consider merge with other rules, as this is tiny atm
     message: "Aggregates uncontrolled charging timeseries for {wildcards.resolution} electrified road transport transport"
     input:
-        time_series = [
-            f'build/data/transport/timeseries/timeseries-uncontrolled-{vehicle_type}.csv'
-            for vehicle_type in config["parameters"]["transport"]["road-transport-conversion-factors"].keys()
-        ],
+        time_series = (  # Historical data does not have electrified motorcycles and heavy-duty-vehicles
+            "build/data/transport/timeseries/timeseries-uncontrolled-light-duty-vehicles-historic-electrification.csv",
+            "build/data/transport/timeseries/timeseries-uncontrolled-coaches-and-buses-historic-electrification.csv",
+            "build/data/transport/timeseries/timeseries-uncontrolled-passenger-cars-historic-electrification.csv",
+        ),
         locations = "build/data/{resolution}/units.csv",
         populations = "build/data/{resolution}/population.csv"
     conda: "../envs/default.yaml"
     output:
-        "build/models/{resolution}/timeseries/demand/uncontrolled-electrified-road-transport.csv",
+        "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv",
     script: "../scripts/transport/aggregate_timeseries.py"
-
-
-use rule aggregate_timeseries as aggregate_timeseries_historic_electrified with:
-    message: "Aggregates uncontrolled charging timeseries for {wildcards.resolution} historically electrified road transport"
-    input:
-        time_series = (
-            "build/data/transport/timeseries/timeseries-uncontrolled-light-duty-vehicles-historic-electrification.csv",
-            "build/data/transport/timeseries/timeseries-uncontrolled-coaches-and-buses-historic-electrification.csv",
-            "build/data/transport/timeseries/timeseries-uncontrolled-passenger-cars-historic-electrification.csv"),
-        locations = "build/data/{resolution}/units.csv",
-        populations = "build/data/{resolution}/population.csv"
-    output:
-        "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv"

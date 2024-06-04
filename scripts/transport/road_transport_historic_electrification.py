@@ -14,7 +14,7 @@ def create_road_transport_demand_timeseries(
     country_codes: list[str],
     path_to_output: str,
 ) -> None:
-    """This function reads historical electrified transport and creates a timeseries to act as a supply"""
+    """This function reads historical electrified transport annual data and creates a timeseries to act as a supply"""
 
     # Read annual road transport distance into panda dataframe
 
