@@ -11,10 +11,11 @@ def create_road_transport_demand_timeseries(
     country_neighbour_dict: dict[str, list[str]],
     power_scaling_factor: float,
     conversion_factor: float,
-    historic: bool,
     country_codes: list[str],
     path_to_output: str,
 ) -> None:
+    """This function reads historical electrified transport and creates a timeseries to act as a supply"""
+
     # Read annual road transport distance into panda dataframe
 
     df_annual = (
@@ -54,16 +55,15 @@ def create_road_transport_demand_timeseries(
     df_timeseries = (
         df_timeseries.mul(conversion_factor)
         .mul(power_scaling_factor)
-        .mul(
-            1 if historic else -1
-        )  # historic demand is actually a supply to avoid double counting
         .loc[:, country_codes]
         .tz_localize(None)
         .rename_axis("utc-timestamp")
     )
+
     assert not df_timeseries.isna().any(
         axis=None
     ), "There are NaN values in the timeseries dataframe"
+
     df_timeseries.to_csv(path_to_output)
 
 
@@ -86,7 +86,6 @@ if __name__ == "__main__":
         final_year=snakemake.params.final_year,
         vehicle_type=snakemake.wildcards.vehicle_type,
         conversion_factor=snakemake.params.conversion_factor,
-        historic=snakemake.params.historic,
         path_to_output=snakemake.output[0],
         country_codes=[
             pycountry.countries.lookup(c).alpha_3 for c in snakemake.params.countries

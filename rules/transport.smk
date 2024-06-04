@@ -77,42 +77,25 @@ rule create_controlled_ev_charging_parameters:
     output: "build/models/{resolution}/timeseries/demand/{dataset_name}-ev.csv"
     script: "../scripts/transport/road_transport_controlled_constraints.py"
 
-rule create_uncontrolled_road_transport_timeseries:
-    message: "Create timeseries for road transport demand  (uncontrolled charging)"
+rule create_uncontrolled_road_transport_timeseries_historic_electrification:
+    message: "Create timeseries for historical electrified road transport demand  (assumed uncontrolled charging)"
     input:
-        annual_data = "build/data/transport/annual-road-transport-distance-demand-uncontrolled.csv",
+        annual_data = "build/data/transport/annual-road-transport-distance-demand-historic-electrification.csv",
         timeseries = "data/automatic/ramp-ev-uncontrolled-charging-profiles.csv.gz"
     params:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
         power_scaling_factor = config["scaling-factors"]["power"],
         conversion_factor = lambda wildcards: config["parameters"]["transport"]["road-transport-conversion-factors"][wildcards.vehicle_type],
-        historic = False,
         countries = config["scope"]["spatial"]["countries"],
         country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],
     conda: "../envs/default.yaml"
     wildcard_constraints:
         vehicle_type = "light-duty-vehicles|heavy-duty-vehicles|coaches-and-buses|passenger-cars|motorcycles"
     output:
-        main = "build/data/transport/timeseries/timeseries-uncontrolled-{vehicle_type}.csv",
-    script: "../scripts/transport/road_transport_timeseries.py"
+        main = "build/data/transport/timeseries/timeseries-uncontrolled-{vehicle_type}-historic-electrification.csv",
+    script: "../scripts/transport/road_transport_historic_electrification.py"
 
-
-use rule create_uncontrolled_road_transport_timeseries as create_uncontrolled_road_transport_timeseries_historic_electrification with:
-    message: "Create timeseries for historic electrified road transport demand (uncontrolled charging)"
-    input:
-        annual_data = "build/data/transport/annual-road-transport-distance-demand-historic-electrification.csv",
-        timeseries = "data/automatic/ramp-ev-uncontrolled-charging-profiles.csv.gz",
-    params:
-        first_year = config["scope"]["temporal"]["first-year"],
-        final_year = config["scope"]["temporal"]["final-year"],
-        power_scaling_factor = config["scaling-factors"]["power"],
-        conversion_factor = lambda wildcards: config["parameters"]["transport"]["road-transport-conversion-factors"][wildcards.vehicle_type],
-        historic = True,
-        countries = config["scope"]["spatial"]["countries"],
-        country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],
-    output:
-        "build/data/transport/timeseries/timeseries-uncontrolled-{vehicle_type}-historic-electrification.csv"
 
 
 rule aggregate_timeseries: # TODO consider merge with other rules, as this is tiny atm
