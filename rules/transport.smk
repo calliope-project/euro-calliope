@@ -23,7 +23,6 @@ rule download_uncontrolled_timeseries:
     localrule: True
     shell: "curl -sSLo {output} {params.url}"
 
-
 rule annual_transport_demand:
     message: "Calculate future transport energy demand based on JRC IDEES"
     input:
@@ -32,13 +31,10 @@ rule annual_transport_demand:
         jrc_road_distance = "build/data/jrc-idees/transport/processed-road-distance.csv",
     params:
         fill_missing_values = config["data-pre-processing"]["fill-missing-values"]["jrc-idees"],
-        efficiency_quantile = config["parameters"]["transport"]["future-vehicle-efficiency-percentile"],
-        uncontrolled_charging_share = config["parameters"]["transport"]["uncontrolled-ev-charging-share"],
-    conda: "../envs/default.yaml"
     output:
-        road_distance_controlled = "build/data/transport/annual-road-transport-distance-demand-controlled.csv",
-        road_distance_uncontrolled = "build/data/transport/annual-road-transport-distance-demand-uncontrolled.csv",
+        road_distance = "build/data/transport/annual-road-transport-distance-demand.csv",
         road_distance_historically_electrified = "build/data/transport/annual-road-transport-distance-demand-historic-electrification.csv",
+    conda: "../envs/default.yaml"
     script: "../scripts/transport/annual_transport_demand.py"
 
 rule create_controlled_road_transport_annual_demand_and_installed_capacities:
