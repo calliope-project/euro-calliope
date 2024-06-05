@@ -70,6 +70,7 @@ rule create_transport_demand_data_for_yaml:
         final_year = config["scope"]["temporal"]["final-year"],
         countries = config["scope"]["spatial"]["countries"],
         vehicle_aggregation = config["parameters"]["transport"]["vehicle-type-aggregation"],
+        transport_factor = config["scaling-factors"]["transport"],
     conda: "../envs/default.yaml"
     output:
         main = "build/data/{resolution}/demand/transport.csv",

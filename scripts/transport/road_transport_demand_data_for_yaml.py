@@ -93,5 +93,7 @@ if __name__ == "__main__":
     ]
     df_annual_road_distance_demand.index.name = "id"
 
-    # Export to CSV
-    df_annual_road_distance_demand.to_csv(path_to_output)
+    # Multiply by transport unit and export to CSV
+    df_annual_road_distance_demand.mul(snakemake.params.transport_factor).to_csv(
+        path_to_output
+    )
