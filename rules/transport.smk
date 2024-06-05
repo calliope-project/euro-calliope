@@ -59,6 +59,22 @@ rule create_controlled_road_transport_annual_demand_and_installed_capacities:
         main = "build/data/{resolution}/demand/electrified-transport.csv",
     script: "../scripts/transport/road_transport_controlled_charging.py"
 
+rule create_transport_demand_data_for_yaml:
+    message: "Create transport demand data to be exported into the YAML file"
+    input:
+        annual_road_distance = "build/data/transport/annual-road-transport-distance-demand.csv",
+        locations = "build/data/{resolution}/units.csv",
+        populations = "build/data/{resolution}/population.csv",
+    params:
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
+        countries = config["scope"]["spatial"]["countries"],
+        vehicle_aggregation = config["parameters"]["transport"]["vehicle-type-aggregation"],
+    conda: "../envs/default.yaml"
+    output:
+        main = "build/data/{resolution}/demand/transport.csv",
+    script: "../scripts/transport/road_transport_demand_data_for_yaml.py"
+
 rule create_controlled_ev_charging_parameters:
     message: "Create timeseries parameters {wildcards.dataset_name} for controlled EV charging at {wildcards.resolution} resolution"
     input:

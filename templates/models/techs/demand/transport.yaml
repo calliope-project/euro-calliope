@@ -1,0 +1,41 @@
+techs:
+    demand_light_transport:
+        essentials:
+            name: 'Light vehicle transport demand'
+            parent: demand
+            carrier: light_transport
+        constraints:
+            force_resource: false
+            resource: -.inf  # i.e. very large negative relative to model scale
+    demand_heavy_transport:
+        essentials:
+            name: 'Heavy vehicle demand'
+            parent: demand
+            carrier: heavy_transport
+        constraints:
+            force_resource: false
+            resource: -.inf  # i.e. very large negative relative to model scale
+
+
+
+locations:
+    {% for id in locations.index %}
+    {{ id }}.techs:
+        demand_light_transport:
+        demand_heavy_transport:
+    {% endfor %}
+
+overrides:
+    annual_transport_distance:
+        group_constraints:
+            {% for idx in locations.index %}
+            {% for tech in locations.columns %}
+            {{ tech }}_annual_distance_{{ idx }}:
+                techs: [demand_{{ tech[5:] }}]
+                locs: [{{ idx }}]
+                carrier_con_equals:
+                    {{ tech[5:] }}: {{ -1 * locations.loc[idx, tech] }}  # {{ (1 / scaling_factors.transport) | unit("Miokm") }}
+            {% endfor %}
+
+            {% endfor %}
+

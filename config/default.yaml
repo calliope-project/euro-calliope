@@ -168,6 +168,12 @@ parameters:
             coaches-and-buses: Motor coaches, buses and trolley buses
             passenger-cars: Passenger cars
             motorcycles: Powered 2-wheelers
+        vehicle-type-aggregation:
+            light-duty-vehicles: light_transport
+            heavy-duty-vehicles: heavy_transport
+            coaches-and-buses: heavy_transport
+            passenger-cars: light_transport
+            motorcycles: light_transport
         ev-battery-sizes:
             heavy-duty-vehicles: 0.2  # average from [EUCAR_2019]
             light-duty-vehicles: 0.1  # own assumption based on passenger cars from [EUCAR_2019]
