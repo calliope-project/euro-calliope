@@ -106,7 +106,7 @@ properties:
             controlled-ev-profiles:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
-                description: Web address of electric vehicle data.
+                description: Web address of electric vehicle data for controlled charging.
             uncontrolled-ev-profiles:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
@@ -198,6 +198,9 @@ properties:
             monetary:
                 type: number
                 description: "Applied to all quantities of monetary cost (base: EUR)."
+            transport:
+                type: number
+                description: "Applied to all quantities of transport (base: Mio km)."
     parameters:
         type: object
         description: Parameter values of the models.
@@ -368,9 +371,43 @@ properties:
                             motorcycles:
                                 type: string
                                 description: JRC-IDEES name of motorcycles.
+                    ev-battery-sizes:
+                        type: object
+                        description: EV battery size per vehicle type in MWh.
+                        additionalProperties: false
+                        properties:
+                            light-duty-vehicles:
+                                type: number
+                                description: Light duty vehicles / trucks.
+                            heavy-duty-vehicles:
+                                type: number
+                                description: Heavy duty vehicles / trucks.
+                            coaches-and-buses:
+                                type: number
+                                description: Coaches and buses.
+                            passenger-cars:
+                                type: number
+                                description: Passenger cars.
+                            motorcycles:
+                                type: number
+                                description: Motorcylces.
                     uncontrolled-ev-charging-share:
                         type: number
                         description: Share of uncontrolled charging.
+                    monthly-demand-bound-fraction:
+                        type: object
+                        description: Charging flexibility parameter constraining the amount of monthly demand to be met.
+                        additionalProperties: false
+                        properties:
+                            min:
+                                type: number
+                                description: Minimum monthly demand range.
+                            max:
+                                type: number
+                                description: Maximum monthly demand range.
+                            equals:
+                                type: number
+                                description: Equal monthly demand range.
             entsoe-tyndp:
                 type: object
                 description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/

@@ -19,7 +19,7 @@ data-sources:
     swiss-end-use: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/energieverbrauch-nach-verwendungszweck.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvOTg1NA==.html
     swiss-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/gesamtenergiestatistik.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvNzUxOQ==.html
     swiss-industry-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/teilstatistiken.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODc4OA==.html
-    controlled-ev-profiles: https://zenodo.org/record/6579421/files/ramp-ev-consumption-profiles.csv.gz?download=1
+    controlled-ev-profiles: https://zenodo.org/record/6579421/files/ramp-ev-{dataset}.csv.gz?download=1
     uncontrolled-ev-profiles: https://sandbox.zenodo.org/records/45530/files/uncontrolled-charging-profiles.csv.gz?download=1 # TODO: convert into Zenodo repository
     gridded-temperature-data: https://zenodo.org/records/6557643/files/temperature.nc?download=1
     gridded-10m-windspeed-data: https://zenodo.org/records/6557643/files/wind10m.nc?download=1
@@ -55,6 +55,7 @@ scaling-factors: # values are tuned for models with a few hours resolution and o
     power: 0.00001 # from MW(h) to 100 GW(h)
     area: 0.0001 # from km2 to 10,000 km2
     monetary: 0.000000001 # from EUR to 1 billion EUR
+    transport: 0.01  # from Mio km to 100 Mio km
 capacity-factors:
     min: 0.001
     max: 10 # 0.001 -> 10 leads to a numerical range of 1e5 (hourly resolution)
@@ -167,7 +168,17 @@ parameters:
             coaches-and-buses: Motor coaches, buses and trolley buses
             passenger-cars: Passenger cars
             motorcycles: Powered 2-wheelers
-        uncontrolled-ev-charging-share: 0.5
+        ev-battery-sizes:
+            heavy-duty-vehicles: 0.2  # average from [EUCAR_2019]
+            light-duty-vehicles: 0.1  # own assumption based on passenger cars from [EUCAR_2019]
+            motorcycles: 0.01  # own assumption
+            coaches-and-buses: 0.2  # own assumption based on HDVs from [EUCAR_2019]
+            passenger-cars: 0.08  # average from [EUCAR_2019]
+        uncontrolled-ev-charging-share: 1
+        monthly-demand-bound-fraction:
+            min: 0.9
+            max: 1.1
+            equals: 1
     entsoe-tyndp:
         scenario: National Trends
         grid: Reference

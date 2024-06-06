@@ -34,7 +34,7 @@ wildcard_constraints:
 
 ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
 ruleorder: bio_techs_and_locations_template > techs_and_locations_template
-ruleorder: create_controlled_road_transport_annual_demand > dummy_tech_locations_template
+ruleorder: create_controlled_road_transport_annual_demand_and_installed_capacities > dummy_tech_locations_template
 
 ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
@@ -178,6 +178,10 @@ rule model_template:
             "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv",
             "build/models/{resolution}/timeseries/demand/electrified-heat-demand.csv",
             "build/models/{resolution}/timeseries/demand/heat-demand-historic-electrification.csv",
+            "build/models/{resolution}/timeseries/demand/demand-shape-min-ev.csv",
+            "build/models/{resolution}/timeseries/demand/demand-shape-max-ev.csv",
+            "build/models/{resolution}/timeseries/demand/demand-shape-equals-ev.csv",
+            "build/models/{resolution}/timeseries/demand/plugin-profiles-ev.csv",
         ),
         optional_input_files = lambda wildcards: expand(
             f"build/models/{wildcards.resolution}/{{input_file}}",

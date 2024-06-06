@@ -6,7 +6,10 @@ rule download_transport_timeseries:
     params:
         url = config["data-sources"]["controlled-ev-profiles"]
     conda: "../envs/shell.yaml"
-    output: protected("data/automatic/ramp-ev-consumption-profiles.csv.gz")
+    output:
+        protected("data/automatic/ramp-ev-{dataset}.csv.gz")
+    wildcard_constraints:
+        dataset = "consumption-profiles|plugin-profiles"
     localrule: True
     shell: "curl -sSLo {output} {params.url}"
 
@@ -38,16 +41,20 @@ rule annual_transport_demand:
         road_distance_historically_electrified = "build/data/transport/annual-road-transport-distance-demand-historic-electrification.csv",
     script: "../scripts/transport/annual_transport_demand.py"
 
-rule create_controlled_road_transport_annual_demand:
-    message: "Create annual demand for controlled charging at {wildcards.resolution} resolution"
+rule create_controlled_road_transport_annual_demand_and_installed_capacities:
+    message: "Create annual demand for controlled charging and corresponding charging potentials at {wildcards.resolution} resolution"
     input:
         annual_controlled_demand = "build/data/transport/annual-road-transport-distance-demand-controlled.csv",
+        ev_vehicle_number = "build/data/jrc-idees/transport/processed-road-vehicles.csv",
+        jrc_road_distance = "build/data/jrc-idees/transport/processed-road-distance.csv",
         locations = "build/data/{resolution}/units.csv",
         populations = "build/data/{resolution}/population.csv",
     params:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
         power_scaling_factor = config["scaling-factors"]["power"],
+        transport_scaling_factor = config["scaling-factors"]["transport"],
+        battery_sizes = config["parameters"]["transport"]["ev-battery-sizes"],
         conversion_factors = config["parameters"]["transport"]["road-transport-conversion-factors"],
         countries = config["scope"]["spatial"]["countries"],
         country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],
@@ -56,6 +63,23 @@ rule create_controlled_road_transport_annual_demand:
         main = "build/data/{resolution}/demand/electrified-transport.csv",
     script: "../scripts/transport/road_transport_controlled_charging.py"
 
+rule create_controlled_ev_charging_parameters:
+    message: "Create timeseries parameters {wildcards.dataset_name} for controlled EV charging at {wildcards.resolution} resolution"
+    input:
+        ev_profiles = lambda wildcards: "data/automatic/ramp-ev-consumption-profiles.csv.gz" if "demand" in wildcards.dataset_name else f"data/automatic/ramp-ev-{wildcards.dataset_name}.csv.gz",
+        locations = "build/data/{resolution}/units.csv",
+        populations = "build/data/{resolution}/population.csv",
+    params:
+        demand_range = config["parameters"]["transport"]["monthly-demand-bound-fraction"],
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
+        country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],
+        countries = config["scope"]["spatial"]["countries"],
+    wildcard_constraints:
+        dataset_name = "demand-shape-equals|demand-shape-max|demand-shape-min|plugin-profiles"
+    conda: "../envs/default.yaml"
+    output: "build/models/{resolution}/timeseries/demand/{dataset_name}-ev.csv"
+    script: "../scripts/transport/road_transport_controlled_constraints.py"
 
 rule create_uncontrolled_road_transport_timeseries:
     message: "Create timeseries for road transport demand  (uncontrolled charging)"
