@@ -17,6 +17,14 @@ rule download_when2heat_params:
     conda: "../envs/shell.yaml"
     shell: "mkdir -p {output} && curl -sSLo '{output}/#1' '{params.url}'"
 
+rule download_heat_pump_characteristics:
+    message: "Download manufacturer heat pump data"
+    params: url = config["data-sources"]["heat-pump-characteristics"]
+    output: protected("data/automatic/heat-pump-characteristics.nc")
+    conda: "../envs/shell.yaml"
+    localrule: True
+    shell: "curl -sSLo {output} '{params.url}'"
+
 
 rule annual_heat_demand:
     message: "Calculate national heat demand for household and commercial sectors"
@@ -106,3 +114,43 @@ rule unscaled_heat_profiles:
     conda: "../envs/default.yaml"
     output: "build/data/{resolution}/hourly_unscaled_heat_demand.nc"
     script: "../scripts/heat/unscaled_heat_profiles.py"
+
+
+rule heat_pump_cop_subset:
+    message: "Generate {wildcards.resolution} {wildcards.heat_pump_type} supply coefficient of performance (COP) for {wildcards.year}"
+    input:
+        temperature = lambda wildcards: (
+            "data/automatic/gridded-weather/temperature.nc" if wildcards.heat_pump_type == "ashp"
+            else "data/automatic/gridded-weather/tsoil5.nc"
+        ),
+        population = rules.population_per_weather_gridbox.output[0],
+        heat_pump_characteristics = rules.download_heat_pump_characteristics.output[0]
+    params:
+        sink_temperature = config["parameters"]["heat-pump"]["sink-temperature"],
+        space_heat_sink_ratio = config["parameters"]["heat-pump"]["space-heat-sink-ratio"],
+        correction_factor = config["parameters"]["heat-pump"]["correction-factor"],
+        lat_name = "lat",
+        lon_name = "lon",
+    wildcard_constraints:
+        heat_pump_type = "ashp|gshp"
+    conda: "../envs/default.yaml"
+    output: "build/data/{resolution}/cop_{heat_pump_type}_{year}.nc"
+    script: "../scripts/heat/heat_pump_cop.py"
+
+
+rule merge_heat_pumps:
+    message: "Merge {wildcards.resolution} air- and ground-source heat pump characteristic data for {wildcards.year} into one generic 'heat_pump' technology definition."
+    input:
+        ashp = "build/data/{resolution}/cop_ashp_{year}.nc",
+        gshp = "build/data/{resolution}/cop_gshp_{year}.nc",
+    params:
+        heat_pump_ratio = config["parameters"]["heat-pump"]["heat-pump-ratio"],
+    conda: "../envs/default.yaml"
+    output: "build/data/{resolution}/cop_hp_{year}.nc"
+    run:
+        import xarray as xr
+
+        ashp = xr.open_dataset(input.ashp) * heat_pump_ratio["ashp"]
+        gshp = xr.open_dataset(input.gshp) * heat_pump_ratio["gshp"]
+        hp = ashp + gshp
+        hp.to_netcdf(output[0])
