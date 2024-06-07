@@ -94,7 +94,8 @@ rule population_per_weather_gridbox:
 
 
 rule unscaled_heat_profiles:
-    message: "Generate {wildcards.resolution} heat demand profile shapes from gridded weather data, aggregated to {wildcards.resolution} units using population data."
+    message: "Generate gridded heat demand profile shapes for {wildcards.year} from weather and population data"
+
     input:
         population = rules.population_per_weather_gridbox.output[0],
         wind_speed = "data/automatic/gridded-weather/wind10m.nc",

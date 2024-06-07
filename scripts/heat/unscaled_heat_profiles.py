@@ -1,6 +1,7 @@
 """
 Use weather data to simulate hourly heat profiles using When2Heat
 (https://github.com/oruhnau/when2heat) data processing pipeline.
+
 Functions attributable to When2Heat are explicitly referenced as such
 in the function docstring.
 """

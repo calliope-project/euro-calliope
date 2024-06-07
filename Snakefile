@@ -6,18 +6,6 @@ from snakemake.utils import validate, min_version, makedirs
 configfile: "config/default.yaml"
 validate(config, "config/schema.yaml")
 
-# >>>>>> Include modules >>>>>>
-# Industry
-configfile: "modules/industry/config.yaml"
-validate(config, "modules/industry/schema.yaml")
-
-module module_industry:
-    snakefile: "modules/industry/industry.smk"
-    config: config["industry"]
-use rule * from module_industry as module_industry_*
-# <<<<<< Include modules <<<<<<
-
-
 root_dir = config["root-directory"] + "/" if config["root-directory"] not in ["", "."] else ""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
 test_dir = f"{root_dir}tests/"
@@ -38,6 +26,7 @@ include: "./rules/nuclear.smk"
 include: "./rules/transport.smk"
 include: "./rules/sync.smk"
 include: "./rules/heat.smk"
+include: "./rules/modules.smk"
 min_version("8.10")
 localrules: all, clean
 wildcard_constraints:
@@ -45,7 +34,7 @@ wildcard_constraints:
 
 ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
 ruleorder: bio_techs_and_locations_template > techs_and_locations_template
-ruleorder: create_controlled_road_transport_annual_demand > dummy_tech_locations_template
+ruleorder: create_controlled_road_transport_annual_demand_and_installed_capacities > dummy_tech_locations_template
 
 ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
@@ -83,6 +72,7 @@ onerror:
 rule all:
     message: "Generate euro-calliope pre-built models and run tests."
     localrule: True
+    default_target: True
     input:
         "build/logs/continental/test.success",
         "build/logs/national/test.success",
@@ -188,6 +178,10 @@ rule model_template:
             "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv",
             "build/models/{resolution}/timeseries/demand/electrified-heat-demand.csv",
             "build/models/{resolution}/timeseries/demand/heat-demand-historic-electrification.csv",
+            "build/models/{resolution}/timeseries/demand/demand-shape-min-ev.csv",
+            "build/models/{resolution}/timeseries/demand/demand-shape-max-ev.csv",
+            "build/models/{resolution}/timeseries/demand/demand-shape-equals-ev.csv",
+            "build/models/{resolution}/timeseries/demand/plugin-profiles-ev.csv",
         ),
         optional_input_files = lambda wildcards: expand(
             f"build/models/{wildcards.resolution}/{{input_file}}",
