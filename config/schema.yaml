@@ -114,7 +114,7 @@ properties:
             gridded-weather-data:
                 type: string
                 pattern: ^(https?|http?):\/\/.+{data_var}.*\.(nc)$
-                description: "Web address of gridded weather data. Expecting a netCDF file with the coordinates [time, site], the variables [{data_type}, lat, lon], and the attribute 'unit'."
+                description: "Web address of gridded weather data. Expecting a netCDF file with the coordinates [time, site], the variables [{data_var}, lat, lon], and the attribute 'unit'."
             when2heat-params:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
