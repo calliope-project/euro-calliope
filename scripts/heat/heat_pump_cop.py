@@ -1,5 +1,4 @@
-from pathlib import Path
-from typing import Literal, Union
+from typing import Union
 
 import pandas as pd
 import xarray as xr
@@ -9,16 +8,16 @@ HEAT_PUMP_TYPE_SOURCE = {"ashp": "air", "gshp": "ground"}
 
 
 def cop(
-    path_to_temperature: str,
+    path_to_temperature_air: str,
+    path_to_temperature_ground: str,
     path_to_population: str,
     path_to_heat_pump_characteristics: str,
-    sink_temperature: dict,
-    space_heat_sink_ratio: dict,
+    sink_temperature: dict[str, int],
+    space_heat_sink_ratio: dict[str, float],
     correction_factor: float,
-    lat_name: str,
-    lon_name: str,
-    heat_pump_type: Literal["ashp", "gshp"],
-    year: Union[str, int],
+    heat_pump_ratio: dict[str, float],
+    first_year: Union[int, str],
+    final_year: Union[int, str],
     path_to_output: str,
 ):
     """Calculate heat pump Coefficient of Performance (COP) based on manufacturer data.
@@ -37,14 +36,15 @@ def cop(
         lat_name (str): Name of the latitude dimension in the gridded datasets.
         lon_name (str):  Name of the longitude dimension in the gridded datasets.
         heat_pump_type (Literal[ashp, gshp]): Heat pump type being modelled.
-        year (Union[str, int]): Timeseries year to select.
+        first_year (Union[str, int]): First year of data to include in the profile (inclusive).
+        final_year (Union[str, int]): Final year of data to include in the profile (inclusive).
         path_to_output (str): Output to which COP timeseries data will be saved.
     """
     population = xr.open_dataarray(path_to_population)
-    temperature_ds = (
-        xr.open_dataset(path_to_temperature)
-        .rename({lon_name: "x", lat_name: "y"})
-        .sel(time=str(year))
+
+    temperature_ds = xr.merge(
+        _load_temperature_data(filepath, first_year, final_year)
+        for filepath in [path_to_temperature_air, path_to_temperature_ground]
     )
 
     # 1. Get characteristics per sink method
@@ -74,18 +74,31 @@ def cop(
         dropna=False,
     )
 
-    ds_cop = temperature_to_cop(
-        heat_pump_characteristics,
-        temperature_ds,
+    cop_ashp = temperature_to_cop(
+        heat_pump_characteristics.sel(source="air"),
+        temperature_ds["temperature"],
         correction_factor,
-        HEAT_PUMP_TYPE_SOURCE[heat_pump_type],
-        Path(path_to_temperature).stem,
     )
 
+    cop_gshp = temperature_to_cop(
+        heat_pump_characteristics.sel(source="ground"),
+        # ASSUME: 5C decrease to account for soil to brine heat transfer
+        temperature_ds["tsoil5"] - 5,
+        correction_factor,
+    )
+    assert (
+        sum(heat_pump_ratio.values()) == 1
+    ), "Heat pump technology ratios must add up to 1."
+
+    cop = (
+        cop_ashp * heat_pump_ratio["ashp"] + cop_gshp * heat_pump_ratio["gshp"]
+    ).fillna(cop_ashp)
+
     # Sanity check that there is higher COP in summer than winter
-    cop_monthly = ds_cop.groupby("time.month").sum()
+    cop_monthly = cop.groupby("time.month").mean()
     cop_winter = cop_monthly.sel(month=[12, 1, 2]).mean("month")
     cop_summer = cop_monthly.sel(month=[6, 7, 8]).mean("month")
+
     assert (cop_summer > cop_winter).all()
 
     # population weighted COP.
@@ -93,7 +106,7 @@ def cop(
     # `ds_cop` has dims [site, time], `weight` has dims [site, id],
     # we want a final array with dims [id, time]
     ds_cop_grouped = xr.concat(
-        [(ds_cop * weight.sel({"id": id})).sum(["site"]) for id in weight.id],
+        [(cop * weight.sel({"id": id})).sum(["site"]) for id in weight.id],
         dim="id",
     )
 
@@ -107,43 +120,45 @@ def cop(
 
 def temperature_to_cop(
     heat_pump_characteristics: xr.DataArray,
-    temperature_ds: xr.Dataset,
+    temperature_celsius: xr.DataArray,
     correction_factor: float,
-    source: Literal["ground", "air"],
-    weather_var: str,
 ):
     """
     Interpolate heat pump temperature-COP relationship to the gridded weather temperature profiles.
     """
-    if source == "air":
-        temperature = temperature_ds[weather_var]
-    elif source == "ground":
-        # ASSUME: 5C decrease to account for soil to brine heat transfer
-        temperature = temperature_ds[weather_var] - 5
-
-    temperature_c = temperature - 273.15 if (temperature > 100).all() else temperature
 
     # The range of source temperatures covered in the characteristic data depends on the heat pump type
-    source_cop = correction_factor * heat_pump_characteristics.dropna(
-        "source_temp"
-    ).sel(source=source)
+    source_cop = correction_factor * heat_pump_characteristics.dropna("source_temp")
 
     return source_cop.interp(
-        {"source_temp": temperature_c}, kwargs={"fill_value": "extrapolate"}
+        {"source_temp": temperature_celsius}, kwargs={"fill_value": "extrapolate"}
     )
+
+
+def _load_temperature_data(
+    path_to_temperature_data: str,
+    first_year: Union[int, str],
+    final_year: Union[int, str],
+) -> xr.Dataset:
+    "Load xarray dataset and check that units are in the correct unit"
+    ds = xr.open_dataset(path_to_temperature_data).sel(
+        time=slice(str(first_year), str(final_year))
+    )
+    assert ds.attrs["unit"].lower() == "degrees c"
+    return ds
 
 
 if __name__ == "__main__":
     cop(
-        path_to_temperature=snakemake.input.temperature,
+        path_to_temperature_air=snakemake.input.temperature_air,
+        path_to_temperature_ground=snakemake.input.temperature_ground,
         path_to_population=snakemake.input.population,
         path_to_heat_pump_characteristics=snakemake.input.heat_pump_characteristics,
         sink_temperature=snakemake.params.sink_temperature,
         space_heat_sink_ratio=snakemake.params.space_heat_sink_ratio,
         correction_factor=snakemake.params.correction_factor,
-        lat_name=snakemake.params.lat_name,
-        lon_name=snakemake.params.lon_name,
-        heat_pump_type=snakemake.wildcards.heat_pump_type,
-        year=snakemake.wildcards.year,
+        heat_pump_ratio=snakemake.params.heat_pump_ratio,
+        first_year=snakemake.params.first_year,
+        final_year=snakemake.params.final_year,
         path_to_output=snakemake.output[0],
     )
