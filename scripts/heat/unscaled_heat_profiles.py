@@ -35,9 +35,13 @@ def get_unscaled_heat_profiles(
         lon_name: "x",
         lat_name: "y",
     })
+    assert temperature_ds.attrs["unit"].lower() == "degrees c"
+
     # Only need site-wide mean wind speed for this analysis
     wind_ds = xr.open_dataset(path_to_wind_speed).rename({lon_name: "x", lat_name: "y"})
-    average_wind_speed = wind_ds["wind_speed"].mean("time")
+    assert wind_ds.attrs["unit"].lower() == "m/s"
+
+    average_wind_speed = wind_ds["wind10m"].mean("time")
 
     # Subset temperature to the selected year extended by a couple of days either end,
     # so we don't compute values for years we don't need, but keep a buffer for the shifts
@@ -218,17 +222,14 @@ def get_daily_heat_demand(
 
     def heat_function(t, parameters):
         # BDEW et al. 2015 describes this function combining parameters
-        # Handle situation where the temperature input is in Kelvin
-        celsius = t - 273.15 if (t > 100).all() else t
 
         sigmoid = (
-            parameters["A"]
-            / (1 + (parameters["B"] / (celsius - 40)) ** parameters["C"])
+            parameters["A"] / (1 + (parameters["B"] / (t - 40)) ** parameters["C"])
             + parameters["D"]
         )
 
         linear = xr.concat(
-            [parameters[f"m_{i}"] * celsius + parameters[f"b_{i}"] for i in ["s", "w"]],
+            [parameters[f"m_{i}"] * t + parameters[f"b_{i}"] for i in ["s", "w"]],
             dim="param",
         ).max("param")
 
@@ -248,13 +249,10 @@ def get_daily_hot_water_demand(
     """
 
     def water_function(t, parameters):
-        # Handle situation where the temperature input is in Kelvin
-        celsius = t - 273.15 if (t > 100).all() else t
-
         # Below 15 °C, the water heating demand is not defined and assumed to stay constant
-        celsius_clipped = celsius.clip(min=15)
+        t_clipped = t.clip(min=15)
 
-        return parameters["m_w"] * celsius_clipped + parameters["b_w"] + parameters["D"]
+        return parameters["m_w"] * t_clipped + parameters["b_w"] + parameters["D"]
 
     return daily(temperature, average_wind, all_parameters, water_function)
 
