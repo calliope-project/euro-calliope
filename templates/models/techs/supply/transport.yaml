@@ -1,0 +1,92 @@
+tech_groups:
+    transport_ice:
+        exists: false
+        essentials:
+            parent: conversion
+            carrier_in: diesel
+        constraints:
+            lifetime: 10
+    transport_ev:
+        exists: false
+        essentials:
+            parent: conversion
+            carrier_in: electricity
+        constraints:
+            lifetime: 15
+    transport_ev_time_varying:
+        essentials.parent: transport_ev
+        constraints:
+            energy_cap_max_time_varying: file=plugin-ev.csv
+
+techs:
+    # Vehicle supply technologies
+    heavy_transport_ice:
+        essentials:
+            name: Internal combustion engine heavy vehicles
+            parent: transport_ice
+            carrier_out: heavy_transport
+    light_transport_ice:
+        essentials:
+            name: Internal combustion engine light vehicles
+            parent: transport_ice
+            carrier_out: light_transport
+    heavy_transport_ev:
+        essentials:
+            name: Electric heavy vehicles
+            parent: transport_ev
+            carrier_out: heavy_transport
+    light_transport_ev:
+        essentials:
+            name: Electric light vehicles
+            parent: transport_ev_time_varying
+            carrier_out: light_transport
+
+    # Historical electrified road transport demand
+    demand_road_transport_historic_electrified_uncontrolled:
+        essentials:
+            name: 'Removes historic electrified road transport demand from ENTSOE-derived historical electricity demand profile -- assumed uncontrolled'
+            parent: supply
+            carrier: electricity
+        constraints:
+            resource: file=demand/uncontrolled-road-transport-historic-electrification.csv  # TODO: think whether this timeseries should be in supply or demand folder
+            force_resource: true
+
+
+
+overrides:
+    # Set capacities and efficiencies for vehicles, per year
+    {% for year in locations.columns %}
+    {{ year[:4] }}_vehicle_parameters:
+        locations:
+    {% for location in locations.index %}
+            {{ location }}:
+                techs:
+                {% if "charging" in year %}
+                    light_transport_ev:
+                        constraints:
+                            energy_cap_max: {{ locations.loc[location, year] }} # {{ (1 / scaling_factors.transport) | unit("Mio km") }}
+                            energy_eff: 0
+                    heavy_transport_ev: 
+                        constraints:
+                            energy_eff: 0
+                    light_transport_ice:
+                        constraints:
+                            energy_eff: 0
+                    heavy_transport_ice:
+                        constraints:
+                            energy_eff: 0
+                {% endif %}
+
+
+    {% endfor %}
+
+    {% endfor %}
+
+    # Remove historical electrified road transport
+    keep-historic-electricity-demand-from-road-transport:
+      # TODO: possibly remove this override as there may be no use-cases for it.
+      {% for id, location in locations.iterrows() %}
+      {{ id }}.techs.demand_road_transport_historic_electrified_uncontrolled.exists: false
+      {% endfor %}
+
+    

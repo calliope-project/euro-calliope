@@ -37,10 +37,9 @@ rule annual_transport_demand:
     conda: "../envs/default.yaml"
     script: "../scripts/transport/annual_transport_demand.py"
 
-rule create_controlled_road_transport_annual_demand_and_installed_capacities:
-    message: "Create annual demand for controlled charging and corresponding charging potentials at {wildcards.resolution} resolution"
+rule create_road_transport_vehicle_parameters:
+    message: "Create vehicle parameters at {wildcards.resolution} resolution"
     input:
-        annual_controlled_demand = "build/data/transport/annual-road-transport-distance-demand-controlled.csv",
         ev_vehicle_number = "build/data/jrc-idees/transport/processed-road-vehicles.csv",
         jrc_road_distance = "build/data/jrc-idees/transport/processed-road-distance.csv",
         locations = "build/data/{resolution}/units.csv",
@@ -56,8 +55,8 @@ rule create_controlled_road_transport_annual_demand_and_installed_capacities:
         country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],
     conda: "../envs/default.yaml"
     output:
-        main = "build/data/{resolution}/demand/electrified-transport.csv",
-    script: "../scripts/transport/road_transport_controlled_charging.py"
+        main = "build/data/{resolution}/supply/transport.csv",
+    script: "../scripts/transport/road_transport_vehicle_parameters.py"
 
 rule create_transport_demand_data_for_yaml:
     message: "Create transport demand data to be exported into the YAML file"
@@ -77,6 +76,7 @@ rule create_transport_demand_data_for_yaml:
     script: "../scripts/transport/road_transport_demand_data_for_yaml.py"
 
 rule create_controlled_ev_charging_parameters:
+    # Necessary timeseries for custom constraints of controlled charging
     message: "Create timeseries parameters {wildcards.dataset_name} for controlled EV charging at {wildcards.resolution} resolution"
     input:
         ev_profiles = lambda wildcards: "data/automatic/ramp-ev-consumption-profiles.csv.gz" if "demand" in wildcards.dataset_name else f"data/automatic/ramp-ev-{wildcards.dataset_name}.csv.gz",

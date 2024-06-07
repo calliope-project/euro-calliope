@@ -122,7 +122,6 @@ def reshape_and_add_suffix(df, suffix):
 if __name__ == "__main__":
     resolution = snakemake.wildcards.resolution
 
-    path_to_controlled_annual_demand = snakemake.input.annual_controlled_demand
     power_scaling_factor = snakemake.params.power_scaling_factor
     first_year = snakemake.params.first_year
     final_year = snakemake.params.final_year
@@ -141,16 +140,6 @@ if __name__ == "__main__":
     transport_scaling_factor = snakemake.params.transport_scaling_factor
     path_to_ev_numbers = snakemake.input.ev_vehicle_number
 
-    #  Convert annual distance driven demand to electricity demand for controlled charging
-    df_demand = convert_annual_distance_to_electricity_demand(
-        path_to_controlled_annual_demand,
-        power_scaling_factor,
-        first_year,
-        final_year,
-        conversion_factors,
-        country_codes,
-    )
-
     # Extract national EV charging potentials
     df_charging_potentials = extract_national_ev_charging_potentials(
         path_to_ev_numbers,
@@ -161,11 +150,9 @@ if __name__ == "__main__":
         battery_sizes,
         country_codes,
     )
-
     # Add prefix for yaml template
     parameters_evs = {
-        "_demand": df_demand,
-        "_charging": df_charging_potentials,
+        "_charging_potential": df_charging_potentials,
     }
 
     # Rescale to desired resolution and add suffix
@@ -186,4 +173,6 @@ if __name__ == "__main__":
         dfs.append(reshape_and_add_suffix(df, key))
 
     # Export to csv
+    breakpoint()
+    # FIXME data for ev_charging potential does not seem to vary per year
     pd.concat(dfs, axis=1).to_csv(path_to_output, index_label=["id"])
