@@ -411,9 +411,6 @@ properties:
                             motorcycles:
                                 type: number
                                 description: Motorcylces.
-                    uncontrolled-ev-charging-share:
-                        type: number
-                        description: Share of uncontrolled charging.
                     monthly-demand-bound-fraction:
                         type: object
                         description: Charging flexibility parameter constraining the amount of monthly demand to be met.
