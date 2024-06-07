@@ -111,14 +111,10 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of electric light-duty vehicle uncontrolled charging.
-            gridded-temperature-data:
+            gridded-weather-data:
                 type: string
-                pattern: ^(https?|http?):\/\/.+
-                description: "Web address of gridded temperature data. Expecting a netCDF file with the coordinates [time, site], and the variables [temperature, lat, lon]."
-            gridded-10m-windspeed-data:
-                type: string
-                pattern: ^(https?|http?):\/\/.+
-                description: "Web address of gridded 10m wind speed data. Expecting a netCDF file with the coordinates [time, site], and the variables [temperature, lat, lon]."
+                pattern: ^(https?|http?):\/\/.+{data_var}.*\.(nc)$
+                description: "Web address of gridded weather data. Expecting a netCDF file with the coordinates [time, site], the variables [{data_type}, lat, lon], and the attribute 'unit'."
             when2heat-params:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
