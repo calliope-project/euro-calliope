@@ -221,11 +221,20 @@ def get_reference_temperature(
     """
 
     # Daily average
-    daily_average = temperature.resample(**{time_dim: "1D"}).mean(time_dim)
+    # pandas manages time resampling much quicker than xarray, so we switch to a dataframe here.
+    daily_average = (
+        temperature.rename(time=time_dim)
+        .to_series()
+        .unstack("time")
+        .T.resample("1D")
+        .mean()
+        .stack()
+        .to_xarray()
+    )
 
     # Weighted mean, method for which is given in [@Ruhnau:2019]
     return sum(
-        (0.5**i) * daily_average.shift({time_dim: i}).bfill(time_dim) for i in range(4)
+        (0.5**i) * daily_average.shift({"time": i}).bfill("time") for i in range(4)
     ) / sum(0.5**i for i in range(4))
 
 
