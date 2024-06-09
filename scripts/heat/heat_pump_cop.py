@@ -40,6 +40,14 @@ def cop(
         final_year (Union[str, int]): Final year of data to include in the profile (inclusive).
         path_to_output (str): Output to which COP timeseries data will be saved.
     """
+    # Initial fast-fail checks.
+    assert (
+        sum(heat_pump_ratio.values()) == 1
+    ), "Heat pump technology ratios must add up to 1."
+    assert (
+        sum(space_heat_sink_ratio.values()) == 1
+    ), "Space heating sink method ratios must add up to 1."
+
     population = xr.open_dataarray(path_to_population)
 
     temperature_ds = xr.merge(
@@ -57,9 +65,6 @@ def cop(
     )
     # 2. Combine sink methods into space heating and hot water end uses,
     # using weightings for space heating (hot water is a distinct sink method already)
-    assert (
-        sum(space_heat_sink_ratio.values()) == 1
-    ), "Space heating sink method ratios must add up to 1."
     sink_method_ratios = (
         pd.Series({"hot-water": 1, **space_heat_sink_ratio})
         .rename_axis(index="sink_temp")
@@ -86,34 +91,28 @@ def cop(
         temperature_ds["tsoil5"] - 5,
         correction_factor,
     )
-    assert (
-        sum(heat_pump_ratio.values()) == 1
-    ), "Heat pump technology ratios must add up to 1."
 
-    cop = (
-        cop_ashp * heat_pump_ratio["ashp"] + cop_gshp * heat_pump_ratio["gshp"]
-    ).fillna(cop_ashp)
+    cop = cop_ashp * heat_pump_ratio["ashp"] + cop_gshp * heat_pump_ratio["gshp"]
+    # We infill with ASHP COP for gridcells that have no GSHP data.
+    # These tend to be gridcells covering areas with no/limited land.
+    cop = cop.fillna(cop_ashp)
 
-    # Sanity check that there is higher COP in summer than winter
+    # Sanity check that there is a. higher COP in summer than winter, b. no COP < 1 (worse than direct electrical heating)
     cop_monthly = cop.groupby("time.month").mean()
     cop_winter = cop_monthly.sel(month=[12, 1, 2]).mean("month")
     cop_summer = cop_monthly.sel(month=[6, 7, 8]).mean("month")
-
-    assert (cop_summer > cop_winter).all()
+    assert (
+        cop_summer > cop_winter
+    ).all(), "Found higher heating COP values in winter than in summer."
+    assert (cop >= 1).all(), "Found improbably low heat pump COP values (< 1)."
 
     # population weighted COP.
     weight = population / population.sum(["site"])
-    # `ds_cop` has dims [site, time], `weight` has dims [site, id],
-    # we want a final array with dims [id, time]
+    # `ds_cop` has dims [site, time], `weight` has dims [site, id], we want a final array with dims [id, time]
     ds_cop_grouped = xr.concat(
         [(cop * weight.sel({"id": id})).sum(["site"]) for id in weight.id],
         dim="id",
     )
-
-    # You can never have a COP < 1 (direct electrical heating)
-    assert (
-        ds_cop_grouped >= 1
-    ).all(), "Improbably low heat pump COP values (< 1) found."
 
     ds_cop_grouped.to_dataset(dim="end_use").to_netcdf(path_to_output)
 
@@ -122,7 +121,7 @@ def temperature_to_cop(
     heat_pump_characteristics: xr.DataArray,
     temperature_celsius: xr.DataArray,
     correction_factor: float,
-):
+) -> xr.DataArray:
     """
     Interpolate heat pump temperature-COP relationship to the gridded weather temperature profiles.
     """

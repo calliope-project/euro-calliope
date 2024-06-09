@@ -117,7 +117,7 @@ rule unscaled_heat_profiles:
     script: "../scripts/heat/unscaled_heat_profiles.py"
 
 
-rule heat_pump_cop_subset:
+rule heat_pump_cop:
     message: "Generate {wildcards.resolution} heat pump coefficient of performance (COP)"
     input:
         temperature_air = "data/automatic/gridded-weather/temperature.nc",
