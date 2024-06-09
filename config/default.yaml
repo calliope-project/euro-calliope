@@ -21,8 +21,7 @@ data-sources:
     swiss-industry-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/teilstatistiken.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODc4OA==.html
     controlled-ev-profiles: https://zenodo.org/record/6579421/files/ramp-ev-{dataset}.csv.gz?download=1
     uncontrolled-ev-profiles: https://sandbox.zenodo.org/records/45530/files/uncontrolled-charging-profiles.csv.gz?download=1 # TODO: convert into Zenodo repository
-    gridded-temperature-data: https://zenodo.org/records/6557643/files/temperature.nc?download=1
-    gridded-10m-windspeed-data: https://zenodo.org/records/6557643/files/wind10m.nc?download=1
+    gridded-weather-data: https://zenodo.org/records/11516744/files/{data_var}.nc
     when2heat-params: https://zenodo.org/records/10965295/files/{dataset}?download=1
     population: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/JRC_GRID_2018.zip
 data-pre-processing:
