@@ -1,8 +1,8 @@
 """
 Use weather data to simulate hourly heat profiles using When2Heat
 (https://github.com/oruhnau/when2heat) data processing pipeline.
-Functions attributable to When2Heat are explicitly referenced as such
-in the function docstring.
+
+Functions attributable to When2Heat are explicitly referenced as such in the function docstring.
 """
 
 import os
@@ -112,8 +112,10 @@ def get_unscaled_heat_profiles(
     # population weighted profiles.
     # NOTE: profile magnitude is now only consistent within each region, not between them
     weight = population / population.sum(["site"])
-    grouped_hourly_space = group_gridcells(hourly_space, weight).rename("space_heat")
-    grouped_hourly_water = group_gridcells(hourly_hot_water, weight).rename("hot_water")
+    grouped_hourly_space = _group_gridcells(hourly_space, weight).rename("space_heat")
+    grouped_hourly_water = _group_gridcells(hourly_hot_water, weight).rename(
+        "hot_water"
+    )
 
     grouped_hourly_heat = xr.merge([grouped_hourly_space, grouped_hourly_water])
     grouped_hourly_heat.to_netcdf(out_path)
@@ -270,7 +272,7 @@ def daily(
     )
 
 
-def group_gridcells(gridded_data: xr.DataArray, weight: xr.DataArray) -> xr.DataArray:
+def _group_gridcells(gridded_data: xr.DataArray, weight: xr.DataArray) -> xr.DataArray:
     # `hourly_heat` has dims [x, y, datetime], `weight` has dims [x, y, id],
     # we want a final array with dims [id, datetime]
 

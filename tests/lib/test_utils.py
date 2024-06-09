@@ -224,6 +224,8 @@ class TestRenameAndGroupby:
         ("Greece", "GR", "alpha2"),
         ("Greece", "EL", "alpha2_eu"),
         ("bh", "BA", "alpha2"),
+        ("uk", "United Kingdom", "name"),
+        ("de", "Germany", "name"),
     ],
 )
 def test_country_code_conversion(input_country, iso3166, output):

@@ -10,7 +10,7 @@
 
 * **ADD** fully-electrified heat demand (#284, #343, #390, #391) and heat pumps with variable COP to meet that demand (#393).
 
-* **ADD** fully-electrified road transportation (#270, #271, #358). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (#338).
+* **ADD** fully-electrified road transportation (#270, #271, #358). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (#338). Data for controlled charging constraints is readily available (#356), but corresponding constraints are not yet implemented (#385).
 
 * **ADD** nuclear power plant technology with capacity limits. Capacity limits can be equal to today or be bound by a minimum and maximum capacity to represent an available range in future. In either case, capacities are allocated at a subnational resolution based on linear scaling from current capacity geolocations, using the JRC power plant database (#78).
 
@@ -69,6 +69,7 @@
 * **UPDATE** source of fraction of shared coast for offshore wind capacity factor distribution from a fixed shape download to an internal rule which can handle ad hoc shapes (partial #238).
 * **UPDATE** dropped support for Intel macOS. The workflow may still run on Intel macOS, but we do not actively maintain support (#369).
 * **UPDATE** link to GADM data following changes upstream (#376).
+* **UPDATE** link to NUTS data to allow for different NUTS years (#380, #382).
 
 ### Fixed (models)
 
