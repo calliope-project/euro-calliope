@@ -337,19 +337,19 @@ properties:
                         additionalProperties: false
                         properties:
                             light-duty-vehicles:
-                                type: number
+                                type: object
                                 description: Light duty vehicles / trucks.
                             heavy-duty-vehicles:
-                                type: number
+                                type: object
                                 description: Heavy duty vehicles / trucks.
                             coaches-and-buses:
-                                type: number
+                                type: object
                                 description: Coaches and buses.
                             passenger-cars:
-                                type: number
+                                type: object
                                 description: Passenger cars.
                             motorcycles:
-                                type: number
+                                type: object
                                 description: Motorcylces.
                     vehicle-type-names:
                         type: object
