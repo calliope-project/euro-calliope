@@ -72,8 +72,8 @@ overrides:
                             energy_eff: {{ locations.loc[location, col] }} # {{ (scaling_factors.power / scaling_factors.transport) | unit("Miokm/MWh") }}
                     {% endif %}
                     {% if "efficiency_ev_heavy" in col %}
-                    heavy_transport_ev: 
-                        constraints: 
+                    heavy_transport_ev:
+                        constraints:
                             energy_eff: {{ locations.loc[location, col] }} # {{ (scaling_factors.power / scaling_factors.transport) | unit("Miokm/MWh") }}
                             # FIXME: add energy_cap_max for heavy EVs
                     {% endif %}
@@ -99,5 +99,3 @@ overrides:
       {% for id, location in locations.iterrows() %}
       {{ id }}.techs.demand_road_transport_historic_electrified_uncontrolled.exists: false
       {% endfor %}
-
-    
