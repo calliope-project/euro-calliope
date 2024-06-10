@@ -45,7 +45,7 @@ wildcard_constraints:
 
 ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
 ruleorder: bio_techs_and_locations_template > techs_and_locations_template
-ruleorder: create_controlled_road_transport_annual_demand_and_installed_capacities > dummy_tech_locations_template
+ruleorder: create_road_transport_vehicle_parameters > create_transport_demand_data_for_yaml > dummy_tech_locations_template
 
 ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
@@ -165,10 +165,11 @@ rule model_template:
                 "interest-rate.yaml",
                 "locations.yaml",
                 "techs/demand/electricity.yaml",
-                "techs/demand/electrified-transport.yaml",
                 "techs/demand/electrified-heat.yaml",
+                "techs/demand/transport.yaml",
                 "techs/storage/electricity.yaml",
                 "techs/storage/hydro.yaml",
+                "techs/supply/transport.yaml",
                 "techs/supply/biofuel.yaml",
                 "techs/supply/hydro.yaml",
                 "techs/supply/load-shedding.yaml",
@@ -184,8 +185,7 @@ rule model_template:
         ),
         demand_timeseries_data = (
             "build/models/{resolution}/timeseries/demand/electricity.csv",
-            "build/models/{resolution}/timeseries/demand/uncontrolled-electrified-road-transport.csv",
-            "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv",
+            "build/models/{resolution}/timeseries/supply/uncontrolled-road-transport-historic-electrification.csv",
             "build/models/{resolution}/timeseries/demand/electrified-heat-demand.csv",
             "build/models/{resolution}/timeseries/demand/heat-demand-historic-electrification.csv",
             "build/models/{resolution}/timeseries/demand/demand-shape-min-ev.csv",
