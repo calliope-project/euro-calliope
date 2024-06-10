@@ -10,7 +10,7 @@
 
 * **ADD** fully-electrified heat demand (#284).
 
-* **ADD** fully-electrified road transportation (#270, #271, #358). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (#338). Data for controlled charging constraints is readily available (#356), but corresponding constraints are not yet implemented (#385).
+* **ADD** Road transportation is added (#270, #271, #358). Electric vehicles and diesel engine vehicles are included as supply technologies, and vehicles are grouped into light and heavy transport (#394). Data for controlled charging constraints of EVs is readily available (#356), but corresponding constraints are not yet implemented (#385).
 
 * **ADD** nuclear power plant technology with capacity limits. Capacity limits can be equal to today or be bound by a minimum and maximum capacity to represent an available range in future. In either case, capacities are allocated at a subnational resolution based on linear scaling from current capacity geolocations, using the JRC power plant database (#78).
 
