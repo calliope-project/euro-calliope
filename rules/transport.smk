@@ -103,7 +103,7 @@ rule create_uncontrolled_road_transport_timeseries_historic_electrification:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
         power_scaling_factor = config["scaling-factors"]["power"],
-        conversion_factor = lambda wildcards: config["parameters"]["transport"]["road-transport-conversion-factors"][wildcards.vehicle_type],
+        conversion_factor = lambda wildcards: config["parameters"]["transport"]["road-transport-conversion-factors"][wildcards.vehicle_type]['electricity'],
         countries = config["scope"]["spatial"]["countries"],
         country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],
     conda: "../envs/default.yaml"
