@@ -55,28 +55,38 @@ techs:
 
 overrides:
     # Set capacities and efficiencies for vehicles, per year
-    {% for year in locations.columns %}
-    {{ year[:4] }}_vehicle_parameters:
+    {% set unique_years = locations.columns.str[:4].unique() %}
+    {% for year in unique_years %}
+    {{ year }}_vehicle_parameters:
         locations:
     {% for location in locations.index %}
             {{ location }}:
                 techs:
-                {% if "charging" in year %}
+                {% for col in locations.columns if col.startswith(year) %}
+                    {% if "charging_potential" in col %}
                     light_transport_ev:
                         constraints:
-                            energy_cap_max: {{ locations.loc[location, year] }} # {{ (1 / scaling_factors.transport) | unit("Mio km") }}
-                            energy_eff: 0
+                            energy_cap_max: {{ locations.loc[location, col] }} # {{ (1 / scaling_factors.transport) | unit("Mio km") }}
+                    {% endif %}
+                    {% if "efficiency_ev_light" in col %}
+                            energy_eff: {{ locations.loc[location, col] }} # {{ (scaling_factors.power / scaling_factors.transport) | unit("Miokm/MWh") }}
+                    {% endif %}
+                    {% if "efficiency_ev_heavy" in col %}
                     heavy_transport_ev: 
                         constraints:
-                            energy_eff: 0
+                            energy_eff: {{ locations.loc[location, col] }}
+                    {% endif %}
+                    {% if "efficiency_ice_light" in col %}
                     light_transport_ice:
                         constraints:
-                            energy_eff: 0
+                            energy_eff: {{ locations.loc[location, col] }}
+                    {% endif %}
+                    {% if "efficiency_ice_heavy" in col %}
                     heavy_transport_ice:
                         constraints:
-                            energy_eff: 0
-                {% endif %}
-
+                            energy_eff: {{ locations.loc[location, col] }}
+                    {% endif %}
+                {% endfor %}
 
     {% endfor %}
 

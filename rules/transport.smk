@@ -53,6 +53,7 @@ rule create_road_transport_vehicle_parameters:
         conversion_factors = config["parameters"]["transport"]["road-transport-conversion-factors"],
         countries = config["scope"]["spatial"]["countries"],
         country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],
+        vehicle_type_aggregation = config["parameters"]["transport"]["vehicle-type-aggregation"],
     conda: "../envs/default.yaml"
     output:
         main = "build/data/{resolution}/supply/transport.csv",
@@ -126,5 +127,5 @@ rule aggregate_timeseries_historic_electrified: # TODO consider merge with other
         populations = "build/data/{resolution}/population.csv"
     conda: "../envs/default.yaml"
     output:
-        "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv",
+        "build/models/{resolution}/timeseries/supply/uncontrolled-road-transport-historic-electrification.csv",
     script: "../scripts/transport/aggregate_timeseries.py"
