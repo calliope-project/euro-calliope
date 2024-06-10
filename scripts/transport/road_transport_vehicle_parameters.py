@@ -3,40 +3,60 @@ import pandas as pd
 import pycountry
 
 
-def scale_to_regional_resolution(df, region_country_mapping, populations):
+def scale_to_regional_resolution(df, region_country_mapping, populations, key):
     """
-    Create regional electricity demand for controlled charging.
-    ASSUME all road transport is subnationally distributed in proportion to population.
+    Create regional vehicle parameters.
+    ASSUME all road transport potential is subnationally distributed in proportion to population.
+    ASSUME efficiencies of vehicles are equal across regions.
     """
-    df_population_share = (
-        populations.loc[:, "population_sum"]
-        .reindex(region_country_mapping.keys())
-        .groupby(by=region_country_mapping)
-        .transform(lambda df: df / df.sum())
-    )
 
-    regional_df = (
-        pd.DataFrame(
+    # Scale charging potential data to population
+    if "charging" in key:
+        df_population_share = (
+            populations.loc[:, "population_sum"]
+            .reindex(region_country_mapping.keys())
+            .groupby(by=region_country_mapping)
+            .transform(lambda df: df / df.sum())
+        )
+
+        regional_df = (
+            pd.DataFrame(
+                index=df.index,
+                data={
+                    id: df[country_code]
+                    for id, country_code in region_country_mapping.items()
+                },
+            )
+            .mul(df_population_share)
+            .rename(columns=lambda col_name: col_name.replace(".", "-"))
+        )
+
+        pd.testing.assert_series_equal(regional_df.sum(axis=1), df.sum(axis=1))
+
+    # Efficiency data is the same across regions
+    if "efficiency" in key:
+        regional_df = pd.DataFrame(
             index=df.index,
             data={
                 id: df[country_code]
                 for id, country_code in region_country_mapping.items()
             },
-        )
-        .mul(df_population_share)
-        .rename(columns=lambda col_name: col_name.replace(".", "-"))
-    )
-    pd.testing.assert_series_equal(regional_df.sum(axis=1), df.sum(axis=1))
+        ).rename(columns=lambda col_name: col_name.replace(".", "-"))
     return regional_df
 
 
-def scale_to_national_resolution(df):
+def scale_to_national_resolution(df, key):
     df.columns.name = None
     return df
 
 
-def scale_to_continental_resolution(df):
-    return df.sum(axis=1).to_frame("EUR")
+def scale_to_continental_resolution(df, key):
+    # Sum all countries' potentials for charging
+    if "charging" in key:
+        return df.sum(axis=1).to_frame("EUR")
+    # Mean of all countries for efficiencies
+    if "efficiency" in key:
+        return df.mean(axis=1).to_frame("EUR")
 
 
 def group_vehicle_types(df, vehicle_type_aggregation):
@@ -304,14 +324,15 @@ if __name__ == "__main__":
     dfs = []
     for key, df in parameters_evs.items():
         if resolution == "continental":
-            df = scale_to_continental_resolution(df)
+            df = scale_to_continental_resolution(df, key)
         elif resolution == "national":
-            df = scale_to_national_resolution(df)
+            df = scale_to_national_resolution(df, key)
         elif resolution in ["regional", "ehighways"]:
             df = scale_to_regional_resolution(
                 df,
                 region_country_mapping=region_country_mapping,
                 populations=populations,
+                key=key,
             )
         else:
             raise ValueError("Input resolution is not recognised")

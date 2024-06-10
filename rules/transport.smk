@@ -38,7 +38,7 @@ rule annual_transport_demand:
     script: "../scripts/transport/annual_transport_demand.py"
 
 rule create_road_transport_vehicle_parameters:
-    message: "Create vehicle parameters at {wildcards.resolution} resolution"
+    message: "Create vehicle parameters (efficiencies and maximum charging potential) at {wildcards.resolution} resolution"
     input:
         ev_vehicle_number = "build/data/jrc-idees/transport/processed-road-vehicles.csv",
         jrc_road_distance = "build/data/jrc-idees/transport/processed-road-distance.csv",

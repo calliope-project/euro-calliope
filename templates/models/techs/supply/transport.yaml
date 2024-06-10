@@ -73,18 +73,19 @@ overrides:
                     {% endif %}
                     {% if "efficiency_ev_heavy" in col %}
                     heavy_transport_ev: 
-                        constraints:
-                            energy_eff: {{ locations.loc[location, col] }}
+                        constraints: 
+                            energy_eff: {{ locations.loc[location, col] }} # {{ (scaling_factors.power / scaling_factors.transport) | unit("Miokm/MWh") }}
+                            # FIXME: add energy_cap_max for heavy EVs
                     {% endif %}
                     {% if "efficiency_ice_light" in col %}
                     light_transport_ice:
                         constraints:
-                            energy_eff: {{ locations.loc[location, col] }}
+                            energy_eff: {{ locations.loc[location, col] }} # {{ (scaling_factors.power / scaling_factors.transport) | unit("Miokm/MWh") }}
                     {% endif %}
                     {% if "efficiency_ice_heavy" in col %}
                     heavy_transport_ice:
                         constraints:
-                            energy_eff: {{ locations.loc[location, col] }}
+                            energy_eff: {{ locations.loc[location, col] }} # {{ (scaling_factors.power / scaling_factors.transport) | unit("Miokm/MWh") }}
                     {% endif %}
                 {% endfor %}
 
