@@ -35,7 +35,7 @@ rule annual_heat_demand:
         commercial_demand = "build/data/jrc-idees/tertiary/processed.csv",
         carrier_names = "config/energy-balances/energy-balance-carrier-names.csv"
     params:
-        heat_tech_params = config["parameters"]["heat"],
+        heat_tech_params = config["parameters"]["heat"]["tech-efficiencies"],
         countries = config["scope"]["spatial"]["countries"],
         fill_missing_values = config["data-pre-processing"]["fill-missing-values"]["jrc-idees"]
     conda: "../envs/default.yaml"
@@ -57,34 +57,6 @@ rule rescale_annual_heat_demand_to_resolution:
         total_demand = "build/data/heat/{resolution}/annual-heat-demand-twh.csv",
         electricity = "build/data/heat/{resolution}/annual-heat-electricity-demand-twh.csv",
     script: "../scripts/heat/rescale.py"
-
-
-rule create_heat_demand_timeseries:
-    message: "Create heat demand timeseries at {wildcards.resolution} for household and commercial sectors"
-    input:
-        annual_demand = rules.rescale_annual_heat_demand_to_resolution.output["total_demand"],
-    params:
-        first_year = config["scope"]["temporal"]["first-year"],
-        final_year = config["scope"]["temporal"]["final-year"],
-        historic = False,
-        power_scaling_factor = config["scaling-factors"]["power"],
-    conda: "../envs/default.yaml"
-    output:
-        "build/models/{resolution}/timeseries/demand/electrified-heat-demand.csv",
-    script: "../scripts/heat/create_timeseries.py"
-
-
-use rule create_heat_demand_timeseries as create_heat_demand_timeseries_historic_electrification with:
-    message: "Create timeseries for historic electrified heat demand"
-    input:
-        annual_demand = rules.rescale_annual_heat_demand_to_resolution.output["electricity"],
-    params:
-        first_year = config["scope"]["temporal"]["first-year"],
-        final_year = config["scope"]["temporal"]["final-year"],
-        historic = True,
-        power_scaling_factor = config["scaling-factors"]["power"],
-    output:
-        "build/models/{resolution}/timeseries/demand/heat-demand-historic-electrification.csv",
 
 
 rule population_per_weather_gridbox:
@@ -142,3 +114,30 @@ rule group_gridded_timeseries:
     threads: 4
     output: "build/models/{resolution}/timeseries/supply/{input_dataset}.csv"
     script: "../scripts/heat/group_gridded_timeseries.py"
+
+rule create_heat_demand_timeseries:
+    message: "Create heat demand timeseries at {wildcards.resolution} for household and commercial sectors"
+    input:
+        annual_demand = rules.rescale_annual_heat_demand_to_resolution.output["total_demand"],
+        unscaled_demand_profiles = rules.unscaled_heat_profiles.output[0],
+        heat_pump_cop = rules.heat_pump_cop.output[0]
+    params:
+        sfh_mfh_ratio = config["parameters"]["heat"]["sfh-mfh-ratio"],
+        historic = False,
+        power_scaling_factor = config["scaling-factors"]["power"],
+    conda: "../envs/default.yaml"
+    output: "build/models/{resolution}/timeseries/demand/electrified-heat.csv"
+    script: "../scripts/heat/create_heat_electricity_demand.py"
+
+
+use rule create_heat_demand_timeseries as create_heat_demand_timeseries_historic_electrification with:
+    message: "Create timeseries for historic electrified heat demand"
+    input:
+        annual_demand = rules.rescale_annual_heat_demand_to_resolution.output["electricity"],
+        unscaled_demand_profiles = rules.unscaled_heat_profiles.output[0],
+        heat_pump_cop = rules.heat_pump_cop.output[0]
+    params:
+        sfh_mfh_ratio = config["parameters"]["heat"]["sfh-mfh-ratio"],
+        historic = True,
+        power_scaling_factor = config["scaling-factors"]["power"],
+    output: "build/models/{resolution}/timeseries/demand/historic-electrified-heat.csv"

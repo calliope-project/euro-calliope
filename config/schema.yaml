@@ -453,72 +453,94 @@ properties:
                 description: Parameters for heat sector model.
                 additionalProperties: false
                 properties:
-                    space_heat:
+                    tech-efficiencies:
                         type: object
-                        description: Parameters of space heating technologies.
+                        additionalProperties: false
+                        description: Heat technology efficiencies by heating end use.
+                        properties:
+                            space_heat:
+                                type: object
+                                description: Parameters of space heating technologies.
+                                additionalProperties: false
+                                properties:
+                                    gas-eff:
+                                        type: number
+                                        description: Gas boiler efficiency.
+                                    oil-eff:
+                                        type: number
+                                        description: Oil boiler efficiency.
+                                    solid-fossil-eff:
+                                        type: number
+                                        description: Solid fossil boiler efficiency.
+                                    biofuel-eff:
+                                        type: number
+                                        description: Biofuel boiler efficiency.
+                                    solar-thermal-eff:
+                                        type: number
+                                        description: Solar thermal efficiency.
+                                    electricity-eff:
+                                        type: number
+                                        description: Electric heater efficiency.
+                            hot_water:
+                                type: object
+                                description: Parameters of water heating technologies.
+                                additionalProperties: false
+                                properties:
+                                    gas-eff:
+                                        type: number
+                                        description: Gas boiler efficiency.
+                                    oil-eff:
+                                        type: number
+                                        description: Oil boiler efficiency.
+                                    solid-fossil-eff:
+                                        type: number
+                                        description: Solid fossil boiler efficiency.
+                                    biofuel-eff:
+                                        type: number
+                                        description: Biofuel boiler efficiency.
+                                    solar-thermal-eff:
+                                        type: number
+                                        description: Solar thermal efficiency.
+                                    electricity-eff:
+                                        type: number
+                                        description: Electric heater efficiency.
+                            cooking:
+                                type: object
+                                description: Parameters of cooking technologies.
+                                additionalProperties: false
+                                properties:
+                                    gas-eff:
+                                        type: number
+                                        description: Gas stove efficiency.
+                                    oil-eff:
+                                        type: number
+                                        description: Oil stove efficiency.
+                                    solid-fossil-eff:
+                                        type: number
+                                        description: Solid fossil stove efficiency.
+                                    biofuel-eff:
+                                        type: number
+                                        description: Biofuel stove efficiency.
+                                    electricity-eff:
+                                        type: number
+                                        description: Electric stove efficiency.
+                    sfh-mfh-ratio:
+                        type: object
+                        description: |
+                            Ratio of single-family to multi-family households which will be used to aggregate household heat demand profiles.
+                            Fractions must add to 1.
                         additionalProperties: false
                         properties:
-                            gas-eff:
+                            MFH:
                                 type: number
-                                description: Gas boiler efficiency.
-                            oil-eff:
+                                description: Fraction of multi-family households
+                                minimum: 0
+                                maximum: 1
+                            SFH:
                                 type: number
-                                description: Oil boiler efficiency.
-                            solid-fossil-eff:
-                                type: number
-                                description: Solid fossil boiler efficiency.
-                            biofuel-eff:
-                                type: number
-                                description: Biofuel boiler efficiency.
-                            solar-thermal-eff:
-                                type: number
-                                description: Solar thermal efficiency.
-                            electricity-eff:
-                                type: number
-                                description: Electric heater efficiency.
-                    hot_water:
-                        type: object
-                        description: Parameters of water heating technologies.
-                        additionalProperties: false
-                        properties:
-                            gas-eff:
-                                type: number
-                                description: Gas boiler efficiency.
-                            oil-eff:
-                                type: number
-                                description: Oil boiler efficiency.
-                            solid-fossil-eff:
-                                type: number
-                                description: Solid fossil boiler efficiency.
-                            biofuel-eff:
-                                type: number
-                                description: Biofuel boiler efficiency.
-                            solar-thermal-eff:
-                                type: number
-                                description: Solar thermal efficiency.
-                            electricity-eff:
-                                type: number
-                                description: Electric heater efficiency.
-                    cooking:
-                        type: object
-                        description: Parameters of cooking technologies.
-                        additionalProperties: false
-                        properties:
-                            gas-eff:
-                                type: number
-                                description: Gas stove efficiency.
-                            oil-eff:
-                                type: number
-                                description: Oil stove efficiency.
-                            solid-fossil-eff:
-                                type: number
-                                description: Solid fossil stove efficiency.
-                            biofuel-eff:
-                                type: number
-                                description: Biofuel stove efficiency.
-                            electricity-eff:
-                                type: number
-                                description: Electric stove efficiency.
+                                description: Fraction of single-family households
+                                minimum: 0
+                                maximum: 1
 
             heat-pump:
                 type: object

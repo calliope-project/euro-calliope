@@ -5,7 +5,7 @@ techs:
             parent: demand
             carrier: electricity
         constraints:
-            resource: file=demand/electrified-heat-demand.csv
+            resource: file=demand/electrified-heat.csv
 
     demand_heat_historic_electrified:
         essentials:
@@ -13,7 +13,7 @@ techs:
             parent: supply
             carrier: electricity
         constraints:
-            resource: file=demand/heat-demand-historic-electrification.csv
+            resource: file=demand/historic-electrified-heat.csv
             force_resource: true
 
 overrides:
