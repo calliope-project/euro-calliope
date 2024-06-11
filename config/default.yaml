@@ -9,7 +9,7 @@ data-sources:
     hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
     hydro-stations: https://zenodo.org/record/5215920/files/energy-modelling-toolkit/hydro-power-database-v10.zip?download=1
     load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
-    nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_{nuts_year}_01M_SH.zip
+    nuts: https://ec.europa.eu/eurostat/cache/GISCO/distribution/v2/nuts/shp/NUTS_RG_01M_{nuts_year}_4326.shp.zip
     potentials: https://zenodo.org/records/6600619/files/raw-potentials.zip?download=1
     entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
     jrc-ppdb: https://zenodo.org/record/3574566/files/JRC-PPDB-OPEN.ver1.0.zip
@@ -19,9 +19,9 @@ data-sources:
     swiss-end-use: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/energieverbrauch-nach-verwendungszweck.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvOTg1NA==.html
     swiss-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/gesamtenergiestatistik.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvNzUxOQ==.html
     swiss-industry-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/teilstatistiken.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODc4OA==.html
-    ev-data: https://zenodo.org/record/6579421/files/ramp-ev-consumption-profiles.csv.gz?download=1
-    gridded-temperature-data: https://zenodo.org/records/6557643/files/temperature.nc?download=1
-    gridded-10m-windspeed-data: https://zenodo.org/records/6557643/files/wind10m.nc?download=1
+    controlled-ev-profiles: https://zenodo.org/record/6579421/files/ramp-ev-{dataset}.csv.gz?download=1
+    uncontrolled-ev-profiles: https://sandbox.zenodo.org/records/45530/files/uncontrolled-charging-profiles.csv.gz?download=1 # TODO: convert into Zenodo repository
+    gridded-weather-data: https://zenodo.org/records/11516744/files/{data_var}.nc
     when2heat-params: https://zenodo.org/records/10965295/files/{dataset}?download=1
     population: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/JRC_GRID_2018.zip
 data-pre-processing:
@@ -54,6 +54,7 @@ scaling-factors: # values are tuned for models with a few hours resolution and o
     power: 0.00001 # from MW(h) to 100 GW(h)
     area: 0.0001 # from km2 to 10,000 km2
     monetary: 0.000000001 # from EUR to 1 billion EUR
+    transport: 0.01  # from Mio km to 100 Mio km
 capacity-factors:
     min: 0.001
     max: 10 # 0.001 -> 10 leads to a numerical range of 1e5 (hourly resolution)
@@ -166,7 +167,17 @@ parameters:
             coaches-and-buses: Motor coaches, buses and trolley buses
             passenger-cars: Passenger cars
             motorcycles: Powered 2-wheelers
-        uncontrolled-ev-charging-share: 0.5
+        ev-battery-sizes:
+            heavy-duty-vehicles: 0.2  # average from [EUCAR_2019]
+            light-duty-vehicles: 0.1  # own assumption based on passenger cars from [EUCAR_2019]
+            motorcycles: 0.01  # own assumption
+            coaches-and-buses: 0.2  # own assumption based on HDVs from [EUCAR_2019]
+            passenger-cars: 0.08  # average from [EUCAR_2019]
+        uncontrolled-ev-charging-share: 1
+        monthly-demand-bound-fraction:
+            min: 0.9
+            max: 1.1
+            equals: 1
     entsoe-tyndp:
         scenario: National Trends
         grid: Reference

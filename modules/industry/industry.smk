@@ -1,3 +1,5 @@
+from snakemake.utils import validate
+
 # Paths dependent on main Snakefile
 MODULE_PATH = "modules/industry"
 BUILD_PATH = f"{MODULE_PATH}/build"
@@ -6,6 +8,8 @@ DATA_PATH = f"{MODULE_PATH}/raw_data"
 # Paths relative to this snakefile (snakemake behaviour is inconsitent)
 SCRIPT_PATH = "scripts"  # scripts are called relative to this file
 CONDA_PATH = "./env_industry.yaml"
+
+validate(config, "./schema.yaml")
 
 # Ensure rules are defined in order.
 # Otherwise commands like "rules.rulename.output" won't work!

@@ -1,16 +1,7 @@
-rule download_gridded_temperature_data:
-    message: "Download gridded temperature data"
-    params: url = config["data-sources"]["gridded-temperature-data"]
-    output: protected("data/automatic/gridded-weather/temperature.nc")
-    conda: "../envs/shell.yaml"
-    localrule: True
-    shell: "curl -sSLo {output} '{params.url}'"
-
-
-rule download_gridded_10m_windspeed_data:
-    message: "Download gridded 10m wind speed data"
-    params: url = config["data-sources"]["gridded-10m-windspeed-data"]
-    output: protected("data/automatic/gridded-weather/wind10m.nc")
+rule download_gridded_weather_data:
+    message: "Download gridded {wildcards.data_var} data"
+    params: url = lambda wildcards: config["data-sources"]["gridded-weather-data"].format(data_var=wildcards.data_var)
+    output: protected("data/automatic/gridded-weather/{data_var}.nc")
     conda: "../envs/shell.yaml"
     localrule: True
     shell: "curl -sSLo {output} '{params.url}'"
@@ -87,10 +78,11 @@ use rule create_heat_demand_timeseries as create_heat_demand_timeseries_historic
     output:
         "build/models/{resolution}/timeseries/demand/heat-demand-historic-electrification.csv",
 
+
 rule population_per_weather_gridbox:
     message: "Get {wildcards.resolution} population information per weather data gridbox"
     input:
-        wind_speed = rules.download_gridded_10m_windspeed_data.output[0],
+        weather_grid = "data/automatic/gridded-weather/grid.nc",
         population = rules.raw_population_unzipped.output[0],
         locations = rules.units.output[0]
     params:
@@ -101,16 +93,17 @@ rule population_per_weather_gridbox:
     script: "../scripts/heat/population_per_gridbox.py"
 
 
-rule gridded_unscaled_heat_profiles:
+rule unscaled_heat_profiles:
     message: "Generate gridded heat demand profile shapes for {wildcards.year} from weather and population data"
+
     input:
         population = rules.population_per_weather_gridbox.output[0],
-        wind_speed = rules.download_gridded_10m_windspeed_data.output[0],
-        temperature = rules.download_gridded_temperature_data.output[0],
+        wind_speed = "data/automatic/gridded-weather/wind10m.nc",
+        temperature = "data/automatic/gridded-weather/temperature.nc",
         when2heat = rules.download_when2heat_params.output[0]
     params:
-        lat_name = "lat",
-        lon_name = "lon",
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
     conda: "../envs/default.yaml"
-    output: "build/data/{resolution}/gridded_hourly_unscaled_heat_demand_{year}.nc"
-    script: "../scripts/heat/gridded_unscaled_heat_profiles.py"
+    output: "build/data/{resolution}/hourly_unscaled_heat_demand.nc"
+    script: "../scripts/heat/unscaled_heat_profiles.py"
