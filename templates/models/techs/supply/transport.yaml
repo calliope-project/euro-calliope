@@ -48,7 +48,7 @@ techs:
             parent: supply
             carrier: electricity
         constraints:
-            resource: file=demand/uncontrolled-road-transport-historic-electrification.csv  # TODO: think whether this timeseries should be in supply or demand folder
+            resource: file=supply/uncontrolled-road-transport-historic-electrification.csv  # TODO: think whether this timeseries should be in supply or demand folder
             force_resource: true
 
 

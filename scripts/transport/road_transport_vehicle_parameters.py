@@ -59,12 +59,11 @@ def scale_to_continental_resolution(df, key):
         return df.mean(axis=1).to_frame("EUR")
 
 
-def group_vehicle_types(df, vehicle_type_aggregation):
-    breakpoint()
-    df.index = df.index.set_levels(
-        [df.index.levels[0], df.index.levels[1].map(vehicle_type_aggregation)], level=1
-    )
-    return df.groupby(level=[0, 1]).sum()
+def fill_empty_country(df, jrc_fill_missing_values):
+    for country, neighbours in jrc_fill_missing_values.items():
+        assert country not in df.columns
+        df[country] = df[neighbours].mean(axis=1)
+    return df
 
 
 def get_efficiency_data_carrier(
@@ -77,6 +76,7 @@ def get_efficiency_data_carrier(
     conversion_factors: dict[str, float],
     country_codes: list[str],
     vehicle_type_aggregation: dict[str, str],
+    fill_missing_values: dict[str, float],
 ) -> pd.DataFrame:
     """
     Get vehicle efficiency data for the vehicle type corresponding to the carrier, per year
@@ -94,29 +94,33 @@ def get_efficiency_data_carrier(
         )
 
     def _get_distance(vehicle):
+        start_year = 2015 if first_year > 2015 else first_year
         return (
             pd.read_csv(path_to_road_distance)
             .set_index(["vehicle_type", "vehicle_subtype", "year"])
-            .xs(slice(first_year, final_year), level="year", drop_level=False)
+            .xs(slice(start_year, final_year), level="year", drop_level=False)
             .groupby(["vehicle_type", "vehicle_subtype", "country_code", "year"])
             .sum()
             .squeeze()
             .unstack("country_code")
+            .pipe(fill_empty_country, fill_missing_values)
             .loc[:, country_codes]
             .swaplevel(0, 1)
             .loc[[vehicle], :]
         )
 
     def _aggregate(df, vehicle_type_aggregation):
+        start_year = 2015 if first_year > 2015 else first_year
         # First get the weights of each vehicle category per year
         weights = (
             pd.read_csv(path_to_road_distance)
             .set_index(["vehicle_type", "vehicle_subtype", "year"])
-            .xs(slice(first_year, final_year), level="year", drop_level=False)
+            .xs(slice(start_year, final_year), level="year", drop_level=False)
             .groupby(["vehicle_type", "country_code", "year"])
             .sum()
             .squeeze()
             .unstack("country_code")
+            .pipe(fill_empty_country, fill_missing_values)
             .loc[df.index.get_level_values("vehicle_type").unique(), country_codes]
             .pipe(lambda df: df.div(df.groupby(level="year").sum(), level="year"))
             .pipe(  # Add vehicle_type column
@@ -160,7 +164,7 @@ def get_efficiency_data_carrier(
         .apply(_get_efficiency, axis=1, args=(carrier,))
         .droplevel(0)
         .swaplevel(0, 1)
-        .pipe(  # Add vehicle_type column
+        .pipe(  # Add aggregated vehicle_type column
             lambda df: df.assign(
                 vehicle_type_agg=df.index.get_level_values("vehicle_type").map(
                     vehicle_type_aggregation
@@ -184,7 +188,9 @@ def get_efficiency_data_carrier(
                     (2015, vehicle_type), :
                 ]
     # Return data with correct units
-    return efficiency.mul(transport_scaling_factor / power_scaling_factor)
+    return efficiency.xs(
+        slice(first_year, final_year), level="year", drop_level=False
+    ).mul(transport_scaling_factor / power_scaling_factor)
 
 
 def extract_national_ev_charging_potentials(
@@ -195,13 +201,19 @@ def extract_national_ev_charging_potentials(
     conversion_factors: dict[str, float],
     battery_sizes: dict[str, float],
     country_codes: list[str],
+    fill_missing_values: dict[str, str],
 ) -> pd.DataFrame:
     # Extract number of EVs per vehicle type
     df_ev_numbers = (
         pd.read_csv(path_to_ev_numbers, index_col=[0, 1, 2, 3, 4])
         .squeeze()
+        .unstack("country_code")
+        .pipe(fill_empty_country, fill_missing_values)
+        .loc[:, country_codes]
+        .stack("country_code")
         .droplevel(["vehicle_subtype", "section"])
     )
+
     assert not df_ev_numbers.isnull().values.any()
 
     # Compute max. distance travelled per full battery for one EV [in Mio km / vehicle]
@@ -265,6 +277,7 @@ if __name__ == "__main__":
 
     path_to_ev_numbers = snakemake.input.ev_vehicle_number
     path_to_road_distance = snakemake.input.jrc_road_distance
+    fill_missing_values = snakemake.params.jrc_fill_missing_values
 
     # Extract efficiency data for electric vehicles
     df_efficiency_ev = get_efficiency_data_carrier(
@@ -277,6 +290,7 @@ if __name__ == "__main__":
         conversion_factors,
         country_codes,
         vehicle_type_aggregation,
+        fill_missing_values,
     )
 
     df_efficiency_ice = get_efficiency_data_carrier(
@@ -289,6 +303,7 @@ if __name__ == "__main__":
         conversion_factors,
         country_codes,
         vehicle_type_aggregation,
+        fill_missing_values,
     )
 
     # Extract national EV charging potentials
@@ -300,6 +315,7 @@ if __name__ == "__main__":
         {a: cf["electricity"] for a, cf in conversion_factors.items()},
         battery_sizes,
         country_codes,
+        fill_missing_values,
     )
 
     # Add prefix for yaml template
@@ -320,7 +336,6 @@ if __name__ == "__main__":
     }
 
     # Rescale to desired resolution and add suffix
-    # FIXME: rescaling is different for efficiencies and is currently incorrect
     dfs = []
     for key, df in parameters_evs.items():
         if resolution == "continental":

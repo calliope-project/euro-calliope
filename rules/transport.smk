@@ -52,7 +52,7 @@ rule create_road_transport_vehicle_parameters:
         battery_sizes = config["parameters"]["transport"]["ev-battery-sizes"],
         conversion_factors = config["parameters"]["transport"]["road-transport-conversion-factors"],
         countries = config["scope"]["spatial"]["countries"],
-        country_neighbour_dict = config["data-pre-processing"]["fill-missing-values"]["ramp"],
+        jrc_fill_missing_values = config["data-pre-processing"]["fill-missing-values"]["jrc-idees"],
         vehicle_type_aggregation = config["parameters"]["transport"]["vehicle-type-aggregation"],
     conda: "../envs/default.yaml"
     output:
