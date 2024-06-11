@@ -40,7 +40,7 @@ properties:
         properties:
             non-generic-categories:
                 type: array
-                description: "Specifies which industry categories will be processed separately."
+                description: "Specifies which JRC industry categories will be processed separately."
                 uniqueItems: true
                 items:
                     type: string
@@ -75,7 +75,10 @@ properties:
                             type: string
                     useful-demands:
                         type: array
-                        description: "Useful subsection demands to take (always removed from final demands)."
+                        description: |
+                            Demands to select from 'useful' rather than 'final' energy consumption data.
+                            Accepts any pre-processed JRC IDEES 'subsection' names.
+                            Always subtracted from 'final' energy demand to avoid double-counting.
                         uniqueItems: true
                         items:
                             type: string

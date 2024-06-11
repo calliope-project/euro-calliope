@@ -16,7 +16,9 @@ def get_generic_demand(
     path_jrc_industry_production: str,
     path_output: Optional[str] = None,
 ) -> xr.DataArray:
-    """Execute a generic data processing pipeline for industry categories.
+    """Processing of industry categories not selected for individual processing.
+
+    Merges all energy demand into a single `generic` category using a configurable data processing pipeline.
 
     Args:
         non_generic_categories (list): categories with separate processing (will be ignored).
@@ -48,7 +50,7 @@ def get_generic_demand(
     # Process data:
     # Extract useful dem. -> remove useful dem. from rest -> extract final dem.
     selected_useful = generic_config["useful-demands"]
-    other_useful_demand = jrc.convert_subsec_demand_to_carrier(
+    other_useful_demand = jrc.convert_subsection_demand_to_carrier(
         jrc_energy, selected_useful
     )
 

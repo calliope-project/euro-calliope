@@ -192,7 +192,7 @@ def transform_jrc_subsector_demand(
     h2_intensity = h2_intensity.assign_coords(carrier_name="Hydrogen")
 
     # Low heat
-    low_heat_intensity = jrc.get_sec_subsec_useful_intensity(
+    low_heat_intensity = jrc.get_section_subsection_useful_intensity(
         "Electric arc", "Low enthalpy heat", "Electric arc", jrc_energy, jrc_prod
     )
     low_heat_intensity = low_heat_intensity.assign_coords(

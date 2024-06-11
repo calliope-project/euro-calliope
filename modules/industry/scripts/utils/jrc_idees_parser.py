@@ -100,7 +100,7 @@ def get_sec_subsec_final_intensity(
     return final_intensity.fillna(0)
 
 
-def get_sec_subsec_useful_intensity(
+def get_section_subsection_useful_intensity(
     section: str,
     subsection: str,
     material: str,
@@ -160,7 +160,7 @@ def replace_final_demand_by_carrier(
     return carrier_final_demand
 
 
-def convert_subsec_demand_to_carrier(
+def convert_subsection_demand_to_carrier(
     jrc_energy: xr.Dataset,
     subsection: Union[str, list[str]],
     demand_type: str = "useful",
