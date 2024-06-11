@@ -13,12 +13,12 @@ validate(config, "./schema.yaml")
 
 # Ensure rules are defined in order.
 # Otherwise commands like "rules.rulename.output" won't work!
-if "Iron and steel" in config["params"]["specific-industries"]:
+if "Iron and steel" in config["params"]["non-generic-categories"]:
     rule steel_industry:
         message: "Calculate energy demand for the 'Iron and steel' sector in JRC-IDEES."
         conda: CONDA_PATH
         params:
-            config_steel = config["params"]["steel"]
+            steel_config = config["params"]["steel-config"]
         input:
             path_energy_balances = config["inputs"]["path-energy-balances"],
             path_cat_names = config["inputs"]["path-cat-names"],
@@ -29,19 +29,21 @@ if "Iron and steel" in config["params"]["specific-industries"]:
             path_output = f"{BUILD_PATH}/annual_demand_steel.nc"
         script: f"{SCRIPT_PATH}/steel_industry.py"
 
-rule chemical_industry:
-    message: "."
-    conda: CONDA_PATH
-    params:
-    input:
-    output:
-    script: f"{SCRIPT_PATH}/chemicals.py"
+if "Chemicals Industry" in config["params"]["non-generic-categories"]:
+    rule chemical_industry:
+        message: "."
+        conda: CONDA_PATH
+        params:
+        input:
+        output:
+        script: f"{SCRIPT_PATH}/chemicals.py"
 
 rule other_industry:
     message: "Calculate energy demand for all other industry sectors in JRC-IDEES."
     conda: CONDA_PATH
     params:
-        config_params = config["params"],
+        non_generic_categories = config["params"]["non-generic-categories"],
+        generic_config = config["params"]["generic-config"],
     input:
         path_energy_balances = config["inputs"]["path-energy-balances"],
         path_cat_names = config["inputs"]["path-cat-names"],

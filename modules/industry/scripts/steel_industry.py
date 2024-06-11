@@ -18,7 +18,7 @@ def _get_h2_to_steel(recycled_steel_share: float) -> float:
 
 
 def get_steel_demand_df(
-    config_steel: dict,
+    steel_config: dict,
     path_energy_balances: str,
     path_cat_names: str,
     path_carrier_names: str,
@@ -29,7 +29,7 @@ def get_steel_demand_df(
     """Execute the data processing pipeline for the "Iron and steel" sub-sector.
 
     Args:
-        config_steel (dict): steel sector configuration.
+        steel_config (dict): steel sector configuration.
         path_energy_balances (str): country energy balances (usually from eurostat).
         path_cat_names (str): eurostat category mapping file.
         path_carrier_names (str): eurostat carrier name mapping file.
@@ -56,7 +56,7 @@ def get_steel_demand_df(
 
     # Process data
     new_steel_demand = transform_jrc_subsector_demand(
-        jrc_energy, jrc_prod, config_steel
+        jrc_energy, jrc_prod, steel_config
     )
     new_steel_demand = filling.fill_missing_countries_years(
         energy_balances_df, cat_names_df, carrier_names_df, new_steel_demand
@@ -182,7 +182,6 @@ def transform_jrc_subsector_demand(
     electric_intensity = electric_intensity.where(
         electric_intensity > 0, other=mean_demand_per_year
     )
-    electric_intensity = electric_intensity.assign_coords(carrier_name="electricity")
 
     # Hydrogen consumption for H-DRI:
     # only for country/year that handle iron ore and don't recycle all their steel
@@ -190,13 +189,15 @@ def transform_jrc_subsector_demand(
 
     h2_intensity = electric_intensity.where(sintering_intensity > 0).fillna(0)
     h2_intensity = h2_intensity.where(h2_intensity == 0, h_dri_h2_intensity)
-    h2_intensity = h2_intensity.assign_coords(carrier_name="hydrogen")
+    h2_intensity = h2_intensity.assign_coords(carrier_name="Hydrogen")
 
     # Low heat
     low_heat_intensity = jrc.get_sec_subsec_useful_intensity(
         "Electric arc", "Low enthalpy heat", "Electric arc", jrc_energy, jrc_prod
     )
-    low_heat_intensity = low_heat_intensity.assign_coords(carrier_name="space_heat")
+    low_heat_intensity = low_heat_intensity.assign_coords(
+        carrier_name="Low enthalpy heat"
+    )
 
     # Combine and transform to energy demand
     total_intensity = xr.concat(
@@ -213,7 +214,7 @@ def transform_jrc_subsector_demand(
 
 if __name__ == "__main__":
     get_steel_demand_df(
-        config_steel=snakemake.params.config_steel,
+        steel_config=snakemake.params.steel_config,
         path_energy_balances=snakemake.input.path_energy_balances,
         path_cat_names=snakemake.input.path_cat_names,
         path_carrier_names=snakemake.input.path_carrier_names,

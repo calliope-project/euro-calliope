@@ -38,14 +38,14 @@ properties:
         additionalProperties: false
         description: Parameters allow users to configure module behaviour.
         properties:
-            specific-industries:
+            non-generic-categories:
                 type: array
-                description: "Unique processing steps to activate."
+                description: "Specifies which industry categories will be processed separately."
                 uniqueItems: true
                 items:
                     type: string
                     enum: ["Iron and steel", "Chemicals Industry"]
-            steel:
+            steel-config:
                 type: object
                 additionalProperties: false
                 description: "Parameters specific to the 'Iron and steel' industry category."
@@ -55,14 +55,18 @@ properties:
                         description: "Share of recycled metal in the H-DRI steel process."
                         minimum: 0
                         maximum: 1
-            other:
+            generic-config:
                 type: object
                 additionalProperties: false
-                description: "Parameters determining the processing of energy in all other sectors."
+                description: "Parameters for default/generic category processing."
                 properties:
                     final-energy-method:
-                        description: "Processing method for final-demand."
+                        description: |
+                            Processing method for final-demand.
+                            - "by priority": will take the carriers specified in "final-energy-carriers" in order of importance (first subtracts from second, etc.).
+                            - "keep everything": will keep all the final carrier demands with no assumptions.
                         type: string
+                        enum: ["by priority", "keep everything"]
                     final-energy-carriers:
                         type: array
                         description: "Final energy carriers to take, if relevant."

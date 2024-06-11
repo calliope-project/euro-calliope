@@ -5,17 +5,10 @@ import xarray as xr
 from utils import filling
 from utils import jrc_idees_parser as jrc
 
-# TODO: this should be defined externally via a .csv file.
-JRC_TO_CALLIOPE = {
-    "Electricity": "electricity",
-    "Natural gas (incl. biogas)": "methane",
-    "Diesel oil (incl. biofuels)": "diesel",
-    "Low enthalpy heat": "space_heat",
-}
 
-
-def get_other_demand(
-    config_params: dict,
+def get_generic_demand(
+    non_generic_categories: list,
+    generic_config: dict,
     path_energy_balances: str,
     path_cat_names: str,
     path_carrier_names: str,
@@ -23,10 +16,11 @@ def get_other_demand(
     path_jrc_industry_production: str,
     path_output: Optional[str] = None,
 ) -> xr.DataArray:
-    """Execute the default data processing pipeline all non-specific industries.
+    """Execute a generic data processing pipeline for industry categories.
 
     Args:
-        config_params (dict): all industry configuration parameters.
+        non_generic_categories (list): categories with separate processing (will be ignored).
+        generic_config (dict): configuration for generic category processing.
         path_energy_balances (str): country energy balances (usually from eurostat).
         path_cat_names (str): eurostat category mapping file.
         path_carrier_names (str): eurostat carrier name mapping file.
@@ -47,26 +41,30 @@ def get_other_demand(
     jrc_prod = xr.open_dataarray(path_jrc_industry_production)
 
     # Remove data from all specifically processed industries
-    specific_industries = config_params["specific-industries"]
-    cat_names_df = cat_names_df[~cat_names_df["jrc_idees"].isin(specific_industries)]
-    jrc_energy = jrc_energy.drop_sel(cat_name=specific_industries)
-    jrc_prod = jrc_prod.drop_sel(cat_name=specific_industries)
+    cat_names_df = cat_names_df[~cat_names_df["jrc_idees"].isin(non_generic_categories)]
+    jrc_energy = jrc_energy.drop_sel(cat_name=non_generic_categories)
+    jrc_prod = jrc_prod.drop_sel(cat_name=non_generic_categories)
 
     # Process data:
     # Extract useful dem. -> remove useful dem. from rest -> extract final dem.
-    selected_useful = config_params["other"]["useful-demands"]
+    selected_useful = generic_config["useful-demands"]
     other_useful_demand = jrc.convert_subsec_demand_to_carrier(
         jrc_energy, selected_useful
     )
 
-    final_method = config_params["other"]["final-energy-method"]
+    final_method = generic_config["final-energy-method"]
     jrc_energy = jrc_energy.drop_sel(subsection=selected_useful)
-    if final_method == "priority":
-        other_final_demand = transform_final_demand_by_priority(
-            jrc_energy, config_params["other"]["final-energy-carriers"]
-        )
-    else:
-        raise ValueError(f"Unsupported final energy method: {final_method}.")
+
+    match final_method:
+        case "by priority":
+            other_final_demand = transform_final_demand_by_priority(
+                jrc_energy, generic_config["final-energy-carriers"]
+            )
+        case "keep everything":
+            other_final_demand = jrc_energy["final"].sum(["section", "subsection"])
+            other_final_demand = jrc.standardize(other_final_demand, "twh")
+        case _:
+            raise ValueError(f"Unsupported final energy method: {final_method}.")
 
     # Combine and fill missing countries
     other_demand = xr.concat(
@@ -77,11 +75,6 @@ def get_other_demand(
         energy_balances_df, cat_names_df, carrier_names_df, other_demand
     )
 
-    # Fix the naming
-    for carrier in JRC_TO_CALLIOPE:
-        other_demand["carrier_name"] = other_demand["carrier_name"].where(
-            lambda x, i=carrier: x != i, JRC_TO_CALLIOPE[carrier]
-        )
     other_demand = jrc.standardize(other_demand, "twh")
 
     if path_output:
@@ -93,7 +86,7 @@ def get_other_demand(
 def transform_final_demand_by_priority(
     jrc_energy: xr.Dataset, carrier_priority: list[str]
 ) -> xr.DataArray:
-    """Transform final demand of all sectors by giving priority to certain carriers.
+    """Transform final demand of generic categories by giving priority to certain carriers.
 
     Steps:
     1. Assume that all demand that could consume a carrier will be met by said carrier.
@@ -135,8 +128,9 @@ def transform_final_demand_by_priority(
 
 
 if __name__ == "__main__":
-    get_other_demand(
-        config_params=snakemake.params.config_params,
+    get_generic_demand(
+        non_generic_categories=snakemake.params.non_generic_categories,
+        generic_config=snakemake.params.generic_config,
         path_energy_balances=snakemake.input.path_energy_balances,
         path_cat_names=snakemake.input.path_cat_names,
         path_carrier_names=snakemake.input.path_carrier_names,
