@@ -52,7 +52,7 @@ def _build_layer(
         for country, source_layer in resolution_config.items()
     ])
     assert isinstance(layer, pd.DataFrame)
-    return gpd.GeoDataFrame(layer, crs=crs)
+    return gpd.GeoDataFrame(layer, crs=crs).reset_index(drop=True)
 
 
 def _read_source_layers(
@@ -121,7 +121,15 @@ def _rename_ehighways_countries(units: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     Method is future-proofed to handle higher resolution than country code (e.g. using GADM3 units in one country).
     It does this by ordering all non-ehighways IDs alphabetically and then turning them into "XXX_#" style codes.
     """
-    sorted_units = units.sort_values(by="id")
+    order = (
+        units.id.str.extractall(r"(\d+)")
+        .groupby(level=0)
+        .sum()
+        .reindex(units.index)
+        .fillna(1)
+        .astype(int)
+    )
+    sorted_units = units.assign(order=order).sort_values(by=["country_code", "order"])
 
     new_names = (
         sorted_units.country_code
@@ -132,7 +140,8 @@ def _rename_ehighways_countries(units: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     sorted_units["id"] = sorted_units.id.where(
         sorted_units.type == "ehighways", new_names
     )
-    return sorted_units
+
+    return sorted_units.drop("order", axis=1)
 
 
 if __name__ == "__main__":
