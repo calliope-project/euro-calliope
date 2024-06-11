@@ -14,7 +14,7 @@ validate(config, "./schema.yaml")
 # Ensure rules are defined in order.
 # Otherwise commands like "rules.rulename.output" won't work!
 if "Iron and steel" in config["params"]["non-generic-categories"]:
-    rule steel_industry:
+    rule steel_processing:
         message: "Calculate energy demand for the 'Iron and steel' sector in JRC-IDEES."
         conda: CONDA_PATH
         params:
@@ -27,18 +27,18 @@ if "Iron and steel" in config["params"]["non-generic-categories"]:
             path_jrc_industry_production = config["inputs"]["path-jrc-industry-production"],
         output:
             path_output = f"{BUILD_PATH}/annual_demand_steel.nc"
-        script: f"{SCRIPT_PATH}/steel_industry.py"
+        script: f"{SCRIPT_PATH}/steel_processing.py"
 
 if "Chemicals Industry" in config["params"]["non-generic-categories"]:
-    rule chemical_industry:
+    rule chemicals_processing:
         message: "."
         conda: CONDA_PATH
         params:
         input:
         output:
-        script: f"{SCRIPT_PATH}/chemicals.py"
+        script: f"{SCRIPT_PATH}/chemicals_processing.py"
 
-rule other_industry:
+rule generic_processing:
     message: "Calculate energy demand for all other industry sectors in JRC-IDEES."
     conda: CONDA_PATH
     params:
@@ -51,8 +51,8 @@ rule other_industry:
         path_jrc_industry_energy = config["inputs"]["path-jrc-industry-energy"],
         path_jrc_industry_production = config["inputs"]["path-jrc-industry-production"],
     output:
-        path_output = f"{BUILD_PATH}/annual_demand_other.nc"
-    script: f"{SCRIPT_PATH}/other_industry.py"
+        path_output = f"{BUILD_PATH}/annual_demand_generic.nc"
+    script: f"{SCRIPT_PATH}/generic_processing.py"
 
 # rule combine_and_scale:
 #     message: "."
