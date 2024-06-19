@@ -36,7 +36,7 @@ def capacities_per_location(plants, locations, tech_name):
         index=plants.index,
     )
     location_of_plant = gpd.sjoin(
-        plant_centroids, locations, how="left", op="intersects"
+        plant_centroids, locations, how="left", predicate="intersects"
     )["index_right"]
     location_of_plant = location_of_plant[~location_of_plant.index.duplicated()]
     return (

@@ -116,7 +116,7 @@ def _get_coastal_units_as_linestrings(
     # slightly overlap the continent polygon boundary.
     temp_units = units.copy()
     temp_units["geometry"] = units.geometry.buffer(units.total_bounds.mean() * 1e-6)
-    non_coastal_units = gpd.sjoin(temp_units, merged_units, op="within")
+    non_coastal_units = gpd.sjoin(temp_units, merged_units, predicate="within")
     coastal_units = units.loc[~units.id.isin(non_coastal_units.id_left)].set_index("id")
 
     # Simplify geometries to get rid of tiny islands that slow down the computation and
