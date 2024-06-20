@@ -96,7 +96,7 @@ if __name__ == "__main__":
     population_on_weather_grid(
         path_to_population=snakemake.input.population,
         path_to_locations=snakemake.input.locations,
-        path_to_coordinates=snakemake.input.wind_speed,
+        path_to_coordinates=snakemake.input.weather_grid,
         lat_name=snakemake.params.lat_name,
         lon_name=snakemake.params.lon_name,
         out_path=snakemake.output[0],

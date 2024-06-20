@@ -8,7 +8,7 @@
 
 * **ADD** Spatial resolution that aligns with the regions defined by the [e-Highway 2050 project](https://cordis.europa.eu/project/id/308908/reporting) (`ehighways`) (#370).
 
-* **ADD** fully-electrified heat demand (#284).
+* **ADD** fully-electrified heat demand (#284, #343, #390, #391).
 
 * **ADD** Road transportation is added (#270, #271, #358). Electric vehicles and diesel engine vehicles are included as supply technologies, and vehicles are grouped into light and heavy transport (#394). Data for controlled charging constraints of EVs is readily available (#356), but corresponding constraints are not yet implemented (#385).
 
@@ -69,6 +69,7 @@
 * **UPDATE** source of fraction of shared coast for offshore wind capacity factor distribution from a fixed shape download to an internal rule which can handle ad hoc shapes (partial #238).
 * **UPDATE** dropped support for Intel macOS. The workflow may still run on Intel macOS, but we do not actively maintain support (#369).
 * **UPDATE** link to GADM data following changes upstream (#376).
+* **UPDATE** link to NUTS data to allow for different NUTS years (#380, #382).
 
 ### Fixed (models)
 

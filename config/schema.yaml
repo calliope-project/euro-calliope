@@ -65,8 +65,8 @@ properties:
                 description: Web address of load data.
             nuts:
                 type: string
-                pattern: ^(https?|http?):\/\/.+
-                description: Web address of geospatial NUTS data.
+                pattern: ^(https?|http?):\/\/.+{nuts_year}.*
+                description: Web address of geospatial NUTS data. Must contain a {nuts_year} placeholder.
             potentials:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
@@ -111,14 +111,10 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of electric light-duty vehicle uncontrolled charging.
-            gridded-temperature-data:
+            gridded-weather-data:
                 type: string
-                pattern: ^(https?|http?):\/\/.+
-                description: "Web address of gridded temperature data. Expecting a netCDF file with the coordinates [time, site], and the variables [temperature, lat, lon]."
-            gridded-10m-windspeed-data:
-                type: string
-                pattern: ^(https?|http?):\/\/.+
-                description: "Web address of gridded 10m wind speed data. Expecting a netCDF file with the coordinates [time, site], and the variables [temperature, lat, lon]."
+                pattern: ^(https?|http?):\/\/.+{data_var}.*\.(nc)$
+                description: "Web address of gridded weather data. Expecting a netCDF file with the coordinates [time, site], the variables [{data_var}, lat, lon], and the attribute 'unit'."
             when2heat-params:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
@@ -457,7 +453,7 @@ properties:
             nuts-year:
                 description: Version of the Nomenclature of Territorial Units for Statistics to use in creating spatial units (see https://ec.europa.eu/eurostat/web/nuts/history for more info).
                 type: number
-                enum: [2013]  # FIXME: enable other years
+                enum: [2006, 2010, 2013, 2016]
             heat:
                 type: object
                 description: Parameters for heat sector model.
