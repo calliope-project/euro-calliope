@@ -126,9 +126,9 @@ rule heat_pump_cop:
         heat_pump_characteristics = rules.download_heat_pump_characteristics.output[0]
     params:
         sink_temperature = config["parameters"]["heat-pump"]["sink-temperature"],
-        space_heat_sink_ratio = config["parameters"]["heat-pump"]["space-heat-sink-ratio"],
+        space_heat_sink_shares = config["parameters"]["heat-pump"]["space-heat-sink-shares"],
         correction_factor = config["parameters"]["heat-pump"]["correction-factor"],
-        heat_pump_ratio = config["parameters"]["heat-pump"]["heat-pump-ratio"],
+        heat_pump_shares = config["parameters"]["heat-pump"]["heat-pump-shares"],
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
     conda: "../envs/default.yaml"

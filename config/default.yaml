@@ -214,16 +214,16 @@ parameters:
             biofuel-eff: 0.1 #  [Ramanathan_1994] scaled down 60%, based on values calculated by [Karunanithy_2016]
             electricity-eff: 0.5  # [Karunanithy_2016] based on 2/3 40% efficient direct electric, 1/3 70% efficient induction
     heat-pump:
-        sink-temperature:
+        sink-temperature:  # All values are assumed.
             underfloor: 35
             radiator-large: 50
             radiator-conventional: 65
             hot-water: 60
-        space-heat-sink-ratio:  # All values are assumed.
+        space-heat-sink-shares:  # All values are assumed.
             underfloor: 0.1
             radiator-large: 0.15
             radiator-conventional: 0.75
-        heat-pump-ratio:  # see https://stats.ehpa.org, 2018 market data assuming current ashp = air-to-air AND air-to-water
+        heat-pump-shares:  # see https://stats.ehpa.org, 2018 market data assuming current ashp = air-to-air AND air-to-water
             ashp: 0.9
             gshp: 0.1
         correction-factor: 0.85  # [@Ruhnau:2019]

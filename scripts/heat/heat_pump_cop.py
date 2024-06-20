@@ -13,9 +13,9 @@ def cop(
     path_to_population: str,
     path_to_heat_pump_characteristics: str,
     sink_temperature: dict[str, int],
-    space_heat_sink_ratio: dict[str, float],
+    space_heat_sink_shares: dict[str, float],
     correction_factor: float,
-    heat_pump_ratio: dict[str, float],
+    heat_pump_shares: dict[str, float],
     first_year: Union[int, str],
     final_year: Union[int, str],
     path_to_output: str,
@@ -27,26 +27,25 @@ def cop(
     COP is aggregated from grid-cells to model resolution using a population-weighted sum.
 
     Args:
-        path_to_temperature (str): Gridded temperature timeseries data.
-        path_to_population (str): Gridded population data with `id` dimension that defined model resolution unit IDs.
-        path_to_heat_pump_characteristics (str): Manufacturer data on heat pump characteristics across a product range.
-        sink_temperature (dict): Working temperature for different heating methods (the temperature 'sink' of a heat pump).
-        space_heat_sink_ratio (dict): Ratio of different space heating methods assumed for the building stock.
-        correction_factor: Factor with which to downrate heat pump performance to go from manufacturer data to "operational" performance.
-        lat_name (str): Name of the latitude dimension in the gridded datasets.
-        lon_name (str):  Name of the longitude dimension in the gridded datasets.
-        heat_pump_type (Literal[ashp, gshp]): Heat pump type being modelled.
-        first_year (Union[str, int]): First year of data to include in the profile (inclusive).
-        final_year (Union[str, int]): Final year of data to include in the profile (inclusive).
+        path_to_temperature_air (str): Gridded air temperature timeseries data.
+        path_to_temperature_ground (str): Gridded ground/soil temperature timeseries data.
+        path_to_population (str):  Gridded population data with `id` dimension that defined model resolution unit IDs.
+        path_to_heat_pump_characteristics (str):  Manufacturer data on heat pump characteristics across a product range.
+        sink_temperature (dict[str, int]): Working temperature for different heating methods (the temperature 'sink' of a heat pump).
+        space_heat_sink_shares (dict[str, float]): Share of different space heating methods assumed for the building stock.
+        correction_factor (float): Factor with which to downrate heat pump performance to go from manufacturer data to "operational" performance.
+        heat_pump_shares (dict[str, float]): Share of air- vs ground-source heat pumps in the market.
+        first_year (Union[int, str]): First year of data to include in the profile (inclusive).
+        final_year (Union[int, str]): Final year of data to include in the profile (inclusive).
         path_to_output (str): Output to which COP timeseries data will be saved.
     """
     # Initial fast-fail checks.
     assert (
-        sum(heat_pump_ratio.values()) == 1
-    ), "Heat pump technology ratios must add up to 1."
+        sum(heat_pump_shares.values()) == 1
+    ), "Heat pump technology shares must add up to 1."
     assert (
-        sum(space_heat_sink_ratio.values()) == 1
-    ), "Space heating sink method ratios must add up to 1."
+        sum(space_heat_sink_shares.values()) == 1
+    ), "Space heating sink method shares must add up to 1."
 
     population = xr.open_dataarray(path_to_population)
 
@@ -65,14 +64,14 @@ def cop(
     )
     # 2. Combine sink methods into space heating and hot water end uses,
     # using weightings for space heating (hot water is a distinct sink method already)
-    sink_method_ratios = (
-        pd.Series({"hot-water": 1, **space_heat_sink_ratio})
+    sink_method_shares = (
+        pd.Series({"hot-water": 1, **space_heat_sink_shares})
         .rename_axis(index="sink_temp")
         .to_xarray()
     )
-    space_heat_renamer = {k: "space_heat" for k in space_heat_sink_ratio}
+    space_heat_renamer = {k: "space_heat" for k in space_heat_sink_shares}
     heat_pump_characteristics = utils.rename_and_groupby(
-        pre_grouped_heat_pump_characteristics * sink_method_ratios,
+        pre_grouped_heat_pump_characteristics * sink_method_shares,
         {"hot-water": "hot_water", **space_heat_renamer},
         "sink_temp",
         "end_use",
@@ -92,7 +91,7 @@ def cop(
         correction_factor,
     )
 
-    cop = cop_ashp * heat_pump_ratio["ashp"] + cop_gshp * heat_pump_ratio["gshp"]
+    cop = cop_ashp * heat_pump_shares["ashp"] + cop_gshp * heat_pump_shares["gshp"]
     # We infill with ASHP COP for gridcells that have no GSHP data.
     # These tend to be gridcells covering areas with no/limited land.
     cop = cop.fillna(cop_ashp)
@@ -154,9 +153,9 @@ if __name__ == "__main__":
         path_to_population=snakemake.input.population,
         path_to_heat_pump_characteristics=snakemake.input.heat_pump_characteristics,
         sink_temperature=snakemake.params.sink_temperature,
-        space_heat_sink_ratio=snakemake.params.space_heat_sink_ratio,
+        space_heat_sink_shares=snakemake.params.space_heat_sink_shares,
         correction_factor=snakemake.params.correction_factor,
-        heat_pump_ratio=snakemake.params.heat_pump_ratio,
+        heat_pump_shares=snakemake.params.heat_pump_shares,
         first_year=snakemake.params.first_year,
         final_year=snakemake.params.final_year,
         path_to_output=snakemake.output[0],

@@ -557,9 +557,9 @@ properties:
                             hot-water:
                                 type: integer
                                 description: Hot water temperature (not space heating).
-                    space-heat-sink-ratio:
+                    space-heat-sink-shares:
                         type: object
-                        description: Ratio of building stock assumed to have different space heating methods
+                        description: Share of building stock assumed to have different space heating methods
                         additionalProperties: false
                         properties:
                             underfloor:
@@ -571,9 +571,11 @@ properties:
                             radiator-conventional:
                                 type: number
                                 description: Conventional radiators (usually installed alongside gas boilers).
-                    heat-pump-ratio:
+                    heat-pump-shares:
                         type: object
-                        description: Assumed ratio of air- vs ground-source heat pumps. Must sum to 1.
+                        description: >-
+                            Market share of air- vs ground-source heat pumps, which will be used to create a generic "heat pump" technology.
+                            Must sum to 1.
                         additionalProperties: false
                         properties:
                             ashp:
@@ -590,7 +592,7 @@ properties:
                         type: number
                         minimum: 0
                         maximum: 1
-                        description: Correction factor to go from manufacturer data to 'real' systems
+                        description: Correction factor to go from manufacturer data on heat pump performance to 'real' system performance.
     scope:
         type: object
         description: Spatial and temporal scope bounding the models.
