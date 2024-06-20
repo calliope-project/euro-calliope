@@ -45,12 +45,14 @@ def _build_layer(
         resolution_config
     """
     crs = [layer.crs for layer in source_layers.values()][0]
-    layer = pd.concat([
-        source_layers[source_layer][
-            source_layers[source_layer].country_code == _iso3(country)
+    layer = pd.concat(
+        [
+            source_layers[source_layer][
+                source_layers[source_layer].country_code == _iso3(country)
+            ]
+            for country, source_layer in resolution_config.items()
         ]
-        for country, source_layer in resolution_config.items()
-    ])
+    )
     assert isinstance(layer, pd.DataFrame)
     return gpd.GeoDataFrame(layer, crs=crs).reset_index(drop=True)
 
@@ -83,15 +85,17 @@ def _validate_resolution_config(
 ):
     missing_countries = set(all_countries).difference(resolution_config)
 
-    assert not missing_countries, f"Missing countries in {resolution} resolution configuration: {missing_countries}"
+    assert (
+        not missing_countries
+    ), f"Missing countries in {resolution} resolution configuration: {missing_countries}"
 
 
 def _verify_all_countries_captured(
     countries: list[str], units: gpd.GeoDataFrame, resolution: str
 ):
-    missing_countries = set(units.country_code).difference([
-        _iso3(country) for country in countries
-    ])
+    missing_countries = set(units.country_code).difference(
+        [_iso3(country) for country in countries]
+    )
     assert (
         not missing_countries
     ), f"Countries are missing in {resolution} resolution shapes: {missing_countries}"
@@ -121,6 +125,8 @@ def _rename_ehighways_countries(units: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     Method is future-proofed to handle higher resolution than country code (e.g. using GADM3 units in one country).
     It does this by ordering all non-ehighways IDs alphabetically and then turning them into "XXX_#" style codes.
     """
+    # Extract all digits from a string, merge them in order via string summation, then convert to an integer
+    # E.g., "BE.1.2-3" -> 123
     order = (
         units.id.str.extractall(r"(\d+)")
         .groupby(level=0)
