@@ -156,24 +156,39 @@ parameters:
         future-vehicle-efficiency-percentile: 0.25 # FIXME Why so low? Why not 0.5?
         # FIXME road-transport-conversion-factors are redundant, as they are derived using future-vehicle-efficiency-percentile
         road-transport-conversion-factors: # MWh / mio km 25th percentile efficiency of all countries in 2015 [@Mantzos:2017]
-            light-duty-vehicles: 480
-            heavy-duty-vehicles: 3248 # based on buses
-            coaches-and-buses: 3248
-            passenger-cars: 324
-            motorcycles: 200  # based on passenger car electrical efficiency scaled by relative diesel efficiency
+            heavy-duty-vehicles:
+                diesel: 5140
+                electricity: 3248  # based on buses
+            light-duty-vehicles:
+                diesel: 855
+                electricity: 480
+            motorcycles:
+                diesel: 419
+                electricity: 200  # based on passenger car electrical efficiency scaled by relative diesel efficiency
+            coaches-and-buses:
+                diesel: 6057
+                electricity: 3248
+            passenger-cars:
+                diesel: 675
+                electricity: 324
         vehicle-type-names:
             light-duty-vehicles: Light duty vehicles
             heavy-duty-vehicles: Heavy duty vehicles
             coaches-and-buses: Motor coaches, buses and trolley buses
             passenger-cars: Passenger cars
             motorcycles: Powered 2-wheelers
+        vehicle-type-aggregation:
+            light-duty-vehicles: light_transport
+            heavy-duty-vehicles: heavy_transport
+            coaches-and-buses: heavy_transport
+            passenger-cars: light_transport
+            motorcycles: light_transport
         ev-battery-sizes:
             heavy-duty-vehicles: 0.2  # average from [EUCAR_2019]
             light-duty-vehicles: 0.1  # own assumption based on passenger cars from [EUCAR_2019]
             motorcycles: 0.01  # own assumption
             coaches-and-buses: 0.2  # own assumption based on HDVs from [EUCAR_2019]
             passenger-cars: 0.08  # average from [EUCAR_2019]
-        uncontrolled-ev-charging-share: 1
         monthly-demand-bound-fraction:
             min: 0.9
             max: 1.1

@@ -333,19 +333,19 @@ properties:
                         additionalProperties: false
                         properties:
                             light-duty-vehicles:
-                                type: number
+                                type: object
                                 description: Light duty vehicles / trucks.
                             heavy-duty-vehicles:
-                                type: number
+                                type: object
                                 description: Heavy duty vehicles / trucks.
                             coaches-and-buses:
-                                type: number
+                                type: object
                                 description: Coaches and buses.
                             passenger-cars:
-                                type: number
+                                type: object
                                 description: Passenger cars.
                             motorcycles:
-                                type: number
+                                type: object
                                 description: Motorcylces.
                     vehicle-type-names:
                         type: object
@@ -367,6 +367,26 @@ properties:
                             motorcycles:
                                 type: string
                                 description: JRC-IDEES name of motorcycles.
+                    vehicle-type-aggregation:
+                        type: object
+                        description: Aggregation of vehicle types for model resolution
+                        additionalProperties: false
+                        properties:
+                            light-duty-vehicles:
+                                type: string
+                                description: Aggregated category of light-duty-vehicles.
+                            heavy-duty-vehicles:
+                                type: string
+                                description: Aggregated category of heavy-duty-vehicles.
+                            coaches-and-buses:
+                                type: string
+                                description: Aggregated category of coaches-and-buses.
+                            passenger-cars:
+                                type: string
+                                description: Aggregated category of passenger-cars.
+                            motorcycles:
+                                type: string
+                                description: Aggregated category of motorcycles.
                     ev-battery-sizes:
                         type: object
                         description: EV battery size per vehicle type in MWh.
@@ -387,9 +407,6 @@ properties:
                             motorcycles:
                                 type: number
                                 description: Motorcylces.
-                    uncontrolled-ev-charging-share:
-                        type: number
-                        description: Share of uncontrolled charging.
                     monthly-demand-bound-fraction:
                         type: object
                         description: Charging flexibility parameter constraining the amount of monthly demand to be met.
