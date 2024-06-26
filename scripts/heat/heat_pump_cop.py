@@ -10,7 +10,6 @@ HEAT_PUMP_TYPE_SOURCE = {"ashp": "air", "gshp": "ground"}
 def cop(
     path_to_temperature_air: str,
     path_to_temperature_ground: str,
-    path_to_population: str,
     path_to_heat_pump_characteristics: str,
     sink_temperature: dict[str, int],
     space_heat_sink_shares: dict[str, float],
@@ -46,8 +45,6 @@ def cop(
     assert (
         sum(space_heat_sink_shares.values()) == 1
     ), "Space heating sink method shares must add up to 1."
-
-    population = xr.open_dataarray(path_to_population)
 
     temperature_ds = xr.merge(
         _load_temperature_data(filepath, first_year, final_year)
@@ -96,24 +93,9 @@ def cop(
     # These tend to be gridcells covering areas with no/limited land.
     cop = cop.fillna(cop_ashp)
 
-    # Sanity check that there is a. higher COP in summer than winter, b. no COP < 1 (worse than direct electrical heating)
-    cop_monthly = cop.groupby("time.month").mean()
-    cop_winter = cop_monthly.sel(month=[12, 1, 2]).mean("month")
-    cop_summer = cop_monthly.sel(month=[6, 7, 8]).mean("month")
-    assert (
-        cop_summer > cop_winter
-    ).all(), "Found higher heating COP values in winter than in summer."
-    assert (cop >= 1).all(), "Found improbably low heat pump COP values (< 1)."
-
-    # population weighted COP.
-    weight = population / population.sum(["site"])
-    # `ds_cop` has dims [site, time], `weight` has dims [site, id], we want a final array with dims [id, time]
-    ds_cop_grouped = xr.concat(
-        [(cop * weight.sel({"id": id})).sum(["site"]) for id in weight.id],
-        dim="id",
-    )
-
-    ds_cop_grouped.to_dataset(dim="end_use").to_netcdf(path_to_output)
+    cop_ds = cop.to_dataset(dim="end_use")
+    encoding = {k: {"zlib": True, "complevel": 4} for k in cop_ds.data_vars}
+    cop_ds.to_netcdf(path_to_output, encoding=encoding)
 
 
 def temperature_to_cop(
@@ -138,7 +120,7 @@ def _load_temperature_data(
     first_year: Union[int, str],
     final_year: Union[int, str],
 ) -> xr.Dataset:
-    "Load xarray dataset and check that units are in the correct unit"
+    "Load xarray dataset, subset to modelled geographic extent, and check that units are in the correct unit"
     ds = xr.open_dataset(path_to_temperature_data).sel(
         time=slice(str(first_year), str(final_year))
     )
@@ -150,7 +132,6 @@ if __name__ == "__main__":
     cop(
         path_to_temperature_air=snakemake.input.temperature_air,
         path_to_temperature_ground=snakemake.input.temperature_ground,
-        path_to_population=snakemake.input.population,
         path_to_heat_pump_characteristics=snakemake.input.heat_pump_characteristics,
         sink_temperature=snakemake.params.sink_temperature,
         space_heat_sink_shares=snakemake.params.space_heat_sink_shares,

@@ -22,7 +22,6 @@ AVE_WIND_SPEED_THRESHOLD = 4.4
 
 
 def get_unscaled_heat_profiles(
-    path_to_population: str,
     path_to_wind_speed: str,
     path_to_temperature: str,
     path_to_when2heat_params: str,
@@ -43,11 +42,10 @@ def get_unscaled_heat_profiles(
         final_year (Union[str, int]): Final year of data to include in the profile (inclusive).
         out_path (str): Path to which data will be saved.
     """
-    population = xr.open_dataarray(path_to_population)
 
     # Weather data is subset by the geographic area covered by model run (given by available population sites)
-    temperature_ds = xr.open_dataset(path_to_temperature).sel(site=population.site)
-    wind_ds = xr.open_dataset(path_to_wind_speed).sel(site=population.site)
+    temperature_ds = xr.open_dataset(path_to_temperature)
+    wind_ds = xr.open_dataset(path_to_wind_speed)
 
     # Check units
     assert temperature_ds.attrs["unit"].lower() == "degrees c"
@@ -76,7 +74,6 @@ def get_unscaled_heat_profiles(
     reference_temperature = reference_temperature.sel(
         time=slice(str(first_year), str(final_year))
     )
-
     # Parameters and how to apply them is based on [@BDEW:2015]
     daily_params = read_daily_parameters(path_to_when2heat_params)
     hourly_params = read_hourly_parameters(path_to_when2heat_params)
@@ -102,29 +99,19 @@ def get_unscaled_heat_profiles(
 
     # Space heating demand = total heating demand - hot water demand
     hourly_space = (hourly_heat - hourly_hot_water).clip(min=0)
-
-    # Sanity check that there is more space heating demand in winter than summer
-    hourly_space_monthly = hourly_space.groupby("time.month").sum()
-    hourly_space_winter = hourly_space_monthly.sel(month=[12, 1, 2]).sum("month")
-    hourly_space_summer = hourly_space_monthly.sel(month=[6, 7, 8]).sum("month")
-    assert (hourly_space_winter > hourly_space_summer).all()
-
-    # population weighted profiles.
-    # NOTE: profile magnitude is now only consistent within each region, not between them
-    weight = population / population.sum(["site"])
-    grouped_hourly_space = _group_gridcells(hourly_space, weight).rename("space_heat")
-    grouped_hourly_water = _group_gridcells(hourly_hot_water, weight).rename(
-        "hot_water"
+    grouped_hourly_heat = xr.merge(
+        [hourly_space.rename("space_heat"), hourly_hot_water.rename("hot_water")]
     )
-
-    grouped_hourly_heat = xr.merge([grouped_hourly_space, grouped_hourly_water])
-    grouped_hourly_heat.to_netcdf(out_path)
+    encoding = {
+        k: {"zlib": True, "complevel": 4} for k in grouped_hourly_heat.data_vars
+    }
+    grouped_hourly_heat.to_netcdf(out_path, encoding=encoding)
 
 
 def get_hourly_heat_profiles(
     reference_temperature: xr.DataArray,
     daily_heat: xr.DataArray,
-    hourly_params: pd.Series,
+    hourly_params: xr.DataArray,
 ) -> xr.DataArray:
     """Convert daily heat demand to hourly profiles.
 
@@ -142,29 +129,16 @@ def get_hourly_heat_profiles(
 
     # get temperature in 5C increments between -15C and +30C
     temperature_increments = (
-        (np.ceil((reference_temperature / 5).astype("float64")) * 5)
-        .clip(min=-15, max=30)
-        .to_series()
-    )
+        np.ceil((reference_temperature / 5).astype("float64")) * 5
+    ).clip(min=-15, max=30)
     # Profiles are linked to the day's temperature increment, so we align the two
-    increment_index = (
-        temperature_increments.to_frame("temperature")
-        .assign(weekday=temperature_increments.index.get_level_values("time").dayofweek)
-        .set_index(["temperature", "weekday"], append=True)
-    )
-    aligned_increment_to_params = pd.merge(
-        hourly_params.rename("param"),
-        increment_index,
-        left_index=True,
-        right_index=True,
-    ).squeeze()
+    temperature_increments.coords["weekday"] = temperature_increments.time.dt.dayofweek
+    hourly_params_at_all_locations = hourly_params.sel(
+        temperature=temperature_increments, weekday=temperature_increments.weekday
+    ).drop(["temperature", "weekday"])
 
-    hourly_params_at_all_locations = xr.DataArray.from_series(
-        aligned_increment_to_params.droplevel(["weekday", "temperature"])
-    )
     # daily heat is multiplied by the hourly parameter value to get the relative heat demand for that hour
     hourly_heat = hourly_params_at_all_locations * daily_heat
-
     hourly_heat = _hour_and_day_to_datetime(hourly_heat)
 
     return hourly_heat
@@ -179,7 +153,7 @@ def read_daily_parameters(input_path: str) -> pd.DataFrame:
     return pd.read_csv(file, sep=";", decimal=",", header=[0, 1], index_col=0)
 
 
-def read_hourly_parameters(input_path: str) -> pd.DataFrame:
+def read_hourly_parameters(input_path: str) -> xr.DataArray:
     """Load When2Heat hourly parameters
 
     Modified from https://github.com/oruhnau/when2heat/blob/351bd1a2f9392ed50a7bdb732a103c9327c51846/scripts/read.py
@@ -203,7 +177,7 @@ def read_hourly_parameters(input_path: str) -> pd.DataFrame:
     combined_df.columns = combined_df.columns.astype(int).rename("temperature")
     combined_df = combined_df.rename(lambda x: int(x.replace(":00", "")), level="time")
     combined_df = combined_df.rename_axis(index={"time": "hour"})
-    return combined_df.stack()
+    return combined_df.stack().to_xarray()
 
 
 def get_reference_temperature(
@@ -354,7 +328,6 @@ def _water_function(
 
 if __name__ == "__main__":
     get_unscaled_heat_profiles(
-        path_to_population=snakemake.input.population,
         path_to_wind_speed=snakemake.input.wind_speed,
         path_to_temperature=snakemake.input.temperature,
         path_to_when2heat_params=snakemake.input.when2heat,

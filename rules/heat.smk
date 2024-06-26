@@ -103,9 +103,7 @@ rule population_per_weather_gridbox:
 
 rule unscaled_heat_profiles:
     message: "Generate gridded heat demand profile shapes from weather and population data"
-
     input:
-        population = rules.population_per_weather_gridbox.output[0],
         wind_speed = "data/automatic/gridded-weather/wind10m.nc",
         temperature = "data/automatic/gridded-weather/temperature.nc",
         when2heat = rules.download_when2heat_params.output[0]
@@ -113,16 +111,15 @@ rule unscaled_heat_profiles:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
     conda: "../envs/default.yaml"
-    output: "build/data/{resolution}/hourly_unscaled_heat_demand.nc"
+    output: "build/data/heat/hourly_unscaled_heat_demand.nc"
     script: "../scripts/heat/unscaled_heat_profiles.py"
 
 
 rule heat_pump_cop:
-    message: "Generate {wildcards.resolution} heat pump coefficient of performance (COP)"
+    message: "Generate gridded heat pump coefficient of performance (COP)"
     input:
         temperature_air = "data/automatic/gridded-weather/temperature.nc",
         temperature_ground = "data/automatic/gridded-weather/tsoil5.nc",
-        population = rules.population_per_weather_gridbox.output[0],
         heat_pump_characteristics = rules.download_heat_pump_characteristics.output[0]
     params:
         sink_temperature = config["parameters"]["heat-pump"]["sink-temperature"],
@@ -132,5 +129,5 @@ rule heat_pump_cop:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
     conda: "../envs/default.yaml"
-    output: "build/data/{resolution}/heat_pump_cop.nc"
+    output: "build/data/heat/heat_pump_cop.nc"
     script: "../scripts/heat/heat_pump_cop.py"
