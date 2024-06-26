@@ -8,7 +8,7 @@
 
 * **ADD** Spatial resolution that aligns with the regions defined by the [e-Highway 2050 project](https://cordis.europa.eu/project/id/308908/reporting) (`ehighways`) (#370).
 
-* **ADD** fully-electrified heat demand (#284, #343, #390, #391) and heat pumps with variable COP to meet that demand (#393).
+* **ADD** fully-electrified heat demand (#284, #343, #389) and heat pumps with variable COP to meet that demand (#80).
 
 * **ADD** fully-electrified road transportation (#270, #271, #358). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (#338). Data for controlled charging constraints is readily available (#356), but corresponding constraints are not yet implemented (#385).
 

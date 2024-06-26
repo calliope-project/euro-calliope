@@ -102,7 +102,7 @@ rule population_per_weather_gridbox:
 
 
 rule unscaled_heat_profiles:
-    message: "Generate gridded heat demand profile shapes for {wildcards.year} from weather and population data"
+    message: "Generate gridded heat demand profile shapes from weather and population data"
 
     input:
         population = rules.population_per_weather_gridbox.output[0],
