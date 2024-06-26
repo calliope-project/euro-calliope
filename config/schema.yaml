@@ -458,9 +458,6 @@ properties:
                         description: Parameters of space heating technologies.
                         additionalProperties: false
                         properties:
-                            carnot-performance:
-                                type: number
-                                description: Carnot performance.
                             gas-eff:
                                 type: number
                                 description: Gas boiler efficiency.
@@ -479,12 +476,6 @@ properties:
                             electricity-eff:
                                 type: number
                                 description: Electric heater efficiency.
-                            space-heat-temp:
-                                type: number
-                                description: Space heating temperature.
-                            hp-cop:
-                                type: number
-                                description: Heat pump coefficient of performance.
                     water_heat:
                         type: object
                         description: Parameters of water heating technologies.
@@ -508,12 +499,6 @@ properties:
                             electricity-eff:
                                 type: number
                                 description: Electric heater efficiency.
-                            water-heat-temp:
-                                type: number
-                                description: Water heating temperature.
-                            hp-cop:
-                                type: number
-                                description: Heat pump coefficient of performance.
                     cooking:
                         type: object
                         description: Parameters of cooking technologies.

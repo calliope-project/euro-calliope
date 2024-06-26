@@ -189,24 +189,19 @@ parameters:
     nuts-year: 2013
     heat:
         space_heat:
-            carnot-performance: 0.36  # [Nouvel_2015]
-            gas-eff: 0.97  # [DEA_2016], but 70-80% according to [Qu_2014]
-            oil-eff: 0.9  # [DEA_2016], but 0.63 according to [martin_2014]
+            gas-eff: 0.97  # [@DEA:2020], but 70-80% according to [Qu_2014]
+            oil-eff: 0.9  # [@DEA:2020], but 0.63 according to [martin_2014]
             solid-fossil-eff: 0.8 # Assume same as biofuel
-            biofuel-eff: 0.8  # [mermoud_2015] [Chandrasekaran_2013] [DEA_2016]
+            biofuel-eff: 0.8  # [@DEA:2020] [mermoud_2015] [Chandrasekaran_2013] [DEA_2016]
             solar-thermal-eff: 1  # Eurostat energy balances method
             electricity-eff: 1  # must be 1 for the time being (we assume 1 -> 1 electricity -> heat conversion)
-            space-heat-temp: 36  # degrees C [Nouvel_2015]
-            hp-cop: 3.5
         water_heat:
-            gas-eff: 0.97  # [DEA_2016], but 70-80% according to [Qu_2014]
-            oil-eff: 0.9  # [DEA_2016], but 0.63 according to [martin_2014]
+            gas-eff: 0.97  # [@DEA:2020], but 70-80% according to [Qu_2014]
+            oil-eff: 0.9  # [@DEA:2020], but 0.63 according to [martin_2014]
             solid-fossil-eff: 0.8 # Assume same as biofuel
             biofuel-eff: 0.8  # [mermoud_2015] [Chandrasekaran_2013] [DEA_2016]
             solar-thermal-eff: 1  # Eurostat energy balances method
             electricity-eff: 1  # must be 1 for the time being (we assume 1 -> 1 electricity -> heat conversion)
-            water-heat-temp: 52  # degrees C [Nouvel_2015]
-            hp-cop: 3.5
         cooking:
             gas-eff: 0.28  # [Karunanithy_2016]
             oil-eff: 0.28  # [Karunanithy_2016] assuming oil == gas efficiency
