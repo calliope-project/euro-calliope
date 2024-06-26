@@ -476,7 +476,7 @@ properties:
                             electricity-eff:
                                 type: number
                                 description: Electric heater efficiency.
-                    water_heat:
+                    hot_water:
                         type: object
                         description: Parameters of water heating technologies.
                         additionalProperties: false

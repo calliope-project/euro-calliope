@@ -8,7 +8,7 @@ from eurocalliopelib import utils
 END_USE_CAT_NAMES = {
     "FC_OTH_HH_E_CK": "cooking",
     "FC_OTH_HH_E_SH": "space_heat",
-    "FC_OTH_HH_E_WH": "water_heat",
+    "FC_OTH_HH_E_WH": "hot_water",
 }
 
 CH_ENERGY_CARRIER_TRANSLATION = {
@@ -28,7 +28,7 @@ CH_ENERGY_CARRIER_TRANSLATION = {
 
 CH_HH_END_USE_TRANSLATION = {
     "Raumwärme": "space_heat",
-    "Warmwasser": "water_heat",
+    "Warmwasser": "hot_water",
     "Prozesswärme": "process_heat",
     "Beleuchtung": "end_use_electricity",
     "Klima, Lüftung, HT": "end_use_electricity",
@@ -163,12 +163,14 @@ def get_household_final_energy_demand(
     hh_end_use_df = pd.read_csv(
         path_to_hh_end_use, delimiter="\t", index_col=0, na_values=[":", ": ", ": z"]
     )
-    hh_end_use_df.index = hh_end_use_df.index.str.split(",", expand=True).rename([
-        "cat_code",
-        "carrier_code",
-        "unit",
-        "country_code",
-    ])
+    hh_end_use_df.index = hh_end_use_df.index.str.split(",", expand=True).rename(
+        [
+            "cat_code",
+            "carrier_code",
+            "unit",
+            "country_code",
+        ]
+    )
     hh_end_use_df.columns = hh_end_use_df.columns.astype(int).rename("year")
 
     # remove 'countries' which are not relevant
@@ -271,9 +273,10 @@ def update_final_renewable_energy_demand(df: pd.DataFrame) -> None:
         renewables_carriers = renewables.drop("RA000", axis=1).sum(axis=1, min_count=1)
         renewables_all = renewables.xs("RA000", axis=1)
         # Only update those rows where the sum of renewable energy carriers != RA000
-        return renewables.loc[
-            ~np.isclose(renewables_carriers, renewables_all)
-        ], renewables_carriers
+        return (
+            renewables.loc[~np.isclose(renewables_carriers, renewables_all)],
+            renewables_carriers,
+        )
 
     to_update, renewables_carriers = _get_rows_to_update(df)
     # Some rows have no data other than RA000, so we need to assign that data to one of the
@@ -311,7 +314,7 @@ def read_ch_hh_final_demand(path_to_ch_end_use: str) -> pd.DataFrame:
         skipfooter=8,
         translation=CH_ENERGY_CARRIER_TRANSLATION,
     )
-    water_heat = get_ch_sheet(
+    hot_water = get_ch_sheet(
         path_to_ch_end_use,
         "Tabelle 20",
         skipfooter=5,
@@ -327,8 +330,8 @@ def read_ch_hh_final_demand(path_to_ch_end_use: str) -> pd.DataFrame:
 
     df = (
         pd.concat(
-            [space_heat, water_heat, cooking],
-            keys=("space_heat", "water_heat", "cooking"),
+            [space_heat, hot_water, cooking],
+            keys=("space_heat", "hot_water", "cooking"),
             names=["cat_name", "carrier_name"],
         )
         .assign(country_code="CHE")
@@ -462,9 +465,9 @@ def fill_missing_countries_and_years(
         jrc_data = jrc_data.assign(**{country: jrc_data[neighbors].mean(axis=1)})
 
     jrc_data = jrc_data.stack().unstack("year")
-    jrc_data = jrc_data.assign(**{
-        str(year): jrc_data[2015] for year in range(2016, 2019)
-    })
+    jrc_data = jrc_data.assign(
+        **{str(year): jrc_data[2015] for year in range(2016, 2019)}
+    )
     jrc_data.columns = jrc_data.columns.astype(int)
     return jrc_data.stack()
 
@@ -638,7 +641,7 @@ def get_national_useful_heat_demand(
     """
 
     demands = []
-    for end_use in ["space_heat", "water_heat", "cooking"]:
+    for end_use in ["space_heat", "hot_water", "cooking"]:
         _demand = (
             annual_final_energy_demand.loc[[end_use]]
             .mul(efficiencies(heat_tech_params[end_use]), level="carrier_name", axis=0)
@@ -671,23 +674,25 @@ def get_national_useful_heat_demand(
 
 
 def efficiencies(params: dict[str, float]) -> pd.Series:
-    return pd.Series({
-        "biogas": params.get("gas-eff", np.nan),
-        "biofuel": params.get("biofuel-eff", np.nan),
-        "solid_fossil": params.get("solid-fossil-eff", np.nan),
-        "natural_gas": params.get("gas-eff", np.nan),
-        "manufactured_gas": params.get("gas-eff", np.nan),
-        "gas": params.get("gas-eff", np.nan),
-        "oil": params.get("oil-eff", np.nan),
-        "solar_thermal": params.get("solar-thermal-eff", np.nan),
-        "renewable_heat": params.get("solar-thermal-eff", np.nan),
-        "electricity": params.get("electricity-eff", np.nan),
-        "direct_electric": 1,  # don't need to deal with heat pump COP if direct electric is 100% efficient
-        "heat": 1,
-        # heat demand met by heat pumps = heat pump electricity + ambient heat
-        "heat_pump": 1,
-        "ambient_heat": 1,
-    })
+    return pd.Series(
+        {
+            "biogas": params.get("gas-eff", np.nan),
+            "biofuel": params.get("biofuel-eff", np.nan),
+            "solid_fossil": params.get("solid-fossil-eff", np.nan),
+            "natural_gas": params.get("gas-eff", np.nan),
+            "manufactured_gas": params.get("gas-eff", np.nan),
+            "gas": params.get("gas-eff", np.nan),
+            "oil": params.get("oil-eff", np.nan),
+            "solar_thermal": params.get("solar-thermal-eff", np.nan),
+            "renewable_heat": params.get("solar-thermal-eff", np.nan),
+            "electricity": params.get("electricity-eff", np.nan),
+            "direct_electric": 1,  # don't need to deal with heat pump COP if direct electric is 100% efficient
+            "heat": 1,
+            # heat demand met by heat pumps = heat pump electricity + ambient heat
+            "heat_pump": 1,
+            "ambient_heat": 1,
+        }
+    )
 
 
 def get_ch_sheet(
