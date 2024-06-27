@@ -18,6 +18,7 @@ dependencies:
     - hdf5=1.12.2
     - libnetcdf=4.8.1
     - scipy=1.9.1
+    - dask=2023.2.0
     - pip:
         - -e ./lib
         - styleframe==4.2

@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import jinja2
+import numpy as np
 
 from eurocalliopelib import filters
 
@@ -20,6 +21,7 @@ def parametrise_template(path_to_template, path_to_output_yaml, **kwargs):
         undefined=jinja2.StrictUndefined,  # This ensures that missing pandas index elements raise an exception instead of silently returning None
     )
     env.filters["unit"] = filters.unit
+    env.globals["mean"] = np.mean
     rendered = env.get_template(path_to_template.name).render(**kwargs)
 
     with open(path_to_output_yaml, "w") as result_file:

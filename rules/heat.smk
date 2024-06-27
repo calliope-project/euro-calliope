@@ -131,3 +131,14 @@ rule heat_pump_cop:
     conda: "../envs/default.yaml"
     output: "build/data/heat/heat_pump_cop.nc"
     script: "../scripts/heat/heat_pump_cop.py"
+
+rule group_gridded_timeseries:
+    message: "Generate {wildcards.resolution} {wildcards.input_dataset} timeseries data from gridded data "
+    input:
+        gridded_timeseries_data = "build/data/heat/{input_dataset}.nc",
+        grid_weights = rules.population_per_weather_gridbox.output[0],
+        annual_demand = rules.rescale_annual_heat_demand_to_resolution.output.total_demand
+    conda: "../envs/default.yaml"
+    threads: 4
+    output: "build/models/{resolution}/timeseries/supply/{input_dataset}.csv"
+    script: "../scripts/heat/group_gridded_timeseries.py"
