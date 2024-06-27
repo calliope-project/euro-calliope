@@ -155,7 +155,7 @@ rule hydro_capacities:
 rule capacity_factors_hydro:
     message: "Generate capacityfactor time series for hydro electricity on {wildcards.resolution} resolution."
     input:
-        capacities = rules.hydro_capacities.output[0],
+        capacities = rules.hydro_capacities.output.supply,
         stations = "build/data/hydro-electricity-with-energy-inflow-{first_year}-{final_year}.nc".format(
             first_year = config["scope"]["temporal"]["first-year"],
             final_year = config["scope"]["temporal"]["final-year"]
