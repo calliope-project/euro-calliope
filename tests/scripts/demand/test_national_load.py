@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -14,7 +15,8 @@ from scripts.demand.national_load import (
     filter_outliers,
 )
 
-THIS_DIR = os.path.dirname(__file__)
+THIS_DIR = Path(os.path.dirname(__file__))
+PATH_TO_RESOURCES = THIS_DIR / ".." / ".." / "resources"
 
 
 class TestLoadHelperFunctions:
@@ -197,14 +199,13 @@ class TestLoadDummyData:
                 "fill-29th-feb-from-28th": fill_29th_feb_from_28th,
                 "data-source-priority-order": list(data_source_priority_order),
             }
-            path_to_raw_load = os.path.join(
-                THIS_DIR, "..", "resources", "national", "dummy_load.csv"
-            )
+            path_to_raw_load = PATH_TO_RESOURCES / "national" / "dummy_load.csv"
+
             countries = ["ALB", "DEU"]
             year = 2016
 
             return clean_load_data(
-                path_to_raw_load, year, year, data_quality_config, countries
+                path_to_raw_load.as_posix(), year, year, data_quality_config, countries
             )
 
         return _load
