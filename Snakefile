@@ -247,7 +247,7 @@ rule test:
             technology=ALL_CF_TECHNOLOGIES
         ),
         unscaled_space_heat = "build/data/heat/hourly_unscaled_heat_demand.nc",
-        cop = "build/models/{resolution}/timeseries/supply/heat_pump_cop.csv"
+        cop = "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv"
     params:
         config = config,
         test_args = []  # add e.g. "--pdb" to enter ipdb on test failure
