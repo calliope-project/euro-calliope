@@ -129,7 +129,7 @@ rule heat_pump_cop:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
     conda: "../envs/default.yaml"
-    output: "build/data/heat/heat_pump_cop.nc"
+    output: "build/data/heat/heat-pump-cop.nc"
     script: "../scripts/heat/heat_pump_cop.py"
 
 rule group_gridded_timeseries:

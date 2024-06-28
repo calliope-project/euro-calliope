@@ -43,7 +43,15 @@ Schröder, A., Kunz, F., Meiss, J., Mendelevitch, R., &#38; Von Hirschhausen, C.
 
 ### @DEA:2020
 
-Danish Energy Agency. (2020). <i>Technology Data for Generation of Electricity and District Heating.</i> [https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and](https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and)
+Danish Energy Agency. (2020). _Technology Data for Generation of Electricity and District Heating, version 9._ <https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and>
+
+### @DEA:2019
+
+Danish Energy Agency. (2019). _Technology Data for Energy storage, version 4._ <https://ens.dk/en/our-services/technology-catalogues/technology-data-energy-storage>
+
+### @DEA:2017
+
+Danish Energy Agency. (2017). _Technology Data for heating installations, version 1._ <https://ens.dk/en/our-services/technology-catalogues/technology-data-individual-heating-plants>
 
 ### @Wealer:2019
 

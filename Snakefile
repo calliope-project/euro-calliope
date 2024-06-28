@@ -160,6 +160,7 @@ rule model_template:
                 "techs/demand/electrified-heat.yaml",
                 "techs/storage/electricity.yaml",
                 "techs/storage/hydro.yaml",
+                "techs/storage/heat.yaml",
                 "techs/supply/biofuel.yaml",
                 "techs/supply/hydro.yaml",
                 "techs/supply/load-shedding.yaml",
@@ -167,10 +168,10 @@ rule model_template:
                 "techs/supply/rooftop-solar.yaml",
                 "techs/supply/wind-offshore.yaml",
                 "techs/supply/nuclear.yaml",
-                "techs/supply/heat.yaml",
+                "techs/supply/heat-from-electricity.yaml",
             ]
         ),
-        cop_data = "build/models/{resolution}/timeseries/supply/heat_pump_cop.csv",
+        cop_data = "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv",
         capacityfactor_timeseries_data = expand(
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_CF_TECHNOLOGIES
