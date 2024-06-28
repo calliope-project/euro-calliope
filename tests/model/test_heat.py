@@ -1,6 +1,6 @@
-def test_cop_monthly(cop_timeseries):
+def test_cop_monthly(cop_timeseries, location):
     """Expecting higher COP in summer than winter."""
-    cop_monthly = cop_timeseries.groupby(cop_timeseries.index.month).mean()
+    cop_monthly = cop_timeseries[location].groupby(cop_timeseries.index.month).mean()
     cop_winter = cop_monthly.loc[[12, 1, 2]].mean()
     cop_summer = cop_monthly.loc[[6, 7, 8]].mean()
     assert (
