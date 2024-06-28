@@ -99,9 +99,10 @@ def get_unscaled_heat_profiles(
 
     # Space heating demand = total heating demand - hot water demand
     hourly_space = (hourly_heat - hourly_hot_water).clip(min=0)
-    grouped_hourly_heat = xr.merge(
-        [hourly_space.rename("space_heat"), hourly_hot_water.rename("hot_water")]
-    )
+    grouped_hourly_heat = xr.merge([
+        hourly_space.rename("space_heat"),
+        hourly_hot_water.rename("hot_water"),
+    ])
     encoding = {
         k: {"zlib": True, "complevel": 4} for k in grouped_hourly_heat.data_vars
     }

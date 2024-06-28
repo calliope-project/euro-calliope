@@ -248,7 +248,8 @@ rule test:
         unscaled_space_heat = "build/data/heat/hourly_unscaled_heat_demand.nc",
         cop = "build/models/{resolution}/timeseries/supply/heat_pump_cop.csv"
     params:
-        config = config
+        config = config,
+        test_args = []  # add e.g. "--pdb" to enter ipdb on test failure
     log: "build/logs/{resolution}/test-report.html"
     output: "build/logs/{resolution}/test.success"
     conda: "./envs/test.yaml"

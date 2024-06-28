@@ -29,6 +29,7 @@ def run_test(snakemake):
             f"--html={snakemake.log[0]}",
             "--self-contained-html",
             "--verbose",
+            *snakemake.params.test_args,
         ],
         plugins=[
             _create_config_plugin(snakemake, override_dict, scenarios, subset_time)

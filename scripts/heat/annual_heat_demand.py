@@ -163,14 +163,12 @@ def get_household_final_energy_demand(
     hh_end_use_df = pd.read_csv(
         path_to_hh_end_use, delimiter="\t", index_col=0, na_values=[":", ": ", ": z"]
     )
-    hh_end_use_df.index = hh_end_use_df.index.str.split(",", expand=True).rename(
-        [
-            "cat_code",
-            "carrier_code",
-            "unit",
-            "country_code",
-        ]
-    )
+    hh_end_use_df.index = hh_end_use_df.index.str.split(",", expand=True).rename([
+        "cat_code",
+        "carrier_code",
+        "unit",
+        "country_code",
+    ])
     hh_end_use_df.columns = hh_end_use_df.columns.astype(int).rename("year")
 
     # remove 'countries' which are not relevant
@@ -465,9 +463,9 @@ def fill_missing_countries_and_years(
         jrc_data = jrc_data.assign(**{country: jrc_data[neighbors].mean(axis=1)})
 
     jrc_data = jrc_data.stack().unstack("year")
-    jrc_data = jrc_data.assign(
-        **{str(year): jrc_data[2015] for year in range(2016, 2019)}
-    )
+    jrc_data = jrc_data.assign(**{
+        str(year): jrc_data[2015] for year in range(2016, 2019)
+    })
     jrc_data.columns = jrc_data.columns.astype(int)
     return jrc_data.stack()
 
@@ -674,25 +672,23 @@ def get_national_useful_heat_demand(
 
 
 def efficiencies(params: dict[str, float]) -> pd.Series:
-    return pd.Series(
-        {
-            "biogas": params.get("gas-eff", np.nan),
-            "biofuel": params.get("biofuel-eff", np.nan),
-            "solid_fossil": params.get("solid-fossil-eff", np.nan),
-            "natural_gas": params.get("gas-eff", np.nan),
-            "manufactured_gas": params.get("gas-eff", np.nan),
-            "gas": params.get("gas-eff", np.nan),
-            "oil": params.get("oil-eff", np.nan),
-            "solar_thermal": params.get("solar-thermal-eff", np.nan),
-            "renewable_heat": params.get("solar-thermal-eff", np.nan),
-            "electricity": params.get("electricity-eff", np.nan),
-            "direct_electric": 1,  # don't need to deal with heat pump COP if direct electric is 100% efficient
-            "heat": 1,
-            # heat demand met by heat pumps = heat pump electricity + ambient heat
-            "heat_pump": 1,
-            "ambient_heat": 1,
-        }
-    )
+    return pd.Series({
+        "biogas": params.get("gas-eff", np.nan),
+        "biofuel": params.get("biofuel-eff", np.nan),
+        "solid_fossil": params.get("solid-fossil-eff", np.nan),
+        "natural_gas": params.get("gas-eff", np.nan),
+        "manufactured_gas": params.get("gas-eff", np.nan),
+        "gas": params.get("gas-eff", np.nan),
+        "oil": params.get("oil-eff", np.nan),
+        "solar_thermal": params.get("solar-thermal-eff", np.nan),
+        "renewable_heat": params.get("solar-thermal-eff", np.nan),
+        "electricity": params.get("electricity-eff", np.nan),
+        "direct_electric": 1,  # don't need to deal with heat pump COP if direct electric is 100% efficient
+        "heat": 1,
+        # heat demand met by heat pumps = heat pump electricity + ambient heat
+        "heat_pump": 1,
+        "ambient_heat": 1,
+    })
 
 
 def get_ch_sheet(
