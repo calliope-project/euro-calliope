@@ -43,13 +43,14 @@ locations:
 
 overrides:
     add_heat_pump_storage:  # Link technologies to their own storage buffers. Storage technology "groups" given in `techs/storage/heat.yaml`.
-        techs.heat_pump.essentials.carrier_out: hp_heat
-        hp_heat_storage_small:
-            essentials.parent: heat_storage_small
-            essentials.carrier: hp_heat
-        hp_tech_heat_to_demand:
-            essentials.parent: tech_heat_to_demand
-            essentials.carrier_in: hp_heat
+        techs:
+            heat_pump.essentials.carrier_out: hp_heat
+            hp_heat_storage_small:
+                essentials.parent: heat_storage_small
+                essentials.carrier: hp_heat
+            hp_tech_heat_to_demand:
+                essentials.parent: tech_heat_to_demand
+                essentials.carrier_in: hp_heat
         locations:
             {% for id, location in locations.iterrows() %}
             {{ id }}:
@@ -58,13 +59,14 @@ overrides:
                     hp_tech_heat_to_demand:
             {% endfor %}
     add_electric_heater_storage:
-        techs.electric_heater.essentials.carrier_out: electric_heater_heat
-        electric_heater_heat_storage_small:
-            essentials.parent: heat_storage_small
-            essentials.carrier: electric_heater_heat
-        electric_heater_tech_heat_to_demand:
-            essentials.parent: tech_heat_to_demand
-            essentials.carrier_in: electric_heater_heat
+        techs:
+            electric_heater.essentials.carrier_out: electric_heater_heat
+            electric_heater_heat_storage_small:
+                essentials.parent: heat_storage_small
+                essentials.carrier: electric_heater_heat
+            electric_heater_tech_heat_to_demand:
+                essentials.parent: tech_heat_to_demand
+                essentials.carrier_in: electric_heater_heat
         locations:
             {% for id, location in locations.iterrows() %}
             {{ id }}:

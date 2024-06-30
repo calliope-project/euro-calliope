@@ -31,6 +31,7 @@ def population_on_weather_grid(
     # Locations are shapefiles at the resolution of interest
     # (e.g. countries for resolution `national`)
     locations = gpd.read_file(path_to_locations)
+    locations["id"] = locations["id"].str.replace(".", "-", regex=False)
 
     gridbox_points = gpd.GeoDataFrame(
         geometry=gpd.points_from_xy(
