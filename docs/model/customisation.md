@@ -82,6 +82,24 @@ Here, we describe each module in terms of the technologies they contain (`callio
         The ratio is derived from typical values of commercial lithium-ion batteries available today (2021).
         Constraining hydrogen storage as well ensures it does not directly compete with battery storage, but is used instead for durations of fours hours and longer.
 
+??? note "storage/heat.yaml"
+
+    === "Technologies"
+
+        **heat_storage_small**: Abstract [technology group](https://calliope.readthedocs.io/en/v0.6.10/user/advanced_features.html#using-tech-groups-to-group-configuration).
+        This "technology" only becomes part of the model when defining technologies in the overrides of this file.
+
+    === "Overrides"
+
+        **add_heat_pump_storage**: Add storage buffer for heat pumps.
+        Adds the technology `hp_heat_storage_small` using the `heat_storage_small` abstract technology group.
+
+        **add_electric_heater_storage**: Add storage buffer for direct electric heaters.
+        Adds the technology `electric_heater_heat_storage_small` using the `heat_storage_small` abstract technology group.
+
+    === "Scenarios"
+
+        **add_heat_tech_storage**: Add all technology storage buffers at once.
 
 ??? note "storage/hydro.yaml"
 
@@ -100,6 +118,18 @@ Here, we describe each module in terms of the technologies they contain (`callio
     === "Technologies"
 
         **biofuel**: Biofuel
+
+??? note "supply/heat-from-electricity.yaml"
+
+    === "Technologies"
+
+        **heat_pump**: Heat pump.
+
+        **heat_pump_tech_heat_to_demand**: Dummy technology to convert heat pump output to a carrier that can be used to meet heat demand.
+
+        **electric_heater**: Direct electric heater.
+
+        **electric_heater_tech_heat_to_demand**: Dummy technology to convert electric heater output to a carrier that can be used to meet heat demand.
 
 ??? note "supply/hydro.yaml"
 
@@ -132,7 +162,6 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         Calliope provides a built-in mechanism that is similar: [`ensure-feasibility`](https://calliope.readthedocs.io/en/v{{ calliope_version }}/user/building.html#allowing-for-unmet-demand).
         The benefit of using the `load-shedding` override over Calliope's built-in mechanism is that it is more targeted towards modelling shedding of electrical load and provides more flexibility -- for example in terms of the cost of shed load.
-
 
 ??? note "supply/nuclear.yaml"
 
