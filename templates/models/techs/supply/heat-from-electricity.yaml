@@ -1,4 +1,4 @@
-{# TODO: weight single-/multi-family technology costs based on regional dwelling ratio #}
+{# TODO: weight single-/multi-family technology costs based on regional dwelling ratio - see https://github.com/calliope-project/euro-calliope/issues/406 #}
 {# Costs being averaged are given in the order they appear in the spreadsheet (which is the same order as in the inline comments). #}
 {# Costs are given by DEA per technology "unit" (1000EUR/unit), so are converted to a cost per capacity (1000EUR/kW_heating) by dividing by the capacity of one unit, as given in the same data table. #}
 
