@@ -8,6 +8,7 @@ test-model:
             alternative-cost: ["dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost"]
             shed-load: ["load-shedding"]
             keep-historic-transport: ["keep-historic-electricity-demand-from-road-transport"]
+            add-heat-tech-storage: ["add_heat_tech_storage"]
         national:
             default: []
             connected_neighbours: ["connect_all_neighbours"]
@@ -18,14 +19,15 @@ test-model:
             alternative-cost: ["dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost"]
             shed-load: ["load-shedding"]
             keep-historic-transport: ["keep-historic-electricity-demand-from-road-transport"]
+            add-heat-tech-storage: ["add_heat_tech_storage"]
         regional:
             default: ["connect_all_neighbours", "run_barrier_no_crossover"]
             all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
-                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding"]
+                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "add_heat_tech_storage"]
         ehighways:
             default: ["connect_all_neighbours", "run_barrier_no_crossover"]
             all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
-                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding"]
+                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "add_heat_tech_storage"]
     overrides:
         continental: {}
         national:

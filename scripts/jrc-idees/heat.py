@@ -6,7 +6,7 @@ idx = pd.IndexSlice
 END_USES = {
     "Space heating": "space_heat",
     "Space cooling": "end_use_electricity",
-    "Hot water": "water_heat",
+    "Hot water": "hot_water",
     "Catering": "cooking",
 }
 CARRIER_NAMES = {

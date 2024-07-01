@@ -13,6 +13,7 @@ Within each resolution-specific model directory, there is a subdirectory for tec
 ├── {resolution}                                            <- An individual folder for each spatial resolution.
 │   ├── timeseries                                          <- All timeseries data CSV files.
 |   |   |── supply
+|   |   |   └── heat-pump-cop.csv                           <- Timeseries of heat pump coefficients of performance (COPs).
 |   |   |   └── capacityfactors-{technology}.csv            <- Timeseries of capacityfactors of all renewables.
 |   |   └── demand
 |   |   |   └── electricity.csv                             <- Timeseries of electricity demand on each node.

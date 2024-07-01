@@ -5,6 +5,7 @@ from pathlib import Path
 import calliope
 import pandas as pd
 import pytest
+import xarray as xr
 import yaml
 
 
@@ -28,6 +29,7 @@ def run_test(snakemake):
             f"--html={snakemake.log[0]}",
             "--self-contained-html",
             "--verbose",
+            *snakemake.params.test_args,
         ],
         plugins=[
             _create_config_plugin(snakemake, override_dict, scenarios, subset_time)
@@ -124,6 +126,14 @@ def _create_config_plugin(snakemake, override_dict, scenarios, subset_time):
             ]
             assert len(selected) == 1
             return selected[0]
+
+        @pytest.fixture(scope="module")
+        def cop_timeseries(self):
+            return pd.read_csv(snakemake.input.cop, index_col=0, parse_dates=True)
+
+        @pytest.fixture(scope="module")
+        def unscaled_space_heat_timeseries(self):
+            return xr.open_dataset(snakemake.input.unscaled_space_heat)
 
     return SnakemakeConfigPlugin()
 

@@ -17,6 +17,14 @@ rule download_when2heat_params:
     conda: "../envs/shell.yaml"
     shell: "mkdir -p {output} && curl -sSLo '{output}/#1' '{params.url}'"
 
+rule download_heat_pump_characteristics:
+    message: "Download manufacturer heat pump data"
+    params: url = config["data-sources"]["heat-pump-characteristics"]
+    output: protected("data/automatic/heat-pump-characteristics.nc")
+    conda: "../envs/shell.yaml"
+    localrule: True
+    shell: "curl -sSLo {output} '{params.url}'"
+
 
 rule annual_heat_demand:
     message: "Calculate national heat demand for household and commercial sectors"
@@ -94,10 +102,8 @@ rule population_per_weather_gridbox:
 
 
 rule unscaled_heat_profiles:
-    message: "Generate gridded heat demand profile shapes for {wildcards.year} from weather and population data"
-
+    message: "Generate gridded heat demand profile shapes from weather and population data"
     input:
-        population = rules.population_per_weather_gridbox.output[0],
         wind_speed = "data/automatic/gridded-weather/wind10m.nc",
         temperature = "data/automatic/gridded-weather/temperature.nc",
         when2heat = rules.download_when2heat_params.output[0]
@@ -105,5 +111,34 @@ rule unscaled_heat_profiles:
         first_year = config["scope"]["temporal"]["first-year"],
         final_year = config["scope"]["temporal"]["final-year"],
     conda: "../envs/default.yaml"
-    output: "build/data/{resolution}/hourly_unscaled_heat_demand.nc"
+    output: "build/data/heat/hourly_unscaled_heat_demand.nc"
     script: "../scripts/heat/unscaled_heat_profiles.py"
+
+
+rule heat_pump_cop:
+    message: "Generate gridded heat pump coefficient of performance (COP)"
+    input:
+        temperature_air = "data/automatic/gridded-weather/temperature.nc",
+        temperature_ground = "data/automatic/gridded-weather/tsoil5.nc",
+        heat_pump_characteristics = rules.download_heat_pump_characteristics.output[0]
+    params:
+        sink_temperature = config["parameters"]["heat-pump"]["sink-temperature"],
+        space_heat_sink_shares = config["parameters"]["heat-pump"]["space-heat-sink-shares"],
+        correction_factor = config["parameters"]["heat-pump"]["correction-factor"],
+        heat_pump_shares = config["parameters"]["heat-pump"]["heat-pump-shares"],
+        first_year = config["scope"]["temporal"]["first-year"],
+        final_year = config["scope"]["temporal"]["final-year"],
+    conda: "../envs/default.yaml"
+    output: "build/data/heat/heat-pump-cop.nc"
+    script: "../scripts/heat/heat_pump_cop.py"
+
+rule group_gridded_timeseries:
+    message: "Generate {wildcards.resolution} {wildcards.input_dataset} timeseries data from gridded data "
+    input:
+        gridded_timeseries_data = "build/data/heat/{input_dataset}.nc",
+        grid_weights = rules.population_per_weather_gridbox.output[0],
+        annual_demand = rules.rescale_annual_heat_demand_to_resolution.output.total_demand
+    conda: "../envs/default.yaml"
+    threads: 4
+    output: "build/models/{resolution}/timeseries/supply/{input_dataset}.csv"
+    script: "../scripts/heat/group_gridded_timeseries.py"
