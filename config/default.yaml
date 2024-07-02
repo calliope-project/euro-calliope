@@ -180,7 +180,7 @@ quality-control:
     hydro:
         scale-phs-according-to-geth-et-al: false
         station-nearest-basin-max-km: 1
-    capacity-factor-gridcell-overlap-threshold: 0.97 # Ceuta y Melilla has smallest overlap
+    capacity-factor-gridcell-overlap-threshold: 0.2 # Ceuta y Melilla has smallest overlap
 
 sea-connections:
     continental: []

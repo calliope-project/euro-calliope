@@ -1,14 +1,13 @@
 name: test
 channels:
     - conda-forge
-    - gurobi
 dependencies:
     - python=3.9
     - ipdb=0.13.13
     - numpy=1.23
     - pandas=1.5
     - xarray=2022.3
-    - gurobi=9.5.1
+    - coincbc
     - pytest=7.3.1
     - pytest-html=3.2.0
     - calliope=0.6.10
