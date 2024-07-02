@@ -5,7 +5,6 @@ from pathlib import Path
 import calliope
 import pandas as pd
 import pytest
-import xarray as xr
 import yaml
 
 
@@ -132,8 +131,16 @@ def _create_config_plugin(snakemake, override_dict, scenarios, subset_time):
             return pd.read_csv(snakemake.input.cop, index_col=0, parse_dates=True)
 
         @pytest.fixture(scope="module")
-        def unscaled_space_heat_timeseries(self):
-            return xr.open_dataset(snakemake.input.unscaled_space_heat)
+        def heat_demand(self):
+            return pd.read_csv(
+                snakemake.input.heat_demand, index_col=0, parse_dates=True
+            )
+
+        @pytest.fixture(scope="module")
+        def historic_electrified_heat(self):
+            return pd.read_csv(
+                snakemake.input.historic_electrified_heat, index_col=0, parse_dates=True
+            )
 
     return SnakemakeConfigPlugin()
 

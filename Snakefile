@@ -157,7 +157,7 @@ rule model_template:
                 "locations.yaml",
                 "techs/demand/electricity.yaml",
                 "techs/demand/electrified-transport.yaml",
-                "techs/demand/electrified-heat.yaml",
+                "techs/demand/heat.yaml",
                 "techs/storage/electricity.yaml",
                 "techs/storage/hydro.yaml",
                 "techs/storage/heat.yaml",
@@ -180,7 +180,7 @@ rule model_template:
             "build/models/{resolution}/timeseries/demand/electricity.csv",
             "build/models/{resolution}/timeseries/demand/uncontrolled-electrified-road-transport.csv",
             "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv",
-            "build/models/{resolution}/timeseries/demand/electrified-heat.csv",
+            "build/models/{resolution}/timeseries/demand/heat.csv",
             "build/models/{resolution}/timeseries/demand/historic-electrified-heat.csv",
             "build/models/{resolution}/timeseries/demand/demand-shape-min-ev.csv",
             "build/models/{resolution}/timeseries/demand/demand-shape-max-ev.csv",
@@ -246,7 +246,8 @@ rule test:
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_CF_TECHNOLOGIES
         ),
-        unscaled_space_heat = "build/data/heat/hourly_unscaled_heat_demand.nc",
+        heat_demand = "build/models/{resolution}/timeseries/demand/heat.csv",
+        historic_electrified_heat = "build/models/{resolution}/timeseries/demand/historic-electrified-heat.csv",
         cop = "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv"
     params:
         config = config,

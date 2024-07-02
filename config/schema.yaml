@@ -524,11 +524,11 @@ properties:
                                     electricity-eff:
                                         type: number
                                         description: Electric stove efficiency.
-                    sfh-mfh-ratio:
+                    sfh-mfh-shares:
                         type: object
                         description: |
-                            Ratio of single-family to multi-family households which will be used to aggregate household heat demand profiles.
-                            Fractions must add to 1.
+                            Share of single-family to multi-family households which will be used to aggregate household heat demand profiles.
+                            Shares must add to 1.
                         additionalProperties: false
                         properties:
                             MFH:

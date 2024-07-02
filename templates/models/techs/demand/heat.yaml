@@ -1,0 +1,27 @@
+techs:
+    demand_heat:
+        essentials:
+            name: Heat demand
+            parent: demand
+            carrier: heat
+        constraints:
+            resource: file=demand/heat.csv
+
+    demand_historic_electrified_heat:
+        essentials:
+            name: Removes historic electrified heat demand from the electricity demand profile
+            parent: supply
+            carrier: electricity
+        constraints:
+            resource: file=demand/historic-electrified-heat.csv
+            force_resource: true
+
+overrides:
+    keep-historic-electricity-demand-from-heat:
+        techs.demand_heat_historic_electrified.exists: False
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.techs.demand_heat:
+    {{ id }}.techs.demand_historic_electrified_heat:
+    {% endfor %}
