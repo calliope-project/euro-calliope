@@ -1,6 +1,5 @@
 """Rules related to biofuels."""
 
-
 rule download_biofuel_potentials_and_costs:
     message: "Download raw biofuel potential and cost data."
     params: url = config["data-sources"]["biofuel-potentials-and-costs"]
@@ -55,7 +54,7 @@ rule biofuels:
 rule bio_techs_and_locations_template:
     message: "Create biofuel tech definition file from template."
     input:
-        template = techs_template_dir + "supply/biofuel.yaml",
+        template = techs_template_dir + "supply/biofuel.yaml.jinja",
         biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
             scenario=config["parameters"]["jrc-biofuel"]["scenario"]
         ),

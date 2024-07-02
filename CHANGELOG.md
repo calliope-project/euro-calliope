@@ -58,7 +58,7 @@
 * **UPDATED** structure of YAML templates and parametrisation:
     * Parametrisation moved to eurocalliopelib.
     * Rules to parametrise split into smaller technology-specific rules, to ensure inputs are directly relevant to the files being parametrised.
-    * YAML templates restructured to match structure of final model (see `Updated (models) above`);
+    * YAML templates restructured to match structure of final model (see `Updated (models) above`) and given `.jinja` suffix to allow for IDE syntax highlighting (#404);
 * **UPDATE** cluster sync infrastructure to retain file permission defaults on the cluster. This change improves team collaboration, as default group settings will apply to the files on the cluster (#214).
 * **UPDATE** the declaration of required cluster resources. Moving away from a mechanism that is deprecated in Snakemake (#211).
 * **UPDATE** default Snakemake profile to be activated automatically, for convenience (#264, #268).
