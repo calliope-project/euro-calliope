@@ -21,7 +21,9 @@ import pandas as pd
 import pycountry
 import logging
 
+logger = logging.getLogger(_name_)
 logging.basicConfig(filename='snakemake.log', encoding='utf-8', level=logging.DEBUG)
+
 
 def national_load(
     path_to_raw_load,
