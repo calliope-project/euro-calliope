@@ -32,9 +32,7 @@ localrules: all, clean
 wildcard_constraints:
     resolution = "continental|national|regional|ehighways"
 
-ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
-ruleorder: bio_techs_and_locations_template > techs_and_locations_template
-ruleorder: create_controlled_road_transport_annual_demand_and_installed_capacities > dummy_tech_locations_template
+ruleorder: techs_and_locations_template > dummy_tech_locations_template
 
 ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
@@ -96,30 +94,28 @@ rule all_tests:
         )
 
 
-rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_template` with a locational CSV linked to each technology that has no location-specific data to define.
-    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."  # Update ruleorder at the top of the file if you instead want the techs_and_locations_template rule to be used to generate a file
-    input: rules.locations_template.output.csv
-    output: "build/data/{resolution}/{tech_group}/{tech}.csv"
-    conda: "envs/shell.yaml"
-    shell: "cp {input} {output}"
-
-
 rule techs_and_locations_template:
-    message: "Create {wildcards.resolution} definition file for the {wildcards.tech_group} tech `{wildcards.tech}`."
+    message: "Create {wildcards.resolution} definition file for {wildcards.tech_and_group}."
     input:
-        template = techs_template_dir + "{tech_group}/{tech}.yaml",
-        locations = "build/data/{resolution}/{tech_group}/{tech}.csv"
+        template = techs_template_dir + "{tech_and_group}.yaml.jinja",
+        locations = "build/data/{resolution}/{tech_and_group}.csv"
     params:
         scaling_factors = config["scaling-factors"],
         capacity_factors = config["capacity-factors"]["average"],
         max_power_densities = config["parameters"]["maximum-installable-power-density"],
         heat_pump_shares = config["parameters"]["heat-pump"]["heat-pump-shares"],
     wildcard_constraints:
-        tech_group = "(?!transmission).*"  # i.e. all but transmission
+        # Exclude all outputs that have their own `techs_and_locations_template` implementation
+        tech_and_group = "(?!transmission\/|supply\/biofuel).*"
     conda: "envs/default.yaml"
-    output: "build/models/{resolution}/techs/{tech_group}/{tech}.yaml"
+    output: "build/models/{resolution}/techs/{tech_and_group}.yaml"
     script: "scripts/template_techs.py"
 
+use rule techs_and_locations_template as dummy_tech_locations_template with:
+    # For all cases where we don't have any location-specific data that we want to supply to the template
+    input:
+        template = techs_template_dir + "{tech_and_group}.yaml.jinja",
+        locations = rules.locations_template.output.csv
 
 rule no_params_model_template:
     message: "Create {wildcards.resolution} configuration files from templates where no parameterisation is required."
@@ -146,7 +142,7 @@ rule no_params_template:
 rule model_template:
     message: "Generate top-level {wildcards.resolution} model configuration file from template"
     input:
-        template = model_template_dir + "example-model.yaml",
+        template = model_template_dir + "example-model.yaml.jinja",
         non_model_files = expand(
             "build/models/{template}", template=["environment.yaml", "README.md"]
         ),
