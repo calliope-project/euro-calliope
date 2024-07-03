@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 import numpy as np
@@ -15,8 +14,8 @@ from scripts.demand.national_load import (
     filter_outliers,
 )
 
-THIS_DIR = Path(os.path.dirname(__file__))
-PATH_TO_RESOURCES = THIS_DIR / ".." / ".." / "resources"
+THIS_DIR = Path(__file__).parent
+PATH_TO_RESOURCES = THIS_DIR.parent.parent / "resources"
 
 
 class TestLoadHelperFunctions:
