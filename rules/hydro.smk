@@ -1,8 +1,5 @@
 """Rules to generate hydro electricity capacities and time series."""
 
-localrules: download_basins_database, download_stations_database
-localrules: download_hydro_generation_data, download_pumped_hydro_data, basins_database, stations_database
-
 
 rule download_hydro_generation_data:
     message: "Download database of historical hydro power generation."
@@ -10,8 +7,9 @@ rule download_hydro_generation_data:
     output:
         protected("data/automatic/raw-hydro-generation.csv")
     conda: "../envs/shell.yaml"
+    localrule: True
     shell:
-        "curl -sLo {output} '{params.url}'"
+        "curl -sSLo {output} '{params.url}'"
 
 
 rule download_pumped_hydro_data:
@@ -20,8 +18,9 @@ rule download_pumped_hydro_data:
     output:
         protected("data/automatic/raw-pumped-hydro-storage-capacities-gwh.csv")
     conda: "../envs/shell.yaml"
+    localrule: True
     shell:
-        "curl -sLo {output} '{params.url}'"
+        "curl -sSLo {output} '{params.url}'"
 
 
 rule download_runoff_data:
@@ -46,8 +45,9 @@ rule download_basins_database:
     output:
         protected("data/automatic/raw-hydro-basins.zip")
     conda: "../envs/shell.yaml"
+    localrule: True
     shell:
-        "curl -sLo {output} '{params.url}'"
+        "curl -sSLo {output} '{params.url}'"
 
 
 rule download_stations_database:
@@ -56,8 +56,9 @@ rule download_stations_database:
     output:
         protected("data/automatic/raw-hydro-stations.zip")
     conda: "../envs/shell.yaml"
+    localrule: True
     shell:
-        "curl -sLo {output} '{params.url}'"
+        "curl -sSLo {output} '{params.url}'"
 
 
 rule basins_database:
@@ -65,6 +66,7 @@ rule basins_database:
     input: rules.download_basins_database.output
     output: "build/data/basins/hybas_eu_lev07_v1c.shp"
     conda: "../envs/shell.yaml"
+    localrule: True
     shell: "unzip {input} -d ./build/data/basins/"
 
 
@@ -74,6 +76,7 @@ rule stations_database:
     output: "build/data/jrc-hydro-power-plant-database.csv"
     shadow: "full"
     conda: "../envs/shell.yaml"
+    localrule: True
     shell:
         """
         unzip -j {input} "**/jrc-hydro-power-plant-database.csv" -d build/data/
@@ -152,7 +155,7 @@ rule hydro_capacities:
 rule capacity_factors_hydro:
     message: "Generate capacityfactor time series for hydro electricity on {wildcards.resolution} resolution."
     input:
-        capacities = rules.hydro_capacities.output[0],
+        capacities = rules.hydro_capacities.output.supply,
         stations = "build/data/hydro-electricity-with-energy-inflow-{first_year}-{final_year}.nc".format(
             first_year = config["scope"]["temporal"]["first-year"],
             final_year = config["scope"]["temporal"]["final-year"]

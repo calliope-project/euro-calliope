@@ -2,7 +2,7 @@
 
 Euro-Calliope's workflow builds the models from raw data.
 In essence, it is composed out of three things: scripts that retrieve raw data, process data, and formulate the model; execution environments that explicitly define software dependencies and requirements (equivalent to the conditions in a lab); and the glue ensuring all scripts run in the correct execution environment and the right order.
-Scripts are written in Python; the execution environments are [conda environments](https://docs.conda.io/en/latest/); and the glue holding everything together is the workflow management system [Snakemake](https://snakemake.readthedocs.io/en/v6.1.1/).
+Scripts are written in Python; the execution environments are [conda environments](https://docs.conda.io/en/latest/); and the glue holding everything together is the workflow management system [Snakemake](https://snakemake.readthedocs.io/en/v{{ snakemake_version }}/).
 
 ## Rationale
 
@@ -39,7 +39,8 @@ In the _model_ step, the models are composed out of all their components.
 In the _test_ step, the models are tested through a set of test routines.
 The final step _all_ is a Snakemake specificity and exists only to ensure the model and built steps ran through successfully.
 
-Some of the steps run more than once, but this hidden in the visualisation below. For example, the _model_ step runs three times: once for each model resolution continental, national, and regional.
+Some of the steps run more than once, but this hidden in the visualisation below.
+For example, the _model_ step runs four times: once for each model resolution continental, national, ehighways, and regional.
 
 ![All workflow steps and their connections forming a directed acyclic graph.](../img/dag.png){: id="dag" }
 

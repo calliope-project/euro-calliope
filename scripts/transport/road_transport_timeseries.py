@@ -16,6 +16,7 @@ def create_road_transport_demand_timeseries(
     path_to_output: str,
 ) -> None:
     # Read annual road transport distance into panda dataframe
+
     df_annual = (
         pd.read_csv(path_to_annual_data, index_col=[0, 1, 2], parse_dates=[2])
         .squeeze()
@@ -30,7 +31,6 @@ def create_road_transport_demand_timeseries(
 
     if vehicle_type in ["passenger-cars", "motorcycles", "light-duty-vehicles"]:
         # Use RAMP time series profiles for small and light vehicles.
-        # TODO check if path_to_timeseries data is charging demand or transport demand
         df_timeseries = (
             pd.read_csv(path_to_timeseries, index_col=[0, 1, 2], parse_dates=[0])
             .xs(slice(first_year, final_year), level="year")
@@ -39,9 +39,9 @@ def create_road_transport_demand_timeseries(
             .groupby(by=lambda idx: idx.year)
             .transform(lambda x: x / x.sum())
             .pipe(fill_empty_country, country_neighbour_dict)
+            .tz_localize("UTC")
             .mul(df_annual)
         )
-
     elif vehicle_type in ["heavy-duty-vehicles", "coaches-and-buses"]:
         # ASSUME flat profiles for heavy transport.
         df_timeseries = df_annual.groupby(by=lambda idx: idx.year).transform(
@@ -61,7 +61,6 @@ def create_road_transport_demand_timeseries(
         .tz_localize(None)
         .rename_axis("utc-timestamp")
     )
-
     assert not df_timeseries.isna().any(
         axis=None
     ), "There are NaN values in the timeseries dataframe"
@@ -70,7 +69,10 @@ def create_road_transport_demand_timeseries(
 
 def fill_empty_country(df, country_neighbour_dict):
     for country, neighbours in country_neighbour_dict.items():
-        assert country not in df.columns
+        if country in df.columns:
+            print(f"Country {country} is already in dataframe")
+            continue
+        print(f"Country {country} is not in dataframe, filling with neighbours")
         df[country] = df[neighbours].mean(axis=1)
     return df
 

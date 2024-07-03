@@ -43,7 +43,15 @@ Schröder, A., Kunz, F., Meiss, J., Mendelevitch, R., &#38; Von Hirschhausen, C.
 
 ### @DEA:2020
 
-Danish Energy Agency. (2020). <i>Technology Data for Generation of Electricity and District Heating.</i> [https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and](https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and)
+Danish Energy Agency. (2020). _Technology Data for Generation of Electricity and District Heating, version 9._ <https://ens.dk/en/our-services/projections-and-models/technology-data/technology-data-generation-electricity-and>
+
+### @DEA:2019
+
+Danish Energy Agency. (2019). _Technology Data for Energy storage, version 4._ <https://ens.dk/en/our-services/technology-catalogues/technology-data-energy-storage>
+
+### @DEA:2017
+
+Danish Energy Agency. (2017). _Technology Data for heating installations, version 1._ <https://ens.dk/en/our-services/technology-catalogues/technology-data-individual-heating-plants>
 
 ### @Wealer:2019
 
@@ -64,3 +72,11 @@ Department for Business, Energy and Industrial Strategy (2016). <i>Electricity G
 ### @Mantzos:2017
 
 Mantzos, L., Wiesenthal, T., Matei, N. A., Tchung-Ming, S., Rozsai, M., Russ, P., & Ramirez, A. S. (2017). JRC-IDEES: Integrated Database of the European Energy Sector: Methodological note. JRC Research Reports, Article JRC108244. https://ideas.repec.org//p/ipt/iptwpa/jrc108244.html
+
+### @Ruhnau:2019
+
+Ruhnau, O., Hirth, L. & Praktiknjo, A. Time series of heat demand and heat pump efficiency for energy system modeling. Sci Data 6, 189 (2019). https://doi.org/10.1038/s41597-019-0199-y
+
+### @BDEW:2015
+
+German Association of Energy and Water Industries (BDEW), German Association of Local Utilities (VKU) & European Association of Loacal Energy Distributors (GEODE). Abwicklung von Standardlastprofilen Gas [Execution of Gas Standard Load Profiles]. Guidelines (BDEW, 2015). [https://www.bdew.de/media/documents/Leitfaden_20160630_Abwicklung-Standardlastprofile-Gas.pdf](https://www.bdew.de/media/documents/Leitfaden_20160630_Abwicklung-Standardlastprofile-Gas.pdf)

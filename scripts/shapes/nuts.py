@@ -1,177 +1,146 @@
 """Preprocessing of raw NUTS data to bring it into normalised form."""
 
-import zipfile
+import logging
+from typing import Union
 
 import fiona
-import fiona.transform
 import geopandas as gpd
-import pandas as pd
-import pycountry
+import numpy as np
 import shapely.geometry
 from eurocalliopelib import utils
 
 OUTPUT_DRIVER = "GPKG"
-LAYER_NAME = "nuts{layer_id}"
+
+LOGGER = logging.getLogger("nuts.py")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
-def merge(path_to_shapes, path_to_attributes, path_to_output):
-    """Merge NUTS shapes with attributes."""
-    shapes = gpd.read_file(path_to_shapes)
-    shapes.geometry = shapes.geometry.map(_to_multi_polygon)
-    attributes = gpd.read_file(path_to_attributes)
-    attributes = pd.DataFrame(attributes)  # to be able to remove geo information
-    del attributes["geometry"]
-    shapes.merge(attributes, on="NUTS_ID", how="left").to_file(
-        path_to_output, driver=OUTPUT_DRIVER
+def clean_nuts(
+    path_to_nuts: str,
+    path_to_output: str,
+    crs: str,
+    study_area: shapely.geometry.Polygon,
+    all_countries: list[str],
+    schema: dict,
+):
+    """Preprocess downloaded NUTS data into a format that aligns with other shapefile data sources (e.g. GADM).
+
+    Args:
+        path_to_nuts (str): Path to downloaded NUTS data.
+        path_to_output (str): Path to which output GeoPackage will be saved.
+        crs (str): Study CRS. Output data will be stored in this CRS.
+        study_area (shapely.geometry.Polygon): Study area to which NUTS data will be clipped.
+        all_countries (list[str]): List of countries to which NUTS data will be clipped.
+        schema (dict): Schema to which the processed data should align.
+    """
+    gdf_nuts = gpd.read_file(path_to_nuts)
+
+    gdf_nuts_clean = (
+        gpd.GeoDataFrame(
+            geometry=gdf_nuts.geometry.apply(_to_multi_polygon),
+            data={
+                "id": gdf_nuts.NUTS_ID,
+                "name": gdf_nuts.NAME_LATN,
+                "type": np.where(gdf_nuts.LEVL_CODE == 0, "country", np.nan),
+                "layer": "nuts" + gdf_nuts.LEVL_CODE.astype(str),
+                "proper": True,
+                "country_code": gdf_nuts.CNTR_CODE.apply(utils.eu_country_code_to_iso3),
+            },
+            crs=gdf_nuts.crs,
+        )
+        .to_crs(crs)
+        .pipe(_fix_country_names)
+        .pipe(_clip_nuts, study_area, all_countries)
     )
 
+    gdf_nuts_clean.groupby("layer").apply(
+        _to_file, path_to_output=path_to_output, schema=schema
+    )
 
-def normalise(path_to_nuts, path_to_output, crs, study_area, all_countries, schema):
-    """Normalises raw NUTS data.
-
-    Raw data contains all NUTS layers in one layer of one shapefile. The output
-    of this function corresponds to the form the data is used in this analysis,
-    where each geographical layer is stored in one layer of a GeoPackage.
-    """
-    with fiona.open(path_to_nuts, "r") as nuts_file:
-        for layer_id in range(4):
-            print(f"Building layer {layer_id}...")
-            _write_layer(
-                nuts_file,
-                crs,
-                study_area,
-                all_countries,
-                path_to_output,
-                layer_id,
-                schema,
-            )
     _test_id_uniqueness(path_to_output)
 
 
-def _write_layer(
-    nuts_file, crs, study_area, all_countries, path_to_output, layer_id, schema
-):
-    with fiona.open(
-        path_to_output,
-        "w",
-        crs=crs,
-        schema=schema,
-        driver=OUTPUT_DRIVER,
-        layer=LAYER_NAME.format(layer_id=layer_id),
-    ) as result_file:
-        result_file.writerecords(
-            _layer_features(nuts_file, crs, study_area, all_countries, layer_id)
-        )
+def _clip_nuts(
+    gdf_nuts: gpd.GeoDataFrame,
+    study_area: shapely.geometry.Polygon,
+    all_countries: list[str],
+) -> gpd.GeoDataFrame:
+    """Keep only geometries that are in the study area.
 
+    Remove:
+    * countries not in study country codes
+    * entire shapes is not in study area bounding box
+    * parts of multipolygons that are not in the study area (e.g. remove Caribbean islands from the France country shape)
 
-def _layer_features(nuts_file, crs, study_area, all_countries, layer_id):
-    for feature in filter(
-        _in_layer_and_in_study_area(layer_id, study_area, all_countries), nuts_file
-    ):
-        new_feature = {}
-        new_feature["properties"] = {}
-        new_feature["properties"]["country_code"] = utils.eu_country_code_to_iso3(
-            feature["properties"]["NUTS_ID"][:2]
-        )
-        new_feature["properties"]["id"] = feature["properties"]["NUTS_ID"]
-        new_feature["properties"]["name"] = feature["properties"]["NAME_LATN"]
-        new_feature["properties"]["type"] = "country" if layer_id == 0 else None
-        new_feature["properties"]["proper"] = True
-        new_feature["geometry"] = _all_parts_in_study_area_and_crs(
-            feature, nuts_file.crs, crs, study_area
-        )
-        if layer_id == 0:
-            new_feature = _fix_country_feature(new_feature)
-        yield new_feature
-
-
-def _fix_country_feature(feature):
-    # * IDs should have three letters instead of two
-    # * many country names are broken or missing
-    feature["properties"]["id"] = utils.eu_country_code_to_iso3(
-        feature["properties"]["id"]
+    """
+    countries = utils.convert_valid_countries(all_countries, output="alpha3").values()
+    to_keep = gdf_nuts.intersects(study_area) & gdf_nuts.country_code.isin(countries)
+    to_drop = gdf_nuts[~to_keep]
+    LOGGER.info(f"Removing NUTS regions outside study area: {to_drop.id.values}")
+    gdf_nuts_clipped = gdf_nuts[to_keep].apply(
+        _all_parts_in_study_area, study_area=study_area, axis=1
     )
-    feature["properties"]["name"] = pycountry.countries.lookup(
-        feature["properties"]["id"]
-    ).name
-    return feature
+    return gdf_nuts_clipped
 
 
-def _all_parts_in_study_area_and_crs(feature, src_crs, dst_crs, study_area):
-    unit = _to_multi_polygon(feature["geometry"])
+def _fix_country_names(gdf_nuts: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    "Use pycountry names and ISO3 ID for NUTS0 shapes, instead of those supplied by NUTS"
+
+    gdf_nuts["name"] = np.where(
+        gdf_nuts.layer == "nuts0",
+        gdf_nuts.country_code.apply(utils.convert_country_code, output="name"),
+        gdf_nuts["name"],
+    )
+    gdf_nuts["id"] = np.where(
+        gdf_nuts.layer == "nuts0", gdf_nuts.country_code, gdf_nuts["id"]
+    )
+    return gdf_nuts
+
+
+def _all_parts_in_study_area(
+    feature: gpd.GeoSeries, study_area: shapely.geometry.Polygon
+) -> gpd.GeoSeries:
+    unit = feature.geometry
     if not study_area.contains(unit):
-        print(
-            "Removing parts of {} outside of study area.".format(
-                feature["properties"]["NUTS_ID"]
-            )
-        )
+        LOGGER.info(f"Removing parts of {feature.id} outside of study area.")
         new_unit = shapely.geometry.MultiPolygon([
             polygon for polygon in unit.geoms if study_area.contains(polygon)
         ])
-        unit = new_unit
-    geometry = shapely.geometry.mapping(unit)
-    return fiona.transform.transform_geom(
-        src_crs=src_crs, dst_crs=dst_crs, geom=geometry
-    )
+        feature["geometry"] = new_unit
+    return feature
 
 
-def _in_layer_and_in_study_area(layer_id, study_area, all_countries):
-    def _in_layer_and_in_study_area(feature):
-        return _in_layer(layer_id, feature) and _in_study_area(
-            study_area, all_countries, feature
-        )
-
-    return _in_layer_and_in_study_area
-
-
-def _in_layer(layer_id, feature):
-    return feature["properties"]["STAT_LEVL_"] == layer_id
-
-
-def _in_study_area(study_area, all_countries, feature):
-    countries = [pycountry.countries.lookup(country) for country in all_countries]
-    unit = shapely.geometry.shape(feature["geometry"])
-    country = pycountry.countries.lookup(
-        utils.eu_country_code_to_iso3(feature["properties"]["NUTS_ID"][:2])
-    )
-    if (country in countries) and (
-        study_area.contains(unit) or study_area.intersects(unit)
-    ):
-        return True
-    else:
-        print(
-            "Removing {} as it is outside of study area.".format(
-                feature["properties"]["NUTS_ID"]
-            )
-        )
-        return False
-
-
-def _to_multi_polygon(geometry):
+def _to_multi_polygon(
+    geometry: Union[dict, shapely.geometry.Polygon],
+) -> shapely.geometry.MultiPolygon:
+    "Convert all input shapes into MultiPolygons"
     if isinstance(geometry, dict):
         geometry = shapely.geometry.shape(geometry)
-    if isinstance(geometry, shapely.geometry.polygon.Polygon):
+    if isinstance(geometry, shapely.geometry.Polygon):
         return shapely.geometry.MultiPolygon(polygons=[geometry])
     else:
         return geometry
 
 
-def _test_id_uniqueness(path_to_file):
+def _to_file(gdf: gpd.GeoDataFrame, path_to_output: str, schema: dict):
+    "Save a layer to a geopackage"
+    gdf.drop("layer", axis=1).to_file(
+        path_to_output, driver=OUTPUT_DRIVER, layer=gdf.name, schema=schema
+    )
+
+
+def _test_id_uniqueness(path_to_file: str):
     for layer_name in fiona.listlayers(path_to_file):
         assert not gpd.read_file(path_to_file, layer=layer_name).id.duplicated().any()
 
 
 if __name__ == "__main__":
-    with zipfile.ZipFile(snakemake.input.zipped, "r") as zipped:
-        zipped.extractall("./build")
-    TMP_FILE = "./build/raw-nuts.gpkg"
-    merge(
-        path_to_shapes="./build/NUTS_2013_01M_SH/data/NUTS_RG_01M_2013.shp",
-        path_to_attributes="./build/NUTS_2013_01M_SH/data/NUTS_AT_2013.dbf",
-        path_to_output=TMP_FILE,
-    )
-    normalise(
-        path_to_nuts=TMP_FILE,
+    clean_nuts(
+        path_to_nuts=snakemake.input.zipped,
         path_to_output=snakemake.output[0],
         crs=snakemake.params.crs,
         schema=snakemake.params.schema,

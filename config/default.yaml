@@ -1,23 +1,49 @@
 # For descriptions of the configuration values, see `./schema.yaml`.
 data-sources:
     biofuel-potentials-and-costs: https://cidportal.jrc.ec.europa.eu/ftp/jrc-opendata/ENSPRESO/ENSPRESO_BIOMASS.xlsx
-    eez: https://geo.vliz.be/geoserver/MarineRegions/wfs?service=WFS&version=1.0.0&request=GetFeature&typeNames=MarineRegions:eez&outputFormat=SHAPE-ZIP
+    eez: https://sandbox.zenodo.org/records/45135/files/eez_v11.gpkg.zip?download=1  # FIXME: update to actual zenodo record before next Euro-Calliope release.
     hydro-generation: https://zenodo.org/record/5797549/files/hydro-generation.csv?download=1
     national-phs-storage-capacities: https://zenodo.org/record/5797549/files/pumped-hydro-storage-capacities-gwh.csv?download=1
     capacity-factors: https://zenodo.org/record/3899687/files/{filename}?download=1
-    gadm: https://biogeo.ucdavis.edu/data/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
+    gadm: https://geodata.ucdavis.edu/gadm/gadm3.6/gpkg/gadm36_{country_code}_gpkg.zip
     hydro-basins: https://www.dropbox.com/sh/hmpwobbz9qixxpe/AADeU9iCgMd3ZO1KgrFmfWu6a/HydroBASINS/standard/eu/hybas_eu_lev07_v1c.zip?dl=1
     hydro-stations: https://zenodo.org/record/5215920/files/energy-modelling-toolkit/hydro-power-database-v10.zip?download=1
     load: https://data.open-power-system-data.org/time_series/2019-06-05/time_series_60min_stacked.csv
-    nuts: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/NUTS_2013_01M_SH.zip
-    potentials: https://zenodo.org/record/5112963/files/possibility-for-electricity-autarky.zip
+    nuts: https://ec.europa.eu/eurostat/cache/GISCO/distribution/v2/nuts/shp/NUTS_RG_01M_{nuts_year}_4326.shp.zip
+    potentials: https://zenodo.org/records/6600619/files/raw-potentials.zip?download=1
     entsoe-tyndp: https://2020.entsos-tyndp-scenarios.eu/wp-content/uploads/2020/06/TYNDP-2020-Scenario-Datafile.xlsx.zip
     jrc-ppdb: https://zenodo.org/record/3574566/files/JRC-PPDB-OPEN.ver1.0.zip
     jrc-idees: https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/JRC-IDEES/JRC-IDEES-2015_v1/JRC-IDEES-2015_All_xlsx_{country_code}.zip
-    eurostat-energy-balance: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/eurostat/nrg_bal_c.tsv.gz # FIXME do not use cached data
+    eurostat-energy-balance: https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/eurostat/nrg_bal_c.tsv.gz # FIXME: move to zenodo
+    eurostat-hh-end-use:  https://raw.githubusercontent.com/calliope-project/euro-calliope-datasets/feature-sector-coupling/eurostat/nrg_d_hhq.tsv.gz # FIXME: move to zenodo
+    swiss-end-use: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/energieverbrauch-nach-verwendungszweck.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvOTg1NA==.html
     swiss-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/gesamtenergiestatistik.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvNzUxOQ==.html
     swiss-industry-energy-balance: https://www.bfe.admin.ch/bfe/en/home/versorgung/statistik-und-geodaten/energiestatistiken/teilstatistiken.exturl.html/aHR0cHM6Ly9wdWJkYi5iZmUuYWRtaW4uY2gvZGUvcHVibGljYX/Rpb24vZG93bmxvYWQvODc4OA==.html
-    ev-data: https://zenodo.org/record/6579421/files/ramp-ev-consumption-profiles.csv.gz?download=1
+    controlled-ev-profiles: https://zenodo.org/record/6579421/files/ramp-ev-{dataset}.csv.gz?download=1
+    uncontrolled-ev-profiles: https://sandbox.zenodo.org/records/45530/files/uncontrolled-charging-profiles.csv.gz?download=1 # TODO: convert into Zenodo repository
+    gridded-weather-data: https://zenodo.org/records/11516744/files/{data_var}.nc
+    when2heat-params: https://zenodo.org/records/10965295/files/{dataset}?download=1
+    population: https://ec.europa.eu/eurostat/cache/GISCO/geodatafiles/JRC_GRID_2018.zip
+    heat-pump-characteristics: https://sandbox.zenodo.org/records/45378/files/wamak-heat-pump-characteristics.nc
+data-pre-processing:
+    fill-missing-values:
+        jrc-idees:
+            ALB: [BGR, HRV, HUN, ROU, GRC]
+            BIH: [BGR, HRV, HUN, ROU, GRC]
+            MNE: [BGR, HRV, HUN, ROU, GRC]
+            MKD: [BGR, HRV, HUN, ROU, GRC]
+            SRB: [BGR, HRV, HUN, ROU, GRC]
+            NOR: [SWE, DNK]
+            CHE: [DEU, AUT, FRA, ITA]
+        ramp:
+            ALB: [HRV]
+            MKD: [HRV]
+            GRC: [ROU]
+            BGR: [ROU]
+            BIH: [HRV, HUN]
+            MNE: [HRV]
+            SRB: [HUN]
+            CYP: [ROU]
 root-directory: .
 cluster-sync:
     url: euler.ethz.ch
@@ -29,6 +55,7 @@ scaling-factors: # values are tuned for models with a few hours resolution and o
     power: 0.00001 # from MW(h) to 100 GW(h)
     area: 0.0001 # from km2 to 10,000 km2
     monetary: 0.000000001 # from EUR to 1 billion EUR
+    transport: 0.01  # from Mio km to 100 Mio km
 capacity-factors:
     min: 0.001
     max: 10 # 0.001 -> 10 leads to a numerical range of 1e5 (hourly resolution)
@@ -141,23 +168,17 @@ parameters:
             coaches-and-buses: Motor coaches, buses and trolley buses
             passenger-cars: Passenger cars
             motorcycles: Powered 2-wheelers
-        fill-missing-values:
-            annual-data:
-                ALB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-                BIH: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-                MNE: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-                MKD: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-                SRB: ['BGR', 'HRV', 'HUN', 'ROU', 'GRC']
-                NOR: ['SWE', 'DNK']
-                CHE: ['DEU', 'AUT', 'FRA', 'ITA']
-            timeseries-data:
-                ALB: ['HRV']
-                MKD: ['HRV']
-                GRC: ['ROU']
-                BGR: ['ROU']
-                BIH: ['HRV', 'HUN']
-                MNE: ['HRV']
-                SRB: ['HUN']
+        ev-battery-sizes:
+            heavy-duty-vehicles: 0.2  # average from [EUCAR_2019]
+            light-duty-vehicles: 0.1  # own assumption based on passenger cars from [EUCAR_2019]
+            motorcycles: 0.01  # own assumption
+            coaches-and-buses: 0.2  # own assumption based on HDVs from [EUCAR_2019]
+            passenger-cars: 0.08  # average from [EUCAR_2019]
+        uncontrolled-ev-charging-share: 1
+        monthly-demand-bound-fraction:
+            min: 0.9
+            max: 1.1
+            equals: 1
     entsoe-tyndp:
         scenario: National Trends
         grid: Reference
@@ -165,7 +186,42 @@ parameters:
         ntc_limit: max
         energy_cap_limit: equals
     nuclear-capacity-scenario: current
-
+    nuts-year: 2013
+    heat:
+        space_heat:
+            gas-eff: 0.97  # [@DEA:2020], but 70-80% according to [Qu_2014]
+            oil-eff: 0.9  # [@DEA:2020], but 0.63 according to [martin_2014]
+            solid-fossil-eff: 0.8 # Assume same as biofuel
+            biofuel-eff: 0.8  # [@DEA:2020] [mermoud_2015] [Chandrasekaran_2013] [DEA_2016]
+            solar-thermal-eff: 1  # Eurostat energy balances method
+            electricity-eff: 1  # must be 1 for the time being (we assume 1 -> 1 electricity -> heat conversion)
+        hot_water:
+            gas-eff: 0.97  # [@DEA:2020], but 70-80% according to [Qu_2014]
+            oil-eff: 0.9  # [@DEA:2020], but 0.63 according to [martin_2014]
+            solid-fossil-eff: 0.8 # Assume same as biofuel
+            biofuel-eff: 0.8  # [mermoud_2015] [Chandrasekaran_2013] [DEA_2016]
+            solar-thermal-eff: 1  # Eurostat energy balances method
+            electricity-eff: 1  # must be 1 for the time being (we assume 1 -> 1 electricity -> heat conversion)
+        cooking:
+            gas-eff: 0.28  # [Karunanithy_2016]
+            oil-eff: 0.28  # [Karunanithy_2016] assuming oil == gas efficiency
+            solid-fossil-eff: 0.15 # [Ramanathan_1994] scaled down 60%, based on values calculated by [Karunanithy_2016]
+            biofuel-eff: 0.1 #  [Ramanathan_1994] scaled down 60%, based on values calculated by [Karunanithy_2016]
+            electricity-eff: 0.5  # [Karunanithy_2016] based on 2/3 40% efficient direct electric, 1/3 70% efficient induction
+    heat-pump:
+        sink-temperature:  # All values are assumed.
+            underfloor: 35
+            radiator-large: 50
+            radiator-conventional: 65
+            hot-water: 60
+        space-heat-sink-shares:  # All values are assumed.
+            underfloor: 0.1
+            radiator-large: 0.15
+            radiator-conventional: 0.75
+        heat-pump-shares:  # see https://stats.ehpa.org, 2018 market data assuming current ashp = air-to-air AND air-to-water
+            ashp: 0.9
+            gshp: 0.1
+        correction-factor: 0.85  # [@Ruhnau:2019]
 quality-control:
     load:
         outlier-data-thresholds:
@@ -180,8 +236,8 @@ quality-control:
     hydro:
         scale-phs-according-to-geth-et-al: false
         station-nearest-basin-max-km: 1
-    capacity-factor-gridcell-overlap-threshold: 0.2 # Ceuta y Melilla has smallest overlap
-
+    capacity-factor-gridcell-overlap-threshold: 0.97 # Ceuta y Melilla has smallest overlap
+    shared-coast-polygon-area-share-threshold: 0.01
 sea-connections:
     continental: []
     national: # Source: https://www.entsoe.eu/data/map/
@@ -240,6 +296,37 @@ sea-connections:
         - [CYP.1_1, CYP.2_1] # Famagusta and Larnaca
         - [EST.7_1, EST.2_1] # Lääne and Hiiu
         - [EST.7_1, EST.12_1] # Lääne and Saare
+    ehighways:
+        - [ITA_3, ITA_6]
+        - [ITA_6, FRA_15]
+        - [ITA_2, FRA_15]
+        - [ITA_4, ITA_5]
+        - [ITA_3, MNE_1]
+        - [ITA_2, HRV_1]
+        - [ITA_4, ALB_1]
+        - [ITA_4, GRC_1]
+        - [CYP_1, GRC_2]
+        - [EST_1, FIN_2]
+        - [FIN_2, SWE_3]
+        - [LTU_1, SWE_3]
+        - [POL_5, SWE_4]
+        - [NOR_1, GBR_4]
+        - [GBR_4, GBR_6]
+        - [GBR_3, IRL_1]
+        - [FRA_8, IRL_1]
+        - [FRA_9, GBR_1]
+        - [FRA_9, GBR_1]
+        - [FRA_13, GBR_1]
+        - [BEL_1, GBR_1]
+        - [NLD_1, GBR_1]
+        - [NLD_1, NOR_1]
+        - [DEU_1, NOR_1]
+        - [DNK_1, DNK_2]
+        - [DNK_1, NOR_1]
+        - [DNK_1, SWE_3]
+        - [DEU_1, SWE_4]
+        # the following do not exist today
+        - [GRC_2, CYP_1]
 scope:
     spatial:
         countries:
@@ -286,6 +373,7 @@ scope:
         first-year: 2016
         final-year: 2016
 shapes: # This config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
+    # TODO: update this link to Bryn's new one, which includes the potentials for ehighways
     continental:
         Austria: nuts0
         Belgium: nuts0
@@ -395,3 +483,38 @@ shapes: # This config must be consistent with data from https://doi.org/10.5281/
         Norway: gadm1 # match 19
         Serbia: gadm1 # gadm1 25 regions; wiki 5 regions
         Switzerland: gadm1 # match 26
+    ehighways:
+        Austria: ehighways
+        Belgium: nuts0
+        Bulgaria: nuts0
+        Croatia: nuts0
+        Cyprus: nuts0
+        Czech Republic: ehighways
+        Denmark: ehighways
+        Estonia: nuts0
+        Finland: ehighways
+        France: ehighways
+        Germany: ehighways
+        Greece: ehighways
+        Hungary: nuts0
+        Ireland: nuts0
+        Italy: ehighways
+        Latvia: nuts0
+        Lithuania: nuts0
+        Luxembourg: nuts0
+        Netherlands: nuts0
+        Poland: ehighways
+        Portugal: ehighways
+        Romania: ehighways
+        Slovakia: nuts0
+        Slovenia: nuts0
+        Spain: ehighways
+        Sweden: ehighways
+        United Kingdom: ehighways
+        Albania: gadm0
+        Bosnia and Herzegovina: gadm0
+        Macedonia, Republic of: gadm0
+        Montenegro: gadm0
+        Norway: ehighways
+        Serbia: gadm0
+        Switzerland: ehighways

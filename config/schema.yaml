@@ -65,8 +65,8 @@ properties:
                 description: Web address of load data.
             nuts:
                 type: string
-                pattern: ^(https?|http?):\/\/.+
-                description: Web address of geospatial NUTS data.
+                pattern: ^(https?|http?):\/\/.+{nuts_year}.*
+                description: Web address of geospatial NUTS data. Must contain a {nuts_year} placeholder.
             potentials:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
@@ -87,6 +87,14 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of Eurostat energy balance data.
+            eurostat-hh-end-use:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of Eurostat household end use data.
+            swiss-end-use:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of Swiss annual energy consumption data.
             swiss-energy-balance:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
@@ -95,10 +103,71 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: Web address of Swiss industry energy balance data.
-            ev-data:
+            controlled-ev-profiles:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
-                description: Web address of electric vehicle data.
+                description: Web address of electric vehicle data for controlled charging.
+            uncontrolled-ev-profiles:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: Web address of electric light-duty vehicle uncontrolled charging.
+            gridded-weather-data:
+                type: string
+                pattern: ^(https?|http?):\/\/.+{data_var}.*\.(nc)$
+                description: "Web address of gridded weather data. Expecting a netCDF file with the coordinates [time, site], the variables [{data_var}, lat, lon], and the attribute 'unit'."
+            when2heat-params:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: "Web address of When2Heat parameters for heat demand profiles."
+            population:
+                type: string
+                pattern: ^(https?|http?):\/\/.+
+                description: "Web address of population data."
+            heat-pump-characteristics:
+                type: string
+                pattern: ^(https?|http?):\/\/.*\.(nc)$
+                description: >
+                    Web address of manufacturer heat pump characteristic dataset.
+                    Expected dimensions are:
+                    - source (intended source of ambient temperature of the heat pump - air or ground)
+                    - product (names of manufacturer products)
+                    - sink_temp (sink temperature in degrees C)
+                    - source_temp (source temperature in degrees C)
+                    - data_type (characteristics of the heat pumps, e.g. COP, Heating capacity)
+    data-pre-processing:
+        type: object
+        description: Parameters for the pre-processing of raw data.
+        additionalProperties: false
+        properties:
+            fill-missing-values:
+                type: object
+                description: Strategies to fill missing values.
+                additionalProperties: false
+                properties:
+                    jrc-idees:
+                        description: Fill missing countries in JRC IDEES annual demand data.
+                        type: object
+                        additionalProperties: false
+                        patternProperties:
+                            "^[A-Z][A-Z][A-Z]$":
+                                type: array
+                                description: Country to fill missing values for.
+                                items:
+                                    type: string
+                                    pattern: ^[A-Z][A-Z][A-Z]$
+                                    description: Country to fill missing values from.
+                    ramp:
+                        description: Fill missing countries in RAMP timeseries profiles.
+                        type: object
+                        additionalProperties: false
+                        patternProperties:
+                            "^[A-Z][A-Z][A-Z]$":
+                                type: array
+                                description: Country to fill missing values for.
+                                items:
+                                    type: string
+                                    pattern: ^[A-Z][A-Z][A-Z]$
+                                    description: Country to fill missing values from.
     root-directory:
         type: string
         description: Path to the root directory of euro-calliope containing scripts and template folders.
@@ -136,6 +205,9 @@ properties:
             monetary:
                 type: number
                 description: "Applied to all quantities of monetary cost (base: EUR)."
+            transport:
+                type: number
+                description: "Applied to all quantities of transport (base: Mio km)."
     parameters:
         type: object
         description: Parameter values of the models.
@@ -306,35 +378,43 @@ properties:
                             motorcycles:
                                 type: string
                                 description: JRC-IDEES name of motorcycles.
-                    fill-missing-values:
+                    ev-battery-sizes:
                         type: object
-                        description: Dictionaries to fill missing values
+                        description: EV battery size per vehicle type in MWh.
                         additionalProperties: false
                         properties:
-                            annual-data:
-                                description: Fill missing values in annual transport demand.
-                                type: object
-                                additionalProperties: false
-                                patternProperties:
-                                    "^[A-Z][A-Z][A-Z]$":
-                                        type: array
-                                        description: Country to fill missing values for.
-                                        items:
-                                            type: string
-                                            pattern: ^[A-Z][A-Z][A-Z]$
-                                            description: Country to fill missing values from.
-                            timeseries-data:
-                                description: Fill missing countries in timeseries profile.
-                                type: object
-                                additionalProperties: false
-                                patternProperties:
-                                    "^[A-Z][A-Z][A-Z]$":
-                                        type: array
-                                        description: Country to fill missing values for.
-                                        items:
-                                            type: string
-                                            pattern: ^[A-Z][A-Z][A-Z]$
-                                            description: Country to fill missing values from.
+                            light-duty-vehicles:
+                                type: number
+                                description: Light duty vehicles / trucks.
+                            heavy-duty-vehicles:
+                                type: number
+                                description: Heavy duty vehicles / trucks.
+                            coaches-and-buses:
+                                type: number
+                                description: Coaches and buses.
+                            passenger-cars:
+                                type: number
+                                description: Passenger cars.
+                            motorcycles:
+                                type: number
+                                description: Motorcylces.
+                    uncontrolled-ev-charging-share:
+                        type: number
+                        description: Share of uncontrolled charging.
+                    monthly-demand-bound-fraction:
+                        type: object
+                        description: Charging flexibility parameter constraining the amount of monthly demand to be met.
+                        additionalProperties: false
+                        properties:
+                            min:
+                                type: number
+                                description: Minimum monthly demand range.
+                            max:
+                                type: number
+                                description: Maximum monthly demand range.
+                            equals:
+                                type: number
+                                description: Equal monthly demand range.
             entsoe-tyndp:
                 type: object
                 description: Parameters to define scenario choice for data accessed from the ENTSO-E ten-year network development plan 2020. For more information, see https://2020.entsos-tyndp-scenarios.eu/
@@ -364,7 +444,140 @@ properties:
                 type: string
                 description: Nuclear technology capacity scenario. "current" will use today's capacities based on the JRC power plant database (PPDB). All other scenario names should point to a configuration CSV file specifying minimum and maximum capacities per country in MW with non-zero capacities (columns=[country, min, max]).
                 pattern: ^(current)|(\w+.csv)$
+            nuts-year:
+                description: Version of the Nomenclature of Territorial Units for Statistics to use in creating spatial units (see https://ec.europa.eu/eurostat/web/nuts/history for more info).
+                type: number
+                enum: [2006, 2010, 2013, 2016]
+            heat:
+                type: object
+                description: Parameters for heat sector model.
+                additionalProperties: false
+                properties:
+                    space_heat:
+                        type: object
+                        description: Parameters of space heating technologies.
+                        additionalProperties: false
+                        properties:
+                            gas-eff:
+                                type: number
+                                description: Gas boiler efficiency.
+                            oil-eff:
+                                type: number
+                                description: Oil boiler efficiency.
+                            solid-fossil-eff:
+                                type: number
+                                description: Solid fossil boiler efficiency.
+                            biofuel-eff:
+                                type: number
+                                description: Biofuel boiler efficiency.
+                            solar-thermal-eff:
+                                type: number
+                                description: Solar thermal efficiency.
+                            electricity-eff:
+                                type: number
+                                description: Electric heater efficiency.
+                    hot_water:
+                        type: object
+                        description: Parameters of water heating technologies.
+                        additionalProperties: false
+                        properties:
+                            gas-eff:
+                                type: number
+                                description: Gas boiler efficiency.
+                            oil-eff:
+                                type: number
+                                description: Oil boiler efficiency.
+                            solid-fossil-eff:
+                                type: number
+                                description: Solid fossil boiler efficiency.
+                            biofuel-eff:
+                                type: number
+                                description: Biofuel boiler efficiency.
+                            solar-thermal-eff:
+                                type: number
+                                description: Solar thermal efficiency.
+                            electricity-eff:
+                                type: number
+                                description: Electric heater efficiency.
+                    cooking:
+                        type: object
+                        description: Parameters of cooking technologies.
+                        additionalProperties: false
+                        properties:
+                            gas-eff:
+                                type: number
+                                description: Gas stove efficiency.
+                            oil-eff:
+                                type: number
+                                description: Oil stove efficiency.
+                            solid-fossil-eff:
+                                type: number
+                                description: Solid fossil stove efficiency.
+                            biofuel-eff:
+                                type: number
+                                description: Biofuel stove efficiency.
+                            electricity-eff:
+                                type: number
+                                description: Electric stove efficiency.
 
+            heat-pump:
+                type: object
+                description: Parameters to define heat pump operating characteristics
+                additionalProperties: false
+                properties:
+                    sink-temperature:
+                        type: object
+                        description: Assumed running temperature (degrees C) of different heating methods.
+                        additionalProperties: false
+                        properties:
+                            underfloor:
+                                type: integer
+                                description: Underfloor heating.
+                            radiator-large:
+                                type: integer
+                                description: Large radiators (usually installed alongside heat pumps during retrofit).
+                            radiator-conventional:
+                                type: integer
+                                description: Conventional radiators (usually installed alongside gas boilers).
+                            hot-water:
+                                type: integer
+                                description: Hot water temperature (not space heating).
+                    space-heat-sink-shares:
+                        type: object
+                        description: Share of building stock assumed to have different space heating methods
+                        additionalProperties: false
+                        properties:
+                            underfloor:
+                                type: number
+                                description: Underfloor heating.
+                            radiator-large:
+                                type: number
+                                description: Large radiators (usually installed alongside heat pumps during retrofit).
+                            radiator-conventional:
+                                type: number
+                                description: Conventional radiators (usually installed alongside gas boilers).
+                    heat-pump-shares:
+                        type: object
+                        description: >-
+                            Market share of air- vs ground-source heat pumps, which will be used to create a generic "heat pump" technology.
+                            Must sum to 1.
+                        additionalProperties: false
+                        properties:
+                            ashp:
+                                type: number
+                                description: Air-source heat pump
+                                minimum: 0
+                                maximum: 1
+                            gshp:
+                                type: number
+                                description: Ground-source heat pump
+                                minimum: 0
+                                maximum: 1
+                    correction-factor:
+                        type: number
+                        minimum: 0
+                        maximum: 1
+                        description: Correction factor to go from manufacturer data on heat pump performance to 'real' system performance.
     scope:
         type: object
         description: Spatial and temporal scope bounding the models.
@@ -523,7 +736,11 @@ properties:
                 description: Set the lower threshold of per-region land area covered by gridcells containing capacity factor timeseries data. Not all land area is covered by data because there are sometimes small islands linked to a region which are missed by the onshore wind / PV datasets. These islands are usually very small, consitituting less than 0.01% of a region.
                 minimum: 0
                 maximum: 1
-
+            shared-coast-polygon-area-share-threshold:
+                type: number
+                description: Set the fraction of a Euro-Calliope unit's area below which a component of the unit can be ignored (e.g. small islands) when assigning Exclusive Economic Zones to subnational Euro-Calliope units.
+                minimum: 0
+                maximum: 1
     capacity-factors:
         type: object
         description: Parameters related to average or time-dependent capacity factors of renewables.
@@ -582,10 +799,12 @@ properties:
                         type: string
                         description: Region code
     shapes:
-        description: Source for geospatial shapes of all locations. The config must be consistent with data from https://doi.org/10.5281/zenodo.3244985.
+        description: >-
+            Source for the lowest-level spatial units of all locations.
+            The config must be consistent with data from https://zenodo.org/records/6600619.
         type: object
         propertyNames:
-            enum: [continental, national, regional]
+            enum: [continental, national, regional, ehighways]
         additionalProperties: false
         patternProperties:
             ^[a-zA-Z]+.*$:

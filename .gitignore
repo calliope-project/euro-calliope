@@ -21,3 +21,5 @@ __pycache__
 # Snakemake
 .snakemake/
 dag.pdf
+**/out/*
+**/tmp/*

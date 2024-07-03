@@ -1,13 +1,12 @@
 """Rules to generate electricity demand time series."""
 
-localrules: download_raw_load
-
 
 rule download_raw_load:
     message: "Download raw load."
     params: url = config["data-sources"]["load"]
     output: protected("data/automatic/raw-load-data.csv")
     conda: "../envs/shell.yaml"
+    localrule: True
     shell: "curl -sLo {output} '{params.url}'"
 
 
