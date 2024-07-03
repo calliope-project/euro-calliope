@@ -8,7 +8,7 @@ from eurocalliopelib import utils
 END_USE_CAT_NAMES = {
     "FC_OTH_HH_E_CK": "cooking",
     "FC_OTH_HH_E_SH": "space_heat",
-    "FC_OTH_HH_E_WH": "water_heat",
+    "FC_OTH_HH_E_WH": "hot_water",
 }
 
 CH_ENERGY_CARRIER_TRANSLATION = {
@@ -28,7 +28,7 @@ CH_ENERGY_CARRIER_TRANSLATION = {
 
 CH_HH_END_USE_TRANSLATION = {
     "Raumwärme": "space_heat",
-    "Warmwasser": "water_heat",
+    "Warmwasser": "hot_water",
     "Prozesswärme": "process_heat",
     "Beleuchtung": "end_use_electricity",
     "Klima, Lüftung, HT": "end_use_electricity",
@@ -271,9 +271,10 @@ def update_final_renewable_energy_demand(df: pd.DataFrame) -> None:
         renewables_carriers = renewables.drop("RA000", axis=1).sum(axis=1, min_count=1)
         renewables_all = renewables.xs("RA000", axis=1)
         # Only update those rows where the sum of renewable energy carriers != RA000
-        return renewables.loc[
-            ~np.isclose(renewables_carriers, renewables_all)
-        ], renewables_carriers
+        return (
+            renewables.loc[~np.isclose(renewables_carriers, renewables_all)],
+            renewables_carriers,
+        )
 
     to_update, renewables_carriers = _get_rows_to_update(df)
     # Some rows have no data other than RA000, so we need to assign that data to one of the
@@ -311,7 +312,7 @@ def read_ch_hh_final_demand(path_to_ch_end_use: str) -> pd.DataFrame:
         skipfooter=8,
         translation=CH_ENERGY_CARRIER_TRANSLATION,
     )
-    water_heat = get_ch_sheet(
+    hot_water = get_ch_sheet(
         path_to_ch_end_use,
         "Tabelle 20",
         skipfooter=5,
@@ -327,8 +328,8 @@ def read_ch_hh_final_demand(path_to_ch_end_use: str) -> pd.DataFrame:
 
     df = (
         pd.concat(
-            [space_heat, water_heat, cooking],
-            keys=("space_heat", "water_heat", "cooking"),
+            [space_heat, hot_water, cooking],
+            keys=("space_heat", "hot_water", "cooking"),
             names=["cat_name", "carrier_name"],
         )
         .assign(country_code="CHE")
@@ -638,7 +639,7 @@ def get_national_useful_heat_demand(
     """
 
     demands = []
-    for end_use in ["space_heat", "water_heat", "cooking"]:
+    for end_use in ["space_heat", "hot_water", "cooking"]:
         _demand = (
             annual_final_energy_demand.loc[[end_use]]
             .mul(efficiencies(heat_tech_params[end_use]), level="carrier_name", axis=0)

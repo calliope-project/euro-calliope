@@ -123,6 +123,17 @@ properties:
                 type: string
                 pattern: ^(https?|http?):\/\/.+
                 description: "Web address of population data."
+            heat-pump-characteristics:
+                type: string
+                pattern: ^(https?|http?):\/\/.*\.(nc)$
+                description: >
+                    Web address of manufacturer heat pump characteristic dataset.
+                    Expected dimensions are:
+                    - source (intended source of ambient temperature of the heat pump - air or ground)
+                    - product (names of manufacturer products)
+                    - sink_temp (sink temperature in degrees C)
+                    - source_temp (source temperature in degrees C)
+                    - data_type (characteristics of the heat pumps, e.g. COP, Heating capacity)
     data-pre-processing:
         type: object
         description: Parameters for the pre-processing of raw data.
@@ -447,9 +458,6 @@ properties:
                         description: Parameters of space heating technologies.
                         additionalProperties: false
                         properties:
-                            carnot-performance:
-                                type: number
-                                description: Carnot performance.
                             gas-eff:
                                 type: number
                                 description: Gas boiler efficiency.
@@ -468,13 +476,7 @@ properties:
                             electricity-eff:
                                 type: number
                                 description: Electric heater efficiency.
-                            space-heat-temp:
-                                type: number
-                                description: Space heating temperature.
-                            hp-cop:
-                                type: number
-                                description: Heat pump coefficient of performance.
-                    water_heat:
+                    hot_water:
                         type: object
                         description: Parameters of water heating technologies.
                         additionalProperties: false
@@ -497,12 +499,6 @@ properties:
                             electricity-eff:
                                 type: number
                                 description: Electric heater efficiency.
-                            water-heat-temp:
-                                type: number
-                                description: Water heating temperature.
-                            hp-cop:
-                                type: number
-                                description: Heat pump coefficient of performance.
                     cooking:
                         type: object
                         description: Parameters of cooking technologies.
@@ -523,6 +519,65 @@ properties:
                             electricity-eff:
                                 type: number
                                 description: Electric stove efficiency.
+
+            heat-pump:
+                type: object
+                description: Parameters to define heat pump operating characteristics
+                additionalProperties: false
+                properties:
+                    sink-temperature:
+                        type: object
+                        description: Assumed running temperature (degrees C) of different heating methods.
+                        additionalProperties: false
+                        properties:
+                            underfloor:
+                                type: integer
+                                description: Underfloor heating.
+                            radiator-large:
+                                type: integer
+                                description: Large radiators (usually installed alongside heat pumps during retrofit).
+                            radiator-conventional:
+                                type: integer
+                                description: Conventional radiators (usually installed alongside gas boilers).
+                            hot-water:
+                                type: integer
+                                description: Hot water temperature (not space heating).
+                    space-heat-sink-shares:
+                        type: object
+                        description: Share of building stock assumed to have different space heating methods
+                        additionalProperties: false
+                        properties:
+                            underfloor:
+                                type: number
+                                description: Underfloor heating.
+                            radiator-large:
+                                type: number
+                                description: Large radiators (usually installed alongside heat pumps during retrofit).
+                            radiator-conventional:
+                                type: number
+                                description: Conventional radiators (usually installed alongside gas boilers).
+                    heat-pump-shares:
+                        type: object
+                        description: >-
+                            Market share of air- vs ground-source heat pumps, which will be used to create a generic "heat pump" technology.
+                            Must sum to 1.
+                        additionalProperties: false
+                        properties:
+                            ashp:
+                                type: number
+                                description: Air-source heat pump
+                                minimum: 0
+                                maximum: 1
+                            gshp:
+                                type: number
+                                description: Ground-source heat pump
+                                minimum: 0
+                                maximum: 1
+                    correction-factor:
+                        type: number
+                        minimum: 0
+                        maximum: 1
+                        description: Correction factor to go from manufacturer data on heat pump performance to 'real' system performance.
     scope:
         type: object
         description: Spatial and temporal scope bounding the models.

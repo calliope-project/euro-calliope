@@ -112,7 +112,8 @@ rule techs_and_locations_template:
     params:
         scaling_factors = config["scaling-factors"],
         capacity_factors = config["capacity-factors"]["average"],
-        max_power_densities = config["parameters"]["maximum-installable-power-density"]
+        max_power_densities = config["parameters"]["maximum-installable-power-density"],
+        heat_pump_shares = config["parameters"]["heat-pump"]["heat-pump-shares"],
     wildcard_constraints:
         tech_group = "(?!transmission).*"  # i.e. all but transmission
     conda: "envs/default.yaml"
@@ -159,6 +160,7 @@ rule model_template:
                 "techs/demand/electrified-heat.yaml",
                 "techs/storage/electricity.yaml",
                 "techs/storage/hydro.yaml",
+                "techs/storage/heat.yaml",
                 "techs/supply/biofuel.yaml",
                 "techs/supply/hydro.yaml",
                 "techs/supply/load-shedding.yaml",
@@ -166,8 +168,10 @@ rule model_template:
                 "techs/supply/rooftop-solar.yaml",
                 "techs/supply/wind-offshore.yaml",
                 "techs/supply/nuclear.yaml",
+                "techs/supply/heat-from-electricity.yaml",
             ]
         ),
+        cop_data = "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv",
         capacityfactor_timeseries_data = expand(
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_CF_TECHNOLOGIES
@@ -241,9 +245,12 @@ rule test:
         capacity_factor_timeseries = expand(
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_CF_TECHNOLOGIES
-        )
+        ),
+        unscaled_space_heat = "build/data/heat/hourly_unscaled_heat_demand.nc",
+        cop = "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv"
     params:
-        config = config
+        config = config,
+        test_args = []  # add e.g. "--pdb" to enter ipdb on test failure
     log: "build/logs/{resolution}/test-report.html"
     output: "build/logs/{resolution}/test.success"
     conda: "./envs/test.yaml"
