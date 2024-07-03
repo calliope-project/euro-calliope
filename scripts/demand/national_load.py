@@ -16,13 +16,13 @@ This process will fail if the 'most complete dataset' for any country has any re
 """
 
 import calendar
+import logging
 
 import pandas as pd
 import pycountry
-import logging
 
 logger = logging.getLogger(_name_)
-logging.basicConfig(filename='snakemake.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename="snakemake.log", encoding="utf-8", level=logging.DEBUG)
 
 
 def national_load(
