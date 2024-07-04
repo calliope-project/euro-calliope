@@ -7,6 +7,7 @@ DATA_PATH = f"{MODULE_PATH}/raw_data"
 
 # Paths relative to this snakefile (snakemake behaviour is inconsitent)
 SCRIPT_PATH = "scripts"  # scripts are called relative to this file
+UTILS = [f"{MODULE_PATH}/{SCRIPT_PATH}/utils/{i}.py" for i in ["filling", "jrc_idees_parser"]]
 CONDA_PATH = "./env_industry.yaml"
 
 configfile: "./config.yaml"
@@ -59,9 +60,11 @@ rule combine_and_scale:
     message: "Identify the category scripts to run based on the configuration."
     conda: CONDA_PATH
     input:
+        UTILS,
         expand("{path}/annual_demand_{sample}.nc", path=[BUILD_PATH], sample=SUFFIXES),
         rules.combined_categories.output
-    # output: "{BUILD_PATH}/annual_demand_aggregated.nc"
+    output: "{BUILD_PATH}/annual_demand_aggregated.nc"
+    shell: "touch {output}"
 
 
 # rule verify:
