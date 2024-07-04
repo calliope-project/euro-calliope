@@ -16,9 +16,13 @@ This process will fail if the 'most complete dataset' for any country has any re
 """
 
 import calendar
+import logging
 
 import pandas as pd
 import pycountry
+
+logger = logging.getLogger(_name_)
+logging.basicConfig(filename="snakemake.log", encoding="utf-8", level=logging.DEBUG)
 
 
 def national_load(
@@ -159,7 +163,7 @@ def _fill_gaps_from_other_years(
             updated_country_series = _fill_29th_feb(updated_country_series, model_year)
 
         model_year_load.loc[:, country] = updated_country_series
-        print(
+        logger.info(
             f"Using data source `{source}`, {country} has {N_missing_timesteps} missing load value(s) in {model_year}. "
             f"A working dataset was constructed from year(s) {', '.join(fill_years)} "
             f"with {updated_country_series.isnull().sum()} remaining empty data points."

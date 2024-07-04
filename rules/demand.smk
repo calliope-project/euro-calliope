@@ -19,7 +19,9 @@ rule electricity_load_national:
         final_year = config["scope"]["temporal"]["final-year"],
         data_quality_config = config["quality-control"]["load"],
         countries = config["scope"]["spatial"]["countries"]
-    output: "build/data/electricity-demand-national.csv"
+    output:
+	csv: "build/data/electricity-demand-national.csv"
+	log: "logs/electricity_load_national.log"
     conda: "../envs/default.yaml"
     script: "../scripts/demand/national_load.py"
 

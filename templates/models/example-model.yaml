@@ -8,7 +8,7 @@ model:
     timeseries_data_path: ./timeseries
     subset_time: ['{{ year }}-01-01', '{{ year }}-01-01']
 run:
-    solver: gurobi
+    solver: cbc
     solver_io: python
     mode: plan
     objective_options: {

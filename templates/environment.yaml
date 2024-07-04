@@ -1,7 +1,6 @@
 name: euro-calliope
 channels:
     - conda-forge
-    - gurobi
 dependencies:
     - python=3.9
     - numpy=1.23
