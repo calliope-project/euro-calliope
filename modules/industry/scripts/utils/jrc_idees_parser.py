@@ -6,6 +6,13 @@ import xarray as xr
 STANDARD_COORDS = ["cat_name", "year", "country_code", "carrier_name"]
 
 
+def check_units(jrc_energy: xr.Dataset, jrc_prod: xr.DataArray) -> None:
+    """Check that the JRC data is in the right units."""
+    for var in jrc_energy:
+        assert jrc_energy[var].attrs["units"].lower() == "twh"
+    assert jrc_prod.attrs["units"].lower() == "kt"
+
+
 def standardize(
     da: xr.DataArray, units: str, name: Optional[str] = None
 ) -> xr.DataArray:
@@ -45,7 +52,7 @@ def standardize(
     return da
 
 
-def get_sec_final_intensity_auxiliary_electric(
+def get_section_final_intensity_auxiliary_electric(
     section: str,
     material: str,
     jrc_energy: xr.Dataset,
@@ -55,7 +62,7 @@ def get_sec_final_intensity_auxiliary_electric(
     """Wrapper for auxiliary electrical processes."""
     auxiliaries = ["Lighting", "Air compressors", "Motor drives", "Fans and pumps"]
     auxiliary_intensity = sum(
-        get_sec_subsec_final_intensity(
+        get_section_subsection_final_intensity(
             section, aux, material, "Electricity", jrc_energy, jrc_prod, fill_empty
         )
         for aux in auxiliaries
@@ -64,7 +71,7 @@ def get_sec_final_intensity_auxiliary_electric(
     return auxiliary_intensity
 
 
-def get_sec_subsec_final_intensity(
+def get_section_subsection_final_intensity(
     section: str,
     subsection: str,
     material: str,
@@ -122,7 +129,7 @@ def get_section_subsection_useful_intensity(
     return useful_intensity.fillna(0)
 
 
-def replace_final_demand_by_carrier(
+def replace_carrier_final_demand(
     carrier: str,
     jrc_energy: xr.Dataset,
 ) -> xr.DataArray:
@@ -142,7 +149,7 @@ def replace_final_demand_by_carrier(
     carrier_tot = jrc_energy.sel(carrier_name=carrier)
     carrier_eff = carrier_tot["useful"] / carrier_tot["final"]
 
-    # Fill NaNs (where there is demand, but no consumption in that country)
+    # ASSUME: fill NaNs (where there is demand, but no consumption in that country)
     # First by country avg. (all years), then by year avg. (all countries).
     carrier_eff = carrier_eff.fillna(carrier_eff.mean(dim="year"))
     carrier_eff = carrier_eff.fillna(carrier_eff.mean(dim="country_code"))
@@ -182,7 +189,4 @@ def convert_subsection_demand_to_carrier(
         "subsection": "carrier_name"
     })
 
-    # Prettify
-    new_carrier_useful_dem = standardize(new_carrier_useful_dem, "twh")
-
-    return new_carrier_useful_dem
+    return standardize(new_carrier_useful_dem, "twh")

@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pandas as pd
 import xarray as xr
 from utils import filling
@@ -18,36 +16,34 @@ def _get_h2_to_steel(recycled_steel_share: float) -> float:
 
 
 def get_steel_demand_df(
-    steel_config: dict,
-    path_energy_balances: str,
-    path_cat_names: str,
-    path_carrier_names: str,
-    path_jrc_industry_energy: str,
-    path_jrc_industry_production: str,
-    path_output: Optional[str] = None,
-) -> xr.DataArray:
+    config: dict,
+    energy_balances: str,
+    cat_names: str,
+    carrier_names: str,
+    jrc_industry_energy: str,
+    jrc_industry_production: str,
+    output_path: str,
+):
     """Execute the data processing pipeline for the "Iron and steel" sub-sector.
 
     Args:
-        steel_config (dict): steel sector configuration.
-        path_energy_balances (str): country energy balances (usually from eurostat).
-        path_cat_names (str): eurostat category mapping file.
-        path_carrier_names (str): eurostat carrier name mapping file.
-        path_jrc_industry_energy (str): jrc country-specific industrial energy demand file.
-        path_jrc_industry_production (str): jrc country-specific industrial production file.
-        path_output (str): location of steel demand output file.
-
-    Returns:
-        xr.DataArray: steel demand per country.
+        config (dict): steel sector configuration.
+        energy_balances (str): country energy balances (usually from eurostat).
+        cat_names (str): eurostat category mapping file.
+        carrier_names (str): eurostat carrier name mapping file.
+        jrc_industry_energy (str): jrc country-specific industrial energy demand file.
+        jrc_industry_production (str): jrc country-specific industrial production file.
+        output_path (str): location of steel demand output file. Defaults to None.
     """
     # Load data
     energy_balances_df = pd.read_csv(
-        path_energy_balances, index_col=[0, 1, 2, 3, 4]
+        energy_balances, index_col=[0, 1, 2, 3, 4]
     ).squeeze("columns")
-    cat_names_df = pd.read_csv(path_cat_names, header=0, index_col=0)
-    carrier_names_df = pd.read_csv(path_carrier_names, header=0, index_col=0)
-    jrc_energy = xr.open_dataset(path_jrc_industry_energy)
-    jrc_prod = xr.open_dataarray(path_jrc_industry_production)
+    cat_names_df = pd.read_csv(cat_names, header=0, index_col=0)
+    carrier_names_df = pd.read_csv(carrier_names, header=0, index_col=0)
+    jrc_energy = xr.open_dataset(jrc_industry_energy)
+    jrc_prod = xr.open_dataarray(jrc_industry_production)
+    jrc.check_units(jrc_energy, jrc_prod)
 
     # Ensure dataframes only have data specific to this industry
     cat_names_df = cat_names_df[cat_names_df["jrc_idees"] == CAT_NAME_STEEL]
@@ -55,17 +51,11 @@ def get_steel_demand_df(
     jrc_prod = jrc_prod.sel(cat_name=CAT_NAME_STEEL)
 
     # Process data
-    new_steel_demand = transform_jrc_subsector_demand(
-        jrc_energy, jrc_prod, steel_config
-    )
+    new_steel_demand = transform_jrc_subsector_demand(jrc_energy, jrc_prod, config)
     new_steel_demand = filling.fill_missing_countries_years(
         energy_balances_df, cat_names_df, carrier_names_df, new_steel_demand
     )
-
-    if path_output is not None:
-        new_steel_demand.to_netcdf(path_output)
-
-    return new_steel_demand
+    new_steel_demand.to_netcdf(output_path)
 
 
 def transform_jrc_subsector_demand(
@@ -99,7 +89,7 @@ def transform_jrc_subsector_demand(
         xr.Dataset: processed dataframe with the expected steel energy consumption.
     """
     # Gather relevant industrial processes
-    sintering_intensity = jrc.get_sec_subsec_final_intensity(
+    sintering_intensity = jrc.get_section_subsection_final_intensity(
         "Integrated steelworks",
         "Steel: Sinter/Pellet making",
         "Integrated steelworks",
@@ -109,7 +99,7 @@ def transform_jrc_subsector_demand(
         fill_empty=True,
     )
 
-    eaf_smelting_intensity = jrc.get_sec_subsec_final_intensity(
+    eaf_smelting_intensity = jrc.get_section_subsection_final_intensity(
         "Electric arc",
         "Steel: Smelters",
         "Electric arc",
@@ -118,7 +108,7 @@ def transform_jrc_subsector_demand(
         jrc_prod,
         fill_empty=True,
     )
-    eaf_intensity = jrc.get_sec_subsec_final_intensity(
+    eaf_intensity = jrc.get_section_subsection_final_intensity(
         "Electric arc",
         "Steel: Electric arc",
         "Electric arc",
@@ -127,7 +117,7 @@ def transform_jrc_subsector_demand(
         jrc_prod,
         fill_empty=True,
     )
-    refining_intensity = jrc.get_sec_subsec_final_intensity(
+    refining_intensity = jrc.get_section_subsection_final_intensity(
         "Electric arc",
         "Steel: Furnaces, Refining and Rolling",
         "Electric arc",
@@ -136,7 +126,7 @@ def transform_jrc_subsector_demand(
         jrc_prod,
         fill_empty=True,
     )
-    finishing_intensity = jrc.get_sec_subsec_final_intensity(
+    finishing_intensity = jrc.get_section_subsection_final_intensity(
         "Electric arc",
         "Steel: Products finishing",
         "Electric arc",
@@ -145,7 +135,7 @@ def transform_jrc_subsector_demand(
         jrc_prod,
         fill_empty=True,
     )
-    auxiliary_intensity = jrc.get_sec_final_intensity_auxiliary_electric(
+    auxiliary_intensity = jrc.get_section_final_intensity_auxiliary_electric(
         "Electric arc", "Electric arc", jrc_energy, jrc_prod, fill_empty=True
     )
 
@@ -208,17 +198,18 @@ def transform_jrc_subsector_demand(
     # Prettify
     steel_energy_demand = steel_energy_demand.assign_attrs(units="twh")
     steel_energy_demand.name = "demand"
+    steel_energy_demand = jrc.standardize(steel_energy_demand, "twh", "demand")
 
     return steel_energy_demand
 
 
 if __name__ == "__main__":
     get_steel_demand_df(
-        steel_config=snakemake.params.steel_config,
-        path_energy_balances=snakemake.input.path_energy_balances,
-        path_cat_names=snakemake.input.path_cat_names,
-        path_carrier_names=snakemake.input.path_carrier_names,
-        path_jrc_industry_energy=snakemake.input.path_jrc_industry_energy,
-        path_jrc_industry_production=snakemake.input.path_jrc_industry_production,
-        path_output=snakemake.output.path_output,
+        config=snakemake.params.config,
+        energy_balances=snakemake.input.energy_balances,
+        cat_names=snakemake.input.cat_names,
+        carrier_names=snakemake.input.carrier_names,
+        jrc_industry_energy=snakemake.input.jrc_industry_energy,
+        jrc_industry_production=snakemake.input.jrc_industry_production,
+        output_path=snakemake.output[0],
     )

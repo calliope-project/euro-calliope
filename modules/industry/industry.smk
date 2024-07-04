@@ -1,7 +1,7 @@
 from snakemake.utils import validate
 
 # Paths dependent on main Snakefile
-MODULE_PATH = "modules/industry"
+MODULE_PATH = "modules/industry"  # TODO: remove if the module becomes an imported external workflow
 BUILD_PATH = f"{MODULE_PATH}/build"
 DATA_PATH = f"{MODULE_PATH}/raw_data"
 
@@ -9,58 +9,60 @@ DATA_PATH = f"{MODULE_PATH}/raw_data"
 SCRIPT_PATH = "scripts"  # scripts are called relative to this file
 CONDA_PATH = "./env_industry.yaml"
 
+configfile: "./config.yaml"
 validate(config, "./schema.yaml")
 
 # Ensure rules are defined in order.
 # Otherwise commands like "rules.rulename.output" won't work!
-if "Iron and steel" in config["params"]["non-generic-categories"]:
-    rule steel_processing:
-        message: "Calculate energy demand for the 'Iron and steel' sector in JRC-IDEES."
-        conda: CONDA_PATH
-        params:
-            steel_config = config["params"]["steel-config"]
-        input:
-            path_energy_balances = config["inputs"]["path-energy-balances"],
-            path_cat_names = config["inputs"]["path-cat-names"],
-            path_carrier_names = config["inputs"]["path-carrier-names"],
-            path_jrc_industry_energy = config["inputs"]["path-jrc-industry-energy"],
-            path_jrc_industry_production = config["inputs"]["path-jrc-industry-production"],
-        output:
-            path_output = f"{BUILD_PATH}/annual_demand_steel.nc"
-        script: f"{SCRIPT_PATH}/steel_processing.py"
+rule iron_and_steel:
+    message: "Calculate energy demand for the 'Iron and steel' sector in JRC-IDEES."
+    conda: CONDA_PATH
+    params:
+        config = config["params"]["config-iron-and-steel"]
+    input:
+        energy_balances = config["input-paths"]["energy-balances"],
+        cat_names = config["input-paths"]["cat-names"],
+        carrier_names = config["input-paths"]["carrier-names"],
+        jrc_industry_energy = config["input-paths"]["jrc-industry-energy"],
+        jrc_industry_production = config["input-paths"]["jrc-industry-production"],
+    output:
+        path_output = f"{BUILD_PATH}/annual_demand_iron_and_steel.nc"
+    script: f"{SCRIPT_PATH}/steel_processing.py"
 
-if "Chemicals Industry" in config["params"]["non-generic-categories"]:
-    rule chemicals_processing:
-        message: "."
-        conda: CONDA_PATH
-        params:
-        input:
-        output:
-        script: f"{SCRIPT_PATH}/chemicals_processing.py"
+rule chemicals_industry:
+    message: "."
+    # conda: CONDA_PATH
+    params:
+    input:
+    output: f"{BUILD_PATH}/annual_demand_chemicals_industry.nc"
+    shell:
+        "touch {output}"
+    # script: f"{SCRIPT_PATH}/annual_demand_chemicals_industry.py"
 
-rule generic_processing:
+rule combined_categories:
     message: "Calculate energy demand for all other industry sectors in JRC-IDEES."
     conda: CONDA_PATH
     params:
-        non_generic_categories = config["params"]["non-generic-categories"],
-        generic_config = config["params"]["generic-config"],
+        specific_categories = config["params"]["specific-categories"],
+        config = config["params"]["config-combined-categories"],
     input:
-        path_energy_balances = config["inputs"]["path-energy-balances"],
-        path_cat_names = config["inputs"]["path-cat-names"],
-        path_carrier_names = config["inputs"]["path-carrier-names"],
-        path_jrc_industry_energy = config["inputs"]["path-jrc-industry-energy"],
-        path_jrc_industry_production = config["inputs"]["path-jrc-industry-production"],
-    output:
-        path_output = f"{BUILD_PATH}/annual_demand_generic.nc"
+        energy_balances = config["input-paths"]["energy-balances"],
+        cat_names = config["input-paths"]["cat-names"],
+        carrier_names = config["input-paths"]["carrier-names"],
+        jrc_industry_energy = config["input-paths"]["jrc-industry-energy"],
+        jrc_industry_production = config["input-paths"]["jrc-industry-production"],
+    output: f"{BUILD_PATH}/annual_demand_combined_categories.nc"
     script: f"{SCRIPT_PATH}/generic_processing.py"
 
-# rule combine_and_scale:
-#     message: "."
-#     conda: CONDA_PATH
-#     params:
-#     input:
-#     output:
-#     script:
+SUFFIXES = [i.lower().replace(" ", "_") for i in config["params"]["specific-categories"]]
+rule combine_and_scale:
+    message: "Identify the category scripts to run based on the configuration."
+    conda: CONDA_PATH
+    input:
+        expand("{path}/annual_demand_{sample}.nc", path=[BUILD_PATH], sample=SUFFIXES),
+        rules.combined_categories.output
+    # output: "{BUILD_PATH}/annual_demand_aggregated.nc"
+
 
 # rule verify:
 #     message: "."

@@ -81,13 +81,12 @@ def fill_missing_countries_years(
     _to_fill = _to_fill.bfill(dim="year")
     all_filled = _to_fill.ffill(dim="year")
 
-    # TODO: CHE has no values for "Wood and wood products" and "Transport Equipment".
-    # We fill this with zeros for now (equivalent to SCEC). Should CHE data be improved/filled in another way?
+    # ASSUME: remaining empty category combinations have no demand
     all_filled = all_filled.fillna(0)
 
     all_filled = jrc.standardize(all_filled, "twh")
 
-    assert ~all_filled.isnull().any(), "Filling failed, found null values."
-    assert ~np.isinf(all_filled).any(), "Filling failed, found inf values."
+    assert not all_filled.isnull().any(), "Filling failed (nan values)."
+    assert not np.isinf(all_filled).any(), "Filling failed (inf values)."
 
     return all_filled

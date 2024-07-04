@@ -1,18 +1,18 @@
 industry:
-    inputs:
-        path-energy-balances: build/data/annual-energy-balances.csv
-        path-cat-names: config/energy-balances/energy-balance-category-names.csv
-        path-carrier-names: config/energy-balances/energy-balance-carrier-names.csv
-        path-jrc-industry-energy: build/data/jrc-idees/industry/processed-energy.nc
-        path-jrc-industry-production: build/data/jrc-idees/industry/processed-production.nc
+    input-paths:
+        energy-balances: build/data/annual-energy-balances.csv
+        cat-names: config/energy-balances/energy-balance-category-names.csv
+        carrier-names: config/energy-balances/energy-balance-carrier-names.csv
+        jrc-industry-energy: build/data/jrc-idees/industry/processed-energy.nc
+        jrc-industry-production: build/data/jrc-idees/industry/processed-production.nc
     outputs:
         placeholder-out1:
         placeholder-out2:
     params:
-        non-generic-categories: ["Iron and steel", "Chemicals Industry"]
-        steel-config:
-            recycled-steel-share: 0.5  # % of recycled scrap steel for H-DRI
-        generic-config:
+        specific-categories: ["Iron and steel", "Chemicals Industry"]
+        config-combined-categories:
             final-energy-method: "by priority"
             final-energy-carriers: ["Electricity", "Natural gas (incl. biogas)", "Diesel oil (incl. biofuels)"]
             useful-demands: ["Low enthalpy heat"]
+        config-iron-and-steel:
+            recycled-steel-share: 0.5  # % of recycled scrap steel for H-DRI

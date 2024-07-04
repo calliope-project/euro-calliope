@@ -4,7 +4,7 @@
 
 ### Added (models)
 
-* **ADD** industry module and steel industry energy demand processing. NOT CONNECTED TO THE MAIN WORKFLOW. Industry sectors pending: chemical. (Fixes #308, #309, #310, #347, #345 and #346)
+* **ADD** Industry module: iron and steel, "default" combined categories. NOT CONNECTED TO THE MAIN WORKFLOW. (Fixes #308, #309, #310, #347, #345 and #346)
 
 * **ADD** Spatial resolution that aligns with the regions defined by the [e-Highway 2050 project](https://cordis.europa.eu/project/id/308908/reporting) (`ehighways`) (#370).
 

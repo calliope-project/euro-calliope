@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pandas as pd
 import xarray as xr
 from utils import filling
@@ -7,82 +5,80 @@ from utils import jrc_idees_parser as jrc
 
 
 def get_generic_demand(
-    non_generic_categories: list,
-    generic_config: dict,
-    path_energy_balances: str,
-    path_cat_names: str,
-    path_carrier_names: str,
-    path_jrc_industry_energy: str,
-    path_jrc_industry_production: str,
-    path_output: Optional[str] = None,
-) -> xr.DataArray:
-    """Processing of industry categories not selected for individual processing.
+    specific_categories: list,
+    config: dict,
+    energy_balances: str,
+    cat_names: str,
+    carrier_names: str,
+    jrc_industry_energy: str,
+    jrc_industry_production: str,
+    output_path: str,
+):
+    """Processing of industry categories not selected for specific processing.
 
     Merges all energy demand into a single `generic` category using a configurable data processing pipeline.
 
     Args:
-        non_generic_categories (list): categories with separate processing (will be ignored).
-        generic_config (dict): configuration for generic category processing.
-        path_energy_balances (str): country energy balances (usually from eurostat).
-        path_cat_names (str): eurostat category mapping file.
-        path_carrier_names (str): eurostat carrier name mapping file.
-        path_jrc_industry_energy (str): jrc country-specific industrial energy demand file.
-        path_jrc_industry_production (str): jrc country-specific industrial production file.
-        path_output (str): location of steel demand output file.
+        specific_categories (list): categories with separate processing (will be ignored).
+        config (dict): configuration for generic category processing.
+        energy_balances (str): country energy balances (usually from eurostat).
+        cat_names (str): eurostat category mapping file.
+        carrier_names (str): eurostat carrier name mapping file.
+        jrc_industry_energy (str): jrc country-specific industrial energy demand file.
+        jrc_industry_production (str): jrc country-specific industrial production file.
+        output_path (str): location of steel demand output file.
 
     Returns:
         pd.DataFrame: dataframe with industrial demand per country.
     """
     # Load data
     energy_balances_df = pd.read_csv(
-        path_energy_balances, index_col=[0, 1, 2, 3, 4]
+        energy_balances, index_col=[0, 1, 2, 3, 4]
     ).squeeze("columns")
-    cat_names_df = pd.read_csv(path_cat_names, header=0, index_col=0)
-    carrier_names_df = pd.read_csv(path_carrier_names, header=0, index_col=0)
-    jrc_energy = xr.open_dataset(path_jrc_industry_energy)
-    jrc_prod = xr.open_dataarray(path_jrc_industry_production)
+    cat_names_df = pd.read_csv(cat_names, header=0, index_col=0)
+    carrier_names_df = pd.read_csv(carrier_names, header=0, index_col=0)
+    jrc_energy = xr.open_dataset(jrc_industry_energy)
+    jrc_prod = xr.open_dataarray(jrc_industry_production)
+    jrc.check_units(jrc_energy, jrc_prod)
 
     # Remove data from all specifically processed industries
-    cat_names_df = cat_names_df[~cat_names_df["jrc_idees"].isin(non_generic_categories)]
-    jrc_energy = jrc_energy.drop_sel(cat_name=non_generic_categories)
-    jrc_prod = jrc_prod.drop_sel(cat_name=non_generic_categories)
+    cat_names_df = cat_names_df[~cat_names_df["jrc_idees"].isin(specific_categories)]
+    jrc_energy = jrc_energy.drop_sel(cat_name=specific_categories)
+    jrc_prod = jrc_prod.drop_sel(cat_name=specific_categories)
 
     # Process data:
-    # Extract useful dem. -> remove useful dem. from rest -> extract final dem.
-    selected_useful = generic_config["useful-demands"]
+    # Extract useful demand -> remove useful demand from rest -> extract final demand
+    selected_useful = config["useful-demands"]
     other_useful_demand = jrc.convert_subsection_demand_to_carrier(
         jrc_energy, selected_useful
     )
 
-    final_method = generic_config["final-energy-method"]
+    final_method = config["final-energy-method"]
     jrc_energy = jrc_energy.drop_sel(subsection=selected_useful)
 
     match final_method:
         case "by priority":
             other_final_demand = transform_final_demand_by_priority(
-                jrc_energy, generic_config["final-energy-carriers"]
+                jrc_energy, config["final-energy-carriers"]
             )
         case "keep everything":
             other_final_demand = jrc_energy["final"].sum(["section", "subsection"])
             other_final_demand = jrc.standardize(other_final_demand, "twh")
         case _:
             raise ValueError(f"Unsupported final energy method: {final_method}.")
-
     # Combine and fill missing countries
     other_demand = xr.concat(
         [other_useful_demand, other_final_demand], dim="carrier_name"
     )
 
+    assert other_demand.sum() < jrc_energy["final"].sum(), "Potential double counting!"
+
     other_demand = filling.fill_missing_countries_years(
         energy_balances_df, cat_names_df, carrier_names_df, other_demand
     )
 
-    other_demand = jrc.standardize(other_demand, "twh")
-
-    if path_output:
-        other_demand.to_netcdf(path_output)
-
-    return other_demand
+    other_demand = jrc.standardize(other_demand, "twh", "demand")
+    other_demand.to_netcdf(output_path)
 
 
 def transform_final_demand_by_priority(
@@ -110,7 +106,7 @@ def transform_final_demand_by_priority(
     carrier_final_dem = {}
 
     for carrier in carrier_priority:
-        dem_replaced = jrc.replace_final_demand_by_carrier(carrier, jrc_energy)
+        dem_replaced = jrc.replace_carrier_final_demand(carrier, jrc_energy)
         dem_replaced = dem_replaced.to_dataframe().dropna()
         for dem_replaced_prev in carrier_final_dem.values():
             dem_replaced = dem_replaced.drop(dem_replaced_prev.index, errors="ignore")
@@ -131,12 +127,12 @@ def transform_final_demand_by_priority(
 
 if __name__ == "__main__":
     get_generic_demand(
-        non_generic_categories=snakemake.params.non_generic_categories,
-        generic_config=snakemake.params.generic_config,
-        path_energy_balances=snakemake.input.path_energy_balances,
-        path_cat_names=snakemake.input.path_cat_names,
-        path_carrier_names=snakemake.input.path_carrier_names,
-        path_jrc_industry_energy=snakemake.input.path_jrc_industry_energy,
-        path_jrc_industry_production=snakemake.input.path_jrc_industry_production,
-        path_output=snakemake.output.path_output,
+        specific_categories=snakemake.params.specific_categories,
+        config=snakemake.params.config,
+        energy_balances=snakemake.input.energy_balances,
+        cat_names=snakemake.input.cat_names,
+        carrier_names=snakemake.input.carrier_names,
+        jrc_industry_energy=snakemake.input.jrc_industry_energy,
+        jrc_industry_production=snakemake.input.jrc_industry_production,
+        output_path=snakemake.output[0],
     )
