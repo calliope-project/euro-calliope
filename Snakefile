@@ -30,9 +30,9 @@ include: "./rules/modules.smk"
 min_version("8.10")
 localrules: all, clean
 wildcard_constraints:
-    resolution = "continental|national|regional|ehighways"
-
-ruleorder: techs_and_locations_template > dummy_tech_locations_template
+    resolution = "continental|national|regional|ehighways",
+    group_and_tech = "(demand|storage|supply|transmission)\/\w+"
+ruleorder: module_with_location_specific_data > module_without_location_specific_data
 
 ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
@@ -94,11 +94,11 @@ rule all_tests:
         )
 
 
-rule techs_and_locations_template:
-    message: "Create {wildcards.resolution} definition file for {wildcards.tech_and_group}."
+rule module_with_location_specific_data:
+    message: "Create {wildcards.resolution} definition file for {wildcards.group_and_tech}."
     input:
-        template = techs_template_dir + "{tech_and_group}.yaml.jinja",
-        locations = "build/data/{resolution}/{tech_and_group}.csv"
+        template = techs_template_dir + "{group_and_tech}.yaml.jinja",
+        locations = "build/data/{resolution}/{group_and_tech}.csv"
     params:
         scaling_factors = config["scaling-factors"],
         capacity_factors = config["capacity-factors"]["average"],
@@ -106,18 +106,18 @@ rule techs_and_locations_template:
         heat_pump_shares = config["parameters"]["heat-pump"]["heat-pump-shares"],
     wildcard_constraints:
         # Exclude all outputs that have their own `techs_and_locations_template` implementation
-        tech_and_group = "(?!transmission\/|supply\/biofuel).*"
+        group_and_tech = "(?!transmission\/|supply\/biofuel).*"
     conda: "envs/default.yaml"
-    output: "build/models/{resolution}/techs/{tech_and_group}.yaml"
+    output: "build/models/{resolution}/techs/{group_and_tech}.yaml"
     script: "scripts/template_techs.py"
 
-use rule techs_and_locations_template as dummy_tech_locations_template with:
+use rule module_with_location_specific_data as module_without_location_specific_data with:
     # For all cases where we don't have any location-specific data that we want to supply to the template
     input:
-        template = techs_template_dir + "{tech_and_group}.yaml.jinja",
-        locations = rules.locations_template.output.csv
+        template = techs_template_dir + "{group_and_tech}.yaml.jinja",
+        locations = rules.locations.output.csv
 
-rule no_params_model_template:
+rule model_file_without_specific_data:
     message: "Create {wildcards.resolution} configuration files from templates where no parameterisation is required."
     input:
         template = model_template_dir + "{template}",
@@ -128,7 +128,7 @@ rule no_params_model_template:
     shell: "cp {input.template} {output}"
 
 
-rule no_params_template:
+rule non_model_file_without_specific_data:
     message: "Create non-model files from templates where no parameterisation is required."
     input:
         template = template_dir + "{template}",
@@ -139,7 +139,7 @@ rule no_params_template:
     shell: "cp {input.template} {output}"
 
 
-rule model_template:
+rule model:
     message: "Generate top-level {wildcards.resolution} model configuration file from template"
     input:
         template = model_template_dir + "example-model.yaml.jinja",

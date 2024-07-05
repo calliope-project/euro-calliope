@@ -140,7 +140,7 @@ rule eez:
         """
 
 
-rule locations_template:
+rule locations:
     message: "Generate locations configuration file for {wildcards.resolution} resolution from template."
     input:
         template = model_template_dir + "locations.yaml.jinja",
