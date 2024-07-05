@@ -51,7 +51,7 @@ rule biofuels:
     script: "../scripts/biofuels/allocate.py"
 
 
-rule bio_techs_and_locations_template:
+rule biofuel_tech_module:
     message: "Create biofuel tech definition file from template."
     input:
         template = techs_template_dir + "supply/biofuel.yaml.jinja",

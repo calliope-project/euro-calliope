@@ -20,11 +20,11 @@ rule entsoe_tyndp_xlsx:
     shell: "unzip -o {input} 'TYNDP-2020-Scenario-Datafile.xlsx' -d build/data/national"
 
 
-rule transmission_entsoe_tyndp_techs_and_locations_template:
+rule transmission_entsoe_tyndp_tech_module:
     message: "Create YAML file of national-scale links with ENTSO-E TYNDP net-transfer capacities"
     input:
         template = techs_template_dir + "transmission/electricity-transmission.yaml.jinja",
-        locations = rules.locations_template.output.csv,
+        locations = rules.locations.output.csv,
         entsoe_tyndp = rules.entsoe_tyndp_xlsx.output[0]
     params:
         scenario = config["parameters"]["entsoe-tyndp"]["scenario"],
@@ -39,7 +39,7 @@ rule transmission_entsoe_tyndp_techs_and_locations_template:
     script: "../scripts/transmission/template_transmission_entsoe_tyndp.py"
 
 
-rule transmission_techs_and_locations_template:
+rule transmission_linked_neighbours_tech_module:
     message: "Link {wildcards.resolution} direct neighbours and neighbours with sea connections with transmission techs from template."
     input:
         template = techs_template_dir + "transmission/electricity-transmission.yaml.jinja",
