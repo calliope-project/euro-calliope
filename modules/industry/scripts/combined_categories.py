@@ -71,7 +71,7 @@ def get_generic_demand(
         [other_useful_demand, other_final_demand], dim="carrier_name"
     )
 
-    assert other_demand.sum() < jrc_energy["final"].sum(), "Potential double counting!"
+    assert other_demand.sum() <= jrc_energy["final"].sum(), "Potential double counting!"
 
     other_demand = filling.fill_missing_countries_years(
         energy_balances_df, cat_names_df, carrier_names_df, other_demand

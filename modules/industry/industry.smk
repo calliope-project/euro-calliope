@@ -28,7 +28,7 @@ rule iron_and_steel:
         jrc_industry_production = config["input-paths"]["jrc-industry-production"],
     output:
         path_output = f"{BUILD_PATH}/annual_demand_iron_and_steel.nc"
-    script: f"{SCRIPT_PATH}/steel_processing.py"
+    script: f"{SCRIPT_PATH}/iron_and_steel.py"
 
 rule chemicals_industry:
     message: "."
@@ -53,7 +53,7 @@ rule combined_categories:
         jrc_industry_energy = config["input-paths"]["jrc-industry-energy"],
         jrc_industry_production = config["input-paths"]["jrc-industry-production"],
     output: f"{BUILD_PATH}/annual_demand_combined_categories.nc"
-    script: f"{SCRIPT_PATH}/generic_processing.py"
+    script: f"{SCRIPT_PATH}/combined_categories.py"
 
 SUFFIXES = [i.lower().replace(" ", "_") for i in config["params"]["specific-categories"]]
 rule combine_and_scale:
