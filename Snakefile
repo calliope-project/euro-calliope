@@ -115,9 +115,9 @@ use rule module_with_location_specific_data as module_without_location_specific_
     # For all cases where we don't have any location-specific data that we want to supply to the template
     input:
         template = techs_template_dir + "{group_and_tech}.yaml.jinja",
-        locations = rules.locations.output.csv
+        locations = rules.locations_module.output.csv
 
-rule model_file_without_specific_data:
+rule module_without_specific_data:
     message: "Create {wildcards.resolution} configuration files from templates where no parameterisation is required."
     input:
         template = model_template_dir + "{template}",
@@ -128,8 +128,8 @@ rule model_file_without_specific_data:
     shell: "cp {input.template} {output}"
 
 
-rule non_model_file_without_specific_data:
-    message: "Create non-model files from templates where no parameterisation is required."
+rule auxiliary_files:
+    message: "Create auxiliary output files (i.e. those not used to define a Calliope model) from templates where no parameterisation is required."
     input:
         template = template_dir + "{template}",
     output: "build/models/{template}"
@@ -143,12 +143,12 @@ rule model:
     message: "Generate top-level {wildcards.resolution} model configuration file from template"
     input:
         template = model_template_dir + "example-model.yaml.jinja",
-        non_model_files = expand(
+        auxiliary_files = expand(
             "build/models/{template}", template=["environment.yaml", "README.md"]
         ),
-        input_files = expand(
-            "build/models/{{resolution}}/{input_file}",
-            input_file=[
+        modules = expand(
+            "build/models/{{resolution}}/{module}",
+            module=[
                 "interest-rate.yaml",
                 "locations.yaml",
                 "techs/demand/electricity.yaml",
