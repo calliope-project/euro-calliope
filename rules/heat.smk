@@ -116,7 +116,7 @@ rule group_gridded_timeseries:
 
 
 rule heat_pump_final_timeseries:
-    message: "Generate {wildcards.resolution} {wildcards.input_dataset} timeseries data from gridded data "
+    message: "Combine hot water and space heating characteristics to generate a weighted average {wildcards.resolution} {wildcards.input_dataset} `heat` carrier timeseries."
     input:
         timeseries_data = "build/data/heat/{resolution}/{input_dataset}.nc",
         annual_demand = rules.rescale_annual_heat_demand_to_resolution.output.total_demand
@@ -134,8 +134,7 @@ rule heat_demand_final_timeseries:
         annual_demand = "build/data/heat/{resolution}/annual-{input_dataset}-demand-twh.csv",
     conda: "../envs/default.yaml"
     params:
-        sfh_mfh_shares = config["parameters"]["heat"]["sfh-mfh-shares"],
-        historic = lambda wildcards: True if "historic" in wildcards.input_dataset else False
+        sfh_mfh_shares = config["parameters"]["heat"]["sfh-mfh-shares"]
     wildcard_constraints:
         input_dataset = "heat|historic-electrified-heat"
     output: "build/models/{resolution}/timeseries/demand/{input_dataset}.csv"

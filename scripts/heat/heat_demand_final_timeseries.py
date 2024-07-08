@@ -1,3 +1,5 @@
+import math
+
 import pandas as pd
 import xarray as xr
 from eurocalliopelib import utils
@@ -24,8 +26,8 @@ def scale_heat_demand_profiles(
     Returns:
         xr.DataArray: `unscaled_demand_profiles` merged across building types and end uses, and scaled to have an annual sum equal to `annual_demand`.
     """
-    assert (
-        sum(sfh_mfh_shares.values()) == 1
+    assert math.isclose(
+        sum(sfh_mfh_shares.values()), 1
     ), "Household type (single- vs multi-family home) ratios must add up to 1."
 
     sfh_mfh_shares_da = (
@@ -79,7 +81,7 @@ if __name__ == "__main__":
     )
 
     # Demands are stored as negative values for Calliope to ingest
-    if not snakemake.params.historic:
+    if "historic" not in snakemake.wildcards.input_dataset:
         scaled_profiles *= -1
 
     final_df = scaled_profiles.astype("float32").to_series().unstack("id")
