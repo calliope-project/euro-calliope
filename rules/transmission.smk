@@ -24,7 +24,7 @@ rule transmission_entsoe_tyndp_tech_module:
     message: "Create YAML file of national-scale links with ENTSO-E TYNDP net-transfer capacities"
     input:
         template = techs_template_dir + "transmission/electricity-transmission.yaml.jinja",
-        locations = rules.locations.output.csv,
+        locations = rules.locations_module.output.csv,
         entsoe_tyndp = rules.entsoe_tyndp_xlsx.output[0]
     params:
         scenario = config["parameters"]["entsoe-tyndp"]["scenario"],
