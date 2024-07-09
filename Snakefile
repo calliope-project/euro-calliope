@@ -30,11 +30,9 @@ include: "./rules/modules.smk"
 min_version("8.10")
 localrules: all, clean
 wildcard_constraints:
-    resolution = "continental|national|regional|ehighways"
-
-ruleorder: area_to_capacity_limits > hydro_capacities > biofuels > nuclear_regional_capacity > dummy_tech_locations_template
-ruleorder: bio_techs_and_locations_template > techs_and_locations_template
-ruleorder: create_controlled_road_transport_annual_demand_and_installed_capacities > dummy_tech_locations_template
+    resolution = "continental|national|regional|ehighways",
+    group_and_tech = "(demand|storage|supply|transmission)\/\w+"
+ruleorder: module_with_location_specific_data > module_without_location_specific_data
 
 ALL_CF_TECHNOLOGIES = [
     "wind-onshore", "wind-offshore", "open-field-pv",
@@ -96,32 +94,30 @@ rule all_tests:
         )
 
 
-rule dummy_tech_locations_template:  # needed to provide `techs_and_locations_template` with a locational CSV linked to each technology that has no location-specific data to define.
-    message: "Create empty {wildcards.resolution} location-specific data file for the {wildcards.tech_group} tech `{wildcards.tech}`."  # Update ruleorder at the top of the file if you instead want the techs_and_locations_template rule to be used to generate a file
-    input: rules.locations_template.output.csv
-    output: "build/data/{resolution}/{tech_group}/{tech}.csv"
-    conda: "envs/shell.yaml"
-    shell: "cp {input} {output}"
-
-
-rule techs_and_locations_template:
-    message: "Create {wildcards.resolution} definition file for the {wildcards.tech_group} tech `{wildcards.tech}`."
+rule module_with_location_specific_data:
+    message: "Create {wildcards.resolution} definition file for {wildcards.group_and_tech}."
     input:
-        template = techs_template_dir + "{tech_group}/{tech}.yaml",
-        locations = "build/data/{resolution}/{tech_group}/{tech}.csv"
+        template = techs_template_dir + "{group_and_tech}.yaml.jinja",
+        locations = "build/data/{resolution}/{group_and_tech}.csv"
     params:
         scaling_factors = config["scaling-factors"],
         capacity_factors = config["capacity-factors"]["average"],
         max_power_densities = config["parameters"]["maximum-installable-power-density"],
         heat_pump_shares = config["parameters"]["heat-pump"]["heat-pump-shares"],
     wildcard_constraints:
-        tech_group = "(?!transmission).*"  # i.e. all but transmission
+        # Exclude all outputs that have their own `techs_and_locations_template` implementation
+        group_and_tech = "(?!transmission\/|supply\/biofuel).*"
     conda: "envs/default.yaml"
-    output: "build/models/{resolution}/techs/{tech_group}/{tech}.yaml"
+    output: "build/models/{resolution}/techs/{group_and_tech}.yaml"
     script: "scripts/template_techs.py"
 
+use rule module_with_location_specific_data as module_without_location_specific_data with:
+    # For all cases where we don't have any location-specific data that we want to supply to the template
+    input:
+        template = techs_template_dir + "{group_and_tech}.yaml.jinja",
+        locations = rules.locations_module.output.csv
 
-rule no_params_model_template:
+rule module_without_specific_data:
     message: "Create {wildcards.resolution} configuration files from templates where no parameterisation is required."
     input:
         template = model_template_dir + "{template}",
@@ -132,8 +128,8 @@ rule no_params_model_template:
     shell: "cp {input.template} {output}"
 
 
-rule no_params_template:
-    message: "Create non-model files from templates where no parameterisation is required."
+rule auxiliary_files:
+    message: "Create auxiliary output files (i.e. those not used to define a Calliope model) from templates where no parameterisation is required."
     input:
         template = template_dir + "{template}",
     output: "build/models/{template}"
@@ -143,16 +139,16 @@ rule no_params_template:
     shell: "cp {input.template} {output}"
 
 
-rule model_template:
+rule model:
     message: "Generate top-level {wildcards.resolution} model configuration file from template"
     input:
-        template = model_template_dir + "example-model.yaml",
-        non_model_files = expand(
+        template = model_template_dir + "example-model.yaml.jinja",
+        auxiliary_files = expand(
             "build/models/{template}", template=["environment.yaml", "README.md"]
         ),
-        input_files = expand(
-            "build/models/{{resolution}}/{input_file}",
-            input_file=[
+        modules = expand(
+            "build/models/{{resolution}}/{module}",
+            module=[
                 "interest-rate.yaml",
                 "locations.yaml",
                 "techs/demand/electricity.yaml",
@@ -187,9 +183,9 @@ rule model_template:
             "build/models/{resolution}/timeseries/demand/demand-shape-equals-ev.csv",
             "build/models/{resolution}/timeseries/demand/plugin-profiles-ev.csv",
         ),
-        optional_input_files = lambda wildcards: expand(
-            f"build/models/{wildcards.resolution}/{{input_file}}",
-            input_file=[
+        optional_modules = lambda wildcards: expand(
+            f"build/models/{wildcards.resolution}/{{module}}",
+            module=[
                 "techs/transmission/electricity-linked-neighbours.yaml",
             ] + ["techs/transmission/electricity-entsoe.yaml" for i in [None] if wildcards.resolution == "national"]
         )

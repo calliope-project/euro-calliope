@@ -140,10 +140,10 @@ rule eez:
         """
 
 
-rule locations_template:
+rule locations_module:
     message: "Generate locations configuration file for {wildcards.resolution} resolution from template."
     input:
-        template = model_template_dir + "locations.yaml",
+        template = model_template_dir + "locations.yaml.jinja",
         shapes = rules.units.output[0]
     output:
         yaml = "build/models/{resolution}/locations.yaml",

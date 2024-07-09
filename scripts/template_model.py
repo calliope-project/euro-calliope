@@ -5,8 +5,8 @@ from pathlib import Path
 from eurocalliopelib.template import parametrise_template
 
 
-def construct_model(path_to_template, path_to_output, input_files, resolution, year):
-    input_files = sorted([update_path(file, resolution) for file in input_files])
+def construct_model(path_to_template, path_to_output, modules, resolution, year):
+    input_files = sorted([update_path(file, resolution) for file in modules])
 
     return parametrise_template(
         path_to_template,
@@ -26,7 +26,7 @@ def update_path(path_string, resolution):
 if __name__ == "__main__":
     construct_model(
         path_to_template=snakemake.input.template,
-        input_files=snakemake.input.input_files,
+        modules=snakemake.input.modules,
         resolution=snakemake.wildcards.resolution,
         year=snakemake.params.year,
         path_to_output=snakemake.output[0],
