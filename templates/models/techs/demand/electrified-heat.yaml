@@ -1,0 +1,14 @@
+techs:
+    demand_heat_electrified:
+        essentials:
+            name: Electrified heat demand
+            parent: demand
+            carrier: electricity
+        constraints:
+            resource: file=demand/electrified-heat.csv
+            exists: false
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.techs.demand_heat_electrified:
+    {% endfor %}

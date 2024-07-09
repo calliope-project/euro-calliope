@@ -169,9 +169,13 @@ rule model_template:
                 "techs/supply/wind-offshore.yaml",
                 "techs/supply/nuclear.yaml",
                 "techs/supply/heat-from-electricity.yaml",
+                "techs/supply/historic-electrified-heat.yaml",
             ]
         ),
-        cop_data = "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv",
+        heat_supply = (
+            "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv",
+            "build/models/{resolution}/timeseries/supply/historic-electrified-heat.csv",
+        ),
         capacityfactor_timeseries_data = expand(
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_CF_TECHNOLOGIES
@@ -181,7 +185,7 @@ rule model_template:
             "build/models/{resolution}/timeseries/demand/uncontrolled-electrified-road-transport.csv",
             "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv",
             "build/models/{resolution}/timeseries/demand/heat.csv",
-            "build/models/{resolution}/timeseries/demand/historic-electrified-heat.csv",
+            "build/models/{resolution}/timeseries/demand/electrified-heat.csv",
             "build/models/{resolution}/timeseries/demand/demand-shape-min-ev.csv",
             "build/models/{resolution}/timeseries/demand/demand-shape-max-ev.csv",
             "build/models/{resolution}/timeseries/demand/demand-shape-equals-ev.csv",
@@ -246,8 +250,9 @@ rule test:
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_CF_TECHNOLOGIES
         ),
+        electrified_heat_demand = "build/models/{resolution}/timeseries/demand/electrified-heat.csv",
         heat_demand = "build/models/{resolution}/timeseries/demand/heat.csv",
-        historic_electrified_heat = "build/models/{resolution}/timeseries/demand/historic-electrified-heat.csv",
+        historic_electrified_heat = "build/models/{resolution}/timeseries/supply/historic-electrified-heat.csv",
         cop = "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv"
     params:
         config = config,

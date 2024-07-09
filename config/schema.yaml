@@ -541,6 +541,43 @@ properties:
                                 description: Fraction of single-family households
                                 minimum: 0
                                 maximum: 1
+                    electrification-shares:
+                        type: object
+                        description: |
+                            Share of electricity-powered technologies available to meet heat demand, used when producing an electrified heat demand profile.
+                            Shares must add to 1.
+                        additionalProperties: false
+                        properties:
+                            space_heat:
+                                type: object
+                                description: Electrification shares of space heating technologies.
+                                additionalProperties: false
+                                properties:
+                                    heat-pump:
+                                        type: number
+                                        description: share of heat pumps.
+                                        minimum: 0
+                                        maximum: 1
+                                    direct:
+                                        type: number
+                                        description: share of direct electric heating.
+                                        minimum: 0
+                                        maximum: 1
+                            hot_water:
+                                type: object
+                                description: Electrification shares of water heating technologies.
+                                additionalProperties: false
+                                properties:
+                                    heat-pump:
+                                        type: number
+                                        description: share of heat pumps.
+                                        minimum: 0
+                                        maximum: 1
+                                    direct:
+                                        type: number
+                                        description: share of direct electric heating.
+                                        minimum: 0
+                                        maximum: 1
 
             heat-pump:
                 type: object

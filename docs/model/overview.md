@@ -18,9 +18,9 @@ Within each resolution-specific model directory, there is a subdirectory for tec
 |   |   └── demand
 |   |   |   └── electricity.csv                             <- Timeseries of electricity demand on each node.
 |   |   |   └── electrified-road-transport.csv              <- Timeseries of road transport demand electrified on each node.
+|   |   |   └── electrified-heat.csv                        <- Timeseries of electrified combined space heat and hot water demand  on each node.
 |   |   |   └── heat.csv                                    <- Timeseries of combined space heat and hot water demand on each node.
 |   |   |   └── road-transport-historic-electrification.csv <- Timeseries of historically electrified road transport demand on each node.
-|   |   |   └── historic-electrified-heat.csv               <- Timeseries of historically electrified heat demand on each node.
 |   ├── techs                                               <- All technology definition YAML files.
 |   |   |── {technology-class}                              <- Calliope base technology classes (one of `supply`, `demand`, `storage`, `transmission`).
 |   |   |   └── {technology-group}.yaml                     <- Definition of a technology (or group of technologies) relevant to the base technology, and the allocation of that technology to nodes in the model.

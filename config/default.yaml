@@ -212,6 +212,15 @@ parameters:
         sfh-mfh-shares:  # derived from https://doi.org/10.2908/CENS_11DWOB_R3 using EFTA total dwelling data.
             MFH: 0.45
             SFH: 0.55
+        electrification-shares:
+            # derived from https://doi.org/10.2908/NRG_D_HHQ
+            # using German ambient heat vs electricity use for 2022 (EU country with some of the highest heat pump shares)
+            space_heat:
+                heat-pump: 0.8
+                direct: 0.2
+            hot_water:
+                heat-pump: 0.05
+                direct: 0.95
     heat-pump:
         sink-temperature:  # All values are assumed.
             underfloor: 35

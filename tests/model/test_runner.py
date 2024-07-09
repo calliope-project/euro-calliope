@@ -142,6 +142,12 @@ def _create_config_plugin(snakemake, override_dict, scenarios, subset_time):
                 snakemake.input.historic_electrified_heat, index_col=0, parse_dates=True
             )
 
+        @pytest.fixture(scope="module")
+        def electrified_heat_demand(self):
+            return pd.read_csv(
+                snakemake.input.electrified_heat_demand, index_col=0, parse_dates=True
+            )
+
     return SnakemakeConfigPlugin()
 
 
