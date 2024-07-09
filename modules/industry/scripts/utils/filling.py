@@ -38,22 +38,15 @@ def fill_missing_countries_years(
         .stack("country")
         .rename_axis(index=["cat_name", "country_code"])
         .apply(ec_utils.tj_to_twh)
+        .stack()
+        .to_xarray()
     )
-    # If JRC-IDEES data exists, there will be data in 'energy_consumption' for that country
-    jrc_balances = eurostat_industry_balances[
-        eurostat_industry_balances.index.get_level_values("country_code").isin(
-            jrc_countries
-        )
-    ]
+    # If in JRC-IDEES, then data already was adequately processed for that country
+    jrc_balances = eurostat_industry_balances.sel(country_code=jrc_countries)
     # Otherwise, there will only be data for that country in annual energy balances
-    nonjrc_balances = eurostat_industry_balances[
-        ~eurostat_industry_balances.index.get_level_values("country_code").isin(
-            jrc_countries
-        )
-    ]
+    nonjrc_balances = eurostat_industry_balances.drop_sel(country_code=jrc_countries)
     # Obtain share of total energy demand in missing countries per year
-    nonjrc_subsector_share = nonjrc_balances.div(jrc_balances.groupby("cat_name").sum())
-    nonjrc_subsector_share = nonjrc_subsector_share.stack().to_xarray()
+    nonjrc_subsector_share = nonjrc_balances / jrc_balances.sum("country_code")
 
     # Fill missing countries in relation to their total energy share.
     # E.g., if CHE consumes a total share of 1% -> assume it consumes 1% of total electricity
@@ -64,19 +57,17 @@ def fill_missing_countries_years(
     # Sometimes JRC-IDEES has consumption, but Eurostat doesn't, leading to inf values
     # E.g., RO: non ferrous metals
     # Correct and fill with mean values.
-    eurostat_industry_balance_xr = eurostat_industry_balances.stack().to_xarray()
-    country_mean_demand = (all_subsector_demand / eurostat_industry_balance_xr).mean(
+    country_mean_demand = (all_subsector_demand / eurostat_industry_balances).mean(
         "year"
     )
     country_mean_demand = country_mean_demand.where(lambda x: ~np.isinf(x) & (x > 0))
     country_mean_demand = country_mean_demand.fillna(
         country_mean_demand.mean("country_code")
     )
-
     # Fill data where JRC says there is no consumption of any form in a country's industry subsector
     # But where the energy balances show consumption (e.g. UK, Wood and wood products)
     _to_fill = all_subsector_demand
-    _filler = eurostat_industry_balance_xr * country_mean_demand
+    _filler = eurostat_industry_balances * country_mean_demand
 
     extra_years = [y for y in _filler.year if y > _to_fill.year.max()]
     _to_fill = xr.concat([_to_fill, _filler.sel(year=extra_years)], dim="year")
@@ -90,10 +81,12 @@ def fill_missing_countries_years(
     _to_fill = _to_fill.bfill(dim="year")
     all_filled = _to_fill.ffill(dim="year")
 
-    all_filled = jrc.ensure_standard_coordinates(all_filled)
-    all_filled = all_filled.assign_attrs(units="twh")
+    # ASSUME: remaining empty category combinations have no demand
+    all_filled = all_filled.fillna(0)
 
-    assert ~all_filled.isnull().any(), "Filling failed, found null values."
-    assert ~np.isinf(all_filled).any(), "Filling failed, found inf values."
+    all_filled = jrc.standardize(all_filled, "twh")
+
+    assert not all_filled.isnull().any(), "Filling failed (nan values)."
+    assert not np.isinf(all_filled).any(), "Filling failed (inf values)."
 
     return all_filled
