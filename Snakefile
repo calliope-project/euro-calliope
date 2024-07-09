@@ -187,9 +187,9 @@ rule model:
             "build/models/{resolution}/timeseries/demand/demand-shape-equals-ev.csv",
             "build/models/{resolution}/timeseries/demand/plugin-profiles-ev.csv",
         ),
-        optional_input_files = lambda wildcards: expand(
-            f"build/models/{wildcards.resolution}/{{input_file}}",
-            input_file=[
+        optional_modules = lambda wildcards: expand(
+            f"build/models/{wildcards.resolution}/{{module}}",
+            module=[
                 "techs/transmission/electricity-linked-neighbours.yaml",
             ] + ["techs/transmission/electricity-entsoe.yaml" for i in [None] if wildcards.resolution == "national"]
         )
