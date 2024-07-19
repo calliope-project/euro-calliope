@@ -1,0 +1,12 @@
+INFO:__main__:Using data source `actual_entsoe_transparency`, IRL has 51 missing load value(s) in 2015. A working dataset was constructed from year(s) 2016, 2014 with 0 remaining empty data points.
+INFO:__main__:Using data source `actual_entsoe_transparency`, GBR has 2 missing load value(s) in 2015. A working dataset was constructed from year(s) 2016, 2014 with 0 remaining empty data points.
+INFO:__main__:Using data source `actual_entsoe_transparency`, IRL has 57 missing load value(s) in 2016. A working dataset was constructed from year(s) 2017, 2015 with 0 remaining empty data points.
+INFO:__main__:Using data source `actual_entsoe_transparency`, GBR has 62 missing load value(s) in 2016. A working dataset was constructed from year(s) 2017, 2015, 2018 with 0 remaining empty data points.
+INFO:__main__:Using the following data sources for national load:
+IRL: actual_entsoe_transparency
+GBR: actual_entsoe_transparency
+INFO:__main__:Gap filling methods lead to the following relative increase in output load compared to input data
+country_code
+IRL    1.011673
+GBR    1.006350
+dtype: float64

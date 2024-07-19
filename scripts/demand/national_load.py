@@ -21,8 +21,8 @@ import logging
 import pandas as pd
 import pycountry
 
-logger = logging.getLogger(_name_)
-logging.basicConfig(filename="snakemake.log", encoding="utf-8", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename=snakemake.log[0], encoding='utf-8', level=logging.DEBUG)
 
 
 def national_load(
@@ -271,7 +271,7 @@ def get_source_choice_per_country(raw_load, gap_filled_load, entsoe_priority):
         .set_index("attribute", append=True)
     )
 
-    print(
+    logger.info(
         "Using the following data sources for national load:\n{}".format(
             "\n".join([f"{idx[0]}: {idx[1]}" for idx in source_choice.index])
         )
@@ -290,7 +290,7 @@ def get_source_choice_per_country(raw_load, gap_filled_load, entsoe_priority):
         raise AssertionError(error_msg)
 
     else:
-        print(
+        logger.info(
             "Gap filling methods lead to the following relative increase in output load compared to input data\n"
             f"{new_load.sum() / raw_load_for_comparison.sum()}"
         )

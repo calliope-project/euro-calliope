@@ -20,8 +20,8 @@ rule electricity_load_national:
         data_quality_config = config["quality-control"]["load"],
         countries = config["scope"]["spatial"]["countries"]
     output:
-	csv: "build/data/electricity-demand-national.csv"
-	log: "logs/electricity_load_national.log"
+        csv = "build/data/electricity-demand-national.csv"
+    log: "logs/electricity_load_national.log"
     conda: "../envs/default.yaml"
     script: "../scripts/demand/national_load.py"
 
