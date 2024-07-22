@@ -12,29 +12,17 @@ tech_groups:
                 # Source also gives om_prod and purchase costs, but the former is in terms of storage cap
                 storage_cap: {{ 0.41e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_heat") }}
 
-overrides:
-    add_heat_pump_storage:  # Link technologies to their own storage buffers.
-        techs:
-            hp_heat_storage_small:
-                essentials.parent: heat_storage_small
-                essentials.carrier: hp_heat
-        locations:
-            {% for id, location in locations.iterrows() %}
-            {{ id }}:
-                techs:
-                    hp_heat_storage_small:
-            {% endfor %}
-    add_electric_heater_storage:
-        techs:
-            electric_heater_heat_storage_small:
-                essentials.parent: heat_storage_small
-                essentials.carrier: electric_heater_heat
-        locations:
-            {% for id, location in locations.iterrows() %}
-            {{ id }}:
-                techs:
-                    electric_heater_heat_storage_small:
-            {% endfor %}
+techs:
+    hp_heat_storage_small:
+        essentials.parent: heat_storage_small
+        essentials.carrier: hp_heat
+    electric_heater_heat_storage_small:
+        essentials.parent: heat_storage_small
+        essentials.carrier: electric_heater_heat
 
-scenarios:
-    add_heat_tech_storage: [add_heat_pump_storage, add_electric_heater_storage]
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}:
+        techs.hp_heat_storage_small:
+        techs.electric_heater_heat_storage_small:
+    {% endfor %}

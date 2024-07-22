@@ -8,7 +8,6 @@ test-model:
             alternative-cost: ["dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost"]
             shed-load: ["load-shedding"]
             keep-historic-transport: ["keep-historic-electricity-demand-from-road-transport"]
-            add-heat-tech-storage: ["add_heat_tech_storage"]
         national:
             default: []
             connected_neighbours: ["connect_all_neighbours"]
@@ -19,15 +18,17 @@ test-model:
             alternative-cost: ["dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost"]
             shed-load: ["load-shedding"]
             keep-historic-transport: ["keep-historic-electricity-demand-from-road-transport"]
-            add-heat-tech-storage: ["add_heat_tech_storage"]
+            heat: ["heat_end_use"]
+            electrified-heat: ["electrified_heat"]
+
         regional:
             default: ["connect_all_neighbours", "run_barrier_no_crossover"]
             all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
-                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "add_heat_tech_storage"]
+                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "heat_end_use"]
         ehighways:
             default: ["connect_all_neighbours", "run_barrier_no_crossover"]
             all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
-                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "add_heat_tech_storage"]
+                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "heat_end_use"]
     overrides:
         continental: {}
         national:
@@ -37,16 +38,41 @@ test-model:
             connect_entsoe_tyndp:
                 import:
                     - 'build/models/national/techs/transmission/electricity-entsoe.yaml'
+            electrified_heat:
+                import:
+                    - "build/models/national/techs/demand/electrified-heat.yaml"
+                    - "build/models/national/techs/supply/historic-electrified-heat.yaml"
+            heat_end_use:
+                import:
+                    - "build/models/national/techs/demand/heat.yaml"
+                    - "build/models/national/techs/storage/heat.yaml"
+                    - "build/models/national/techs/supply/heat-from-electricity.yaml"
+                    - "build/models/national/techs/supply/historic-electrified-heat.yaml"
+
         regional:
             connect_all_neighbours:
                 import:
                     - 'build/models/regional/techs/transmission/electricity-linked-neighbours.yaml'
+            heat_end_use:
+                import:
+                    - "build/models/regional/techs/demand/heat.yaml"
+                    - "build/models/regional/techs/storage/heat.yaml"
+                    - "build/models/regional/techs/supply/heat-from-electricity.yaml"
+                    - "build/models/regional/techs/supply/historic-electrified-heat.yaml"
+
             run_barrier_no_crossover:
                 run.solver_options: {Method: 2, Crossover: 0}
         ehighways:
             connect_all_neighbours:
                 import:
                     - 'build/models/ehighways/techs/transmission/electricity-linked-neighbours.yaml'
+            heat_end_use:
+                import:
+                    - "build/models/ehighways/techs/demand/heat.yaml"
+                    - "build/models/ehighways/techs/storage/heat.yaml"
+                    - "build/models/ehighways/techs/supply/heat-from-electricity.yaml"
+                    - "build/models/ehighways/techs/supply/historic-electrified-heat.yaml"
+
             run_barrier_no_crossover:
                 run.solver_options: {Method: 2, Crossover: 0}
     subset_time:

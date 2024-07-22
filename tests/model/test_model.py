@@ -1,26 +1,30 @@
 import pandas as pd
 import pytest
 
-DEFAULT_TECHNOLOGIES = set([
-    "battery",
-    "hydrogen",
-    "open_field_pv",
-    "wind_onshore_competing",
-    "wind_onshore_monopoly",
-    "roof_mounted_pv",
-    "wind_offshore",
-    "hydro_run_of_river",
-    "hydro_reservoir",
-    "pumped_hydro",
-    "biofuel",
-    "demand_elec",
-    "nuclear",
-])
-DIRECTIONAL_PV = set([
-    "roof_mounted_pv_s_flat",
-    "roof_mounted_pv_n",
-    "roof_mounted_pv_e_w",
-])
+DEFAULT_TECHNOLOGIES = set(
+    [
+        "battery",
+        "hydrogen",
+        "open_field_pv",
+        "wind_onshore_competing",
+        "wind_onshore_monopoly",
+        "roof_mounted_pv",
+        "wind_offshore",
+        "hydro_run_of_river",
+        "hydro_reservoir",
+        "pumped_hydro",
+        "biofuel",
+        "demand_elec",
+        "nuclear",
+    ]
+)
+DIRECTIONAL_PV = set(
+    [
+        "roof_mounted_pv_s_flat",
+        "roof_mounted_pv_n",
+        "roof_mounted_pv_e_w",
+    ]
+)
 
 # Only includes scenarios with non-default technology sets
 TECHNOLOGIES = {
@@ -66,3 +70,10 @@ def test_technologies_are_available(energy_cap, location, technologies):
             assert (technology in energy_cap.techs) and pd.notna(
                 energy_cap.sel(locs=location, techs=technology).item()
             )
+
+
+def test_heat_carrier_exists(model, scenario):
+    if scenario == "heat":
+        assert "heat" in model.inputs.carriers
+    else:
+        assert "heat" not in model.inputs.carriers

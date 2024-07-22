@@ -8,10 +8,6 @@ techs:
             resource: file=supply/historic-electrified-heat.csv
             force_resource: true
 
-overrides:
-    keep-historic-electricity-demand-from-heat:
-        techs.historic_electrified_heat.exists: False
-
 locations:
     {% for id, location in locations.iterrows() %}
     {{ id }}.techs.historic_electrified_heat:
