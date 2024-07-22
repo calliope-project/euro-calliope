@@ -1,30 +1,26 @@
 import pandas as pd
 import pytest
 
-DEFAULT_TECHNOLOGIES = set(
-    [
-        "battery",
-        "hydrogen",
-        "open_field_pv",
-        "wind_onshore_competing",
-        "wind_onshore_monopoly",
-        "roof_mounted_pv",
-        "wind_offshore",
-        "hydro_run_of_river",
-        "hydro_reservoir",
-        "pumped_hydro",
-        "biofuel",
-        "demand_elec",
-        "nuclear",
-    ]
-)
-DIRECTIONAL_PV = set(
-    [
-        "roof_mounted_pv_s_flat",
-        "roof_mounted_pv_n",
-        "roof_mounted_pv_e_w",
-    ]
-)
+DEFAULT_TECHNOLOGIES = set([
+    "battery",
+    "hydrogen",
+    "open_field_pv",
+    "wind_onshore_competing",
+    "wind_onshore_monopoly",
+    "roof_mounted_pv",
+    "wind_offshore",
+    "hydro_run_of_river",
+    "hydro_reservoir",
+    "pumped_hydro",
+    "biofuel",
+    "demand_elec",
+    "nuclear",
+])
+DIRECTIONAL_PV = set([
+    "roof_mounted_pv_s_flat",
+    "roof_mounted_pv_n",
+    "roof_mounted_pv_e_w",
+])
 
 # Only includes scenarios with non-default technology sets
 TECHNOLOGIES = {
