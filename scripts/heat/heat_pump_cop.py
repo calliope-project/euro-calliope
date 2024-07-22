@@ -1,3 +1,4 @@
+import math
 from typing import Union
 
 import pandas as pd
@@ -39,11 +40,11 @@ def cop(
         path_to_output (str): Output to which COP timeseries data will be saved.
     """
     # Initial fast-fail checks.
-    assert (
-        sum(heat_pump_shares.values()) == 1
+    assert math.isclose(
+        sum(heat_pump_shares.values()), 1
     ), "Heat pump technology shares must add up to 1."
-    assert (
-        sum(space_heat_sink_shares.values()) == 1
+    assert math.isclose(
+        sum(space_heat_sink_shares.values()), 1
     ), "Space heating sink method shares must add up to 1."
 
     temperature_ds = xr.merge(

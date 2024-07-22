@@ -66,3 +66,10 @@ def test_technologies_are_available(energy_cap, location, technologies):
             assert (technology in energy_cap.techs) and pd.notna(
                 energy_cap.sel(locs=location, techs=technology).item()
             )
+
+
+def test_heat_carrier_exists(model, scenario):
+    if scenario == "heat":
+        assert "heat" in model.inputs.carriers
+    else:
+        assert "heat" not in model.inputs.carriers

@@ -623,9 +623,6 @@ def get_annual_electricity_demand(
     electricity_demand = fill_data_gaps(
         electricity_demand, energy_balance_dfs, fill="first"
     )
-    electricity_demand = electricity_demand.rename(
-        lambda x: f"{x}_historically_electrified", level="end_use", axis=1
-    )
     return electricity_demand
 
 

@@ -54,18 +54,11 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         **(year)_transport_controlled_electrified_demand**: Total electrified road transport demand whose charging is optimised by the solver.
 
-??? note "demand/electrified-heat.yaml"
+??? note "demand/heat.yaml"
 
     === "Technologies"
 
-        **demand_heat_electrified**: Electrified heat demand
-
-        **demand_heat_historic_electrified**: Removes historically electrified heat demand to avoid double counting
-
-
-    === "Overrides"
-
-        **keep-historic-electricity-demand-from-heat**: Keep historically electrified heat demand. Historically electrified heat demand is deleted by default, as it is already considered in historic electricity demand and would thus be counted twice. Using this override together with Euro-Calliope's default electricity demand is not advised.
+        **demand_heat**: Combined space heat and hot water demand.
 
 ??? note "storage/electricity.yaml"
 
@@ -89,17 +82,9 @@ Here, we describe each module in terms of the technologies they contain (`callio
         **heat_storage_small**: Abstract [technology group](https://calliope.readthedocs.io/en/v0.6.10/user/advanced_features.html#using-tech-groups-to-group-configuration).
         This "technology" only becomes part of the model when defining technologies in the overrides of this file.
 
-    === "Overrides"
+        **hp_heat_storage_small**: Storage buffer for heat pumps which inherits from the `heat_storage_small` abstract technology group, assuming a domestic (small scale) application.
 
-        **add_heat_pump_storage**: Add storage buffer for heat pumps.
-        Adds the technology `hp_heat_storage_small` using the `heat_storage_small` abstract technology group.
-
-        **add_electric_heater_storage**: Add storage buffer for direct electric heaters.
-        Adds the technology `electric_heater_heat_storage_small` using the `heat_storage_small` abstract technology group.
-
-    === "Scenarios"
-
-        **add_heat_tech_storage**: Add all technology storage buffers at once.
+        **electric_heater_heat_storage_small**: Storage buffer for direct electric heaters which inherits from the `heat_storage_small` abstract technology group, assuming a domestic (small scale) application.
 
 ??? note "storage/hydro.yaml"
 
@@ -130,6 +115,12 @@ Here, we describe each module in terms of the technologies they contain (`callio
         **electric_heater**: Direct electric heater.
 
         **electric_heater_tech_heat_to_demand**: Dummy technology to convert electric heater output to a carrier that can be used to meet heat demand.
+
+??? note "supply/historic-electrified-heat.yaml"
+
+    === "Technologies"
+
+        **demand_heat_historic_electrified**: Removes historically electrified heat demand to avoid double counting in the electricity demand profile.
 
 ??? note "supply/hydro.yaml"
 

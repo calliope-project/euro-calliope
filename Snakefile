@@ -153,10 +153,8 @@ rule model:
                 "locations.yaml",
                 "techs/demand/electricity.yaml",
                 "techs/demand/electrified-transport.yaml",
-                "techs/demand/electrified-heat.yaml",
                 "techs/storage/electricity.yaml",
                 "techs/storage/hydro.yaml",
-                "techs/storage/heat.yaml",
                 "techs/supply/biofuel.yaml",
                 "techs/supply/hydro.yaml",
                 "techs/supply/load-shedding.yaml",
@@ -164,30 +162,45 @@ rule model:
                 "techs/supply/rooftop-solar.yaml",
                 "techs/supply/wind-offshore.yaml",
                 "techs/supply/nuclear.yaml",
-                "techs/supply/heat-from-electricity.yaml",
             ]
         ),
-        cop_data = "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv",
+        heat_supply_timeseries_data = (
+            "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv",
+            "build/models/{resolution}/timeseries/supply/historic-electrified-heat.csv",
+        ),
         capacityfactor_timeseries_data = expand(
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_CF_TECHNOLOGIES
         ),
-        demand_timeseries_data = (
-            "build/models/{resolution}/timeseries/demand/electricity.csv",
-            "build/models/{resolution}/timeseries/demand/uncontrolled-electrified-road-transport.csv",
-            "build/models/{resolution}/timeseries/demand/uncontrolled-road-transport-historic-electrification.csv",
-            "build/models/{resolution}/timeseries/demand/electrified-heat-demand.csv",
-            "build/models/{resolution}/timeseries/demand/heat-demand-historic-electrification.csv",
-            "build/models/{resolution}/timeseries/demand/demand-shape-min-ev.csv",
-            "build/models/{resolution}/timeseries/demand/demand-shape-max-ev.csv",
-            "build/models/{resolution}/timeseries/demand/demand-shape-equals-ev.csv",
-            "build/models/{resolution}/timeseries/demand/plugin-profiles-ev.csv",
+        demand_timeseries_data = expand(
+            "build/models/{{resolution}}/timeseries/demand/{filename}",
+            filename=[
+                "electricity.csv",
+                "uncontrolled-electrified-road-transport.csv",
+                "uncontrolled-road-transport-historic-electrification.csv",
+                "demand-shape-min-ev.csv",
+                "demand-shape-max-ev.csv",
+                "demand-shape-equals-ev.csv",
+                "plugin-profiles-ev.csv",
+                "heat.csv",
+                "electrified-heat.csv",
+            ]
         ),
-        optional_modules = lambda wildcards: expand(
+        optional_transmission_modules = lambda wildcards: expand(
             f"build/models/{wildcards.resolution}/{{module}}",
             module=[
                 "techs/transmission/electricity-linked-neighbours.yaml",
             ] + ["techs/transmission/electricity-entsoe.yaml" for i in [None] if wildcards.resolution == "national"]
+        ),
+        optional_heat_modules = expand(
+            "build/models/{{resolution}}/{module}",
+            module=[
+                "techs/demand/heat.yaml",
+                "techs/demand/electrified-heat.yaml",
+                "techs/storage/heat.yaml",
+                "techs/supply/heat-from-electricity.yaml",
+                "techs/supply/historic-electrified-heat.yaml"
+            ]
         )
     params:
         year = config["scope"]["temporal"]["first-year"]
@@ -242,11 +255,13 @@ rule test:
             "build/models/{{resolution}}/timeseries/supply/capacityfactors-{technology}.csv",
             technology=ALL_CF_TECHNOLOGIES
         ),
-        unscaled_space_heat = "build/data/heat/hourly_unscaled_heat_demand.nc",
+        electrified_heat_demand = "build/models/{resolution}/timeseries/demand/electrified-heat.csv",
+        heat_demand = "build/models/{resolution}/timeseries/demand/heat.csv",
+        historic_electrified_heat = "build/models/{resolution}/timeseries/supply/historic-electrified-heat.csv",
         cop = "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv"
     params:
         config = config,
-        test_args = []  # add e.g. "--pdb" to enter ipdb on test failure
+        test_args = ["--pdb"]  # add e.g. "--pdb" to enter ipdb on test failure
     log: "build/logs/{resolution}/test-report.html"
     output: "build/logs/{resolution}/test.success"
     conda: "./envs/test.yaml"

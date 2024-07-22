@@ -13,3 +13,9 @@ def test_cop_all_at_least_1(cop_timeseries):
     assert (
         cop_timeseries.stack() >= 1
     ).all(), "Found improbably low heat pump COP values (< 1)."
+
+
+def test_historic_electrified_heat_sign(historic_electrified_heat):
+    assert (
+        historic_electrified_heat.stack() >= 0
+    ).all(), "Found negative historic electrified heat demand."

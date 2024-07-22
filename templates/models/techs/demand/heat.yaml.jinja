@@ -1,0 +1,13 @@
+techs:
+    demand_heat:
+        essentials:
+            name: Heat demand
+            parent: demand
+            carrier: heat
+        constraints:
+            resource: file=demand/heat.csv
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.techs.demand_heat:
+    {% endfor %}
