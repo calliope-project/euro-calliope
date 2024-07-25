@@ -104,6 +104,7 @@ rule module_with_location_specific_data:
         capacity_factors = config["capacity-factors"]["average"],
         max_power_densities = config["parameters"]["maximum-installable-power-density"],
         heat_pump_shares = config["parameters"]["heat-pump"]["heat-pump-shares"],
+        biofuel_efficiency = config["parameters"]["biofuel-efficiency"],
     wildcard_constraints:
         # Exclude all outputs that have their own `techs_and_locations_template` implementation
         group_and_tech = "(?!transmission\/|supply\/biofuel).*"
@@ -162,10 +163,11 @@ rule model:
                 "techs/supply/rooftop-solar.yaml",
                 "techs/supply/wind-offshore.yaml",
                 "techs/supply/nuclear.yaml",
+                "techs/conversion/electricity-from-biofuel.yaml"
             ]
         ),
-        heat_supply_timeseries_data = (
-            "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv",
+        heat_timeseries_data = (
+            "build/models/{resolution}/timeseries/conversion/heat-pump-cop.csv",
             "build/models/{resolution}/timeseries/supply/historic-electrified-heat.csv",
         ),
         capacityfactor_timeseries_data = expand(
@@ -198,7 +200,8 @@ rule model:
                 "techs/demand/heat.yaml",
                 "techs/demand/electrified-heat.yaml",
                 "techs/storage/heat.yaml",
-                "techs/supply/heat-from-electricity.yaml",
+                "techs/conversion/heat-from-electricity.yaml",
+                "techs/conversion/heat-from-biofuel.yaml",
                 "techs/supply/historic-electrified-heat.yaml"
             ]
         )
@@ -258,10 +261,10 @@ rule test:
         electrified_heat_demand = "build/models/{resolution}/timeseries/demand/electrified-heat.csv",
         heat_demand = "build/models/{resolution}/timeseries/demand/heat.csv",
         historic_electrified_heat = "build/models/{resolution}/timeseries/supply/historic-electrified-heat.csv",
-        cop = "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv"
+        cop = "build/models/{resolution}/timeseries/conversion/heat-pump-cop.csv"
     params:
         config = config,
-        test_args = ["--pdb"]  # add e.g. "--pdb" to enter ipdb on test failure
+        test_args = []  # add e.g. "--pdb" to enter ipdb on test failure
     log: "build/logs/{resolution}/test-report.html"
     output: "build/logs/{resolution}/test.success"
     conda: "./envs/test.yaml"

@@ -42,7 +42,7 @@ def summarise_potentials(
 
     list_of_techs = model.inputs.techs.values
     list_of_locs = model.inputs.locs.values
-    list_of_potentials = list(considered_potentials.keys())
+    list_of_potentials = list(set(considered_potentials).intersection(model.inputs))
 
     summary = np.empty((len(list_of_techs), len(list_of_potentials), len(list_of_locs)))
     summary[:] = np.nan

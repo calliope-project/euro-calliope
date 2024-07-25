@@ -20,15 +20,16 @@ test-model:
             keep-historic-transport: ["keep-historic-electricity-demand-from-road-transport"]
             heat: ["heat_end_use"]
             electrified-heat: ["electrified_heat"]
+            biofuel-flow-limited: ["biofuel_flow_limits"]
 
         regional:
             default: ["connect_all_neighbours", "run_barrier_no_crossover"]
             all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
-                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "heat_end_use"]
+                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "heat_end_use", "biofuel_flow_limits"]
         ehighways:
             default: ["connect_all_neighbours", "run_barrier_no_crossover"]
             all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
-                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "heat_end_use"]
+                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "heat_end_use", "biofuel_flow_limits"]
     overrides:
         continental: {}
         national:
@@ -46,7 +47,8 @@ test-model:
                 import:
                     - "build/models/national/techs/demand/heat.yaml"
                     - "build/models/national/techs/storage/heat.yaml"
-                    - "build/models/national/techs/supply/heat-from-electricity.yaml"
+                    - "build/models/national/techs/conversion/heat-from-electricity.yaml"
+                    - "build/models/national/techs/conversion/heat-from-biofuel.yaml"
                     - "build/models/national/techs/supply/historic-electrified-heat.yaml"
 
         regional:
@@ -57,7 +59,8 @@ test-model:
                 import:
                     - "build/models/regional/techs/demand/heat.yaml"
                     - "build/models/regional/techs/storage/heat.yaml"
-                    - "build/models/regional/techs/supply/heat-from-electricity.yaml"
+                    - "build/models/regional/techs/conversion/heat-from-electricity.yaml"
+                    - "build/models/regional/techs/conversion/heat-from-biofuel.yaml"
                     - "build/models/regional/techs/supply/historic-electrified-heat.yaml"
 
             run_barrier_no_crossover:
@@ -70,7 +73,8 @@ test-model:
                 import:
                     - "build/models/ehighways/techs/demand/heat.yaml"
                     - "build/models/ehighways/techs/storage/heat.yaml"
-                    - "build/models/ehighways/techs/supply/heat-from-electricity.yaml"
+                    - "build/models/ehighways/techs/conversion/heat-from-electricity.yaml"
+                    - "build/models/ehighways/techs/conversion/heat-from-biofuel.yaml"
                     - "build/models/ehighways/techs/supply/historic-electrified-heat.yaml"
 
             run_barrier_no_crossover:

@@ -60,7 +60,6 @@ rule biofuel_tech_module:
         ),
         locations = "build/data/{{resolution}}/biofuel/{scenario}/potential-mwh-per-year.csv".format(scenario=config["parameters"]["jrc-biofuel"]["scenario"])
     params:
-        biofuel_efficiency = config["parameters"]["biofuel-efficiency"],
         scaling_factors = config["scaling-factors"],
     conda: "../envs/default.yaml"
     output: "build/models/{resolution}/techs/supply/biofuel.yaml"

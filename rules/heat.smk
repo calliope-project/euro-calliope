@@ -123,7 +123,7 @@ rule heat_pump_final_timeseries:
     conda: "../envs/default.yaml"
     wildcard_constraints:
         input_dataset = "heat-pump-cop"
-    output: "build/models/{resolution}/timeseries/supply/{input_dataset}.csv"
+    output: "build/models/{resolution}/timeseries/conversion/{input_dataset}.csv"
     script: "../scripts/heat/heat_pump_final_timeseries.py"
 
 

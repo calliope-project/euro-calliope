@@ -85,7 +85,7 @@ def biofuel_potential(
             index_col=["year", "scenario", "country_code", "feedstock"],
         )["value"]
         .div(GJ_TO_MWH)
-        .xs((potential_year, scenario), level=("year", "scenario"))
+        .xs((cost_year, scenario), level=("year", "scenario"))
     )
     units = pd.read_csv(path_to_units).set_index("id")
     if (len(units.index) == 1) and (

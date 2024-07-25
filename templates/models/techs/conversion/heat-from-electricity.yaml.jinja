@@ -2,13 +2,6 @@
 {# Costs being averaged are given in the order they appear in the spreadsheet (which is the same order as in the inline comments). #}
 {# Costs are given by DEA per technology "unit" (1000EUR/unit), so are converted to a cost per capacity (1000EUR/kW_heating) by dividing by the capacity of one unit, as given in the same data table. #}
 
-tech_groups:
-    tech_heat_to_demand:
-        essentials:
-            name: Technology-specific heat carriers to generic heat carrier converter
-            parent: conversion
-            carrier_out: heat
-
 techs:
     heat_pump:   # [@DEA:2017] - 7.3 - 7.6 Air to water & 7.7 - 7.10 Ground source - 2050
         essentials:
@@ -17,7 +10,7 @@ techs:
             carrier_in: electricity
             carrier_out: hp_heat
         constraints:
-            energy_eff: file=supply/heat-pump-cop.csv  # NOTE: based on data processing pipeline, not [@DEA:2017].
+            energy_eff: file=conversion/heat-pump-cop.csv  # NOTE: based on data processing pipeline, not [@DEA:2017].
             lifetime: 20
         costs:
             monetary:
