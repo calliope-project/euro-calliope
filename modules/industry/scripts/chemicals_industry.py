@@ -56,7 +56,6 @@ def get_chemicals_demand_df(
     new_chemicals_demand = filling.fill_missing_countries_years(
         energy_balances_df, cat_names_df, carrier_names_df, new_chemicals_demand
     )
-    breakpoint()
     new_chemicals_demand.to_netcdf(output_path)
 
 
