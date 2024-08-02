@@ -67,7 +67,7 @@ rule basins_database:
     output: "build/data/basins/hybas_eu_lev07_v1c.shp"
     conda: "../envs/shell.yaml"
     localrule: True
-    shell: "unzip {input} -d ./build/data/basins/"
+    shell: "unzip -o {input} -d ./build/data/basins/"
 
 
 rule stations_database:
@@ -79,7 +79,7 @@ rule stations_database:
     localrule: True
     shell:
         """
-        unzip -j {input} "**/jrc-hydro-power-plant-database.csv" -d build/data/
+        unzip -o -j {input} "**/jrc-hydro-power-plant-database.csv" -d build/data/
         """
 
 
