@@ -10,6 +10,7 @@ root_dir = config["root-directory"] + "/" if config["root-directory"] not in [""
 __version__ = open(f"{root_dir}VERSION").readlines()[0].strip()
 test_dir = f"{root_dir}tests/"
 model_test_dir = f"{test_dir}model"
+resources_test_dir = f"{test_dir}resources"
 template_dir = f"{root_dir}templates/"
 model_template_dir = f"{template_dir}models/"
 techs_template_dir = f"{model_template_dir}techs/"
@@ -107,7 +108,7 @@ rule module_with_location_specific_data:
         biofuel_efficiency = config["parameters"]["biofuel-efficiency"],
     wildcard_constraints:
         # Exclude all outputs that have their own `techs_and_locations_template` implementation
-        group_and_tech = "(?!transmission\/|supply\/biofuel).*"
+        group_and_tech = "(?!transmission\/|supply\/biofuel|supply\/electrified-biofuel).*"
     conda: "envs/default.yaml"
     output: "build/models/{resolution}/techs/{group_and_tech}.yaml"
     script: "scripts/template_techs.py"
@@ -156,14 +157,12 @@ rule model:
                 "techs/demand/electrified-transport.yaml",
                 "techs/storage/electricity.yaml",
                 "techs/storage/hydro.yaml",
-                "techs/supply/biofuel.yaml",
                 "techs/supply/hydro.yaml",
                 "techs/supply/load-shedding.yaml",
                 "techs/supply/open-field-solar-and-wind-onshore.yaml",
                 "techs/supply/rooftop-solar.yaml",
                 "techs/supply/wind-offshore.yaml",
                 "techs/supply/nuclear.yaml",
-                "techs/conversion/electricity-from-biofuel.yaml"
             ]
         ),
         heat_timeseries_data = (
@@ -203,6 +202,14 @@ rule model:
                 "techs/conversion/heat-from-electricity.yaml",
                 "techs/conversion/heat-from-biofuel.yaml",
                 "techs/supply/historic-electrified-heat.yaml"
+            ]
+        ),
+        optional_biofuel_modules = expand(
+            "build/models/{{resolution}}/{module}",
+            module=[
+                "techs/supply/biofuel.yaml",
+                "techs/supply/electrified-biofuel.yaml",
+                "techs/conversion/electricity-from-biofuel.yaml"
             ]
         )
     params:
@@ -252,6 +259,7 @@ rule test:
     message: "Run tests"
     input:
         test_dir = model_test_dir,
+        test_resources_dir = resources_test_dir,
         tests = map(str, Path(model_test_dir).glob("**/test_*.py")),
         example_model = "build/models/{resolution}/example-model.yaml",
         capacity_factor_timeseries = expand(

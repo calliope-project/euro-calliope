@@ -10,5 +10,6 @@ if __name__ == "__main__":
         snakemake.output[0],
         biofuel_cost=biofuel_cost,
         scaling_factors=snakemake.params.scaling_factors,
+        biofuel_efficiency=snakemake.params.biofuel_efficiency,
         locations=locations,
     )

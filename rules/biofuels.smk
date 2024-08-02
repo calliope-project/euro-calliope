@@ -52,15 +52,18 @@ rule biofuels:
 
 
 rule biofuel_tech_module:
-    message: "Create biofuel tech definition file from template."
+    message: "Create {wildcards.tech_module} tech definition file from template."
     input:
-        template = techs_template_dir + "supply/biofuel.yaml.jinja",
+        template = techs_template_dir + "supply/{tech_module}.yaml.jinja",
         biofuel_cost = "build/data/regional/biofuel/{scenario}/costs-eur-per-mwh.csv".format(
             scenario=config["parameters"]["jrc-biofuel"]["scenario"]
         ),
         locations = "build/data/{{resolution}}/biofuel/{scenario}/potential-mwh-per-year.csv".format(scenario=config["parameters"]["jrc-biofuel"]["scenario"])
     params:
         scaling_factors = config["scaling-factors"],
+        biofuel_efficiency = config["parameters"]["biofuel-efficiency"]
     conda: "../envs/default.yaml"
-    output: "build/models/{resolution}/techs/supply/biofuel.yaml"
+    output: "build/models/{resolution}/techs/supply/{tech_module}.yaml"
+    wildcard_constraints:
+        tech_module = "biofuel|electrified-biofuel"
     script: "../scripts/biofuels/template_bio.py"
