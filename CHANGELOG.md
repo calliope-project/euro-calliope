@@ -4,6 +4,8 @@
 
 ### Added (models)
 
+* **ADD** Hydrogen and synthetic fuel energy carriers in the Calliope model, and the technologies to generate those (hydrogen from electrolysis and synthetic fuels from biofuels or hydrogen+CO2) (#416)
+
 * **ADD** Specific biofuel energy carrier in the Calliope model, which can be used to generate electricity or to meet heat demand (#417).
 
 * **ADD** Industry module: iron and steel, "default" combined categories. NOT CONNECTED TO THE MAIN WORKFLOW. (Fixes #308, #309, #310, #347, #345 and #346)

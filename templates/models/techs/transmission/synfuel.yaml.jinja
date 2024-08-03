@@ -1,0 +1,75 @@
+# These technologies emulate "copperplate" transmission: the ability to move carriers between any two locations without have explicit links
+# To work as expected, they need an additional constraint to equate annual export and import for each carrier at each location.
+techs:
+    syn_diesel_distribution_export:
+        essentials:
+            carrier: syn_diesel
+            parent: demand
+        constraints:
+            resource: -.inf
+            force_resource: false
+
+    syn_methane_distribution_export:
+        essentials:
+            carrier: syn_methane
+            parent: demand
+        constraints:
+            resource: -.inf
+            force_resource: false
+
+    syn_kerosene_distribution_export:
+        essentials:
+            carrier: syn_kerosene
+            parent: demand
+        constraints:
+            resource: -.inf
+            force_resource: false
+
+    syn_methanol_distribution_export:
+        essentials:
+            carrier: syn_methanol
+            parent: demand
+        constraints:
+            resource: -.inf
+            force_resource: false
+
+    syn_diesel_distribution_import:
+        essentials:
+            carrier: syn_diesel
+            parent: supply
+        constraints:
+            resource: .inf
+
+    syn_methane_distribution_import:
+        essentials:
+            carrier: syn_methane
+            parent: supply
+        constraints:
+            resource: .inf
+
+    syn_kerosene_distribution_import:
+        essentials:
+            carrier: syn_kerosene
+            parent: supply
+        constraints:
+            resource: .inf
+
+    syn_methanol_distribution_import:
+        essentials:
+            carrier: syn_methanol
+            parent: supply
+        constraints:
+            resource: .inf
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.techs:
+        syn_diesel_distribution_export:
+        syn_methane_distribution_export:
+        syn_diesel_distribution_import:
+        syn_methane_distribution_import:
+        syn_kerosene_distribution_export:
+        syn_methanol_distribution_export:
+        syn_kerosene_distribution_import:
+        syn_methanol_distribution_import:
+    {% endfor %}

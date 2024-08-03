@@ -56,6 +56,7 @@ scaling-factors: # values are tuned for models with a few hours resolution and o
     area: 0.0001 # from km2 to 10,000 km2
     monetary: 0.000000001 # from EUR to 1 billion EUR
     transport: 0.01  # from Mio km to 100 Mio km
+    co2: 0.0001  # from t to 10 kt
 capacity-factors:
     min: 0.001
     max: 10 # 0.001 -> 10 leads to a numerical range of 1e5 (hourly resolution)
@@ -190,15 +191,15 @@ parameters:
     heat:
         tech-efficiencies:
             space_heat:
-                gas-eff: 0.97  # [@DEA:2020], but 70-80% according to [Qu_2014]
-                oil-eff: 0.9  # [@DEA:2020], but 0.63 according to [martin_2014]
+                gas-eff: 0.97  # [@DEA:2020a], but 70-80% according to [Qu_2014]
+                oil-eff: 0.9  # [@DEA:2020a], but 0.63 according to [martin_2014]
                 solid-fossil-eff: 0.8 # Assume same as biofuel
-                biofuel-eff: 0.8  # [@DEA:2020] [mermoud_2015] [Chandrasekaran_2013] [DEA_2016]
+                biofuel-eff: 0.8  # [@DEA:2020a] [mermoud_2015] [Chandrasekaran_2013] [DEA_2016]
                 solar-thermal-eff: 1  # Eurostat energy balances method
                 electricity-eff: 1  # must be 1 for the time being (we assume 1 -> 1 electricity -> heat conversion)
             hot_water:
-                gas-eff: 0.97  # [@DEA:2020], but 70-80% according to [Qu_2014]
-                oil-eff: 0.9  # [@DEA:2020], but 0.63 according to [martin_2014]
+                gas-eff: 0.97  # [@DEA:2020a], but 70-80% according to [Qu_2014]
+                oil-eff: 0.9  # [@DEA:2020a], but 0.63 according to [martin_2014]
                 solid-fossil-eff: 0.8 # Assume same as biofuel
                 biofuel-eff: 0.8  # [mermoud_2015] [Chandrasekaran_2013] [DEA_2016]
                 solar-thermal-eff: 1  # Eurostat energy balances method

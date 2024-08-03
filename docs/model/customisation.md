@@ -88,6 +88,8 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         **biofuel_heat_storage_small**: Storage buffer for biofuel boilers which inherits from the `heat_storage_small` abstract technology group, assuming a domestic (small scale) application.
 
+        **methane_heat_storage_small**: Storage buffer for methane boilers which inherits from the `heat_storage_small` abstract technology group, assuming a domestic (small scale) application.
+
 ??? note "storage/hydro.yaml"
 
     === "Technologies"
@@ -139,6 +141,56 @@ Here, we describe each module in terms of the technologies they contain (`callio
         **electric_heater**: Direct electric heater.
 
         **electric_heater_tech_heat_to_demand**: Dummy technology to convert electric heater output to a carrier that can be used to meet heat demand.
+
+??? note "conversion/heat-from-methane.yaml"
+
+    === "Technologies"
+
+        **methane_boiler**: Natural gas / methane boiler
+
+        **methane_tech_heat_to_demand**: "Dummy" technology to convert methane boiler output to a carrier that can be used to meet heat demand.
+
+??? note "conversion/synfuels-from-hydrogen.yaml"
+
+    === "Technologies"
+
+        **hydrogen_to_liquids**: Hydrogen+CO<sub>2</sub> to liquid fuels (diesel & kerosene) converter.
+
+        **hydrogen_to_methanol**: Hydrogen+CO<sub>2</sub> to methanol converter.
+
+        **hydrogen_to_methane**: Hydrogen+CO<sub>2</sub> to methane converter.
+
+        **dac**: Direct air CO<sub>2</sub> capture.
+
+??? note "conversion/fuels-from-synfuels.yaml"
+
+    === "Technologies"
+
+        **syn_diesel_converter**: "Dummy" technology to convert _synthetic_ diesel to a carrier that can be used to meet diesel demand.
+
+        **syn_methane_converter**: "Dummy" technology to convert _synthetic_ methane to a carrier that can be used to meet methane demand.
+
+        **syn_kerosene_converter**: "Dummy" technology to convert _synthetic_ kerosene to a carrier that can be used to meet kerosene demand.
+
+        **syn_methanol_converter**: "Dummy" technology to convert _synthetic_ methanol to a carrier that can be used to meet methanol demand.
+
+??? note "conversion/synfuels-from-biofuel.yaml"
+
+    === "Technologies"
+
+        **biofuel_to_liquids**: Biofuel to liquid fuels (diesel & kerosene) converter.
+
+        **biofuel_to_diesel**: Biofuel to vehicle fuel (assumed diesel) converter.
+
+        **biofuel_to_methanol**: Biofuel to methanol converter.
+
+        **biofuel_to_methane**: Biofuel to methane converter.
+
+??? note "conversion/hydrogen-from-electricity.yaml"
+
+    === "Technologies"
+
+        **electrolysis**: Hydrogen by electrolysis, assuming an equal combination from the primary types of electrolysers: SOEC, PEM, and Alkaline.
 
 ??? note "supply/historic-electrified-heat.yaml"
 
@@ -244,6 +296,30 @@ Here, we describe each module in terms of the technologies they contain (`callio
         **ac_transmission**: High voltage AC transmission line
 
         **free_transmission**: Local power transmission
+
+??? note "transmission/synfuel.yaml"
+
+    This file provides the ability to move synthetic fuels between any two locations without have explicit transmission links.
+    To work as expected, an additional, custom constraint is required to equate annual export and import for each carrier at each location.
+
+    === "Technologies"
+
+        **syn_diesel_distribution_export**: Synthetic diesel exporter
+
+        **syn_methane_distribution_export**: Synthetic methane exporter
+
+        **syn_kerosene_distribution_export**: Synthetic kerosene exporter
+
+        **syn_methanol_distribution_export**: Synthetic methanol exporter
+
+        **syn_diesel_distribution_import**: Synthetic diesel importer
+
+        **syn_methane_distribution_import**: Synthetic methane importer
+
+        **syn_kerosene_distribution_import**: Synthetic kerosene importer
+
+        **syn_methanol_distribution_import**: Synthetic methanol importer
+
 
 ## Overrides and scenarios
 

@@ -208,6 +208,11 @@ properties:
             transport:
                 type: number
                 description: "Applied to all quantities of transport (base: Mio km)."
+            co2:
+                type: number
+                description: "Applied to all quantities of CO2 flows (base: tonnes)."
+
+
     parameters:
         type: object
         description: Parameter values of the models.
