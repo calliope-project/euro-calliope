@@ -9,9 +9,7 @@ import yaml
 
 
 def run_test(snakemake):
-    with open(
-        os.path.join(snakemake.input.test_dir, "..", "resources", "test.yaml")
-    ) as f:
+    with open(os.path.join(snakemake.input.test_resources_dir, "test.yaml")) as f:
         test_config = yaml.safe_load(f)
 
     override_dict = test_config["test-model"]["overrides"][

@@ -19,10 +19,14 @@ techs:
     electric_heater_heat_storage_small:
         essentials.parent: heat_storage_small
         essentials.carrier: electric_heater_heat
+    biofuel_heat_storage_small:
+        essentials.parent: heat_storage_small
+        essentials.carrier: biofuel_heat
 
 locations:
     {% for id, location in locations.iterrows() %}
     {{ id }}:
         techs.hp_heat_storage_small:
         techs.electric_heater_heat_storage_small:
+        techs.biofuel_heat_storage_small:
     {% endfor %}

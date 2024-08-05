@@ -4,11 +4,13 @@
 
 ### Added (models)
 
+* **ADD** Specific biofuel energy carrier in the Calliope model, which can be used to generate electricity or to meet heat demand (#417).
+
 * **ADD** Industry module: iron and steel, "default" combined categories. NOT CONNECTED TO THE MAIN WORKFLOW. (Fixes #308, #309, #310, #347, #345 and #346)
 
 * **ADD** Spatial resolution that aligns with the regions defined by the [e-Highway 2050 project](https://cordis.europa.eu/project/id/308908/reporting) (`ehighways`) (#370).
 
-* **ADD** Heat demand (#284, #343, #389, #275) and heat pumps with variable COP to meet that demand (#80, #39).
+* **ADD** Heat demand (#284, #343, #389, #275), and heat pumps with variable COP and biofuel boilers to meet that demand (#80, #39).
 
 * **ADD** fully-electrified road transportation (#270, #271, #358). A parameter allows to define the share of uncontrolled (timeseries) vs controlled charging (optimised) by the solver (#338). Data for controlled charging constraints is readily available (#356), but corresponding constraints are not yet implemented (#385).
 

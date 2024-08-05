@@ -18,17 +18,19 @@ test-model:
             alternative-cost: ["dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost"]
             shed-load: ["load-shedding"]
             keep-historic-transport: ["keep-historic-electricity-demand-from-road-transport"]
-            heat: ["heat_end_use"]
+            heat: ["heat_carrier"]
             electrified-heat: ["electrified_heat"]
+            biofuel: ["biofuel_carrier"]
+            electrified-biofuel: ["electrified_biofuel"]
 
         regional:
             default: ["connect_all_neighbours", "run_barrier_no_crossover"]
             all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
-                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "heat_end_use"]
+                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "heat_carrier", "biofuel_carrier"]
         ehighways:
             default: ["connect_all_neighbours", "run_barrier_no_crossover"]
             all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
-                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "heat_end_use"]
+                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "heat_carrier", "biofuel_carrier"]
     overrides:
         continental: {}
         national:
@@ -42,23 +44,39 @@ test-model:
                 import:
                     - "build/models/national/techs/demand/electrified-heat.yaml"
                     - "build/models/national/techs/supply/historic-electrified-heat.yaml"
-            heat_end_use:
+            heat_carrier:
                 import:
                     - "build/models/national/techs/demand/heat.yaml"
                     - "build/models/national/techs/storage/heat.yaml"
-                    - "build/models/national/techs/supply/heat-from-electricity.yaml"
+                    - "build/models/national/techs/conversion/heat-from-electricity.yaml"
+                    - "build/models/national/techs/conversion/heat-from-biofuel.yaml"
                     - "build/models/national/techs/supply/historic-electrified-heat.yaml"
+            electrified_biofuel:
+                import:
+                    - "build/models/national/techs/supply/electrified-biofuel.yaml"
+            biofuel_carrier:
+                import:
+                    - "build/models/national/techs/supply/biofuel.yaml"
+                    - "build/models/national/techs/conversion/electricity-from-biofuel.yaml"
 
         regional:
             connect_all_neighbours:
                 import:
                     - 'build/models/regional/techs/transmission/electricity-linked-neighbours.yaml'
-            heat_end_use:
+            heat_carrier:
                 import:
                     - "build/models/regional/techs/demand/heat.yaml"
                     - "build/models/regional/techs/storage/heat.yaml"
-                    - "build/models/regional/techs/supply/heat-from-electricity.yaml"
+                    - "build/models/regional/techs/conversion/heat-from-electricity.yaml"
+                    - "build/models/regional/techs/conversion/heat-from-biofuel.yaml"
                     - "build/models/regional/techs/supply/historic-electrified-heat.yaml"
+            electrified_biofuel:
+                import:
+                    - "build/models/regional/techs/supply/electrified-biofuel.yaml"
+            biofuel_carrier:
+                import:
+                    - "build/models/regional/techs/supply/biofuel.yaml"
+                    - "build/models/regional/techs/conversion/electricity-from-biofuel.yaml"
 
             run_barrier_no_crossover:
                 run.solver_options: {Method: 2, Crossover: 0}
@@ -66,12 +84,20 @@ test-model:
             connect_all_neighbours:
                 import:
                     - 'build/models/ehighways/techs/transmission/electricity-linked-neighbours.yaml'
-            heat_end_use:
+            heat_carrier:
                 import:
                     - "build/models/ehighways/techs/demand/heat.yaml"
                     - "build/models/ehighways/techs/storage/heat.yaml"
-                    - "build/models/ehighways/techs/supply/heat-from-electricity.yaml"
+                    - "build/models/ehighways/techs/conversion/heat-from-electricity.yaml"
+                    - "build/models/ehighways/techs/conversion/heat-from-biofuel.yaml"
                     - "build/models/ehighways/techs/supply/historic-electrified-heat.yaml"
+            electrified_biofuel:
+                import:
+                    - "build/models/ehighways/techs/supply/electrified-biofuel.yaml"
+            biofuel_carrier:
+                import:
+                    - "build/models/ehighways/techs/supply/biofuel.yaml"
+                    - "build/models/ehighways/techs/conversion/electricity-from-biofuel.yaml"
 
             run_barrier_no_crossover:
                 run.solver_options: {Method: 2, Crossover: 0}

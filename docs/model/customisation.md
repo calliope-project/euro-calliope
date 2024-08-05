@@ -86,6 +86,8 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         **electric_heater_heat_storage_small**: Storage buffer for direct electric heaters which inherits from the `heat_storage_small` abstract technology group, assuming a domestic (small scale) application.
 
+        **biofuel_heat_storage_small**: Storage buffer for biofuel boilers which inherits from the `heat_storage_small` abstract technology group, assuming a domestic (small scale) application.
+
 ??? note "storage/hydro.yaml"
 
     === "Technologies"
@@ -102,9 +104,31 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
     === "Technologies"
 
-        **biofuel**: Biofuel
+        **biofuel**: Biofuel supply, limited per model location to an hourly flow that can be stored before use in downstream technologies.
 
-??? note "supply/heat-from-electricity.yaml"
+??? note "supply/electrified-biofuel.yaml"
+
+    === "Technologies"
+
+        **electrified_biofuel**: Electrified biofuel supply (assuming anaerobic digestion).
+        This should be used in an electricity-only model, where biofuel supply is assumed to only be used for direct generation of electricity.
+        This simplifies the model compared to using `supply/biofuel.yaml` and `conversion/electricity-from-biofuel.yaml` by not introducing the `biofuel` energy carrier.
+
+??? note "conversion/heat-from-biofuel.yaml"
+
+    === "Technologies"
+
+        **biofuel_boiler**: Biofuel-consuming boiler.
+
+        **biofuel_tech_heat_to_demand**: "Dummy" technology to convert biofuel boiler output to a carrier that can be used to meet heat demand.
+
+??? note "conversion/electricity-from-biofuel.yaml"
+
+    === "Technologies"
+
+        **electricity_from_biofuel**: Biofuel-consuming electricity production facility (assuming anaerobic digestion).
+
+??? note "conversion/heat-from-electricity.yaml"
 
     === "Technologies"
 
@@ -220,7 +244,6 @@ Here, we describe each module in terms of the technologies they contain (`callio
         **ac_transmission**: High voltage AC transmission line
 
         **free_transmission**: Local power transmission
-
 
 ## Overrides and scenarios
 
