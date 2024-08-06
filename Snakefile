@@ -261,7 +261,7 @@ rule test:
         cop = "build/models/{resolution}/timeseries/supply/heat-pump-cop.csv"
     params:
         config = config,
-        test_args = ["--pdb"]  # add e.g. "--pdb" to enter ipdb on test failure
+        test_args = []  # add e.g. "--pdb" to enter ipdb on test failure
     log: "build/logs/{resolution}/test-report.html"
     output: "build/logs/{resolution}/test.success"
     conda: "./envs/test.yaml"

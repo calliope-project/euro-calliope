@@ -27,7 +27,7 @@ rule potentials:
         population = "build/data/{resolution}/population.csv",
         land_cover = "build/data/{resolution}/land-cover.csv"
     conda: "../envs/shell.yaml"
-    shell: "unzip -o {input} -d build/data"
+    shell: "for file in {output}; do unzip {input} ${{file#'build/data/'}} -d build/data; done"
 
 
 rule download_capacity_factors_wind_and_solar:

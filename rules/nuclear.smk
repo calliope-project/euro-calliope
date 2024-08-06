@@ -13,7 +13,7 @@ rule jrc_power_plant_database:
     output:
         "data/automatic/JRC_OPEN_UNITS.csv"
     conda: "../envs/shell.yaml"
-    shell: "unzip -o {input[0]} JRC_OPEN_UNITS.csv -d data/automatic/"
+    shell: "unzip {input[0]} JRC_OPEN_UNITS.csv -d data/automatic/"
 
 
 rule nuclear_regional_capacity:

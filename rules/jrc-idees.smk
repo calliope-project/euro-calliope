@@ -26,7 +26,7 @@ rule jrc_idees_unzipped:
         sector = "industry|transport|tertiary"
     output: temp("build/data/jrc-idees/{sector}/unprocessed/{country_code}.xlsx")
     conda: "../envs/shell.yaml"
-    shell: "unzip -o -p {input.country_data} JRC-IDEES-2015_{params.sector_title_case}_{wildcards.country_code}.xlsx > {output}"
+    shell: "unzip -p {input.country_data} JRC-IDEES-2015_{params.sector_title_case}_{wildcards.country_code}.xlsx > {output}"
 
 
 rule jrc_idees_industry_processed:
