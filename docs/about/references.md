@@ -92,7 +92,7 @@ Böhm, H., Zauner, A., Rosenfeld, D.C. and Tichler, R. (2020). _Projecting cost 
 
 ### @Fasihi:2019
 
-Fasihi, M., Efimova, O., and Breyer, C. (2019). _ Techno-economic assessment of CO2 direct air capture plants_. Journal of Cleaner Production 224, 957–980. <https://doi.org/10.1016/j.jclepro.2019.03.086>
+Fasihi, M., Efimova, O., and Breyer, C. (2019). _Techno-economic assessment of CO2 direct air capture plants_. Journal of Cleaner Production 224, 957–980. <https://doi.org/10.1016/j.jclepro.2019.03.086>
 
 ### @Mermoud:2015
 

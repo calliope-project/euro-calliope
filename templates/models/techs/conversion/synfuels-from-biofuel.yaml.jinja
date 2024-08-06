@@ -5,14 +5,14 @@ techs:
             name: Biofuel to liquid fuels converter
             parent: conversion_plus
             carrier_in: biofuel
-            carrier_out: syn_kerosene
-            primary_carrier_out: syn_diesel
-            carrier_out_2: syn_diesel
+            carrier_out: kerosene
+            primary_carrier_out: diesel
+            carrier_out_2: diesel
             carrier_out_3: electricity
         constraints:
             carrier_ratios:
-                carrier_out.syn_kerosene: {{ 0.017 + 0.163 / 2 }}  # MWh_kerosene/MWh_in (includes 50% of Naptha production)
-                carrier_out_2.syn_diesel: {{ 0.118 + 0.163 / 2 }}  # MWh_diesel/MWh_in (includes 50% of Naptha production)
+                carrier_out.kerosene: {{ 0.017 + 0.163 / 2 }}  # MWh_kerosene/MWh_in (includes 50% of Naptha production)
+                carrier_out_2.diesel: {{ 0.118 + 0.163 / 2 }}  # MWh_diesel/MWh_in (includes 50% of Naptha production)
                 carrier_out_3.electricity: 0.02  # MWhe/MWh_in
             lifetime: 25
         costs:
@@ -30,7 +30,7 @@ techs:
             name: Biofuel to vehicle fuel converter
             parent: conversion
             carrier_in: biofuel
-            carrier_out: syn_diesel
+            carrier_out: diesel
         constraints:
             energy_eff: 0.6  # {{ 1 | unit("MWh_diesel/MWh_biofuel") }}
             lifetime: 20
@@ -38,7 +38,7 @@ techs:
             monetary:
                 energy_cap: {{ 0.93 * 1e6 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }}
                 om_annual: {{ 0.027 * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel/year") }}
-                # TODO: triple check this: the number seems too high...
+                {# TODO: triple check this: the number seems too high... #}
                 om_prod: {{ 1.31 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_diesel") }}
 
     # ASSUME: ignore waste low grade heat output (which could be used for district heating)
@@ -48,7 +48,7 @@ techs:
             name: Biofuel to Methanol converter
             parent: conversion
             carrier_in: biofuel
-            carrier_out: syn_methanol
+            carrier_out: methanol
         constraints:
             energy_eff: 0.65  # MWh_methanol/MWh_bio
             lifetime: 20
@@ -64,7 +64,7 @@ techs:
             name: Biofuel to Methane converter
             parent: conversion
             carrier_in: biofuel
-            carrier_out: syn_methane
+            carrier_out: methane
         constraints:
             energy_eff: 0.7
             lifetime: 20

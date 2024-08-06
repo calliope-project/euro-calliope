@@ -8,16 +8,16 @@ techs:
             primary_carrier_in: hydrogen
             carrier_in_2: electricity
             carrier_in_3: co2
-            carrier_out: syn_kerosene
-            carrier_out_2: syn_diesel
-            primary_carrier_out: syn_kerosene
+            carrier_out: kerosene
+            carrier_out_2: diesel
+            primary_carrier_out: kerosene
         constraints:
             carrier_ratios:
                 carrier_in.hydrogen: 0.995  # MWh_H2/MWh_in
                 carrier_in_2.electricity: 0.005  # MWhe/MWh_in
                 carrier_in_3.co2: {{ 3.3 * 0.75 / 11.9 * scaling_factors.co2 / scaling_factors.power}}  # {{ (1 / (scaling_factors.co2 / scaling_factors.power)) | unit("tCO2/(MWhe + MWhH2)") }} | Calculated from source using `tCO2/t_fuels * MWh_fuels/MWh_in / MWh_fuels/t_fuels`
-                carrier_out.syn_kerosene: {{ 0.75 * 0.6 }}  # MWh_kerosene/MWh_in @ 60% liquids content
-                carrier_out_2.syn_diesel: {{ 0.75 * 0.4 }}  # MWh_diesel/MWh_in @ 40% liquids content (combining diesel oil and light oil production)
+                carrier_out.kerosene: {{ 0.75 * 0.6 }}  # MWh_kerosene/MWh_in @ 60% liquids content
+                carrier_out_2.diesel: {{ 0.75 * 0.4 }}  # MWh_diesel/MWh_in @ 40% liquids content (combining diesel oil and light oil production)
             lifetime: 25
         costs:
             monetary:
@@ -26,16 +26,15 @@ techs:
                 om_annual: {{ 7.4 * 8000 / 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_kerosene/year") }} | Calculated from source using `Eur/MWh_liquids * 8000h_operation/year / MW_kerosene/MW_liquids`
                 om_prod: {{ 2.1 / 0.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_kerosene") }} | Calculated from source using `Eur/MWh_liquids / MWh_kerosene/MWh_liquids`
 
+    # ASSUME: Can run intermittently
     hydrogen_to_methanol:  # [@DEA:2020b] - renewable fuels - 98 Methanol from power - 2050
-        # TODO: should not be allowed to run intermittently
         essentials:
             name: Hydrogen to Methanol converter
             parent: conversion_plus
             carrier_in: hydrogen
             primary_carrier_in: hydrogen
             carrier_in_2: co2
-            carrier_out: syn_methanol
-            #carrier_out_2: district_heat  # ignoring for now
+            carrier_out: methanol
         constraints:
             energy_eff: {{ 1 / (0.192 * 33.3 / 5.583) }} # MWhMethanol/MWhH2 | Calculated from source using `1 / (tH2/tMethanol * MWhH2/tH2 / MWhMethanol/tMethanol)`
             carrier_ratios:
@@ -54,7 +53,7 @@ techs:
             carrier_in: hydrogen
             primary_carrier_in: hydrogen
             carrier_in_2: co2
-            carrier_out: syn_methane
+            carrier_out: methane
         constraints:
             energy_eff: 0.826  # MW_methane/MW_H2
             carrier_ratios:

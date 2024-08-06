@@ -49,18 +49,6 @@ SYNFUEL_TECHS = set([
     "biofuel_to_methanol",
     "biofuel_to_methane",
     "electrolysis",
-    "syn_diesel_converter",
-    "syn_methane_converter",
-    "syn_kerosene_converter",
-    "syn_methanol_converter",
-    "syn_diesel_distribution_export",
-    "syn_methane_distribution_export",
-    "syn_kerosene_distribution_export",
-    "syn_methanol_distribution_export",
-    "syn_diesel_distribution_import",
-    "syn_methane_distribution_import",
-    "syn_kerosene_distribution_import",
-    "syn_methanol_distribution_import",
 ])
 # Only includes scenarios with non-default technology sets
 TECHNOLOGIES = {
@@ -102,9 +90,7 @@ def test_example_model_runs(optimised_example_model):
     assert optimised_example_model.results.termination_condition == "optimal"
 
 
-def test_technologies_are_available(
-    optimised_model, energy_cap, location, technologies
-):
+def test_technologies_are_available(energy_cap, location, technologies):
     for technology in technologies:
         if "transmission" in technology:
             assert pd.notna(

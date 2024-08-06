@@ -217,10 +217,8 @@ rule model:
             "build/models/{{resolution}}/techs/{module}",
             module=[
                 "conversion/synfuels-from-hydrogen.yaml",
-                "conversion/fuels-from-synfuels.yaml",
                 "conversion/synfuels-from-biofuel.yaml",
                 "conversion/hydrogen-from-electricity.yaml",
-                "transmission/synfuel.yaml",
             ]
         )
     params:

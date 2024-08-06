@@ -36,9 +36,10 @@ def _site_weighted_ave(
 
     This function exists to enable multi-processing across IDs.
     """
-    id_grid_weight = grid_weight.sel(id=id).dropna("site")
+    id_grid_weight = grid_weight.sel(id=id).where(lambda x: x > 0).dropna("site")
     normalised_weight = id_grid_weight / id_grid_weight.sum("site")
-    return (gridded_data.reindex_like(id_grid_weight) * normalised_weight).sum("site")
+    sliced_gridded_data = gridded_data.sel(site=id_grid_weight.site)
+    return (sliced_gridded_data * normalised_weight).sum("site")
 
 
 if __name__ == "__main__":

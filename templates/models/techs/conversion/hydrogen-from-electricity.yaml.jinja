@@ -1,8 +1,8 @@
 {# Costs are given by DEA per technology "unit" (1000EUR/unit), so are converted to a cost per capacity (1000EUR/kW_H2) by dividing by the capacity of one unit, as given in the same data table. #}
 techs:
+    # ASSUME: Electrolyser can run intermittently
+    # Technology constraints and costs are averages over different electrolyser types: SOEC, PEM, and Alkaline
     electrolysis:  # [@DEA:2020b] - 86-88 Electrolysers - 2050
-        {# TODO: should not be allowed to run intermittently #}
-        # Technology constraints and costs are averages over different electrolyser types: SOEC, PEM, and Alkaline
         essentials:
             name: Hydrogen by electrolysis
             parent: conversion

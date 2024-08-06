@@ -63,10 +63,8 @@ test-model:
             synfuel_carriers:
                 import:
                     - "build/models/national/techs/conversion/synfuels-from-hydrogen.yaml"
-                    - "build/models/national/techs/conversion/fuels-from-synfuels.yaml"
                     - "build/models/national/techs/conversion/synfuels-from-biofuel.yaml"
                     - "build/models/national/techs/conversion/hydrogen-from-electricity.yaml"
-                    - "build/models/national/techs/transmission/synfuel.yaml"
 
         regional:
             connect_all_neighbours:
@@ -90,10 +88,8 @@ test-model:
             synfuel_carriers:
                 import:
                     - "build/models/regional/techs/conversion/synfuels-from-hydrogen.yaml"
-                    - "build/models/regional/techs/conversion/fuels-from-synfuels.yaml"
                     - "build/models/regional/techs/conversion/synfuels-from-biofuel.yaml"
                     - "build/models/regional/techs/conversion/hydrogen-from-electricity.yaml"
-                    - "build/models/regional/techs/transmission/synfuel.yaml"
 
             run_barrier_no_crossover:
                 run.solver_options: {Method: 2, Crossover: 0}
@@ -119,10 +115,8 @@ test-model:
             synfuel_carriers:
                 import:
                     - "build/models/ehighways/techs/conversion/synfuels-from-hydrogen.yaml"
-                    - "build/models/ehighways/techs/conversion/fuels-from-synfuels.yaml"
                     - "build/models/ehighways/techs/conversion/synfuels-from-biofuel.yaml"
                     - "build/models/ehighways/techs/conversion/hydrogen-from-electricity.yaml"
-                    - "build/models/ehighways/techs/transmission/synfuel.yaml"
 
             run_barrier_no_crossover:
                 run.solver_options: {Method: 2, Crossover: 0}

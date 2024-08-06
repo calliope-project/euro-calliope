@@ -162,18 +162,6 @@ Here, we describe each module in terms of the technologies they contain (`callio
 
         **dac**: Direct air CO<sub>2</sub> capture.
 
-??? note "conversion/fuels-from-synfuels.yaml"
-
-    === "Technologies"
-
-        **syn_diesel_converter**: "Dummy" technology to convert _synthetic_ diesel to a carrier that can be used to meet diesel demand.
-
-        **syn_methane_converter**: "Dummy" technology to convert _synthetic_ methane to a carrier that can be used to meet methane demand.
-
-        **syn_kerosene_converter**: "Dummy" technology to convert _synthetic_ kerosene to a carrier that can be used to meet kerosene demand.
-
-        **syn_methanol_converter**: "Dummy" technology to convert _synthetic_ methanol to a carrier that can be used to meet methanol demand.
-
 ??? note "conversion/synfuels-from-biofuel.yaml"
 
     === "Technologies"
@@ -296,30 +284,6 @@ Here, we describe each module in terms of the technologies they contain (`callio
         **ac_transmission**: High voltage AC transmission line
 
         **free_transmission**: Local power transmission
-
-??? note "transmission/synfuel.yaml"
-
-    This file provides the ability to move synthetic fuels between any two locations without have explicit transmission links.
-    To work as expected, an additional, custom constraint is required to equate annual export and import for each carrier at each location.
-
-    === "Technologies"
-
-        **syn_diesel_distribution_export**: Synthetic diesel exporter
-
-        **syn_methane_distribution_export**: Synthetic methane exporter
-
-        **syn_kerosene_distribution_export**: Synthetic kerosene exporter
-
-        **syn_methanol_distribution_export**: Synthetic methanol exporter
-
-        **syn_diesel_distribution_import**: Synthetic diesel importer
-
-        **syn_methane_distribution_import**: Synthetic methane importer
-
-        **syn_kerosene_distribution_import**: Synthetic kerosene importer
-
-        **syn_methanol_distribution_import**: Synthetic methanol importer
-
 
 ## Overrides and scenarios
 

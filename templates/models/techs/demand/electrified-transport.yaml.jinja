@@ -38,7 +38,7 @@ techs:
 
 overrides:
     keep-historic-electricity-demand-from-road-transport:
-      # TODO: possibly remove this override as there may be no use-cases for it.
+      {# TODO: possibly remove this override as there may be no use-cases for it. #}
       {% for id, location in locations.iterrows() %}
       {{ id }}.techs.demand_road_transport_historic_electrified_uncontrolled.exists: false
       {% endfor %}
