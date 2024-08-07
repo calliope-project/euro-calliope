@@ -30,10 +30,25 @@ HEAT_TECHS = set([
     "hp_heat_storage_small",
     "electric_heater_heat_storage_small",
     "biofuel_heat_storage_small",
+    "methane_heat_storage_small",
+    "methane_boiler",
+    "methane_tech_heat_to_demand",
 ])
 BIOFUEL_TECHS = set([
     "biofuel_supply",
     "electricity_from_biofuel",
+])
+
+SYNFUEL_TECHS = set([
+    "hydrogen_to_liquids",
+    "hydrogen_to_methanol",
+    "hydrogen_to_methane",
+    "dac",
+    "biofuel_to_liquids",
+    "biofuel_to_diesel",
+    "biofuel_to_methanol",
+    "biofuel_to_methane",
+    "electrolysis",
 ])
 # Only includes scenarios with non-default technology sets
 TECHNOLOGIES = {
@@ -49,6 +64,7 @@ TECHNOLOGIES = {
             | set(["load_shedding"])
             | HEAT_TECHS
             | BIOFUEL_TECHS
+            | SYNFUEL_TECHS
         )
         - set(["roof_mounted_pv"])
     ),
@@ -56,6 +72,7 @@ TECHNOLOGIES = {
     "electrified-biofuel": DEFAULT_TECHNOLOGIES | set(["electrified_biofuel"]),
     "heat": DEFAULT_TECHNOLOGIES | HEAT_TECHS,
     "biofuel": DEFAULT_TECHNOLOGIES | BIOFUEL_TECHS,
+    "synfuel": DEFAULT_TECHNOLOGIES | SYNFUEL_TECHS,
 }
 OPTIONAL_LOCATIONAL_TECHNOLOGIES = ["nuclear"]
 

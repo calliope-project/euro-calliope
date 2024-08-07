@@ -1,0 +1,23 @@
+{# Costs are given by DEA per technology "unit" (1000EUR/unit), so are converted to a cost per capacity (1000EUR/kW_H2) by dividing by the capacity of one unit, as given in the same data table. #}
+techs:
+    # ASSUME: Electrolyser can run intermittently
+    # Technology constraints and costs are averages over different electrolyser types: SOEC, PEM, and Alkaline
+    electrolysis:  # [@DEA:2020b] - 86-88 Electrolysers - 2050
+        essentials:
+            name: Hydrogen by electrolysis
+            parent: conversion
+            carrier_in: electricity
+            carrier_out: hydrogen
+        constraints:
+            energy_eff: {{ mean([0.79, 0.67, 0.692])}}
+            lifetime: {{ mean([30, 15, 25])}}
+        costs:
+            monetary:
+                energy_cap: {{ mean([0.4 / 0.79, 0.4 / 0.67, 0.5 / 0.692]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_H2") }} |
+                om_annual: {{ mean([12 / 0.79, 20 / 0.67, 25 / 0.692]) * 1e3 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_H2/year") }}
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.techs:
+        electrolysis:
+    {% endfor %}

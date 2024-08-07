@@ -1,0 +1,28 @@
+{# TODO: weight single-/multi-family technology costs based on regional dwelling ratio - see https://github.com/calliope-project/euro-calliope/issues/406 #}
+{# Costs being averaged are given in the order they appear in the spreadsheet (which is the same order as in the inline comments). #}
+{# Costs are given by DEA per technology "unit" (1000EUR/unit), so are converted to a cost per capacity (1000EUR/kW_heating) by dividing by the capacity of one unit, as given in the same data table. #}
+techs:
+    methane_boiler:  # [@DEA:2017] - 202 Natural gas boiler - 2050
+        essentials:
+            name: Natural gas / methane boiler
+            parent: conversion
+            carrier_in: methane
+            carrier_out: methane_heat
+        constraints:
+            energy_eff: 0.99
+            lifetime: 20
+        costs:
+            monetary:
+                # Costs are an average of data for existing single-family, new single-family, existing multi-family, and new multi-family homes.
+                energy_cap: {{ mean([2.7 / 10, 2.7 / 10, 21.1 / 400, 15.1 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }}
+                om_annual: {{ mean([0.168 / 10, 0.168 / 10, 0.561/ 400, 0.374 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }}
+    methane_tech_heat_to_demand:
+        essentials.parent: tech_heat_to_demand
+        essentials.carrier_in: methane_heat
+
+locations:
+    {% for id, location in locations.iterrows() %}
+    {{ id }}.techs:
+        methane_boiler:
+        methane_tech_heat_to_demand:
+    {% endfor %}

@@ -22,11 +22,15 @@ techs:
     biofuel_heat_storage_small:
         essentials.parent: heat_storage_small
         essentials.carrier: biofuel_heat
+    methane_heat_storage_small:
+        essentials.parent: heat_storage_small
+        essentials.carrier: methane_heat
 
 locations:
     {% for id, location in locations.iterrows() %}
-    {{ id }}:
-        techs.hp_heat_storage_small:
-        techs.electric_heater_heat_storage_small:
-        techs.biofuel_heat_storage_small:
+    {{ id }}.techs:
+        hp_heat_storage_small:
+        electric_heater_heat_storage_small:
+        biofuel_heat_storage_small:
+        methane_heat_storage_small:
     {% endfor %}

@@ -14,7 +14,7 @@ techs:
             om_prod: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
 
 overrides:
-    dea-renewable-cost-wind-offshore: # from [@DEA:2020]
+    dea-renewable-cost-wind-offshore: # from [@DEA:2020a]
         techs.wind_offshore: # Sheet 21 Offshore Turbines (last updated 2019)
             constraints.lifetime: 30
             costs.monetary:

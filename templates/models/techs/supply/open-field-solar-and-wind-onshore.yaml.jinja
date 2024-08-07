@@ -46,7 +46,7 @@ techs:
             resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
 
 overrides:
-    dea-renewable-cost-pv-open-field: # from [@DEA:2020]
+    dea-renewable-cost-pv-open-field: # from [@DEA:2020a]
         techs.open_field_pv: # Sheet 22 - Photovoltaics Large (last updated 2016)
             constraints.lifetime: 40 # inverter lifetime is shorter but the replacement cost is included in O&M
             costs.monetary:
@@ -54,7 +54,7 @@ overrides:
                 om_annual: {{ (5000 * 1.25 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }} with DC/AC sizing factor
                 om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
 
-    dea-renewable-cost-wind-onshore: # from [@DEA:2020]
+    dea-renewable-cost-wind-onshore: # from [@DEA:2020a]
         tech_groups.wind_onshore: # Sheet 20 Onshore Turbines (last updated 2019)
             constraints.lifetime: 30
             costs.monetary:

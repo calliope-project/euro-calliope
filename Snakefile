@@ -108,7 +108,7 @@ rule module_with_location_specific_data:
         biofuel_efficiency = config["parameters"]["biofuel-efficiency"],
     wildcard_constraints:
         # Exclude all outputs that have their own `techs_and_locations_template` implementation
-        group_and_tech = "(?!transmission\/|supply\/biofuel|supply\/electrified-biofuel).*"
+        group_and_tech = "(?!transmission\/electricity-|supply\/biofuel|supply\/electrified-biofuel).*"
     conda: "envs/default.yaml"
     output: "build/models/{resolution}/techs/{group_and_tech}.yaml"
     script: "scripts/template_techs.py"
@@ -194,22 +194,31 @@ rule model:
             ] + ["techs/transmission/electricity-entsoe.yaml" for i in [None] if wildcards.resolution == "national"]
         ),
         optional_heat_modules = expand(
-            "build/models/{{resolution}}/{module}",
+            "build/models/{{resolution}}/techs/{module}",
             module=[
-                "techs/demand/heat.yaml",
-                "techs/demand/electrified-heat.yaml",
-                "techs/storage/heat.yaml",
-                "techs/conversion/heat-from-electricity.yaml",
-                "techs/conversion/heat-from-biofuel.yaml",
-                "techs/supply/historic-electrified-heat.yaml"
+                "demand/heat.yaml",
+                "demand/electrified-heat.yaml",
+                "storage/heat.yaml",
+                "conversion/heat-from-electricity.yaml",
+                "conversion/heat-from-biofuel.yaml",
+                "conversion/heat-from-methane.yaml",
+                "supply/historic-electrified-heat.yaml"
             ]
         ),
         optional_biofuel_modules = expand(
-            "build/models/{{resolution}}/{module}",
+            "build/models/{{resolution}}/techs/{module}",
             module=[
-                "techs/supply/biofuel.yaml",
-                "techs/supply/electrified-biofuel.yaml",
-                "techs/conversion/electricity-from-biofuel.yaml"
+                "supply/biofuel.yaml",
+                "supply/electrified-biofuel.yaml",
+                "conversion/electricity-from-biofuel.yaml"
+            ]
+        ),
+        optional_synfuel_modules = expand(
+            "build/models/{{resolution}}/techs/{module}",
+            module=[
+                "conversion/synfuels-from-hydrogen.yaml",
+                "conversion/synfuels-from-biofuel.yaml",
+                "conversion/hydrogen-from-electricity.yaml",
             ]
         )
     params:
