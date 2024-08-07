@@ -17,7 +17,7 @@ rule entsoe_tyndp_xlsx:
     output: "build/data/national/TYNDP-2020-Scenario-Datafile.xlsx",
     conda: "../envs/shell.yaml"
     localrule: True
-    shell: "unzip -o {input} 'TYNDP-2020-Scenario-Datafile.xlsx' -d build/data/national"
+    shell: "unzip {input} 'TYNDP-2020-Scenario-Datafile.xlsx' -d build/data/national"
 
 
 rule transmission_entsoe_tyndp_tech_module:

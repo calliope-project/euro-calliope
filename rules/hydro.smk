@@ -61,15 +61,6 @@ rule download_stations_database:
         "curl -sSLo {output} '{params.url}'"
 
 
-rule basins_database:
-    message: "Unzip basins database."
-    input: rules.download_basins_database.output
-    output: "build/data/basins/hybas_eu_lev07_v1c.shp"
-    conda: "../envs/shell.yaml"
-    localrule: True
-    shell: "unzip {input} -d ./build/data/basins/"
-
-
 rule stations_database:
     message: "Unzip stations database."
     input: rules.download_stations_database.output
@@ -86,7 +77,7 @@ rule stations_database:
 rule preprocess_basins:
     message: "Preprocess basins."
     input:
-        basins = rules.basins_database.output[0]
+        basins = rules.download_basins_database.output[0]
     params:
         x_min = config["scope"]["spatial"]["bounds"]["x_min"],
         x_max = config["scope"]["spatial"]["bounds"]["x_max"],

@@ -28,7 +28,7 @@ rule raw_gadm_administrative_borders:
     output: temp("build/data/raw-gadm/gadm36_{country_code}.gpkg")
     conda: "../envs/shell.yaml"
     localrule: True
-    shell: "unzip -o {input} -d build/data/raw-gadm"
+    shell: "unzip {input} 'gadm36_{wildcards.country_code}.gpkg' -d build/data/raw-gadm"
 
 
 rule administrative_borders_gadm:
