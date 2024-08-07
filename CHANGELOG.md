@@ -70,7 +70,7 @@
 * **UPDATE** dropped support for Intel macOS. The workflow may still run on Intel macOS, but we do not actively maintain support (#369).
 * **UPDATE** link to GADM data following changes upstream (#376).
 * **UPDATE** link to NUTS data to allow for different NUTS years (#380, #382).
-* **UPDATE** unzip command to always overwrite existing data if it is called (#327).
+* **UPDATE** rules using `unzip` command to only extract relevant data (#327).
 
 ### Fixed (models)
 
