@@ -1,20 +1,19 @@
-tech_groups:
-    tech_heat_to_demand:
-        essentials:
-            name: Technology-specific heat carriers to generic heat carrier converter
-            parent: conversion
-            carrier_out: heat
-
 techs:
-    demand_heat:
-        essentials:
-            name: Heat demand
-            parent: demand
-            carrier: heat
-        constraints:
-            resource: file=demand/heat.csv
+  demand_heat:
+    name: Heat demand
+    base_tech: demand
+    carrier_in: heat
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs.demand_heat:
-    {% endfor %}
+data_sources:
+  demand_heat:
+    source: timeseries/demand/heat.csv
+    rows: timesteps
+    columns: nodes
+    add_dimensions:
+      techs: demand_heat
+      parameters: sink_use_equals
+
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs.demand_heat:
+  {% endfor %}

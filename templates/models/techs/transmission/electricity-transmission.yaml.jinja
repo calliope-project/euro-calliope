@@ -1,34 +1,36 @@
-techs:
-    free_transmission:
-        essentials:
-            name: 'Local power transmission'
-            parent: transmission
-            carrier: electricity
-        constraints:
-            energy_cap_max: inf
-            energy_eff: 1.0
-        costs.monetary.om_prod: 0
-    ac_transmission:
-        essentials:
-            name: "High voltage AC transmission line"
-            parent: transmission
-            carrier: electricity
-        constraints:
-            energy_eff_per_distance: 0.99999995 # (1/m)
-            lifetime: 60
-        costs.monetary:  # from [@JRC:2014], Table 39
-            energy_cap_per_distance: {{ 0.9 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW/m") }}
-            om_annual_investment_fraction: 0.015
+tech_groups:
+  free_transmission:
+    name: 'Local power transmission'
+    inherit: interest_rate
+    base_tech: transmission
+    carrier_in: electricity
+    carrier_out: electricity
+  ac_transmission:
+    name: "High voltage AC transmission line"
+    inherit: free_transmission
+    flow_out_eff: 0.99999995 # (1/m)
+    lifetime: 60
+    # costs from [@JRC:2014], Table 39
+    cost_flow_cap_per_distance:
+      data: {{ 0.9 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW/m") }}
+      index: monetary
+      dims: costs
+    cost_om_annual_investment_fraction:
+      data: 0.015
+      index: monetary
+      dims: costs
 
 {% if link_comment is defined %}
 {{ link_comment }}
 {% endif %}
 
-links:
-    {% for link in links.index %}
-    {{ link[0] }},{{ link[1] }}:
-        techs.ac_transmission:
-        {% if energy_cap_limit is defined %}
-            constraints.energy_cap_{{ energy_cap_limit }}: {{ links.loc[link] * scaling_factors.power }}  # {{ (1 / scaling_factors.power) | unit("MW") }}
-        {% endif %}
-    {% endfor %}
+techs:
+  {% for link in links.index %}
+  link_{{ link[0] }}_{{ link[1] }}:
+    inherit: ac_transmission
+    from: {{ link[0] }}
+    to: {{ link[1] }}
+    {% if energy_cap_limit is defined %}
+    flow_cap_{{ energy_cap_limit }}: {{ links.loc[link] * scaling_factors.power }}  # {{ (1 / scaling_factors.power) | unit("MW") }}
+    {% endif %}
+  {% endfor %}

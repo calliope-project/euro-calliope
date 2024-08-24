@@ -4,29 +4,38 @@
 # but tends towards being more optimistic in some areas (longer technology lifetime, higher average capacity factor, lower O&M costs)
 # and less optimistic in others (higher investment and annual O&M cost range)
 techs:
-    nuclear:
-        essentials:
-            name: Nuclear power
-            carrier: electricity
-            parent: supply
-        constraints:
-            energy_eff: 0.4
-            lifetime: 50  # average of 40 [Wealer:2019] and 60 [IEA:2020]
-            energy_cap_min_use: 0.8  # average of 0.75 [Wealer:2019] and 0.85 [IEA:2020]
-        costs:
-            monetary:
-                energy_cap: {{ 3672000 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
-                om_annual: {{ 76116 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
-                om_prod:  {{ 10 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }} | ASSUME: fuel costs given by [IEA:2020,Barkatullah:2017] are per MWh electricity produced, not MWh available energy in the input fuel.
+  nuclear:
+    name: Nuclear power
+    inherit: interest_rate
+    carrier_out: electricity
+    base_tech: supply
+    flow_out_eff: 0.4
+    lifetime: 50  # average of 40 [Wealer:2019] and 60 [IEA:2020]
+    flow_out_min_relative: 0.8  # average of 0.75 [Wealer:2019] and 0.85 [IEA:2020]
+    cost_flow_cap:
+      data: {{ 3672000 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
+      index: monetary
+      dims: costs
+    cost_om_annual:
+      data: {{ 76116 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
+      index: monetary
+      dims: costs
+    cost_flow_out:
+      data:  {{ 10 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }} | ASSUME: fuel costs given by [IEA:2020,Barkatullah:2017] are per MWh electricity produced, not MWh available energy in the input fuel.
+      index: monetary
+      dims: costs
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs:
-        nuclear:
-            constraints:
-                {% for sense in ["min", "max", "equals"] %}
-                    {% if "installed_capacity_nuclear_" + sense + "_MW" in location %}
-                    energy_cap_{{ sense }}: {{ location["installed_capacity_nuclear_" + sense + "_MW"] * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-                    {% endif %}
-                {% endfor %}
-    {% endfor %}
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs.nuclear:
+  {% for sense in ["min", "max", "equals"] %}
+    {% if "installed_capacity_nuclear_" + sense + "_MW" in location %}
+    {% if sense == "equals" %}
+    flow_cap_min: {{ location["installed_capacity_nuclear_" + sense + "_MW"] * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+    flow_cap_max: {{ location["installed_capacity_nuclear_" + sense + "_MW"] * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+    {% else %}
+    flow_cap_{{ sense }}: {{ location["installed_capacity_nuclear_" + sense + "_MW"] * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+    {% endif %}
+    {% endif %}
+  {% endfor %}
+  {% endfor %}

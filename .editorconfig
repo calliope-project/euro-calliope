@@ -10,5 +10,8 @@ insert_final_newline = true
 charset = utf-8
 end_of_line = lf
 
+[*.{yaml,yml,yaml.jinja}]
+indent_size = 2
+
 [LICENSE]
 insert_final_newline = false

@@ -23,7 +23,7 @@ def capacityfactors(
     locations = (
         gpd.read_file(path_to_locations).set_index("id").to_crs(EPSG3035).geometry
     )
-    locations.index = locations.index.map(lambda x: x.replace(".", "-"))
+    locations.index = locations.index.map(lambda x: x.replace(".", "_"))
     ts = xr.open_dataset(path_to_timeseries)
     ts = ts.sel(time=slice(first_year, final_year))
     # xarray will silently miss the fact that data doesn't exist with slice
@@ -56,7 +56,9 @@ def capacityfactors(
         spatiotemporal=ts,
         gridcell_overlap_threshold=gridcell_overlap_threshold,
     )
-    capacityfactors.where(capacityfactors >= cf_threshold, 0).to_csv(path_to_result)
+    capacityfactors.where(capacityfactors >= cf_threshold, 0).rename_axis(
+        index="timesteps"
+    ).to_csv(path_to_result)
 
 
 if __name__ == "__main__":

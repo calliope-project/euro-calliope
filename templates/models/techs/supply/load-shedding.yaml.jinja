@@ -1,17 +1,16 @@
 techs:
-    load_shedding:
-        essentials:
-            name: Load shedding as last resort
-            parent: supply
-            carrier: electricity
-        constraints:
-            energy_cap_max: inf
-        costs.monetary:
-            om_prod: {{ 8000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR/MWh") }}
+  load_shedding:
+    name: Load shedding as last resort
+    base_tech: supply
+    carrier_out: electricity
+    cost_flow_out:
+      data: {{ 8000 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR/MWh") }}
+      index: monetary
+      dims: costs
 
 overrides:
-    load-shedding:
-        locations:
-            {% for id, location in locations.iterrows() %}
-            {{ id }}.techs.load_shedding:
-            {% endfor %}
+  load_shedding:
+    nodes:
+      {% for id, location in locations.iterrows() %}
+      {{ id }}.techs.load_shedding:
+      {% endfor %}

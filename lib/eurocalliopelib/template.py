@@ -33,10 +33,14 @@ def _update_kwargs(**kwargs):
         kwargs["scaling_factors"]["specific_costs"] = (
             kwargs["scaling_factors"]["monetary"] / kwargs["scaling_factors"]["power"]
         )
-    for config_key in ["locations", "links"]:  # we cannot allow keys with "." in them
+    for config_key in [
+        "locations",
+        "nodes",
+        "links",
+    ]:  # we cannot allow keys with "." in them
         if config_key in kwargs:
             kwargs[config_key] = kwargs[config_key].rename(
-                index=lambda x: x.replace(".", "-")
+                index=lambda x: x.replace(".", "_")
             )
 
     return kwargs

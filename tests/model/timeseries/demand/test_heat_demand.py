@@ -4,7 +4,7 @@ import pytest
 @pytest.mark.parametrize("demand", ["heat_demand", "electrified_heat_demand"])
 def test_heat_demand_sign(request, demand):
     demand_df = request.getfixturevalue(demand)
-    assert (demand_df.stack() <= 0).all(), "Found positive heat demand."
+    assert (demand_df.stack() >= 0).all(), "Found positive heat demand."
 
 
 @pytest.mark.parametrize("demand", ["heat_demand", "electrified_heat_demand"])
@@ -24,5 +24,5 @@ def test_electrified_heat_vs_heat_demand(
 ):
     """Expecting heat demand to always be the same as or _higher_ than electrified heat demand, due to heating techs having a COP >= 1."""
     assert (
-        heat_demand[location].abs() >= electrified_heat_demand[location].abs()
+        heat_demand[location] >= electrified_heat_demand[location]
     ).all(), "Found higher electrified heat demand than final heat demand."

@@ -3,48 +3,54 @@
 {# Costs are given by DEA per technology "unit" (1000EUR/unit), so are converted to a cost per capacity (1000EUR/kW_heating) by dividing by the capacity of one unit, as given in the same data table. #}
 
 techs:
-    heat_pump:   # [@DEA:2017] - 7.3 - 7.6 Air to water & 7.7 - 7.10 Ground source - 2050
-        essentials:
-            name: Heat pump
-            parent: conversion
-            carrier_in: electricity
-            carrier_out: hp_heat
-        constraints:
-            energy_eff: file=conversion/heat-pump-cop.csv  # NOTE: based on data processing pipeline, not [@DEA:2017].
-            lifetime: 20
-        costs:
-            monetary:
-                # Costs are an average of data for existing single-family, new single-family, existing multi-family, and new multi-family homes | weighted average between air- and ground-source heat pumps according to an assumed relative share of installed capacity.
-                energy_cap: {{ (mean([7.6 / 10, 5 / 4, 114 / 400, 57 / 160]) * heat_pump_shares.ashp + mean([12 / 10, 9 / 4, 202 / 400, 72 / 160]) * heat_pump_shares.gshp) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }}
-                om_annual: {{ (mean([0.222 / 10, 0.222 / 4, 0.761 / 400, 0.761 / 160]) * heat_pump_shares.ashp + mean([0.222 / 10, 0.222 / 4, 0.761 / 400, 0.761 / 160]) * heat_pump_shares.gshp) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }}
-    heat_pump_tech_heat_to_demand:
-        essentials.parent: tech_heat_to_demand
-        essentials.carrier_in: hp_heat
+  heat_pump:   # [@DEA:2017] - 7.3 - 7.6 Air to water & 7.7 - 7.10 Ground source - 2050
+    name: Heat pump
+    inherit: interest_rate
+    base_tech: conversion
+    carrier_in: electricity
+    carrier_out: heat
+    lifetime: 20
 
-    electric_heater:  # [@DEA:2017] - 16 Electric heating - 2050
-        essentials:
-            name: Electrical heater
-            parent: conversion
-            carrier_in: electricity
-            carrier_out: electric_heater_heat
-        constraints:
-            energy_eff: 1
-            lifetime: 30
-        costs:
-            monetary:
-                # Costs are an average of data for new single-family and new multi-family homes
-                energy_cap: {{ mean([2.5 / 3, 89 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }}
-                om_annual: {{ mean([0.021 / 3, 0.042 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }}
-    electric_heater_tech_heat_to_demand:
-        essentials.parent: tech_heat_to_demand
-        essentials.carrier_in: electric_heater_heat
+    # Costs are an average of data for existing single-family, new single-family, existing multi-family, and new multi-family homes | weighted average between air- and ground-source heat pumps according to an assumed relative share of installed capacity.
+    cost_flow_cap:
+      data: {{ (mean([7.6 / 10, 5 / 4, 114 / 400, 57 / 160]) * heat_pump_shares.ashp + mean([12 / 10, 9 / 4, 202 / 400, 72 / 160]) * heat_pump_shares.gshp) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }}
+      index: [[monetary, heat]]
+      dims: [costs, carriers]
+    cost_om_annual:
+      data: {{ (mean([0.222 / 10, 0.222 / 4, 0.761 / 400, 0.761 / 160]) * heat_pump_shares.ashp + mean([0.222 / 10, 0.222 / 4, 0.761 / 400, 0.761 / 160]) * heat_pump_shares.gshp) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }}
+      index: [[monetary, heat]]
+      dims: [costs, carriers]
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}:
-        techs:
-            heat_pump:
-            heat_pump_tech_heat_to_demand:
-            electric_heater:
-            electric_heater_tech_heat_to_demand:
-    {% endfor %}
+  electric_heater:  # [@DEA:2017] - 16 Electric heating - 2050
+    name: Electrical heater
+    inherit: interest_rate
+    base_tech: conversion
+    carrier_in: electricity
+    carrier_out: heat
+    flow_out_eff: 1
+    lifetime: 30
+    # Costs are an average of data for new single-family and new multi-family homes
+    cost_flow_cap:
+      data: {{ mean([2.5 / 3, 89 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }}
+      index: [[monetary, heat]]
+      dims: [costs, carriers]
+    cost_om_annual:
+      data: {{ mean([0.021 / 3, 0.042 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }}
+      index: [[monetary, heat]]
+      dims: [costs, carriers]
+
+data_sources:
+  heat_pump_eff:
+    source: timeseries/conversion/heat-pump-cop.csv
+    rows: timesteps
+    columns: nodes
+    add_dimensions:
+      techs: heat_pump
+      parameters: flow_out_eff
+
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs:
+    heat_pump:
+    electric_heater:
+  {% endfor %}

@@ -1,32 +1,53 @@
 techs:
-    wind_offshore:  # from [@JRC:2014] Table 5
-        essentials:
-            name: Offshore wind
-            carrier: electricity
-            parent: supply
-        constraints:
-            resource: file=supply/capacityfactors-wind-offshore.csv
-            resource_unit: energy_per_cap
-            lifetime: 30
-        costs.monetary:
-            energy_cap: {{ 2280000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-            om_annual: {{ (2280000 * 0.023 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2.3% of CAPEX
-            om_prod: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+  wind_offshore:  # from [@JRC:2014] Table 5
+    name: Offshore wind
+    inherit: interest_rate
+    carrier_out: electricity
+    base_tech: supply
+    source_unit: per_cap
+    lifetime: 30
+    cost_flow_cap:
+      data: {{ 2280000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+      index: monetary
+      dims: costs
+    cost_om_annual:
+      data: {{ (2280000 * 0.023 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2.3% of CAPEX
+      index: monetary
+      dims: costs
+    cost_flow_out:
+      data: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+      index: monetary
+      dims: costs
 
 overrides:
-    dea-renewable-cost-wind-offshore: # from [@DEA:2020a]
-        techs.wind_offshore: # Sheet 21 Offshore Turbines (last updated 2019)
-            constraints.lifetime: 30
-            costs.monetary:
-                energy_cap: {{ 1777000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
-                om_annual: {{ (32448 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
-                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
+  dea_renewable_cost_wind_offshore: # from [@DEA:2020a]
+    techs.wind_offshore: # Sheet 21 Offshore Turbines (last updated 2019)
+      lifetime: 30
+      cost_flow_cap:
+        data: {{ 1777000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
+        index: monetary
+        dims: costs
+      cost_om_annual:
+        data: {{ (32448 - 1 * 8760 * capacity_factors.offshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
+        index: monetary
+        dims: costs
+      cost_flow_out:
+        data: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
+        index: monetary
+        dims: costs
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}:
-        techs:
-            wind_offshore:
-                constraints:
-                    energy_cap_max: {{ location.eligibility_offshore_wind_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-    {% endfor %}
+data_sources:
+  capacityfactors_wind_offshore:
+    source: timeseries/supply/capacityfactors-wind-offshore.csv
+    rows: timesteps
+    columns: nodes
+    add_dimensions:
+      techs: wind_offshore
+      parameters: source_use_max
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}:
+    techs:
+      wind_offshore:
+        flow_cap_max: {{ location.eligibility_offshore_wind_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+  {% endfor %}

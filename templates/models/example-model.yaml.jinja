@@ -1,17 +1,18 @@
 import:
-    {% for file in input_files %}
-    - {{ file }}
-    {% endfor %}
-model:
+  {% for file in input_files %}
+  - {{ file }}
+  {% endfor %}
+config:
+  init:
     name: 'Example model'
-    calliope_version: 0.6.10
-    timeseries_data_path: ./timeseries
-    subset_time: ['{{ year }}-01-01', '{{ year }}-01-01']
-run:
+    calliope_version: "0.7"
+    time_subset: ['{{ year }}-01-01', '{{ year }}-01-01']
+    add_math:
+      {% for file in math_files %}
+      - {{ file }}
+      {% endfor %}
+  build:
+    mode: plan
+  solve:
     solver: gurobi
     solver_io: python
-    mode: plan
-    objective_options: {
-        'cost_class': {'monetary': 1},
-        'sense': 'minimize'
-    }

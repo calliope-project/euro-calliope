@@ -41,7 +41,7 @@ def summarise_potentials(
     model = calliope.Model(path_to_model)
 
     list_of_techs = model.inputs.techs.values
-    list_of_locs = model.inputs.locs.values
+    list_of_locs = model.inputs.nodes.values
     list_of_potentials = list(set(considered_potentials).intersection(model.inputs))
 
     summary = np.empty((len(list_of_techs), len(list_of_potentials), len(list_of_locs)))
@@ -51,25 +51,25 @@ def summarise_potentials(
 
     summary = xr.DataArray(
         summary,
-        dims=("techs", "potentials", "locs"),
+        dims=("techs", "potentials", "nodes"),
         coords={
             "techs": list_of_techs,
             "potentials": list_of_potentials,
-            "locs": list_of_locs,
+            "nodes": list_of_locs,
             "unit": (["potentials"], units),
         },
     )
 
     for potential in list_of_potentials:
-        aux = model.get_formatted_array(potential)
+        aux = model._model_data[potential]
         summary.coords["unit"].loc[dict(potentials=potential)] = considered_potentials[
             potential
         ]["unit"]
         for tech in list_of_techs:
             for loc in list_of_locs:
                 try:
-                    summary.loc[dict(techs=tech, locs=loc, potentials=potential)] = (
-                        aux.loc[dict(techs=tech, locs=loc)]
+                    summary.loc[dict(techs=tech, nodes=loc, potentials=potential)] = (
+                        aux.loc[dict(techs=tech, nodes=loc)]
                         / considered_potentials[potential]["sf"]
                     )
                 except KeyError:

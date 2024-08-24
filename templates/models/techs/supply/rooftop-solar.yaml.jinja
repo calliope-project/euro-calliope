@@ -1,78 +1,105 @@
 tech_groups:
     pv_on_roof:  # from [@JRC:2014] Table 9
-        essentials:
-            name: Roof mounted PV
-            carrier: electricity
-            parent: supply
-        constraints.lifetime: 25
-        costs.monetary:
-            energy_cap: {{ 880000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-            om_annual: {{ (880000 * 0.02 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2% of CAPEX
-            om_prod: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+        name: Roof mounted PV
+        inherit: interest_rate
+        carrier_out: electricity
+        base_tech: supply
+        source_unit: per_cap
+        lifetime: 25
+        cost_flow_cap:
+            data: {{ 880000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+            index: monetary
+            dims: costs
+        cost_om_annual:
+            data: {{ (880000 * 0.02 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 2% of CAPEX
+            index: monetary
+            dims: costs
+        cost_flow_out:
+            data: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+            index: monetary
+            dims: costs
+
 
 techs:
     roof_mounted_pv:
-        essentials:
-            name: Roof mounted PV
-            parent: pv_on_roof
-        constraints:
-            resource: file=supply/capacityfactors-rooftop-pv.csv
-            resource_unit: energy_per_cap
+        inherit: pv_on_roof
+
+data_sources:
+    capacityfactors_rooftop_pv:
+        source: timeseries/supply/capacityfactors-rooftop-pv.csv
+        rows: timesteps
+        columns: nodes
+        add_dimensions:
+            techs: roof_mounted_pv
+            parameters: source_use_max
 
 overrides:
-    dea-renewable-cost-pv-roof-mounted: # from [@DEA:2020a]
-        tech_groups.pv_on_roof: #  Sheet 22 - Photovoltaics Small (last updated 2016)
-            constraints.lifetime: 40 # inverter lifetime is shorter but the replacement cost is included in O&M
-            costs.monetary:
-                energy_cap: {{ 587500 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
-                om_annual: {{ (9135  - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
-                om_prod: {{1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
+  dea_renewable_cost_pv_roof_mounted: # from [@DEA:2020a]
+    tech_groups.pv_on_roof: #  Sheet 22 - Photovoltaics Small (last updated 2016)
+      lifetime: 40 # inverter lifetime is shorter but the replacement cost is included in O&M
+      cost_flow_cap:
+        data: {{ 587500 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
+        index: monetary
+        dims: costs
+      cost_om_annual:
+        data: {{ (9135  - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
+        index: monetary
+        dims: costs
+      cost_flow_out:
+        data: {{1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
+        index: monetary
+        dims: costs
 
-    directional-rooftop-pv:
-        techs:
-            roof_mounted_pv:
-                exists: False
-            roof_mounted_pv_s_flat:
-                essentials:
-                    name: Roof mounted PV south-facing and flat
-                    parent: pv_on_roof
-                constraints:
-                    resource: file=supply/capacityfactors-rooftop-pv-s-flat.csv
-                    resource_unit: energy_per_cap
-            roof_mounted_pv_n:
-                essentials:
-                    name: Roof mounted PV north-facing
-                    parent: pv_on_roof
-                constraints:
-                    resource: file=supply/capacityfactors-rooftop-pv-n.csv
-                    resource_unit: energy_per_cap
-            roof_mounted_pv_e_w:
-                essentials:
-                    name: Roof mounted PV east-facing and west-facing
-                    parent: pv_on_roof
-                constraints:
-                    resource: file=supply/capacityfactors-rooftop-pv-e-w.csv
-                    resource_unit: energy_per_cap
+  directional_rooftop_pv:
+    techs:
+      roof_mounted_pv_s_flat:
+        name: Roof mounted PV south-facing and flat
+        inherit: pv_on_roof
+      roof_mounted_pv_n:
+        name: Roof mounted PV north-facing
+        inherit: pv_on_roof
+      roof_mounted_pv_e_w:
+        name: Roof mounted PV east-facing and west-facing
+        inherit: pv_on_roof
+      data_sources:
+        capacityfactors_rooftop_pv_s_flat:
+          source: timeseries/supply/capacityfactors-rooftop-pv-s-flat.csv
+          rows: timesteps
+          columns: nodes
+          add_dimensions:
+            techs: roof_mounted_pv_s_flat
+            parameters: source_use_max
+        capacityfactors_rooftop_pv_n:
+          source: timeseries/supply/capacityfactors-rooftop-pv-n.csv
+          rows: timesteps
+          columns: nodes
+          add_dimensions:
+            techs: roof_mounted_pv_n
+            parameters: source_use_max
+        capacityfactors_rooftop_pv_e_w:
+          source: timeseries/supply/capacityfactors-rooftop-pv-e-w.csv
+          rows: timesteps
+          columns: nodes
+          add_dimensions:
+            techs: roof_mounted_pv_e_w
+            parameters: source_use_max
 
-        locations:
-            {% for id, location in locations.iterrows() %}
-            {{ id }}.techs:
-                roof_mounted_pv_s_flat:
-                    constraints:
-                        energy_cap_max: {{ location.eligibility_rooftop_pv_s_flat_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-                roof_mounted_pv_n:
-                    constraints:
-                        energy_cap_max: {{ location.eligibility_rooftop_pv_n_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-                roof_mounted_pv_e_w:
-                    constraints:
-                        energy_cap_max: {{ location.eligibility_rooftop_pv_e_w_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-            {% endfor %}
+    nodes:
+      {% for id, location in locations.iterrows() %}
+      {{ id }}.techs:
+        roof_mounted_pv.active: False
+        roof_mounted_pv_s_flat:
+          flow_cap_max: {{ location.eligibility_rooftop_pv_s_flat_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+        roof_mounted_pv_n:
+          flow_cap_max: {{ location.eligibility_rooftop_pv_n_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+        roof_mounted_pv_e_w:
+          flow_cap_max: {{ location.eligibility_rooftop_pv_e_w_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+      {% endfor %}
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}:
-        techs:
-            roof_mounted_pv:
-                constraints:
-                    energy_cap_max: {{ location.eligibility_rooftop_pv_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-    {% endfor %}
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}:
+    techs:
+      roof_mounted_pv:
+        flow_cap_max: {{ location.eligibility_rooftop_pv_mw * scaling_factors.power  }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+  {% endfor %}

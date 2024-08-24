@@ -53,7 +53,7 @@ def create_regional_timeseries(
             },
         )
         .mul(df_population_share)
-        .rename(columns=lambda col_name: col_name.replace(".", "-"))
+        .rename(columns=lambda col_name: col_name.replace(".", "_"))
     )
 
     pd.testing.assert_series_equal(df_regional.sum(axis=1), df_national.sum(axis=1))
@@ -79,4 +79,4 @@ if __name__ == "__main__":
     else:
         raise ValueError("Input resolution not recognised.")
 
-    ts.to_csv(path_to_output)
+    ts.rename_axis(index="timesteps").to_csv(path_to_output)

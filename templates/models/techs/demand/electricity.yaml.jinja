@@ -1,13 +1,19 @@
 techs:
-    demand_elec:
-        essentials:
-            name: 'Electricity demand'
-            parent: demand
-            carrier: electricity
-        constraints:
-            resource: file=demand/electricity.csv
+  demand_elec:
+    name: 'Electricity demand'
+    base_tech: demand
+    carrier_in: electricity
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs.demand_elec:
-    {% endfor %}
+data_sources:
+  demand_electricity:
+    source: timeseries/demand/electricity.csv
+    rows: timesteps
+    columns: nodes
+    add_dimensions:
+      techs: demand_elec
+      parameters: sink_use_equals
+
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs.demand_elec:
+  {% endfor %}

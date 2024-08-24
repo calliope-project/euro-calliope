@@ -54,9 +54,6 @@ def create_road_transport_demand_timeseries(
     df_timeseries = (
         df_timeseries.mul(conversion_factor)
         .mul(power_scaling_factor)
-        .mul(
-            1 if historic else -1
-        )  # historic demand is actually a supply to avoid double counting
         .loc[:, country_codes]
         .tz_localize(None)
         .rename_axis("utc-timestamp")

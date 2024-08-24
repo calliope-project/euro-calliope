@@ -51,7 +51,7 @@ def _create_config_plugin(snakemake, override_dict, scenarios, subset_time):
 
         @pytest.fixture(scope="session")
         def override_dict(self):
-            return {"model.subset_time": subset_time, "overrides": override_dict}
+            return {"config.init.time_subset": subset_time, "overrides": override_dict}
 
         @pytest.fixture(scope="session", params=list(scenarios.keys()))
         def scenario(self, request):
@@ -61,21 +61,19 @@ def _create_config_plugin(snakemake, override_dict, scenarios, subset_time):
         def model(self, scenario, override_dict):
             return calliope.Model(
                 snakemake.input.example_model,
-                scenario=",".join(scenarios[scenario]),
+                scenario=",".join(scenarios[scenario]) if scenarios[scenario] else None,
                 override_dict=override_dict,
             )
 
         @pytest.fixture(scope="session")
         def optimised_model(self, model):
-            model.run()
+            model.build()
+            model.solve()
             return model
 
         @pytest.fixture(scope="session")
-        def energy_cap(self, optimised_model, scaling_factors):
-            return (
-                optimised_model.get_formatted_array("energy_cap")
-                / scaling_factors["power"]
-            )
+        def flow_cap(self, optimised_model, scaling_factors):
+            return optimised_model.results.flow_cap / scaling_factors["power"]
 
         @pytest.fixture(
             scope="module",
@@ -89,9 +87,12 @@ def _create_config_plugin(snakemake, override_dict, scenarios, subset_time):
             model = calliope.Model(
                 snakemake.input.example_model,
                 override_dict=override_dict,
-                scenario=",".join(scenarios["default"]),
+                scenario=",".join(scenarios["default"])
+                if scenarios["default"]
+                else None,
             )
-            model.run()
+            model.build()
+            model.solve()
             return model
 
         @pytest.fixture(

@@ -1,95 +1,100 @@
 techs:
-    demand_road_transport_electrified_uncontrolled:
-        essentials:
-            name: 'Uncontrolled electrified road transport demand -- follows a timeseries'
-            parent: demand
-            carrier: electricity
-        constraints:
-            resource: file=demand/uncontrolled-electrified-road-transport.csv
+  demand_road_transport_electrified_uncontrolled:
+    name: 'Uncontrolled electrified road transport demand -- follows a timeseries'
+    base_tech: demand
+    carrier_in: electricity
 
-    demand_road_transport_historic_electrified_uncontrolled:
-        essentials:
-            name: 'Removes historic electrified road transport demand from ENTSOE-derived historical electricity demand profile -- assumed uncontrolled'
-            parent: supply
-            carrier: electricity
-        constraints:
-            resource: file=demand/uncontrolled-road-transport-historic-electrification.csv
-            force_resource: true
+  demand_road_transport_historic_electrified_uncontrolled:
+    name: 'Removes historic electrified road transport demand from ENTSOE-derived historical electricity demand profile -- assumed uncontrolled'
+    base_tech: supply
+    carrier_out: electricity
 
-    demand_road_transport_electrified_controlled:
-        essentials:
-            name: 'Controlled electrified road transport demand'
-            parent: demand
-            carrier: electricity
-        constraints:
-            force_resource: false
-            resource: -.inf
+  demand_road_transport_electrified_controlled:
+    name: 'Controlled electrified road transport demand'
+    base_tech: demand
+    carrier_in: electricity
 
-    road_transport_controlled_dummy:
-        exists: false
-        essentials:
-            name: 'Dummy tech for controlled road transport demand -- required for max potential charging and demand shape'
-            parent: conversion
-            carrier_in: electricity
-            carrier_out: electricity
-        constraints:
-            energy_eff: 1
-            energy_cap_max_time_varying: file=demand/plugin-profiles-ev.csv
+
+data_sources:
+  demand_uncontrolled_electrified_road_transport:
+    source: timeseries/demand/uncontrolled-electrified-road-transport.csv
+    rows: timesteps
+    columns: nodes
+    add_dimensions:
+      techs: demand_road_transport_electrified_uncontrolled
+      parameters: sink_use_equals
+
+  demand_uncontrolled_road_transport_historic_electrification:
+    source: timeseries/demand/uncontrolled-road-transport-historic-electrification.csv
+    rows: timesteps
+    columns: nodes
+    add_dimensions:
+      techs: demand_road_transport_historic_electrified_uncontrolled
+      parameters: source_use_equals
 
 overrides:
-    keep-historic-electricity-demand-from-road-transport:
-      {# TODO: possibly remove this override as there may be no use-cases for it. #}
-      {% for id, location in locations.iterrows() %}
-      {{ id }}.techs.demand_road_transport_historic_electrified_uncontrolled.exists: false
-      {% endfor %}
-
-    {% for year in locations.columns %}
-    {% if "demand" in year %}
-    {{ year }}_transport_controlled_electrified:
-        group_constraints:
-    {% for location in locations.index %}
-            {{ location }}_annual_controlled_electricity:
-                locs: [{{ location }}]
-                techs: [demand_road_transport_electrified_controlled]
-                carrier_con_equals:
-                    electricity: {{ locations.loc[location, year] }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
-    {% endfor %}
-    {% endif %}
-    {% endfor %}
-
-    monthly_transport_demand_range:
-        techs:
-            demand_road_transport_electrified_controlled:
-                constraints:
-                    demand_shape_per_month_min_time_varying: file=demand/demand-shape-min-ev.csv
-                    demand_shape_per_month_max_time_varying: file=demand/demand-shape-max-ev.csv
-
-    monthly_transport_demand_equality:
-        techs:
-            demand_road_transport_electrified_controlled:
-                constraints:
-                    demand_shape_per_month_equals_time_varying: file=demand/demand-shape-equals-ev.csv
-
-    {% for year in locations.columns %}
-    {% if "charging" in year %}
-    {{ year }}_max_ev_potential:
-        techs:
-            road_transport_controlled_dummy.exists: true
-        locations:
-    {% for location in locations.index %}
-            {{ location }}:
-                techs:
-                    road_transport_controlled_dummy:
-                        constraints:
-                            energy_cap_max: {{ locations.loc[location, year] }} # {{ (1 / scaling_factors.transport) | unit("Mio km") }}
-    {% endfor %}
-    {% endif %}
-    {% endfor %}
-
-locations:
+  keep_historic_electricity_demand_from_road_transport:
+    {# TODO: possibly remove this override as there may be no use-cases for it. #}
     {% for id, location in locations.iterrows() %}
-    {{ id }}.techs:
-        demand_road_transport_electrified_uncontrolled:
-        demand_road_transport_historic_electrified_uncontrolled:
-        demand_road_transport_electrified_controlled:
+    nodes.{{ id }}.techs.demand_road_transport_historic_electrified_uncontrolled.active: false
     {% endfor %}
+
+  {% for year in locations.columns %}
+  {% if "demand" in year %}
+  {{ year }}_transport_controlled_electrified:
+    nodes:
+    {% for id in locations.index %}
+      {{ id }}.techs.demand_road_transport_electrified_controlled:
+        flow_in_total: {{ locations.loc[id, year] }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+    {% endfor %}
+  {% endif %}
+  {% endfor %}
+
+  monthly_transport_demand_range:
+    data_sources:
+      demand_shape_min_ev:
+        source: timeseries/demand/demand-shape-min-ev.csv
+        rows: monthsteps
+        columns: nodes
+        add_dimensions:
+          techs: demand_road_transport_electrified_controlled
+          parameters: flow_in_per_month_min
+      demand_shape_max_ev:
+        source: timeseries/demand/demand-shape-max-ev.csv
+        rows: monthsteps
+        columns: nodes
+        add_dimensions:
+          techs: demand_road_transport_electrified_controlled
+          parameters: flow_in_per_month_max
+
+
+  {% for year in locations.columns %}
+  {% if "charging" in year %}
+  {{ year }}_max_ev_potential:
+    demand_plugin_profiles_ev:
+      source: timeseries/demand/plugin-profiles-ev.csv
+      rows: timesteps
+      columns: nodes
+      add_dimensions:
+        techs: road_transport_controlled_dummy
+        parameters: energy_cap_max_varying
+    techs:
+      road_transport_controlled_dummy:
+        name: 'Dummy tech for controlled road transport demand -- required for max potential charging and demand shape'
+        base_tech: conversion
+        carrier_in: electricity
+        carrier_out: electricity
+    nodes:
+    {% for id in locations.index %}
+      {{ id }}.techs.road_transport_controlled_dummy.flow_cap_max: {{ locations.loc[id, year] }} # {{ (1 / scaling_factors.transport) | unit("Mio km") }}
+    {% endfor %}
+  {% endif %}
+  {% endfor %}
+
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs:
+    demand_road_transport_electrified_uncontrolled:
+    demand_road_transport_historic_electrified_uncontrolled:
+    demand_road_transport_electrified_controlled:
+  {% endfor %}
