@@ -31,14 +31,19 @@ rule iron_and_steel:
     script: f"{SCRIPT_PATH}/iron_and_steel.py"
 
 rule chemicals_industry:
-    message: "."
-    # conda: CONDA_PATH
-    params:
+    message: "Calculate energy demand for the 'Chemicals Industry' sector in JRC-IDEES."
+    conda: CONDA_PATH
+    # params:
+    #     config = config["params"]["config-chemicals-industry"]
     input:
-    output: f"{BUILD_PATH}/annual_demand_chemicals_industry.nc"
-    shell:
-        "touch {output}"
-    # script: f"{SCRIPT_PATH}/annual_demand_chemicals_industry.py"
+        energy_balances = config["input-paths"]["energy-balances"],
+        cat_names = config["input-paths"]["cat-names"],
+        carrier_names = config["input-paths"]["carrier-names"],
+        jrc_industry_energy = config["input-paths"]["jrc-industry-energy"],
+        jrc_industry_production = config["input-paths"]["jrc-industry-production"],
+    output:
+        path_output = f"{BUILD_PATH}/annual_demand_chemicals_industry.nc"
+    script: f"{SCRIPT_PATH}/chemicals_industry.py"
 
 rule combined_categories:
     message: "Calculate energy demand for all other industry sectors in JRC-IDEES."

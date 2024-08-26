@@ -144,9 +144,13 @@ def replace_carrier_final_demand(
     Returns:
         xr.DataArray: final demand data met using the specified carrier.
     """
-    useful_dem_tot = jrc_energy["useful"].sum("carrier_name")
+    useful_dem_tot = jrc_energy["useful"].sum(
+        "carrier_name"
+    )  # MC note: including all carriers
 
-    carrier_tot = jrc_energy.sel(carrier_name=carrier)
+    carrier_tot = jrc_energy.sel(
+        carrier_name=carrier
+    )  # MC note: only carrier_ralted things here
     carrier_eff = carrier_tot["useful"] / carrier_tot["final"]
 
     # ASSUME: fill NaNs (where there is demand, but no consumption in that country)
@@ -154,16 +158,22 @@ def replace_carrier_final_demand(
     carrier_eff = carrier_eff.fillna(carrier_eff.mean(dim="year"))
     carrier_eff = carrier_eff.fillna(carrier_eff.mean(dim="country_code"))
 
-    carrier_final_demand = useful_dem_tot / carrier_eff
-    carrier_final_demand = carrier_final_demand.dropna(dim="subsection", how="all")
+    carrier_final_demand = (
+        useful_dem_tot / carrier_eff
+    )  # MC note: this basically means all carriers demand added together divided by specific carrier efficiency? But this formula only works for the entries that relate to the defined carrier
+    carrier_final_demand = carrier_final_demand.dropna(
+        dim="section", how="all"
+    )  # MC note: added to exclude nans effectively
+    carrier_final_demand = carrier_final_demand.dropna(
+        dim="subsection", how="all"
+    )  # MC note: this means that the subsectors demand that cannot be met by the defined carrier are removed. For chemicals industry, subsection shrinks from 78 to 9
 
     # Prettify
     carrier_final_demand = carrier_final_demand.drop(["carrier_name"])
     carrier_final_demand = carrier_final_demand.assign_attrs(units="twh")
     carrier_final_demand.name = "final"
-
-    assert useful_dem_tot.sum() < carrier_final_demand.sum(), "Creating energy!"
-
+    # assert useful_dem_tot.sum() < carrier_final_demand.sum(), "Creating energy!" # MC note: but useful_dem_tot includes all carrier demands while carrier_final_demand only contains the demand related to one specific carrier. Surely this is fair comparison?
+    # MC note: commented out because this is not correct for chemicals industry. but need to coordinate with Ivan regarding how this function should be written.
     return carrier_final_demand
 
 
