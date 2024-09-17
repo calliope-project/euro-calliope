@@ -20,7 +20,7 @@ data_sources:
     source: timeseries/demand/uncontrolled-electrified-road-transport.csv
     rows: timesteps
     columns: nodes
-    add_dimensions:
+    add_dims:
       techs: demand_road_transport_electrified_uncontrolled
       parameters: sink_use_equals
 
@@ -28,7 +28,7 @@ data_sources:
     source: timeseries/demand/uncontrolled-road-transport-historic-electrification.csv
     rows: timesteps
     columns: nodes
-    add_dimensions:
+    add_dims:
       techs: demand_road_transport_historic_electrified_uncontrolled
       parameters: source_use_equals
 
@@ -56,14 +56,14 @@ overrides:
         source: timeseries/demand/demand-shape-min-ev.csv
         rows: monthsteps
         columns: nodes
-        add_dimensions:
+        add_dims:
           techs: demand_road_transport_electrified_controlled
           parameters: flow_in_per_month_min
       demand_shape_max_ev:
         source: timeseries/demand/demand-shape-max-ev.csv
         rows: monthsteps
         columns: nodes
-        add_dimensions:
+        add_dims:
           techs: demand_road_transport_electrified_controlled
           parameters: flow_in_per_month_max
 
@@ -75,7 +75,7 @@ overrides:
       source: timeseries/demand/plugin-profiles-ev.csv
       rows: timesteps
       columns: nodes
-      add_dimensions:
+      add_dims:
         techs: road_transport_controlled_dummy
         parameters: energy_cap_max_varying
     techs:

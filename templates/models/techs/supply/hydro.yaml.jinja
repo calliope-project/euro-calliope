@@ -1,7 +1,7 @@
 techs:
   hydro_run_of_river:  # from [@JRC:2014] Table 14
     name: Run of river hydro electricity
-    inherit: interest_rate
+    template: interest_rate
     base_tech: supply
     carrier_out: electricity
     source_unit: per_cap
@@ -20,7 +20,7 @@ techs:
       dims: costs
   hydro_reservoir:  # from [@JRC:2014] Table 12
     name: Hydro electricity with a reservoir.
-    inherit: interest_rate
+    template: interest_rate
     base_tech: supply
     carrier_out: electricity
     source_unit: per_cap
@@ -44,14 +44,14 @@ data_sources:
     source: timeseries/supply/capacityfactors-hydro-run-of-river.csv
     rows: timesteps
     columns: nodes
-    add_dimensions:
+    add_dims:
       techs: hydro_run_of_river
       parameters: source_use_max
   capacityfactors_hydro_reservoir:
     source: timeseries/supply/capacityfactors-hydro-reservoir.csv
     rows: timesteps
     columns: nodes
-    add_dimensions:
+    add_dims:
       techs: hydro_reservoir
       parameters: source_use_max
 

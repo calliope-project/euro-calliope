@@ -1,9 +1,9 @@
-tech_groups:
+templates:
   heat_storage_small:  # [@DEA:2019] - energy storage - 142 small scale hot water tank - 2050
     base_tech: storage
     carrier_in: heat
     carrier_out: heat
-    inherit: interest_rate
+    template: interest_rate
     flow_cap_per_storage_cap_max: 6.67  # 20kW/3kWh
     storage_loss: 0.021  # fraction / hour
     lifetime: 30
@@ -16,22 +16,23 @@ tech_groups:
 techs:
   methane_boiler_storage:
     name: Small hot water tank linked to methane boilers
-    inherit: heat_storage_small
+    template: heat_storage_small
   biofuel_boiler_storage:
     name: Small hot water tank linked to biofuel boilers
-    inherit: heat_storage_small
+    template: heat_storage_small
   heat_pump_storage:
     name: Small hot water tank linked to heat pumps
-    inherit: heat_storage_small
+    template: heat_storage_small
   electric_heater_storage:
     name: Small hot water tank linked to electric heaters
-    inherit: heat_storage_small
+    template: heat_storage_small
 
 parameters:
   lookup_linked_storage_tech:
     data: [methane_boiler, biofuel_boiler, heat_pump, electric_heater]
     index: [methane_boiler_storage, biofuel_boiler_storage, heat_pump_storage, electric_heater_storage]
     dims: techs
+
 nodes:
   {% for id, location in locations.iterrows() %}
   {{ id }}.techs:

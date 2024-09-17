@@ -2,7 +2,7 @@ techs:
   biofuel_to_liquids: # [@DEA:2020b] - 85 Gasif. Ent. Flow FT, liq fu - 2050
     # ASSUME: Naptha production can be diverted to kerosene and diesel production, in equal measure.
     name: Biofuel to liquid fuels converter
-    inherit: interest_rate
+    template: interest_rate
     base_tech: conversion
     carrier_in: biofuel
     carrier_out: [kerosene, diesel, electricity]
@@ -38,7 +38,7 @@ techs:
   # ASSUME: all vehicle fuel is diesel.
   biofuel_to_diesel: # [@DEA:2020b] - 101 Catalytic Hydropyrolysis 2 - 2050
     name: Biofuel to vehicle fuel converter
-    inherit: interest_rate
+    template: interest_rate
     base_tech: conversion
     carrier_in: biofuel
     carrier_out: diesel
@@ -62,7 +62,7 @@ techs:
   # ASSUME: ignore electricity output, as it can cause numerical trouble.
   biofuel_to_methanol: # [@DEA:2020b] - 97 Methanol from biomass gasif. - 2050
     name: Biofuel to Methanol converter
-    inherit: interest_rate
+    template: interest_rate
     base_tech: conversion
     carrier_in: biofuel
     carrier_out: methanol
@@ -84,7 +84,7 @@ techs:
   # ASSUME: ignore waste low grade heat (which could be used for district heating)
   biofuel_to_methane: # [@DEA:2020b] - 84 Biomass to SNG gassifier - 2050
     name: Biofuel to Methane converter
-    inherit: interest_rate
+    template: interest_rate
     base_tech: conversion
     carrier_in: biofuel
     carrier_out: methane

@@ -1,7 +1,7 @@
 name: euro-calliope
 channels:
-  - conda-forge
   - conda-forge/label/calliope_dev
+  - conda-forge
   - gurobi
 dependencies:
   - python=3.12
@@ -12,5 +12,5 @@ dependencies:
   - hdf5=1.14.2
   - libnetcdf=4.9.2
   - gurobi=11.0.3
-  - calliope=0.7.0
+  - calliope=0.7.0dev4
   - pyomo=6.7.1

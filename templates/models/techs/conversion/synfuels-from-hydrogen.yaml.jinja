@@ -2,7 +2,7 @@ techs:
   # ASSUME: ignore waste low grade heat output (which could be used for district heating)
   hydrogen_to_liquids:  # [@DEA:2020b] - renewable fuels - 102 Hydrogen to Jet - 2050
     name: Hydrogen to liquid fuels converter
-    inherit: interest_rate
+    template: interest_rate
     base_tech: conversion
     carrier_in: [hydrogen, electricity, co2]  # TODO: custom math to link these carrier flows
     carrier_out: [kerosene, diesel]  # TODO: custom math to link these carrier flows
@@ -42,7 +42,7 @@ techs:
   # ASSUME: Can run intermittently
   hydrogen_to_methanol:  # [@DEA:2020b] - renewable fuels - 98 Methanol from power - 2050
     name: Hydrogen to Methanol converter
-    inherit: interest_rate
+    template: interest_rate
     base_tech: conversion
     carrier_in: [hydrogen, co2] # TODO: custom math to link these carrier flows
     carrier_out: methanol

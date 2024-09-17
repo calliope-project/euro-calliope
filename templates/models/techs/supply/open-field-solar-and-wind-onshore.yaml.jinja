@@ -1,7 +1,7 @@
-tech_groups:
+templates:
   wind_onshore:  # from [@JRC:2014] Table 4
     name: Onshore wind
-    inherit: interest_rate
+    template: interest_rate
     carrier_out: electricity
     base_tech: supply
     source_unit: per_cap
@@ -21,7 +21,7 @@ tech_groups:
 
 techs:
   open_field_pv:  # from [@JRC:2014] Table 7
-    inherit: interest_rate
+    template: interest_rate
     name: Open field PV
     carrier_out: electricity
     base_tech: supply
@@ -44,10 +44,10 @@ techs:
       dims: costs
   wind_onshore_monopoly:
       name: Onshore wind without land competition
-      inherit: wind_onshore
+      template: wind_onshore
   wind_onshore_competing:
       name: Onshore wind competing with open field PV on land
-      inherit: wind_onshore
+      template: wind_onshore
       # open_field_pv and wind_onshore_competing are the only technologies with area footprints
       # as they are the only technologies competing on the same land.
       area_use_per_flow_cap: {{ (1 / max_power_densities["onshore-wind"]) * scaling_factors.area / scaling_factors.power }} # {{ (scaling_factors.power / scaling_factors.area) | unit("km^2/MW") }} from [@EuropeanEnvironmentAgency:2009]
@@ -57,14 +57,14 @@ data_sources:
       source: timeseries/supply/capacityfactors-wind-onshore.csv
       rows: timesteps
       columns: nodes
-      add_dimensions:
+      add_dims:
         techs: [wind_onshore_monopoly, wind_onshore_competing]
         parameters: source_use_max
     capacityfactors_open_field_pv:
       source: timeseries/supply/capacityfactors-open-field-pv.csv
       rows: timesteps
       columns: nodes
-      add_dimensions:
+      add_dims:
         techs: open_field_pv
         parameters: source_use_max
 
@@ -86,7 +86,7 @@ overrides:
         dims: costs
 
   dea_renewable_cost_wind_onshore: # from [@DEA:2020a]
-    tech_groups.wind_onshore: # Sheet 20 Onshore Turbines (last updated 2019)
+    templates.wind_onshore: # Sheet 20 Onshore Turbines (last updated 2019)
       lifetime: 30
       cost_flow_cap:
         data: {{ 963000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}

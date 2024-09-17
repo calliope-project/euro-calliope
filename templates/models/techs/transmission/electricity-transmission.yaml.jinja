@@ -1,13 +1,13 @@
-tech_groups:
+templates:
   free_transmission:
     name: 'Local power transmission'
-    inherit: interest_rate
+    template: interest_rate
     base_tech: transmission
     carrier_in: electricity
     carrier_out: electricity
   ac_transmission:
     name: "High voltage AC transmission line"
-    inherit: free_transmission
+    template: free_transmission
     flow_out_eff: 0.99999995 # (1/m)
     lifetime: 60
     # costs from [@JRC:2014], Table 39
@@ -27,7 +27,7 @@ tech_groups:
 techs:
   {% for link in links.index %}
   link_{{ link[0] }}_{{ link[1] }}:
-    inherit: ac_transmission
+    template: ac_transmission
     from: {{ link[0] }}
     to: {{ link[1] }}
     {% if energy_cap_limit is defined %}

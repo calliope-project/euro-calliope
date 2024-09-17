@@ -1,7 +1,7 @@
 techs:
   wind_offshore:  # from [@JRC:2014] Table 5
     name: Offshore wind
-    inherit: interest_rate
+    template: interest_rate
     carrier_out: electricity
     base_tech: supply
     source_unit: per_cap
@@ -41,7 +41,7 @@ data_sources:
     source: timeseries/supply/capacityfactors-wind-offshore.csv
     rows: timesteps
     columns: nodes
-    add_dimensions:
+    add_dims:
       techs: wind_offshore
       parameters: source_use_max
 nodes:

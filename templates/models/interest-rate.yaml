@@ -1,4 +1,4 @@
-tech_groups:
+templates:
   interest_rate:
     cost_interest_rate:
       data: 0.073 # average wind onshore WACC OECD from [@Steffen:2019]
