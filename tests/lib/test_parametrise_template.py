@@ -43,12 +43,12 @@ foo:
 
 TEMPLATE_LOCATIONS_IN_PARAMS = """
 foo:
-    bar: {{ locations.loc['A-B', 'foo'] }}
+    bar: {{ locations.loc['A_B', 'foo'] }}
 """
 
 TEMPLATE_LINKS_IN_PARAMS = """
 foo:
-    bar: {{ links.loc['A-B,C-D', 'foo'] }}
+    bar: {{ links.loc['A_B,C_D', 'foo'] }}
 """
 
 TEMPLATE_LOCATIONS_LINKS_IN_PARAMS_EXPECTED = """
@@ -69,7 +69,7 @@ foo:
 """
 TEMPLATE_LOCATIONS_ITERATE_EXPECTED = """
 foo:
-    A-B: 1.0
+    A_B: 1.0
 """
 
 

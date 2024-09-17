@@ -13,7 +13,7 @@ def scale_to_resolution_and_create_file(
         df = scale_national_to_regional(df, region_country_mapping, populations)
     else:
         raise ValueError(f"Resolution {resolution} is not supported")
-    df.tz_localize(None).rename_axis("utc-timestamp").to_csv(output_path)
+    df.tz_localize(None).rename_axis("timesteps").to_csv(output_path)
 
 
 def scale_national_to_regional(df, region_country_mapping, populations):
@@ -33,7 +33,7 @@ def scale_national_to_regional(df, region_country_mapping, populations):
             },
         )
         .mul(df_population_share)
-        .rename(columns=lambda col_name: col_name.replace(".", "-"))
+        .rename(columns=lambda col_name: col_name.replace(".", "_"))
     )
     pd.testing.assert_series_equal(regional_df.sum(axis=1), df.sum(axis=1))
     return regional_df

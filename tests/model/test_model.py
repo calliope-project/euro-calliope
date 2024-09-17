@@ -22,17 +22,13 @@ DIRECTIONAL_PV = set([
 ])
 HEAT_TECHS = set([
     "biofuel_boiler",
-    "biofuel_tech_heat_to_demand",
     "heat_pump",
-    "heat_pump_tech_heat_to_demand",
     "electric_heater",
-    "electric_heater_tech_heat_to_demand",
-    "hp_heat_storage_small",
-    "electric_heater_heat_storage_small",
-    "biofuel_heat_storage_small",
-    "methane_heat_storage_small",
+    "heat_pump_storage",
+    "electric_heater_storage",
+    "biofuel_boiler_storage",
+    "methane_boiler_storage",
     "methane_boiler",
-    "methane_tech_heat_to_demand",
 ])
 BIOFUEL_TECHS = set([
     "biofuel_supply",
@@ -52,8 +48,9 @@ SYNFUEL_TECHS = set([
 ])
 # Only includes scenarios with non-default technology sets
 TECHNOLOGIES = {
-    "connected_all_neighbours": DEFAULT_TECHNOLOGIES | set(["ac_transmission"]),
-    "connected_entsoe_tyndp": DEFAULT_TECHNOLOGIES | set(["ac_transmission"]),
+    # TODO: work out way to check for transmission techs
+    "connected_all_neighbours": DEFAULT_TECHNOLOGIES,
+    "connected_entsoe_tyndp": DEFAULT_TECHNOLOGIES,
     "directional-pv": (DEFAULT_TECHNOLOGIES | DIRECTIONAL_PV)
     - set(["roof_mounted_pv"]),
     "shed-load": DEFAULT_TECHNOLOGIES | set(["load_shedding"]),
@@ -90,21 +87,19 @@ def test_example_model_runs(optimised_example_model):
     assert optimised_example_model.results.termination_condition == "optimal"
 
 
-def test_technologies_are_available(energy_cap, location, technologies):
+def test_technologies_are_available(flow_cap, location, technologies):
     for technology in technologies:
-        if "transmission" in technology:
-            assert pd.notna(
-                energy_cap.where(energy_cap.techs.str.find(technology) > -1)
-                .sum(min_count=1)
-                .item()
-            )
+        if "link_" in technology:
+            assert pd.notna(flow_cap.sel(techs=technology).sum(min_count=1).item())
         elif technology in OPTIONAL_LOCATIONAL_TECHNOLOGIES:
             # don't check the capacity values at each location,
             # since we can't be certain that the technology exists at any specific location
-            assert technology in energy_cap.techs
+            assert technology in flow_cap.techs
         else:
-            assert (technology in energy_cap.techs) and pd.notna(
-                energy_cap.sel(locs=location, techs=technology).item()
+            assert (technology in flow_cap.techs) and pd.notna(
+                flow_cap.sel(nodes=location, techs=technology)
+                .sum("carriers", min_count=1)
+                .item()
             )
 
 

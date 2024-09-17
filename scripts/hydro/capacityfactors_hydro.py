@@ -51,7 +51,8 @@ def time_series(plants, locations, capacities):
         .pivot(index="time", columns="index_right", values="inflow_MWh")
         .reindex(columns=locations.index, fill_value=0)
         .div(capacities)
-        .rename(columns=lambda col: col.replace(".", "-"))
+        .rename(columns=lambda col: col.replace(".", "_"))
+        .rename_axis(index="timesteps")
     )
 
 

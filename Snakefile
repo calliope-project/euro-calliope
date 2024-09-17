@@ -125,7 +125,7 @@ rule module_without_specific_data:
         template = model_template_dir + "{template}",
     output: "build/models/{resolution}/{template}"
     wildcard_constraints:
-        template = "interest-rate.yaml"
+        template = "interest-rate.yaml|additional-math.yaml"
     conda: "envs/shell.yaml"
     shell: "cp {input.template} {output}"
 
@@ -164,6 +164,10 @@ rule model:
                 "techs/supply/wind-offshore.yaml",
                 "techs/supply/nuclear.yaml",
             ]
+        ),
+        math_files = expand(
+            "build/models/{{resolution}}/{file}",
+            file=["additional-math.yaml"]
         ),
         heat_timeseries_data = (
             "build/models/{resolution}/timeseries/conversion/heat-pump-cop.csv",

@@ -54,7 +54,9 @@ def capacityfactors(
     capacityfactors = _allocate_to_onshore_locations(
         capacityfactors_per_eez, shared_coast
     )
-    capacityfactors.where(capacityfactors >= cf_threshold, 0).to_csv(path_to_result)
+    capacityfactors.where(capacityfactors >= cf_threshold, 0).rename_axis(
+        index="timesteps"
+    ).to_csv(path_to_result)
 
 
 def _allocate_to_onshore_locations(capacityfactors_per_eez, shared_coast):

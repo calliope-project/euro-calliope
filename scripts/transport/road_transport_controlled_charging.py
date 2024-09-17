@@ -23,7 +23,7 @@ def scale_to_regional_resolution(df, region_country_mapping, populations):
             },
         )
         .mul(df_population_share)
-        .rename(columns=lambda col_name: col_name.replace(".", "-"))
+        .rename(columns=lambda col_name: col_name.replace(".", "_"))
     )
     pd.testing.assert_series_equal(regional_df.sum(axis=1), df.sum(axis=1))
     return regional_df

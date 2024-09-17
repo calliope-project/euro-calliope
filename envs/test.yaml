@@ -1,18 +1,19 @@
 name: test
 channels:
-    - conda-forge
-    - gurobi
+  - conda-forge/label/calliope_dev
+  - conda-forge
+  - gurobi
 dependencies:
-    - python=3.9
-    - ipdb=0.13.13
-    - numpy=1.23
-    - pandas=1.5
-    - xarray=2022.3
-    - gurobi=9.5.1
-    - pytest=7.3.1
-    - pytest-html=3.2.0
-    - calliope=0.6.10
-    - pyomo=6.4.1
-    - netCDF4=1.6.2
-    - hdf5=1.12.2
-    - libnetcdf=4.8.1
+  - python=3.12
+  - ipdb=0.13.13
+  - numpy=1.26.4
+  - pandas=2.1.4
+  - xarray=2024.2.0
+  - gurobi=11.0.3
+  - pytest=8.2.2
+  - pytest-html=3.2.0
+  - calliope=0.7.0dev4
+  - pyomo=6.7.1
+  - netCDF4=1.6.5
+  - hdf5=1.14.2
+  - libnetcdf=4.9.2

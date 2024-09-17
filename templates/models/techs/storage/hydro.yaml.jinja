@@ -1,41 +1,50 @@
 techs:
-    pumped_hydro:  # from [@schmidt:2019] Table S4
-        essentials:
-            name: 'Pumped hydro power storage'
-            parent: storage
-            carrier: electricity
-        constraints:
-            energy_cap_max: inf
-            storage_cap_max: inf
-            energy_eff: 0.8832 # 0.78 round-trip
-            lifetime: 55
-        costs.monetary:
-            storage_cap: {{ 72133 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 80 $2015
-            energy_cap: {{ 1017973 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}, 1129 $2015
-            om_annual: {{ 7213 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}, 8 $2015
-            om_prod: {{ 1 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 1 $2015, rounded to 1€ for numeric range
+  pumped_hydro:  # from [@schmidt:2019] Table S4
+    name: 'Pumped hydro power storage'
+    template: interest_rate
+    base_tech: storage
+    carrier_in: electricity
+    carrier_out: electricity
+    # 0.78 round-trip efficiency
+    flow_out_eff: 0.8832
+    flow_in_eff: 0.8832
+    lifetime: 55
+    cost_storage_cap:
+      data: {{ 72133 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 80 $2015
+      index: monetary
+      dims: costs
+    cost_flow_cap:
+      data: {{ 1017973 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}, 1129 $2015
+      index: monetary
+      dims: costs
+    cost_om_annual:
+      data: {{ 7213 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}, 8 $2015
+      index: monetary
+      dims: costs
+    cost_flow_out:
+      data: {{ 1 * 1.02 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh") }}, 1 $2015, rounded to 1€ for numeric range
+      index: monetary
+      dims: costs
 
 overrides:
-    no-hydro-storage-fixed-cost:
-        # Only assign costs to O&M and variable costs
-        techs.pumped_hydro.costs.monetary:
-            storage_cap: 0
-            energy_cap: 0
-    freeze-hydro-storage-capacities:
-        locations:
-            {% for id, location in locations.iterrows() %}
-            {{ id }}.techs:
-                pumped_hydro:
-                    constraints:
-                        energy_cap_equals: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-                        storage_cap_equals: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
-            {% endfor %}
+  no_hydro_storage_fixed_cost:
+    # Only assign costs to O&M and variable costs
+    techs.pumped_hydro:
+      cost_storage_cap.data: 0
+      cost_flow_cap.data: 0
+  freeze_hydro_storage_capacities:
+    nodes:
+        {% for id, location in locations.iterrows() %}
+        {{ id }}.techs:
+          pumped_hydro:
+            flow_cap_min: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+            storage_cap_min: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+        {% endfor %}
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs:
-        pumped_hydro:
-            constraints:
-                energy_cap_max: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-                storage_cap_max: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
-    {% endfor %}
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs:
+    pumped_hydro:
+      flow_cap_max: {{ location.installed_capacity_hphs_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+      storage_cap_max: {{ location.storage_capacity_hphs_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+  {% endfor %}

@@ -1,19 +1,26 @@
 techs:
-    electricity_from_biofuel:  # from [@JRC:2014] Table 48 Anaerobic digestion
-        essentials:
-            name: Electricity from anaerobically digested biofuel
-            parent: conversion
-            carrier_in: biofuel
-            carrier_out: electricity
-        constraints:
-            energy_eff: {{ biofuel_efficiency }}
-            lifetime: 20
-        costs.monetary:
-            energy_cap: {{2300000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-            om_annual: {{2300000 * 0.041 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 4.1% of CAPEX
-            om_prod: {{ 3.1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MWh") }}
+  electricity_from_biofuel:  # from [@JRC:2014] Table 48 Anaerobic digestion
+    name: Electricity from anaerobically digested biofuel
+    template: interest_rate
+    base_tech: conversion
+    carrier_in: biofuel
+    carrier_out: electricity
+    flow_out_eff: {{ biofuel_efficiency }}
+    lifetime: 20
+    cost_flow_cap:
+      data: {{2300000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+      index: [[monetary, electricity]]
+      dims: [costs, carriers]
+    cost_om_annual:
+      data: {{2300000 * 0.041 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 4.1% of CAPEX
+      index: [[monetary, electricity]]
+      dims: [costs, carriers]
+    cost_flow_out:
+      data: {{ 3.1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MWh") }}
+      index: monetary
+      dims: costs
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs.electricity_from_biofuel:
-    {% endfor %}
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs.electricity_from_biofuel:
+  {% endfor %}

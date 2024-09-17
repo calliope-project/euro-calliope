@@ -1,13 +1,18 @@
 techs:
-    demand_heat_electrified:
-        essentials:
-            name: Electrified heat demand
-            parent: demand
-            carrier: electricity
-        constraints:
-            resource: file=demand/electrified-heat.csv
+  demand_heat_electrified:
+    name: Electrified heat demand
+    base_tech: demand
+    carrier_in: electricity
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs.demand_heat_electrified:
-    {% endfor %}
+data_sources:
+  demand_electrified_heat:
+    source: timeseries/demand/electrified-heat.csv
+    rows: timesteps
+    columns: nodes
+    add_dims:
+      techs: demand_heat_electrified
+      parameters: sink_use_equals
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs.demand_heat_electrified:
+  {% endfor %}

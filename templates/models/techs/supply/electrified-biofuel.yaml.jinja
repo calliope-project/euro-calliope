@@ -1,23 +1,32 @@
 techs:
-    electrified_biofuel:  # from [@JRC:2014] Table 48 Anaerobic digestion
-        essentials:
-            name: Biofuel-derived electricity
-            parent: supply_plus
-            carrier: electricity
-        constraints:
-            energy_eff: 1.0 # efficiency modelled within the input resource stream to avoid poor numerical scaling
-            lifetime: 20
-        costs.monetary:
-            energy_cap: {{2300000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-            om_annual: {{2300000 * 0.041 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 4.1% of CAPEX
-            om_con: {{ (biofuel_cost / biofuel_efficiency + 3.1) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-            om_prod: 0 # 3.1 (EUR2013/MWh) added to om_con because value is very small and causing poor numerical range
+  electrified_biofuel:  # from [@JRC:2014] Table 48 Anaerobic digestion
+    name: Biofuel-derived electricity
+    base_tech: supply
+    carrier_out: electricity
+    lifetime: 20
+    include_storage: true
+    cost_flow_cap:
+      data: {{2300000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+      index: monetary
+      dims: costs
+    cost_om_annual:
+      data: {{2300000 * 0.041 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 4.1% of CAPEX
+      index: monetary
+      dims: costs
+    cost_flow_in:
+      data: {{ (biofuel_cost / biofuel_efficiency + 3.1) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+      index: monetary
+      dims: costs
+    cost_flow_out:
+      data: 0 # 3.1 (EUR2013/MWh) added to om_con because value is very small and causing poor numerical range
+      index: monetary
+      dims: costs
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs:
-        electrified_biofuel:
-            constraints:
-                resource: {{ location.biofuel_potential_mwh_per_year * biofuel_efficiency / 8760 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-                storage_cap_equals: {{ location.biofuel_potential_mwh_per_year * biofuel_efficiency / 2 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }} (0.5x annual yield) # ASSUME < 1 for numerical range
-    {% endfor %}
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs:
+    electrified_biofuel:
+      source_use_max: {{ location.biofuel_potential_mwh_per_year * biofuel_efficiency / 8760 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+      storage_cap_min: {{ location.biofuel_potential_mwh_per_year * biofuel_efficiency / 2 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }} (0.5x annual yield) # ASSUME < 1 for numerical range
+      storage_cap_max: {{ location.biofuel_potential_mwh_per_year * biofuel_efficiency / 2 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }} (0.5x annual yield) # ASSUME < 1 for numerical range
+  {% endfor %}

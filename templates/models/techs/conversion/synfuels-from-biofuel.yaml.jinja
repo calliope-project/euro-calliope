@@ -1,84 +1,114 @@
 techs:
-    biofuel_to_liquids: # [@DEA:2020b] - 85 Gasif. Ent. Flow FT, liq fu - 2050
-        # ASSUME: Naptha production can be diverted to kerosene and diesel production, in equal measure.
-        essentials:
-            name: Biofuel to liquid fuels converter
-            parent: conversion_plus
-            carrier_in: biofuel
-            carrier_out: kerosene
-            primary_carrier_out: diesel
-            carrier_out_2: diesel
-            carrier_out_3: electricity
-        constraints:
-            carrier_ratios:
-                carrier_out.kerosene: {{ 0.017 + 0.163 / 2 }}  # MWh_kerosene/MWh_in (includes 50% of Naptha production)
-                carrier_out_2.diesel: {{ 0.118 + 0.163 / 2 }}  # MWh_diesel/MWh_in (includes 50% of Naptha production)
-                carrier_out_3.electricity: 0.02  # MWhe/MWh_in
-            lifetime: 25
-        costs:
-            monetary:
-                {# TODO: sense check energy_cap vs om_annual costs #}
-                # EUR/MW(h)_diesel(/year) calculated from source data as: EYR/MW(h)_liquids(/year) / MW(h)_diesel/MW(h)_in * MW(h)_liquids/MW(h)_in
-                energy_cap: {{ 3.46e6 / (0.118 + 0.163 / 2) * (0.017 + 0.163 + 0.118) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }}
-                om_annual: {{ 104e3 / (0.118 + 0.163 / 2) * (0.017 + 0.163 + 0.118) * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel/year") }}
-                om_prod: {{ 1.063 / (0.118 + 0.163 / 2) * (0.017 + 0.163 + 0.118) * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }}
+  biofuel_to_liquids: # [@DEA:2020b] - 85 Gasif. Ent. Flow FT, liq fu - 2050
+    # ASSUME: Naptha production can be diverted to kerosene and diesel production, in equal measure.
+    name: Biofuel to liquid fuels converter
+    template: interest_rate
+    base_tech: conversion
+    carrier_in: biofuel
+    carrier_out: [kerosene, diesel, electricity]
+    flow_out_eff: {{ 0.017 + 0.163 / 2 + 0.118 + 0.163 / 2 + 0.02 }} # MWh_out/MWh_in
+    flow_out_share:
+      data:
+        - {{ (0.017 + 0.163 / 2) / (0.017 + 0.163 + 0.118 + 0.02) }} # MWh_kerosene/MWh_out (includes 50% of Naptha production)
+        - {{ (0.118 + 0.163 / 2) / (0.017 + 0.163 + 0.118 + 0.02) }}  # MWh_diesel/MWh_out (includes 50% of Naptha production)
+        - {{ 0.02 / (0.017 + 0.163 + 0.118 + 0.02) }}  # MWhe/MWh_out
+      index:
+        - kerosene
+        - diesel
+        - electricity
+      dims: carriers
+    lifetime: 25
 
-    # ASSUME: ignore electricity input, as it is 1% of the input energy requirements.
-    # ASSUME: all vehicle fuel is diesel.
-    biofuel_to_diesel: # [@DEA:2020b] - 101 Catalytic Hydropyrolysis 2 - 2050
-        essentials:
-            name: Biofuel to vehicle fuel converter
-            parent: conversion
-            carrier_in: biofuel
-            carrier_out: diesel
-        constraints:
-            energy_eff: 0.6  # {{ 1 | unit("MWh_diesel/MWh_biofuel") }}
-            lifetime: 20
-        costs:
-            monetary:
-                energy_cap: {{ 0.93 * 1e6 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }}
-                om_annual: {{ 0.027 * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel/year") }}
-                {# TODO: triple check this: the number seems too high... #}
-                om_prod: {{ 1.31 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_diesel") }}
+    {# TODO: sense check energy_cap vs om_annual costs #}
+    # EUR/MW(h)_diesel(/year) calculated from source data as: EYR/MW(h)_liquids(/year) / MW(h)_diesel/MW(h)_in * MW(h)_liquids/MW(h)_in
+    cost_flow_cap:
+      data: {{ 3.46e6 / (0.118 + 0.163 / 2) * (0.017 + 0.163 + 0.118) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }}
+      index: [[monetary, diesel]]
+      dims: [costs, carriers]
+    cost_om_annual:
+      data: {{ 104e3 / (0.118 + 0.163 / 2) * (0.017 + 0.163 + 0.118) * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel/year") }}
+      index: [[monetary, diesel]]
+      dims: [costs, carriers]
+    cost_flow_out:
+      data: {{ 1.063 / (0.118 + 0.163 / 2) * (0.017 + 0.163 + 0.118) * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }}
+      index: [[monetary, diesel]]
+      dims: [costs, carriers]
 
-    # ASSUME: ignore waste low grade heat output (which could be used for district heating)
-    # ASSUME: ignore electricity output, as it can cause numerical trouble.
-    biofuel_to_methanol: # [@DEA:2020b] - 97 Methanol from biomass gasif. - 2050
-        essentials:
-            name: Biofuel to Methanol converter
-            parent: conversion
-            carrier_in: biofuel
-            carrier_out: methanol
-        constraints:
-            energy_eff: 0.65  # MWh_methanol/MWh_bio
-            lifetime: 20
-        costs:
-            monetary:
-                energy_cap: {{ 1.46e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_methanol") }}
-                om_annual: {{ 0.039e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_methanol/year") }}
-                om_prod: {{ 13.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_methanol") }}
+  # ASSUME: ignore electricity input, as it is 1% of the input energy requirements.
+  # ASSUME: all vehicle fuel is diesel.
+  biofuel_to_diesel: # [@DEA:2020b] - 101 Catalytic Hydropyrolysis 2 - 2050
+    name: Biofuel to vehicle fuel converter
+    template: interest_rate
+    base_tech: conversion
+    carrier_in: biofuel
+    carrier_out: diesel
+    flow_out_eff: 0.6  # {{ 1 | unit("MWh_diesel/MWh_biofuel") }}
+    lifetime: 20
+    cost_flow_cap:
+      data: {{ 0.93 * 1e6 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel") }}
+      index: [[monetary, diesel]]
+      dims: [costs, carriers]
+    cost_om_annual:
+      data: {{ 0.027 * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_diesel/year") }}
+      index: [[monetary, diesel]]
+      dims: [costs, carriers]
+    {# TODO: triple check this: the number seems too high... #}
+    cost_flow_out:
+      data: {{ 1.31 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_diesel") }}
+      index: [[monetary, diesel]]
+      dims: [costs, carriers]
 
-    # ASSUME: ignore waste low grade heat (which could be used for district heating)
-    biofuel_to_methane: # [@DEA:2020b] - 84 Biomass to SNG gassifier - 2050
-        essentials:
-            name: Biofuel to Methane converter
-            parent: conversion
-            carrier_in: biofuel
-            carrier_out: methane
-        constraints:
-            energy_eff: 0.7
-            lifetime: 20
-        costs:
-            monetary:  # source gives in terms of carrier_in, so these are scaled by the methane production efficiency
-                energy_cap: {{ 1.5e6 / 0.7 * scaling_factors.specific_costs }}  #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_methane") }}
-                om_annual: {{ 24.1e3 / 0.7 * scaling_factors.specific_costs }}  #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_methane/year") }}
-                om_prod: {{ 1.6 / 0.7 * scaling_factors.specific_costs }}  #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_methane") }}
+  # ASSUME: ignore waste low grade heat output (which could be used for district heating)
+  # ASSUME: ignore electricity output, as it can cause numerical trouble.
+  biofuel_to_methanol: # [@DEA:2020b] - 97 Methanol from biomass gasif. - 2050
+    name: Biofuel to Methanol converter
+    template: interest_rate
+    base_tech: conversion
+    carrier_in: biofuel
+    carrier_out: methanol
+    flow_out_eff: 0.65  # MWh_methanol/MWh_bio
+    lifetime: 20
+    cost_flow_cap:
+      data: {{ 1.46e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_methanol") }}
+      index: [[monetary, methanol]]
+      dims: [costs, carriers]
+    cost_om_annual:
+      data: {{ 0.039e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_methanol/year") }}
+      index: [[monetary, methanol]]
+      dims: [costs, carriers]
+    cost_flow_out:
+      data: {{ 13.6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_methanol") }}
+      index: [[monetary, methanol]]
+      dims: [costs, carriers]
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs:
-        biofuel_to_liquids:
-        biofuel_to_diesel:
-        biofuel_to_methanol:
-        biofuel_to_methane:
-    {% endfor %}
+  # ASSUME: ignore waste low grade heat (which could be used for district heating)
+  biofuel_to_methane: # [@DEA:2020b] - 84 Biomass to SNG gassifier - 2050
+    name: Biofuel to Methane converter
+    template: interest_rate
+    base_tech: conversion
+    carrier_in: biofuel
+    carrier_out: methane
+    flow_out_eff: 0.7
+    lifetime: 20
+    # source gives in terms of carrier_in, so these are scaled by the methane production efficiency
+    cost_flow_cap:
+      data: {{ 1.5e6 / 0.7 * scaling_factors.specific_costs }}  #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_methane") }}
+      index: [[monetary, methane]]
+      dims: [costs, carriers]
+    cost_om_annual:
+      data: {{ 24.1e3 / 0.7 * scaling_factors.specific_costs }}  #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_methane/year") }}
+      index: [[monetary, methane]]
+      dims: [costs, carriers]
+    cost_flow_out:
+      data: {{ 1.6 / 0.7 * scaling_factors.specific_costs }}  #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MWh_methane") }}
+      index: [[monetary, methane]]
+      dims: [costs, carriers]
+
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs:
+    biofuel_to_liquids:
+    biofuel_to_diesel:
+    biofuel_to_methanol:
+    biofuel_to_methane:
+  {% endfor %}

@@ -1,77 +1,116 @@
 techs:
-    hydro_run_of_river:  # from [@JRC:2014] Table 14
-        essentials:
-            name: Run of river hydro electricity
-            parent: supply
-            carrier: electricity
-        constraints:
-            resource: file=supply/capacityfactors-hydro-run-of-river.csv
-            resource_unit: energy_per_cap
-            lifetime: 60
-        costs.monetary:
-            energy_cap: {{5620000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-            om_annual: {{5620000 * 0.03 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 3% of CAPEX
-            om_prod: {{5 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-    hydro_reservoir:  # from [@JRC:2014] Table 12
-        essentials:
-            name: Hydro electricity with a reservoir.
-            parent: supply_plus
-            carrier: electricity
-        constraints:
-            resource: file=supply/capacityfactors-hydro-reservoir.csv
-            resource_unit: energy_per_cap
-            lifetime: 60
-        costs.monetary:
-            energy_cap: {{3370000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-            om_annual: {{3370000 * 0.03 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 3% of CAPEX
-            om_prod: {{5 * scaling_factors.specific_costs}} #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+  hydro_run_of_river:  # from [@JRC:2014] Table 14
+    name: Run of river hydro electricity
+    template: interest_rate
+    base_tech: supply
+    carrier_out: electricity
+    source_unit: per_cap
+    lifetime: 60
+    cost_flow_cap:
+      data: {{5620000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+      index: monetary
+      dims: costs
+    cost_om_annual:
+      data: {{5620000 * 0.03 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 3% of CAPEX
+      index: monetary
+      dims: costs
+    cost_flow_out:
+      data: {{5 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+      index: monetary
+      dims: costs
+  hydro_reservoir:  # from [@JRC:2014] Table 12
+    name: Hydro electricity with a reservoir.
+    template: interest_rate
+    base_tech: supply
+    carrier_out: electricity
+    source_unit: per_cap
+    include_storage: true
+    lifetime: 60
+    cost_flow_cap:
+      data: {{3370000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+      index: monetary
+      dims: costs
+    cost_om_annual:
+      data: {{3370000 * 0.03 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 3% of CAPEX
+      index: monetary
+      dims: costs
+    cost_flow_out:
+      data: {{5 * scaling_factors.specific_costs}} #  {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+      index: monetary
+      dims: costs
+
+data_sources:
+  capacityfactors_hydro_run_of_river:
+    source: timeseries/supply/capacityfactors-hydro-run-of-river.csv
+    rows: timesteps
+    columns: nodes
+    add_dims:
+      techs: hydro_run_of_river
+      parameters: source_use_max
+  capacityfactors_hydro_reservoir:
+    source: timeseries/supply/capacityfactors-hydro-reservoir.csv
+    rows: timesteps
+    columns: nodes
+    add_dims:
+      techs: hydro_reservoir
+      parameters: source_use_max
 
 overrides:
-    no-hydro-supply-fixed-cost:
-        # Only assign costs to O&M and variable costs
-        techs.hydro_run_of_river.costs.monetary:
-            energy_cap: 0
-            om_con: 0
-        techs.hydro_reservoir.costs.monetary:
-            energy_cap: 0
-            storage_cap: 0
-            om_con: 0
+  no_hydro_supply_fixed_cost:
+    # Only assign costs to O&M and variable costs
+    techs.hydro_run_of_river:
+      cost_flow_cap.data: 0
+    techs.hydro_reservoir:
+      cost_flow_cap.data: 0
 
-    schroeder-hydro-cost: # from [@schroeder:2013]
-        techs.hydro_run_of_river:
-            constraints.lifetime: 60
-            costs.monetary:
-                energy_cap: {{ 3000000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} Table 33
-                om_annual: {{ (60000 - 1 * 8760 * capacity_factors.ror) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} Table 34
-                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} stolen from om_annual for technical reasons
-        techs.hydro_reservoir:
-            constraints.lifetime: 60
-            costs.monetary:
-                energy_cap: {{ 2000000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} Table 33
-                om_annual: {{ (20000 - 1 * 8760 * capacity_factors.ror) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} Table 34
-                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} stolen from om_annual for technical reasons
+  schroeder_hydro_cost: # from [@schroeder:2013]
+    techs:
+      hydro_run_of_river:
+        lifetime: 60
+        cost_flow_cap:
+          data: {{ 3000000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} Table 33
+          index: monetary
+          dims: costs
+        cost_om_annual:
+          data: {{ (60000 - 1 * 8760 * capacity_factors.ror) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} Table 34
+          index: monetary
+          dims: costs
+        cost_flow_out:
+          data: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} stolen from om_annual for technical reasons
+          index: monetary
+          dims: costs
+      hydro_reservoir:
+        lifetime: 60
+        cost_flow_cap:
+          data: {{ 2000000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} Table 33
+          index: monetary
+          dims: costs
+        cost_om_annual:
+          data: {{ (20000 - 1 * 8760 * capacity_factors.ror) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} Table 34
+          index: monetary
+          dims: costs
+        cost_flow_out:
+          data: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2010/MW") }} stolen from om_annual for technical reasons
+          index: monetary
+          dims: costs
 
-    freeze-hydro-supply-capacities:
-        locations:
-            {% for id, location in locations.iterrows() %}
-            {{ id }}.techs: # {{ location["name"] }}
-                hydro_run_of_river:
-                    constraints:
-                        energy_cap_equals: {{ location.installed_capacity_hror_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-                hydro_reservoir:
-                    constraints:
-                        energy_cap_equals: {{ location.installed_capacity_hdam_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-                        storage_cap_equals: {{ location.storage_capacity_hdam_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
-            {% endfor %}
-
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs:
+  freeze_hydro_supply_capacities:
+    nodes:
+      {% for id, location in locations.iterrows() %}
+      {{ id }}.techs: # {{ location["name"] }}
         hydro_run_of_river:
-            constraints:
-                energy_cap_max: {{ location.installed_capacity_hror_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+          flow_cap_min: {{ location.installed_capacity_hror_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
         hydro_reservoir:
-            constraints:
-                energy_cap_max: {{ location.installed_capacity_hdam_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-                storage_cap_max: {{ location.storage_capacity_hdam_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
-    {% endfor %}
+          flow_cap_min: {{ location.installed_capacity_hdam_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+          storage_cap_min: {{ location.storage_capacity_hdam_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+      {% endfor %}
+
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs:
+    hydro_run_of_river:
+      flow_cap_max: {{ location.installed_capacity_hror_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+    hydro_reservoir:
+      flow_cap_max: {{ location.installed_capacity_hdam_MW * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+      storage_cap_max: {{ location.storage_capacity_hdam_MWh * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+  {% endfor %}

@@ -19,7 +19,7 @@ def construct_locations(
     ).loc[:, ["name", "centroid"]]
 
     locations = locations.assign(
-        id=locations.index.str.replace(".", "-", regex=False)
+        id=locations.index.str.replace(".", "_", regex=False)
     ).set_index("id")
 
     parametrise_template(

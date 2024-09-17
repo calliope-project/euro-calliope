@@ -2,22 +2,22 @@ test-model:
     scenarios:
         continental:
             default: []
-            directional-pv: ["directional-rooftop-pv"]
-            e-to-p-ratios: ["exclusive-energy-to-power-ratios"]
-            frozen-hydro: ["freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "no-hydro-supply-fixed-cost", "no-hydro-storage-fixed-cost"]
-            alternative-cost: ["dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost"]
-            shed-load: ["load-shedding"]
-            keep-historic-transport: ["keep-historic-electricity-demand-from-road-transport"]
+            directional-pv: ["directional_rooftop_pv"]
+            e-to-p-ratios: ["exclusive_energy_to_power_ratios"]
+            frozen-hydro: ["freeze_hydro_supply_capacities", "freeze_hydro_storage_capacities", "no_hydro_supply_fixed_cost", "no_hydro_storage_fixed_cost"]
+            alternative-cost: ["dea_renewable_cost_pv_open_field", "dea_renewable_cost_wind_onshore", "dea_renewable_cost_wind_offshore", "dea_renewable_cost_pv_roof_mounted", "schroeder_hydro_cost"]
+            shed-load: ["load_shedding"]
+            keep-historic-transport: ["keep_historic_electricity_demand_from_road_transport"]
         national:
             default: []
             connected_neighbours: ["connect_all_neighbours"]
             connected_entsoe_tyndp: ["connect_entsoe_tyndp"]
-            directional-pv: ["directional-rooftop-pv"]
-            e-to-p-ratios: ["exclusive-energy-to-power-ratios"]
-            frozen-hydro: ["freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "no-hydro-supply-fixed-cost", "no-hydro-storage-fixed-cost"]
-            alternative-cost: ["dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost"]
-            shed-load: ["load-shedding"]
-            keep-historic-transport: ["keep-historic-electricity-demand-from-road-transport"]
+            directional-pv: ["directional_rooftop_pv"]
+            e-to-p-ratios: ["exclusive_energy_to_power_ratios"]
+            frozen-hydro: ["freeze_hydro_supply_capacities", "freeze_hydro_storage_capacities", "no_hydro_supply_fixed_cost", "no_hydro_storage_fixed_cost"]
+            alternative-cost: ["dea_renewable_cost_pv_open_field", "dea_renewable_cost_wind_onshore", "dea_renewable_cost_wind_offshore", "dea_renewable_cost_pv_roof_mounted", "schroeder_hydro_cost"]
+            shed-load: ["load_shedding"]
+            keep-historic-transport: ["keep_historic_electricity_demand_from_road_transport"]
             heat: ["heat_carrier"]
             electrified-heat: ["electrified_heat"]
             biofuel: ["biofuel_carrier"]
@@ -26,12 +26,12 @@ test-model:
 
         regional:
             default: ["connect_all_neighbours", "run_barrier_no_crossover"]
-            all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
-                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "heat_carrier", "biofuel_carrier", "synfuel_carriers"]
+            all-overrides: ["connect_all_neighbours", "directional_rooftop_pv", "exclusive_energy_to_power_ratios",
+                            "dea_renewable_cost_pv_open_field", "dea_renewable_cost_wind_onshore", "dea_renewable_cost_wind_offshore", "dea_renewable_cost_pv_roof_mounted", "schroeder_hydro_cost", "freeze_hydro_supply_capacities", "freeze_hydro_storage_capacities", "load_shedding", "heat_carrier", "biofuel_carrier", "synfuel_carriers"]
         ehighways:
             default: ["connect_all_neighbours", "run_barrier_no_crossover"]
-            all-overrides: ["connect_all_neighbours", "directional-rooftop-pv", "exclusive-energy-to-power-ratios",
-                            "dea-renewable-cost-pv-open-field", "dea-renewable-cost-wind-onshore", "dea-renewable-cost-wind-offshore", "dea-renewable-cost-pv-roof-mounted", "schroeder-hydro-cost", "freeze-hydro-supply-capacities", "freeze-hydro-storage-capacities", "load-shedding", "heat_carrier", "biofuel_carrier", "synfuel_carriers"]
+            all-overrides: ["connect_all_neighbours", "directional_rooftop_pv", "exclusive_energy_to_power_ratios",
+                            "dea_renewable_cost_pv_open_field", "dea_renewable_cost_wind_onshore", "dea_renewable_cost_wind_offshore", "dea_renewable_cost_pv_roof_mounted", "schroeder_hydro_cost", "freeze_hydro_supply_capacities", "freeze_hydro_storage_capacities", "load_shedding", "heat_carrier", "biofuel_carrier", "synfuel_carriers"]
     overrides:
         continental: {}
         national:
@@ -92,7 +92,7 @@ test-model:
                     - "build/models/regional/techs/conversion/hydrogen-from-electricity.yaml"
 
             run_barrier_no_crossover:
-                run.solver_options: {Method: 2, Crossover: 0}
+                config.solve.solver_options: {Method: 2, Crossover: 0}
         ehighways:
             connect_all_neighbours:
                 import:
@@ -119,7 +119,7 @@ test-model:
                     - "build/models/ehighways/techs/conversion/hydrogen-from-electricity.yaml"
 
             run_barrier_no_crossover:
-                run.solver_options: {Method: 2, Crossover: 0}
+                config.solve.solver_options: {Method: 2, Crossover: 0}
     subset_time:
         continental: ['2016-01-01', '2016-01-02']
         national: ['2016-01-01', '2016-01-01']

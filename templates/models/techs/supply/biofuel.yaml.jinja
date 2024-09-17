@@ -1,16 +1,18 @@
 techs:
-    biofuel_supply:
-        essentials:
-            name: Biofuel supply stream
-            parent: supply_plus
-            carrier: biofuel
-        costs.monetary:
-            om_prod: {{ biofuel_cost * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR/MWh") }}
+  biofuel_supply:
+    name: Biofuel supply stream
+    base_tech: supply
+    carrier_out: biofuel
+    include_storage: true
+    cost_flow_out:
+      data: {{ biofuel_cost * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR/MWh") }}
+      index: monetary
+      dims: costs
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs.biofuel_supply:
-        constraints:
-            resource: {{ location.biofuel_potential_mwh_per_year / 8760 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
-            storage_cap_equals: {{ location.biofuel_potential_mwh_per_year / 2 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }} (0.5x annual yield) # ASSUME < 1 for numerical range
-    {% endfor %}
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs.biofuel_supply:
+    source_use_max: {{ location.biofuel_potential_mwh_per_year / 8760 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }}
+    storage_cap_min: {{ location.biofuel_potential_mwh_per_year / 2 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }} (0.5x annual yield) # ASSUME < 1 for numerical range
+    storage_cap_max: {{ location.biofuel_potential_mwh_per_year / 2 * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MWh") }} (0.5x annual yield) # ASSUME < 1 for numerical range
+  {% endfor %}

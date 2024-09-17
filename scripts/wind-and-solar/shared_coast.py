@@ -90,7 +90,7 @@ def allocate_eezs(
     # Clean up id and MRGID data
     share.index = share.index.set_levels(
         levels=(
-            share.index.levels[0].map(lambda x: x.replace(".", "-")),
+            share.index.levels[0].map(lambda x: x.replace(".", "_")),
             share.index.levels[1].astype(int),
         ),
         level=[0, 1],

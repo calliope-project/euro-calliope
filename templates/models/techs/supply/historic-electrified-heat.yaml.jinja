@@ -1,14 +1,19 @@
 techs:
-    historic_electrified_heat:
-        essentials:
-            name: Removes historic electrified heat demand from the electricity demand profile
-            parent: supply
-            carrier: electricity
-        constraints:
-            resource: file=supply/historic-electrified-heat.csv
-            force_resource: true
+  historic_electrified_heat:
+    name: Removes historic electrified heat demand from the electricity demand profile
+    base_tech: supply
+    carrier_out: electricity
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs.historic_electrified_heat:
-    {% endfor %}
+data_sources:
+  historic_electrified_heat:
+    source: timeseries/supply/historic-electrified-heat.csv
+    rows: timesteps
+    columns: nodes
+    add_dims:
+      techs: historic_electrified_heat
+      parameters: source_use_equals
+
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs.historic_electrified_heat:
+  {% endfor %}

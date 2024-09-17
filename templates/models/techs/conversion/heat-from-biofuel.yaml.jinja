@@ -3,27 +3,25 @@
 {# Costs are given by DEA per technology "unit" (1000EUR/unit), so are converted to a cost per capacity (1000EUR/kW_heating) by dividing by the capacity of one unit, as given in the same data table. #}
 
 techs:
-    biofuel_boiler: # [@DEA:2017] - Biomass boiler, automatic stoking , wood pellets or wood chips - 2050
-        # Costs and efficiency are an average of data for existing single-family, new single-family, existing multi-family, and new multi-family homes.
-        essentials:
-            name: Biofuel boiler
-            parent: conversion
-            carrier_in: biofuel
-            carrier_out: biofuel_heat
-        constraints:
-            energy_eff: {{ mean([0.88, 0.85, 0.90, 0.90]) }}
-            lifetime: 20
-        costs:
-            monetary:
-                energy_cap: {{ mean([5.9 / 10, 5.9 / 8, 76 / 400, 45 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }}
-                om_annual: {{ mean([0.42 / 10, 0.42 / 10, 1.343 / 400, 0.889 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }}
-    biofuel_tech_heat_to_demand:
-        essentials.parent: tech_heat_to_demand
-        essentials.carrier_in: biofuel_heat
+  biofuel_boiler: # [@DEA:2017] - Biomass boiler, automatic stoking , wood pellets or wood chips - 2050
+    # Costs and efficiency are an average of data for existing single-family, new single-family, existing multi-family, and new multi-family homes.
+    name: Biofuel boiler
+    template: interest_rate
+    base_tech: conversion
+    carrier_in: biofuel
+    carrier_out: heat
+    flow_out_eff: {{ mean([0.88, 0.85, 0.90, 0.90]) }}
+    lifetime: 20
+    cost_flow_cap:
+      data: {{ mean([5.9 / 10, 5.9 / 8, 76 / 400, 45 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat") }}
+      index: [[monetary, heat]]
+      dims: [costs, carriers]
+    cost_om_annual:
+      data: {{ mean([0.42 / 10, 0.42 / 10, 1.343 / 400, 0.889 / 160]) * 1e6 * scaling_factors.specific_costs }}  # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW_heat/year") }}
+      index: [[monetary, heat]]
+      dims: [costs, carriers]
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}.techs:
-        biofuel_boiler:
-        biofuel_tech_heat_to_demand:
-    {% endfor %}
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}.techs.biofuel_boiler:
+  {% endfor %}

@@ -1,75 +1,113 @@
-tech_groups:
-    wind_onshore:  # from [@JRC:2014] Table 4
-        essentials:
-            name: Onshore wind
-            carrier: electricity
-            parent: supply
-        constraints:
-            resource: file=supply/capacityfactors-wind-onshore.csv
-            resource_unit: energy_per_cap
-            lifetime: 25
-        costs.monetary:
-            energy_cap: {{ 1100000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-            om_annual: {{ (1100000 * 0.017 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% of CAPEX
-            om_prod: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+templates:
+  wind_onshore:  # from [@JRC:2014] Table 4
+    name: Onshore wind
+    template: interest_rate
+    carrier_out: electricity
+    base_tech: supply
+    source_unit: per_cap
+    lifetime: 25
+    cost_flow_cap:
+      data: {{ 1100000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+      index: monetary
+      dims: costs
+    cost_om_annual:
+      data: {{ (1100000 * 0.017 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% of CAPEX
+      index: monetary
+      dims: costs
+    cost_flow_out:
+      data: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+      index: monetary
+      dims: costs
 
 techs:
-    open_field_pv:  # from [@JRC:2014] Table 7
-        essentials:
-            name: Open field PV
-            carrier: electricity
-            parent: supply
-        constraints:
-            # open_field_pv and wind_onshore_competing are the only technologies with area footprints
-            # as they are the only technologies competing on the same land.
-            resource_area_per_energy_cap: {{ (1 / max_power_densities["pv-on-flat-areas"]) * scaling_factors.area / scaling_factors.power }} # {{ (scaling_factors.power / scaling_factors.area) | unit("km^2/MW") }} from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
-            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
-            resource: file=supply/capacityfactors-open-field-pv.csv
-            resource_unit: energy_per_cap
-            lifetime: 25
-        costs.monetary:
-            energy_cap: {{ 520000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
-            om_annual: {{ (520000 * 0.017 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% of CAPEX
-            om_prod: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
-    wind_onshore_monopoly:
-        essentials:
-            name: Onshore wind without land competition
-            parent: wind_onshore
-    wind_onshore_competing:
-        essentials:
-            name: Onshore wind competing with open field PV on land
-            parent: wind_onshore
-        constraints:
-            # open_field_pv and wind_onshore_competing are the only technologies with area footprints
-            # as they are the only technologies competing on the same land.
-            resource_area_per_energy_cap: {{ (1 / max_power_densities["onshore-wind"]) * scaling_factors.area / scaling_factors.power }} # {{ (scaling_factors.power / scaling_factors.area) | unit("km^2/MW") }} from [@EuropeanEnvironmentAgency:2009]
-            resource_area_max: inf # see https://github.com/calliope-project/calliope/pull/160
+  open_field_pv:  # from [@JRC:2014] Table 7
+    template: interest_rate
+    name: Open field PV
+    carrier_out: electricity
+    base_tech: supply
+    # open_field_pv and wind_onshore_competing are the only technologies with area footprints
+    # as they are the only technologies competing on the same land.
+    area_use_per_flow_cap: {{ (1 / max_power_densities["pv-on-flat-areas"]) * scaling_factors.area / scaling_factors.power }} # {{ (scaling_factors.power / scaling_factors.area) | unit("km^2/MW") }} from [@Gagnon:2016][@Klauser:2016][@Wirth:2017]
+    source_unit: per_cap
+    lifetime: 25
+    cost_flow_cap:
+      data: {{ 520000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }}
+      index: monetary
+      dims: costs
+    cost_om_annual:
+      data: {{ (520000 * 0.017 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} 1.7% of CAPEX
+      index: monetary
+      dims: costs
+    cost_flow_out:
+      data: {{1 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2013/MW") }} stolen from om_annual for technical reasons
+      index: monetary
+      dims: costs
+  wind_onshore_monopoly:
+      name: Onshore wind without land competition
+      template: wind_onshore
+  wind_onshore_competing:
+      name: Onshore wind competing with open field PV on land
+      template: wind_onshore
+      # open_field_pv and wind_onshore_competing are the only technologies with area footprints
+      # as they are the only technologies competing on the same land.
+      area_use_per_flow_cap: {{ (1 / max_power_densities["onshore-wind"]) * scaling_factors.area / scaling_factors.power }} # {{ (scaling_factors.power / scaling_factors.area) | unit("km^2/MW") }} from [@EuropeanEnvironmentAgency:2009]
+
+data_sources:
+    capacityfactors_wind_onshore:
+      source: timeseries/supply/capacityfactors-wind-onshore.csv
+      rows: timesteps
+      columns: nodes
+      add_dims:
+        techs: [wind_onshore_monopoly, wind_onshore_competing]
+        parameters: source_use_max
+    capacityfactors_open_field_pv:
+      source: timeseries/supply/capacityfactors-open-field-pv.csv
+      rows: timesteps
+      columns: nodes
+      add_dims:
+        techs: open_field_pv
+        parameters: source_use_max
 
 overrides:
-    dea-renewable-cost-pv-open-field: # from [@DEA:2020a]
-        techs.open_field_pv: # Sheet 22 - Photovoltaics Large (last updated 2016)
-            constraints.lifetime: 40 # inverter lifetime is shorter but the replacement cost is included in O&M
-            costs.monetary:
-                energy_cap: {{ 241000 * 1.25 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} with DC/AC sizing factor
-                om_annual: {{ (5000 * 1.25 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }} with DC/AC sizing factor
-                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
+  dea_renewable_cost_pv_open_field: # from [@DEA:2020a]
+    techs.open_field_pv: # Sheet 22 - Photovoltaics Large (last updated 2016)
+      lifetime: 40 # inverter lifetime is shorter but the replacement cost is included in O&M
+      cost_flow_cap:
+        data: {{ 241000 * 1.25 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} with DC/AC sizing factor
+        index: monetary
+        dims: costs
+      cost_om_annual:
+        data: {{ (5000 * 1.25 - 1 * 8760 * capacity_factors.pv) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }} with DC/AC sizing factor
+        index: monetary
+        dims: costs
+      cost_flow_out:
+        data: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
+        index: monetary
+        dims: costs
 
-    dea-renewable-cost-wind-onshore: # from [@DEA:2020a]
-        tech_groups.wind_onshore: # Sheet 20 Onshore Turbines (last updated 2019)
-            constraints.lifetime: 30
-            costs.monetary:
-                energy_cap: {{ 963000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
-                om_annual: {{ (11340 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
-                om_prod: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
+  dea_renewable_cost_wind_onshore: # from [@DEA:2020a]
+    templates.wind_onshore: # Sheet 20 Onshore Turbines (last updated 2019)
+      lifetime: 30
+      cost_flow_cap:
+        data: {{ 963000 * scaling_factors.specific_costs}} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }}
+        index: monetary
+        dims: costs
+      cost_om_annual:
+        data: {{ (11340 - 1 * 8760 * capacity_factors.onshore) * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW/year") }}
+        index: monetary
+        dims: costs
+      cost_flow_out:
+        data: {{ 1 * scaling_factors.specific_costs }} # {{ (1 / scaling_factors.specific_costs) | unit("EUR2015/MW") }} stolen from om_annual for technical reasons
+        index: monetary
+        dims: costs
 
-locations:
-    {% for id, location in locations.iterrows() %}
-    {{ id }}:
-        available_area: {{ location.eligibility_onshore_wind_and_pv_km2 * scaling_factors.area }}  # {{ (1 / scaling_factors.area) | unit("km2") }} usable by onshore wind or open field pv
-        techs:
-            open_field_pv:
-            wind_onshore_competing:
-            wind_onshore_monopoly:
-                constraints:
-                    energy_cap_max: {{ location.eligibility_onshore_wind_monopoly_mw * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
-    {% endfor %}
+nodes:
+  {% for id, location in locations.iterrows() %}
+  {{ id }}:
+    available_area: {{ location.eligibility_onshore_wind_and_pv_km2 * scaling_factors.area }}  # {{ (1 / scaling_factors.area) | unit("km2") }} usable by onshore wind or open field pv
+    techs:
+      open_field_pv:
+      wind_onshore_competing:
+      wind_onshore_monopoly:
+        flow_cap_max: {{ location.eligibility_onshore_wind_monopoly_mw * scaling_factors.power }} # {{ (1 / scaling_factors.power) | unit("MW") }}
+  {% endfor %}
