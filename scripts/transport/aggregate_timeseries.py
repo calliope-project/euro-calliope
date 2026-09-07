@@ -31,13 +31,15 @@ def create_regional_timeseries(
     df_national = create_national_timeseries(paths_to_input)
 
     region_country_mapping = (
-        pd.read_csv(region_country_mapping, index_col=0)
+        pd
+        .read_csv(region_country_mapping, index_col=0)
         .loc[:, "country_code"]
         .to_dict()
     )
 
     df_population_share = (
-        pd.read_csv(population, index_col=0)
+        pd
+        .read_csv(population, index_col=0)
         .loc[:, "population_sum"]
         .reindex(region_country_mapping.keys())
         .groupby(by=region_country_mapping)
@@ -45,7 +47,8 @@ def create_regional_timeseries(
     )
 
     df_regional = (
-        pd.DataFrame(
+        pd
+        .DataFrame(
             index=df_national.index,
             data={
                 id: df_national[country_code]

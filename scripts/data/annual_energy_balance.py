@@ -50,7 +50,8 @@ def generate_annual_energy_balance_nc(
         "XK"
     ]
     df = (
-        df.drop(axis=0, level="country", labels=not_countries)
+        df
+        .drop(axis=0, level="country", labels=not_countries)
         .reset_index(level="country")
         .assign(country=lambda df: df.country.map(utils.convert_country_code))
         .set_index("country", append=True)
@@ -103,7 +104,8 @@ def add_ch_energy_balance(path_to_ch_excel, path_to_ch_industry_excel, index_lev
     ch_transport_energy_use = get_ch_transport_energy_balance(path_to_ch_excel)
 
     ch_energy_use_tdf = pd.concat([
-        df.reset_index("year")
+        df
+        .reset_index("year")
         .assign(country="CHE", unit="TJ")
         .set_index(["year", "country", "unit"], append=True)
         .squeeze()
@@ -136,7 +138,8 @@ def get_ch_energy_balance_sheet(path_to_excel, sheet, skipfooter, cat_code):
     # Footnote labels lead to some strings randomly ending in numbers; we remove them here
     remove_digits = str.maketrans("", "", digits)
     df = (
-        pd.read_excel(
+        pd
+        .read_excel(
             path_to_excel,
             skiprows=6,
             skipfooter=skipfooter,
@@ -153,7 +156,8 @@ def get_ch_energy_balance_sheet(path_to_excel, sheet, skipfooter, cat_code):
         .rename_axis(index="year")
     )
     df.columns = (
-        df.columns.get_level_values(0)
+        df.columns
+        .get_level_values(0)
         .str.translate(remove_digits)
         .map(ch_energy_carriers)
         .rename("carrier_code")
@@ -183,7 +187,8 @@ def get_ch_waste_consumption(path_to_excel):
     )[("Consommation d'énergie (GWh)", "Ordures")]
     waste_stream_tj = waste_stream_gwh.apply(utils.gwh_to_tj)
     waste_stream_tdf = (
-        waste_stream_tj.to_frame(carrier_code)  # carrier code
+        waste_stream_tj
+        .to_frame(carrier_code)  # carrier code
         .rename_axis(index="year", columns="carrier_code")
         .assign(cat_code=category_code)  # cat code
         .set_index("cat_code", append=True)
@@ -221,7 +226,8 @@ def get_ch_transport_energy_balance(path_to_excel):
 
     def carrier_name_func(index):
         return (
-            df.columns.to_frame()
+            df.columns
+            .to_frame()
             .iloc[:, index]
             .str.translate(remove_digits)
             .map(carriers)
@@ -230,7 +236,8 @@ def get_ch_transport_energy_balance(path_to_excel):
     df.columns = carrier_name_func(0).fillna(carrier_name_func(1)).values
 
     df = (
-        df.groupby(axis=1, level=0)
+        df
+        .groupby(axis=1, level=0)
         .sum()
         .rename_axis(index="year", columns="carrier_code")
         .T
@@ -268,7 +275,8 @@ def get_ch_industry_energy_balance(path_to_excel):
     }
 
     column_names = (
-        pd.read_excel(
+        pd
+        .read_excel(
             path_to_excel,
             sheet_name="Überblick_tot",
             skiprows=5,
@@ -282,7 +290,8 @@ def get_ch_industry_energy_balance(path_to_excel):
     column_names = ["year"] + list(column_names)
 
     return (
-        pd.concat(
+        pd
+        .concat(
             [
                 read_industry_subsector(
                     path_to_excel, first_row, column_names, carrier_name
@@ -302,7 +311,8 @@ def read_industry_subsector(
     path: str, first_row: int, column_names: list[str], carrier_code: str
 ) -> pd.DataFrame:
     return (
-        pd.read_excel(
+        pd
+        .read_excel(
             path,
             sheet_name="Überblick_tot",
             skiprows=first_row - 1,

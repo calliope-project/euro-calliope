@@ -1,7 +1,6 @@
 """Preprocessing of raw NUTS data to bring it into normalised form."""
 
 import logging
-from typing import Union
 
 import fiona
 import geopandas as gpd
@@ -40,7 +39,8 @@ def clean_nuts(
     gdf_nuts = gpd.read_file(path_to_nuts)
 
     gdf_nuts_clean = (
-        gpd.GeoDataFrame(
+        gpd
+        .GeoDataFrame(
             geometry=gdf_nuts.geometry.apply(_to_multi_polygon),
             data={
                 "id": gdf_nuts.NUTS_ID,
@@ -115,7 +115,7 @@ def _all_parts_in_study_area(
 
 
 def _to_multi_polygon(
-    geometry: Union[dict, shapely.geometry.Polygon],
+    geometry: dict | shapely.geometry.Polygon,
 ) -> shapely.geometry.MultiPolygon:
     "Convert all input shapes into MultiPolygons"
     if isinstance(geometry, dict):

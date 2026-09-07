@@ -94,7 +94,8 @@ def test_technologies_are_available(energy_cap, location, technologies):
     for technology in technologies:
         if "transmission" in technology:
             assert pd.notna(
-                energy_cap.where(energy_cap.techs.str.find(technology) > -1)
+                energy_cap
+                .where(energy_cap.techs.str.find(technology) > -1)
                 .sum(min_count=1)
                 .item()
             )

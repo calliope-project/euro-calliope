@@ -52,7 +52,8 @@ def assert_correct_form(shapes, spatiotemporal):
 def weights_between_shape_and_xy(shapes, stacked_spatiotemporal):
     x, y = zip(*stacked_spatiotemporal.xy.values)
     grid_gdf = (
-        gpd.GeoSeries(
+        gpd
+        .GeoSeries(
             gpd.points_from_xy(x=x, y=y, crs=stacked_spatiotemporal.crs), crs=shapes.crs
         )
         .buffer(infer_resolution(stacked_spatiotemporal.unstack("xy")) / 2)
@@ -67,7 +68,8 @@ def weights_between_shape_and_xy(shapes, stacked_spatiotemporal):
         lambda area: area / area.sum()
     )
     weights = (
-        overlaid.set_index(["xy", "shape_id"])
+        overlaid
+        .set_index(["xy", "shape_id"])
         .loc[:, "weight"]
         .to_xarray()
         .reindex_like(stacked_spatiotemporal)  # add all xy's even without overlay
@@ -132,7 +134,8 @@ def convert_old_style_capacity_factor_time_series(ts):
         for site_id in ts.site_id
     }
     gdf = (
-        gpd.GeoDataFrame(
+        gpd
+        .GeoDataFrame(
             data={"site_id": [site_id for site_id in site_id_map]},
             geometry=[Point(lon, lat) for lon, lat in site_id_map.values()],
             crs=WGS84,

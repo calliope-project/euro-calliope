@@ -43,7 +43,8 @@ def process_jrc_heat_tertiary_sector_data(
         df = pd.concat([df_final_energy, df_useful_energy])
 
         df_elec = (
-            df_summary.loc[
+            df_summary
+            .loc[
                 "Energy consumption by end-uses (ktoe)":"Shares of energy consumption in end-uses (in %)"
             ]
             .loc["Specific electricity uses"]
@@ -73,7 +74,8 @@ def clean_df(df: pd.DataFrame, energy_type: str):
     df.end_use = df.end_use.fillna(df.end_use.ffill())
 
     df = (
-        df.dropna()
+        df
+        .dropna()
         .set_index("end_use", append=True)
         .drop(END_USES.keys(), level=0)
         .groupby([CARRIER_NAMES, END_USES], level=[0, 1])

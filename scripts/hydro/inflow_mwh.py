@@ -26,7 +26,8 @@ def determine_energy_inflow(
 
 def read_generation(path_to_generation, year):
     return (
-        pd.read_csv(path_to_generation, index_col=[0, 1])
+        pd
+        .read_csv(path_to_generation, index_col=[0, 1])
         .loc[:, "generation_gwh"]
         .rename("generation")
         .xs(year, level="year")
@@ -114,15 +115,15 @@ def allocate_generation_to_plant(plants, annual_national_generation_mwh):
     # Capacity share is scaled to account for erroneous zero timesteps in the inflow data
     inflow_count = inflows.where(inflows > 1).count(axis=1) / inflows.count(axis=1)
     capacity_share = (
-        plants.assign(
-            scaled_capacity=plants.installed_capacity_MW.multiply(inflow_count)
-        )
+        plants
+        .assign(scaled_capacity=plants.installed_capacity_MW.multiply(inflow_count))
         .groupby("country_code")["scaled_capacity"]
         .transform(lambda x: x / x.sum())
     )
 
     national_generation = (
-        plants.reset_index()
+        plants
+        .reset_index()
         .merge(
             annual_national_generation_mwh,
             on="country_code",
