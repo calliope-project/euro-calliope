@@ -23,13 +23,15 @@ def national_to_regional_resolution(
     # ASSUME national heat demand is spatially distributed by population.
     # TODO maybe we want to have it per GVA for commercial demand
     df_population_share = (
-        populations.loc[:, "population_sum"]
+        populations
+        .loc[:, "population_sum"]
         .reindex(region_country_mapping.keys())
         .groupby(by=region_country_mapping)
         .transform(lambda df: df / df.sum())
     )
     regional_df = (
-        pd.DataFrame(
+        pd
+        .DataFrame(
             index=annual_demand.index,
             data={
                 id: annual_demand[country_code]
@@ -47,7 +49,8 @@ def national_to_regional_resolution(
 
 def read_data(path_to_file: str):
     return (
-        pd.read_csv(path_to_file, index_col=[0, 1, 2, 3])
+        pd
+        .read_csv(path_to_file, index_col=[0, 1, 2, 3])
         .squeeze()
         .unstack("country_code")
     )
@@ -59,7 +62,8 @@ if __name__ == "__main__":
     electrified = read_data(snakemake.input.electricity)
     populations = pd.read_csv(snakemake.input.populations, index_col=0)
     region_country_mapping = (
-        pd.read_csv(snakemake.input.locations, index_col=0)
+        pd
+        .read_csv(snakemake.input.locations, index_col=0)
         .loc[:, "country_code"]
         .to_dict()
     )

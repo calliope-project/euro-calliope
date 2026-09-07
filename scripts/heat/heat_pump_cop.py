@@ -1,5 +1,4 @@
 import math
-from typing import Union
 
 import pandas as pd
 import xarray as xr
@@ -16,8 +15,8 @@ def cop(
     space_heat_sink_shares: dict[str, float],
     correction_factor: float,
     heat_pump_shares: dict[str, float],
-    first_year: Union[int, str],
-    final_year: Union[int, str],
+    first_year: int | str,
+    final_year: int | str,
     path_to_output: str,
 ):
     """Calculate heat pump Coefficient of Performance (COP) based on manufacturer data.
@@ -40,12 +39,12 @@ def cop(
         path_to_output (str): Output to which COP timeseries data will be saved.
     """
     # Initial fast-fail checks.
-    assert math.isclose(
-        sum(heat_pump_shares.values()), 1
-    ), "Heat pump technology shares must add up to 1."
-    assert math.isclose(
-        sum(space_heat_sink_shares.values()), 1
-    ), "Space heating sink method shares must add up to 1."
+    assert math.isclose(sum(heat_pump_shares.values()), 1), (
+        "Heat pump technology shares must add up to 1."
+    )
+    assert math.isclose(sum(space_heat_sink_shares.values()), 1), (
+        "Space heating sink method shares must add up to 1."
+    )
 
     temperature_ds = xr.merge(
         _load_temperature_data(filepath, first_year, final_year)
@@ -54,7 +53,8 @@ def cop(
 
     # 1. Get characteristics per sink method
     pre_grouped_heat_pump_characteristics = (
-        xr.open_dataarray(path_to_heat_pump_characteristics)
+        xr
+        .open_dataarray(path_to_heat_pump_characteristics)
         .mean("product")  # ASSUME: take the average of all heat pump products
         .sel(data_type="COP")
         .interp(sink_temp=list(sink_temperature.values()))
@@ -63,7 +63,8 @@ def cop(
     # 2. Combine sink methods into space heating and hot water end uses,
     # using weightings for space heating (hot water is a distinct sink method already)
     sink_method_shares = (
-        pd.Series({"hot-water": 1, **space_heat_sink_shares})
+        pd
+        .Series({"hot-water": 1, **space_heat_sink_shares})
         .rename_axis(index="sink_temp")
         .to_xarray()
     )
@@ -118,8 +119,8 @@ def temperature_to_cop(
 
 def _load_temperature_data(
     path_to_temperature_data: str,
-    first_year: Union[int, str],
-    final_year: Union[int, str],
+    first_year: int | str,
+    final_year: int | str,
 ) -> xr.Dataset:
     "Load xarray dataset, subset to modelled geographic extent, and check that units are in the correct unit"
     ds = xr.open_dataset(path_to_temperature_data).sel(

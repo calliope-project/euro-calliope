@@ -141,7 +141,8 @@ def _simplify_geometries(
     """
     all_polygons = units.geometry.explode()
     return (
-        all_polygons.where(
+        all_polygons
+        .where(
             all_polygons.area.div(all_polygons.area.groupby(level="id").sum())
             > polygon_area_share_threshold
         )
@@ -175,7 +176,8 @@ def _share_of_coast_length(
         how="intersection",
     )
     coast_length_ratio = (
-        unit_intersection.set_index(["id", "MRGID"])
+        unit_intersection
+        .set_index(["id", "MRGID"])
         .length.groupby("MRGID")
         .transform(lambda x: x / x.sum())
     )

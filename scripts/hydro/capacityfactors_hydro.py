@@ -44,7 +44,8 @@ def time_series(plants, locations, capacities):
         ~location_of_plant.index.duplicated()
     ].rename_axis(index="id")
     return (
-        plants.inflow_MWh.groupby(location_of_plant.to_xarray())
+        plants.inflow_MWh
+        .groupby(location_of_plant.to_xarray())
         .sum(dim="id")
         .to_dataframe()
         .reset_index()

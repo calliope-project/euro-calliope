@@ -1,7 +1,7 @@
 """Utility functions."""
 
 import logging
-from typing import Literal, Optional
+from typing import Literal
 
 import pandas as pd
 import pycountry
@@ -14,9 +14,9 @@ def eu_country_code_to_iso3(eu_country_code):
     """Converts EU country code to ISO 3166 alpha 3.
     The European Union uses its own country codes, which often but not always match ISO 3166.
     """
-    assert (
-        len(eu_country_code) == 2
-    ), f"EU country codes are of length 2, yours is '{eu_country_code}'."
+    assert len(eu_country_code) == 2, (
+        f"EU country codes are of length 2, yours is '{eu_country_code}'."
+    )
 
     return convert_country_code(eu_country_code, output="alpha3")
 
@@ -115,7 +115,7 @@ def rename_and_groupby(
     da: xr.DataArray,
     rename_dict: dict,
     dim_name: str,
-    new_dim_name: Optional[str] = None,
+    new_dim_name: str | None = None,
     dropna: bool = False,
     drop_other_dim_items: bool = True,
 ) -> xr.DataArray:
@@ -155,7 +155,8 @@ def rename_and_groupby(
 
     rename_da = xr.DataArray(rename_series.rename(new_dim_name))
     da = (
-        da.reindex({dim_name: rename_da[dim_name]})
+        da
+        .reindex({dim_name: rename_da[dim_name]})
         .groupby(rename_da)
         .sum(dim_name, skipna=True, min_count=1, keep_attrs=True)
     )

@@ -28,12 +28,13 @@ def scale_heat_demand_profiles(
     Returns:
         xr.DataArray: `unscaled_demand_profiles` merged across building types and end uses, and scaled to have an annual sum equal to `annual_demand`.
     """
-    assert np.isclose(
-        sum(sfh_mfh_shares.values()), 1
-    ), "Household type (single- vs multi-family home) shares must add up to 1."
+    assert np.isclose(sum(sfh_mfh_shares.values()), 1), (
+        "Household type (single- vs multi-family home) shares must add up to 1."
+    )
 
     sfh_mfh_shares_da = (
-        pd.Series({"COM": 1, **sfh_mfh_shares})
+        pd
+        .Series({"COM": 1, **sfh_mfh_shares})
         .rename_axis(index="building")
         .to_xarray()
     )
@@ -68,7 +69,8 @@ def prepare_annual_demand(annual_demand: pd.Series) -> xr.DataArray:
     Result sums over all building categories and only contains hot water and space heating demands (not cooking).
     """
     return (
-        annual_demand.rename_axis(columns="id")
+        annual_demand
+        .rename_axis(columns="id")
         .stack()
         .unstack("end_use")
         .to_xarray()[["space_heat", "hot_water"]]
@@ -89,14 +91,15 @@ def electrify_heat_demand_profiles(
         [weighted_average_cop, direct_electrification_eff], dim="tech"
     )
     electrification_shares_da = (
-        pd.DataFrame(electrification_shares)
+        pd
+        .DataFrame(electrification_shares)
         .rename_axis(index="tech")
         .to_xarray()
         .to_array("end_use")
     )
-    assert np.isclose(
-        electrification_shares_da.sum("tech"), 1
-    ).all(), "Heat electrification shares must add up to 1."
+    assert np.isclose(electrification_shares_da.sum("tech"), 1).all(), (
+        "Heat electrification shares must add up to 1."
+    )
     electrified_heat_demand = (
         heat_demand * electrification_shares_da / efficiency_da
     ).sum("tech")

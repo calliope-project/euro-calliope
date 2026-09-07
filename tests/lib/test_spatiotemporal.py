@@ -48,7 +48,8 @@ def make_spatiotemporal_data(make_timeseries):
     def _make_spatiotemporal_data(values):
         assert len(values) == 4
         da = (
-            pd.concat([
+            pd
+            .concat([
                 make_timeseries(values[0]).to_frame().assign(x=1, y=1),
                 make_timeseries(values[1]).to_frame().assign(x=1, y=3),
                 make_timeseries(values[2]).to_frame().assign(x=3, y=3),
@@ -67,7 +68,8 @@ def make_spatiotemporal_data(make_timeseries):
 @pytest.fixture
 def non_rectangular_spatiotemporal_data(make_timeseries):
     da = (
-        pd.concat([
+        pd
+        .concat([
             make_timeseries(8).to_frame().assign(y=1, x=1),
             make_timeseries(8).to_frame().assign(y=1, x=3),
             make_timeseries(8).to_frame().assign(y=3, x=1),
@@ -85,7 +87,8 @@ def non_rectangular_spatiotemporal_data(make_timeseries):
 @pytest.fixture
 def spatiotemporal_data_with_nodata_within_single_shape(make_timeseries):
     da = (
-        pd.concat([
+        pd
+        .concat([
             make_timeseries(8).to_frame().assign(y=1, x=1),
             make_timeseries(8).to_frame().assign(y=1, x=3),
             make_timeseries(8).to_frame().assign(y=3, x=1),
@@ -101,7 +104,8 @@ def spatiotemporal_data_with_nodata_within_single_shape(make_timeseries):
 @pytest.fixture
 def spatiotemporal_data_with_nodata_outside_single_shape(make_timeseries):
     da = (
-        pd.concat([
+        pd
+        .concat([
             make_timeseries(8).to_frame().assign(x=1, y=1),
             make_timeseries(8).to_frame().assign(x=1, y=3),
             make_timeseries(8).to_frame().assign(x=3, y=3),
