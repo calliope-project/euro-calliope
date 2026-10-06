@@ -32,7 +32,8 @@ def load(
     )
     assert not units["industrial_demand"].isna().any()
     units["fraction_of_national_industrial_load"] = (
-        units.groupby("country_code")
+        units
+        .groupby("country_code")
         .industrial_demand.transform(lambda x: x / x.sum())
         .fillna(0)
     )  # if national demand is 0, division by zero
@@ -68,7 +69,8 @@ def split_national_load(national_load, units):
         units.groupby("country_code").industrial_demand.sum() * 1e6
     )  # from TWh to MWh
     industrial_load = (
-        pd.DataFrame(  # ASSUME flat industry load profiles
+        pd
+        .DataFrame(  # ASSUME flat industry load profiles
             index=national_load.index, data=national_industrial_demand.to_dict()
         )
         .div(len(national_load.index))

@@ -18,7 +18,8 @@ def determine_water_inflow(
 
     inflow_m3 = water_inflow(plants, path_to_cutout, path_to_basins)
     (
-        xr.merge([plants.to_xarray(), inflow_m3])
+        xr
+        .merge([plants.to_xarray(), inflow_m3])
         .drop("geometry")
         .sel(time=slice(first_year, final_year))
         .to_netcdf(path_to_output)

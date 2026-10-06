@@ -50,7 +50,8 @@ def get_all_distance_efficiency(
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     # Add transport energy demand from agriculture and 'not elsewhere specified' (military) (OTHER_TRANSPORT_ROAD)
     transport_energy_balance = (
-        energy_balance.xs(FinalConsumption.ROAD_TRANSPORT)
+        energy_balance
+        .xs(FinalConsumption.ROAD_TRANSPORT)
         .unstack("carrier_code")
         .groupby(CARRIERS, axis=1)
         .sum(min_count=1)
@@ -83,7 +84,8 @@ def get_all_distance_efficiency(
     # 2016-2018 from 2015 data; non-JRC countries, based on neighbour data
     transport_efficiency = fill_missing_countries_and_years(
         road_distance.where(road_distance > 0).div(
-            road_energy.where(road_energy > 0)
+            road_energy
+            .where(road_energy > 0)
             .groupby(
                 level=[
                     "country_code",
@@ -101,7 +103,8 @@ def get_all_distance_efficiency(
     # Distance travelled per transport mode, including years 2016-2018,
     # based on JRC IDEES transport efficiency (2015 data for 2016-2018)
     transport_distance_all_years = (
-        transport_energy_per_mode.groupby(
+        transport_energy_per_mode
+        .groupby(
             level=["country_code", "vehicle_subtype", "section", "vehicle_type", "year"]
         )
         .sum()
@@ -171,14 +174,14 @@ if __name__ == "__main__":
     # ASSUME: agriculture oil use goes to 'road' transport demand;
     # 'not elsewhere specified' oil use goes predominantly to 'road' transport, except kerosene which goes to aviation
     other_transportation_aviation = (  # all kerosene from the military destined for aviation
-        energy_balances.loc[
-            idx[FinalConsumption.OTHER_SECTORS, AVIATION_CARRIERS, :, :, :]
-        ]
+        energy_balances
+        .loc[idx[FinalConsumption.OTHER_SECTORS, AVIATION_CARRIERS, :, :, :]]
         .groupby(level=["country", "year"])
         .sum()
     )
     other_transport_road = (  # i.e. all oil that isn't destined for aviation
-        energy_balances.loc[
+        energy_balances
+        .loc[
             idx[
                 [
                     FinalConsumption.AGRICULTURE_AND_FORESTRY,
@@ -222,9 +225,8 @@ if __name__ == "__main__":
 
     # Extract historical electricity consumption
     total_historically_electrified_distance = (
-        road_historically_electrified_consumption.groupby(
-            level=["carrier", "vehicle_type", "country_code", "year"]
-        )
+        road_historically_electrified_consumption
+        .groupby(level=["carrier", "vehicle_type", "country_code", "year"])
         .sum()
         .xs("electricity")
     )
@@ -233,12 +235,14 @@ if __name__ == "__main__":
     uncontrolled_share = snakemake.params.uncontrolled_charging_share
 
     road_distance_controlled = (
-        total_road_distance.rename("value")
+        total_road_distance
+        .rename("value")
         .mul(1 - uncontrolled_share)
         .to_csv(snakemake.output.road_distance_controlled)
     )
     road_distance_uncontrolled = (
-        total_road_distance.rename("value")
+        total_road_distance
+        .rename("value")
         .mul(uncontrolled_share)
         .sub(total_historically_electrified_distance.rename("value"), fill_value=0)
         .to_csv(snakemake.output.road_distance_uncontrolled)

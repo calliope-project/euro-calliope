@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 import numpy as np
 import xarray as xr
 
@@ -13,9 +11,7 @@ def check_units(jrc_energy: xr.Dataset, jrc_prod: xr.DataArray) -> None:
     assert jrc_prod.attrs["units"].lower() == "kt"
 
 
-def standardize(
-    da: xr.DataArray, units: str, name: Optional[str] = None
-) -> xr.DataArray:
+def standardize(da: xr.DataArray, units: str, name: str | None = None) -> xr.DataArray:
     """Ensure JRC processing standard is met.
 
     Three requirements:
@@ -122,9 +118,9 @@ def get_section_subsection_useful_intensity(
     # Prettify
     useful_intensity = standardize(useful_intensity, "twh/kt", name="useful_intensity")
 
-    assert ~np.isinf(
-        useful_intensity
-    ).any(), f"Zero division ocurred for {section}.{subsection} and {material}!"
+    assert ~np.isinf(useful_intensity).any(), (
+        f"Zero division ocurred for {section}.{subsection} and {material}!"
+    )
 
     return useful_intensity.fillna(0)
 
@@ -169,7 +165,7 @@ def replace_carrier_final_demand(
 
 def convert_subsection_demand_to_carrier(
     jrc_energy: xr.Dataset,
-    subsection: Union[str, list[str]],
+    subsection: str | list[str],
     demand_type: str = "useful",
 ) -> xr.DataArray:
     """Converts a subsection into a carrier by aggregating all demand for it.

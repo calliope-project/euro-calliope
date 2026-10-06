@@ -296,7 +296,11 @@ calliope run build/models/continental/example-model.yaml --scenario=freeze-hydro
 
 ``` python
 import calliope
-model = calliope.Model("build/models/continental/example-model.yaml", scenario="freeze-hydro-supply-capacities")
+
+model = calliope.Model(
+    "build/models/continental/example-model.yaml",
+    scenario="freeze-hydro-supply-capacities",
+)
 model.run()
 ```
 

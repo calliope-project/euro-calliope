@@ -67,7 +67,8 @@ def _entsoe_ntcs(locations, tyndp_scenarios, scenario, grid, year, ntc_limit):
     # Some NTCs are different depending on whether it is import or export between countries.
     # Here, we take either the minimum or maximum NTC of a link, depending on what a user defines for `ntc_limit`
     average_ntc = (
-        pd.concat([tyndp_import, tyndp_export])
+        pd
+        .concat([tyndp_import, tyndp_export])
         .abs()
         .agg(ntc_limit, level=["loc_from", "loc_to"])
     )
@@ -82,7 +83,8 @@ def _split_links_in_index(df):
     # Here we aggregate to national-level
     df.index = df.index.str.split("-", expand=True)
     df = (
-        df.rename(index=lambda x: utils.eu_country_code_to_iso3(x[:2]))
+        df
+        .rename(index=lambda x: utils.eu_country_code_to_iso3(x[:2]))
         .loc[:, "Value"]
         .groupby(level=[0, 1])
         .sum()
