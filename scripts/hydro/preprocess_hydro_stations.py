@@ -89,7 +89,8 @@ def scale_phs_acording_to_geth(stations, path_to_geth_national_capacities):
     """
     hphs_mask = stations.type == "HPHS"
     storage_capacity_share = (
-        stations.loc[hphs_mask]
+        stations
+        .loc[hphs_mask]
         .groupby("country_code")
         .storage_capacity_MWh.transform(lambda x: x / x.sum())
         .rename("storage_capacity_share")
@@ -155,7 +156,8 @@ def new_coords(station, buffer_size_m, hydrobasins):
     basin_id = hydrobasins.distance(point).idxmin()
     closest_basin = hydrobasins.loc[basin_id]
     return (
-        point.buffer(buffer_size_m)
+        point
+        .buffer(buffer_size_m)
         .intersection(closest_basin.geometry)
         .representative_point()
     )

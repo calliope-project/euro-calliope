@@ -43,7 +43,8 @@ class TestRenameAndGroupby:
     def assert_expected_dims_and_dim_vals(new_da: xr.DataArray, expected: dict):
         # check that the dimension items have been appropriately renamed
         assert (
-            new_da.coords["country_code"]
+            new_da
+            .coords["country_code"]
             .to_index()
             .symmetric_difference(expected.keys())
             .empty
@@ -203,7 +204,8 @@ class TestRenameAndGroupby:
         assert "country" in new_da.coords
         assert "country_code" not in new_da.coords
         assert (
-            new_da.coords["country"]
+            new_da
+            .coords["country"]
             .to_index()
             .symmetric_difference(expected.keys())
             .empty

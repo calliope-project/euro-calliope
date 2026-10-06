@@ -40,7 +40,8 @@ def capacities_per_location(plants, locations, tech_name):
     )["index_right"]
     location_of_plant = location_of_plant[~location_of_plant.index.duplicated()]
     return (
-        plants.groupby(location_of_plant)
+        plants
+        .groupby(location_of_plant)
         .agg({"installed_capacity_MW": sum, "storage_capacity_MWh": sum})
         .reindex(index=locations.index, fill_value=0)
         .rename(columns={"installed_capacity_MW": f"installed_capacity_{tech_name}_MW"})

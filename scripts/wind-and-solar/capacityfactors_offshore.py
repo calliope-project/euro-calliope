@@ -60,7 +60,8 @@ def capacityfactors(
 def _allocate_to_onshore_locations(capacityfactors_per_eez, shared_coast):
     shared_coast_norm_per_id = shared_coast.groupby("id").apply(lambda x: x / x.sum())
     return (
-        capacityfactors_per_eez.rename_axis(columns="MRGID")
+        capacityfactors_per_eez
+        .rename_axis(columns="MRGID")
         .mul(shared_coast_norm_per_id, axis=1)
         .groupby("id", axis=1)
         .sum()

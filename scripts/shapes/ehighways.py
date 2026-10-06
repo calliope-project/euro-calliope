@@ -1,7 +1,5 @@
 """Aggregates NUTS3 regions into shapes defined in the E-Highways 2050 project."""
 
-from typing import Union
-
 import geopandas as gpd
 import pandas as pd
 import shapely.geometry
@@ -48,7 +46,7 @@ def create_ehighways_shapes(
 
 
 def _to_multi_polygon(
-    geometry: Union[dict, shapely.geometry.Polygon, shapely.geometry.MultiPolygon],
+    geometry: dict | shapely.geometry.Polygon | shapely.geometry.MultiPolygon,
 ):
     "Handles result of dissolving geometries that don't share a border by converting them to multipolygons"
     if isinstance(geometry, dict):

@@ -14,9 +14,9 @@ def test_heat_demand_between_seasons(request, demand, location):
     demand_monthly = demand_df[location].abs().groupby(demand_df.index.month).sum()
     demand_winter = demand_monthly.loc[[12, 1, 2]].sum()
     demand_summer = demand_monthly.loc[[6, 7, 8]].sum()
-    assert (
-        demand_winter > demand_summer
-    ).all(), "Found higher heat demand in summer than in winter."
+    assert (demand_winter > demand_summer).all(), (
+        "Found higher heat demand in summer than in winter."
+    )
 
 
 def test_electrified_heat_vs_heat_demand(
