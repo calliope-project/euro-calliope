@@ -6,7 +6,8 @@ Functions attributable to When2Heat are explicitly referenced as such in the fun
 """
 
 import os
-from typing import Callable, Literal, Union
+from collections.abc import Callable
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -25,8 +26,8 @@ def get_unscaled_heat_profiles(
     path_to_wind_speed: str,
     path_to_temperature: str,
     path_to_when2heat_params: str,
-    first_year: Union[str, int],
-    final_year: Union[str, int],
+    first_year: str | int,
+    final_year: str | int,
     out_path: str,
 ) -> None:
     """Produces time series of heat demand profiles with the correct shape, and consistent within themselves, but without meaningful units.
@@ -200,7 +201,8 @@ def get_reference_temperature(
     # Daily average
     # pandas manages time resampling much quicker than xarray, so we switch to a dataframe here.
     daily_average = (
-        temperature.rename(time=time_dim)
+        temperature
+        .rename(time=time_dim)
         .to_series()
         .unstack("time")
         .T.resample("1D")

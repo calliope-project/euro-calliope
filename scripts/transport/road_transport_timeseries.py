@@ -18,7 +18,8 @@ def create_road_transport_demand_timeseries(
     # Read annual road transport distance into panda dataframe
 
     df_annual = (
-        pd.read_csv(path_to_annual_data, index_col=[0, 1, 2], parse_dates=[2])
+        pd
+        .read_csv(path_to_annual_data, index_col=[0, 1, 2], parse_dates=[2])
         .squeeze()
         .xs(vehicle_type)
         .xs(slice(str(first_year), str(final_year + 1)), level="year", drop_level=False)
@@ -32,7 +33,8 @@ def create_road_transport_demand_timeseries(
     if vehicle_type in ["passenger-cars", "motorcycles", "light-duty-vehicles"]:
         # Use RAMP time series profiles for small and light vehicles.
         df_timeseries = (
-            pd.read_csv(path_to_timeseries, index_col=[0, 1, 2], parse_dates=[0])
+            pd
+            .read_csv(path_to_timeseries, index_col=[0, 1, 2], parse_dates=[0])
             .xs(slice(first_year, final_year), level="year")
             .unstack("country_code")
             .droplevel(level=0, axis="columns")
@@ -52,7 +54,8 @@ def create_road_transport_demand_timeseries(
         raise ValueError(f"vehicle_type {vehicle_type} is not supported")
 
     df_timeseries = (
-        df_timeseries.mul(conversion_factor)
+        df_timeseries
+        .mul(conversion_factor)
         .mul(power_scaling_factor)
         .mul(
             1 if historic else -1
@@ -61,9 +64,9 @@ def create_road_transport_demand_timeseries(
         .tz_localize(None)
         .rename_axis("utc-timestamp")
     )
-    assert not df_timeseries.isna().any(
-        axis=None
-    ), "There are NaN values in the timeseries dataframe"
+    assert not df_timeseries.isna().any(axis=None), (
+        "There are NaN values in the timeseries dataframe"
+    )
     df_timeseries.to_csv(path_to_output)
 
 

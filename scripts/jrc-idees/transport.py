@@ -48,7 +48,8 @@ def process_jrc_transport_data(
     if DATASET_PARAMS[dataset]["unit"] == "ktoe":
         processed_data = processed_data.apply(utils.ktoe_to_twh)
     processed_data = (
-        processed_data.reset_index(level="country_code")
+        processed_data
+        .reset_index(level="country_code")
         .assign(country_code=lambda df: df.country_code.map(utils.convert_country_code))
         .set_index("country_code", append=True)
         .stack("year")
@@ -145,7 +146,8 @@ def process_road_energy(df: pd.DataFrame, column_names: str) -> pd.DataFrame:
     df["carrier"] = df["carrier"].fillna(df.vehicle_subtype.replace(ROAD_CARRIERS))
 
     df = (
-        df.where((df.indent > 2) | (df.vehicle_type == "Powered 2-wheelers"))
+        df
+        .where((df.indent > 2) | (df.vehicle_type == "Powered 2-wheelers"))
         .dropna()
         .set_index(["section", "vehicle_type", "vehicle_subtype", "carrier"])
         .drop([column_names, "indent"], axis=1)

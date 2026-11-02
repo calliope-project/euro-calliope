@@ -47,7 +47,8 @@ def regionalise_nuclear_capacity(
         capacity_current, geometry=capacity_current_points, crs="EPSG:4326"
     )
     capacity_current_per_region = (
-        gpd.overlay(capacity_current_gdf.to_crs(units.crs), units)
+        gpd
+        .overlay(capacity_current_gdf.to_crs(units.crs), units)
         .groupby(["id", "country_code"])
         .sum()
         .capacity_g  # Generating unit capacity, net (MW)
@@ -86,7 +87,8 @@ def _get_future_capacity_from_config_file(
     nuclear_capacity_scenario, resolution, countries
 ):
     nuclear_scenario_df = (
-        pd.read_csv(nuclear_capacity_scenario, index_col="country")
+        pd
+        .read_csv(nuclear_capacity_scenario, index_col="country")
         .loc[:, ["min", "max"]]
         .rename(columns=lambda x: f"installed_capacity_nuclear_{x}_MW")
         .reindex(countries)
