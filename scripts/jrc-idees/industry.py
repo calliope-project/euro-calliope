@@ -1,7 +1,8 @@
 import logging
+from collections.abc import Callable
 from itertools import product
 from multiprocessing import Pool
-from typing import Callable, Literal, Union
+from typing import Literal
 
 import numpy as np
 import pandas as pd
@@ -62,7 +63,7 @@ def process_jrc_industry_data(
     processed_xr_data.to_netcdf(out_path)
 
 
-def df_to_xr(df: pd.DataFrame, unit: str) -> Union[xr.Dataset, xr.DataArray]:
+def df_to_xr(df: pd.DataFrame, unit: str) -> xr.Dataset | xr.DataArray:
     df.columns = df.columns.rename("year").astype(int)
 
     xr_data = df.stack().unstack("variable").to_xarray()
@@ -98,7 +99,8 @@ def get_jrc_idees_production(sheet_name: str, file: str) -> pd.DataFrame:
     start = df.filter(regex="Physical output", axis=0)
     end = df.filter(regex="Installed capacity", axis=0)
     df_processed = (
-        df.loc[start.index[0] : end.index[0]]
+        df
+        .loc[start.index[0] : end.index[0]]
         .iloc[1:-1]
         .dropna(how="all")
         .assign(
@@ -108,7 +110,8 @@ def get_jrc_idees_production(sheet_name: str, file: str) -> pd.DataFrame:
         .rename_axis(index="produced_material")
     )
     df_processed.index = (
-        df_processed.index.str.replace("(kt)", "", regex=False)
+        df_processed.index.str
+        .replace("(kt)", "", regex=False)
         .str.replace("(kt ", "(", regex=False)
         .str.strip()
     )
@@ -171,7 +174,8 @@ def _assign_section_level_based_on_colour(
             .loc[:last_index_of_data]
         )
         df.loc[idx[idx].index, section_level] = (
-            style_df.loc[idx[idx].index, column_names]
+            style_df
+            .loc[idx[idx].index, column_names]
             .astype(str)
             .where(lambda x: x != "nan")
         )
@@ -216,7 +220,8 @@ def _rename_carriers(df: pd.DataFrame) -> pd.DataFrame:
     # E.g., microwave == electricity, thermal == gas powered, mention of "diesel" == diesel oil.
     for carrier_search_string, carrier_group in ENERGY_SHEET_CARRIERS.items():
         df.loc[
-            df.end_use.fillna(df.subsection)
+            df.end_use
+            .fillna(df.subsection)
             .str.lower()
             .str.contains(carrier_search_string, regex=True, na=False),
             "carrier_name",
@@ -236,7 +241,8 @@ def _assign_category_country_information(
 ) -> pd.DataFrame:
     index = ["section", "subsection", "carrier_name", "country_code", "cat_name"]
     return (
-        df.assign(
+        df
+        .assign(
             cat_name=column_names.split(": ")[1].split(" / ")[0],
             country_code=column_names.split(": ")[0],
         )

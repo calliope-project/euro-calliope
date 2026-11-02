@@ -72,7 +72,8 @@ def biofuel_potential(
 ):
     """Take national potentials from JRC report and allocate to regions based on proxies."""
     national_potentials = (
-        pd.read_csv(
+        pd
+        .read_csv(
             path_to_national_potentials,
             index_col=["year", "scenario", "country_code", "feedstock"],
         )["value"]
@@ -80,7 +81,8 @@ def biofuel_potential(
         .xs((potential_year, scenario), level=("year", "scenario"))
     )
     national_costs = (
-        pd.read_csv(
+        pd
+        .read_csv(
             path_to_national_costs,
             index_col=["year", "scenario", "country_code", "feedstock"],
         )["value"]
@@ -98,7 +100,8 @@ def biofuel_potential(
             index="country_code"
         )
         national_potentials = (
-            national_potentials.rename(lambda x: "EUR", level="country_code")
+            national_potentials
+            .rename(lambda x: "EUR", level="country_code")
             .groupby(level=["country_code", "feedstock"])
             .sum()
         )
@@ -129,7 +132,8 @@ def allocate_potentials(national_potentials, units, population, land_cover, prox
         on="country_code",
     ).pivot(index="id", columns="feedstock", values="value")
     shares = (
-        pd.concat(
+        pd
+        .concat(
             [population, land_cover[FOREST].sum(axis=1), land_cover[FARM].sum(axis=1)],
             axis=1,
             keys=["population", "forest", "farmland"],

@@ -15,7 +15,8 @@ def group_end_uses(
         xr.DataArray: `resolution_specific_data` with end uses averaged into a single `heat` end use.
     """
     weighted_average_da = (
-        resolution_specific_data.to_array("end_use")
+        resolution_specific_data
+        .to_array("end_use")
         .groupby("time.year")
         .apply(_end_use_weighted_ave, annual_demand=annual_demand)
     )
@@ -28,7 +29,8 @@ def prepare_annual_demand(annual_demand: pd.Series) -> xr.DataArray:
     Result sums over all building categories and only contains hot water and space heating demands (not cooking).
     """
     return (
-        annual_demand.rename_axis(columns="id")
+        annual_demand
+        .rename_axis(columns="id")
         .stack()
         .to_xarray()
         .sel(end_use=["space_heat", "hot_water"])

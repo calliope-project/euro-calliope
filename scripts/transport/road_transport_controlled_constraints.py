@@ -18,14 +18,16 @@ def scale_to_resolution_and_create_file(
 
 def scale_national_to_regional(df, region_country_mapping, populations):
     df_population_share = (
-        populations.loc[:, "population_sum"]
+        populations
+        .loc[:, "population_sum"]
         .reindex(region_country_mapping.keys())
         .groupby(by=region_country_mapping)
         .transform(lambda df: df / df.sum())
     )
 
     regional_df = (
-        pd.DataFrame(
+        pd
+        .DataFrame(
             index=df.index,
             data={
                 id: df[country_code]
@@ -49,7 +51,8 @@ def get_national_ev_profiles(
     country_codes: list[str],
 ) -> pd.DataFrame:
     df_timeseries = (
-        pd.read_csv(ev_profiles_path, index_col=[0, 1, 2], parse_dates=[0])
+        pd
+        .read_csv(ev_profiles_path, index_col=[0, 1, 2], parse_dates=[0])
         .xs(slice(first_year, final_year), level="year")
         .unstack("country_code")
         .droplevel(level=0, axis="columns")
@@ -57,7 +60,8 @@ def get_national_ev_profiles(
     if "demand" in dataset_name:
         # Normalise demand and create min-max-equals timeseries
         df = (
-            df_timeseries.groupby(by=lambda idx: idx.year)
+            df_timeseries
+            .groupby(by=lambda idx: idx.year)
             .transform(lambda x: x / x.sum())
             .mul(demand_range[dataset_name.split("-")[-1]])
         )
@@ -76,7 +80,8 @@ def fill_empty_country(df, country_neighbour_dict):
 
 if __name__ == "__main__":
     region_country_mapping = (
-        pd.read_csv(snakemake.input.locations, index_col=0)
+        pd
+        .read_csv(snakemake.input.locations, index_col=0)
         .loc[:, "country_code"]
         .to_dict()
     )

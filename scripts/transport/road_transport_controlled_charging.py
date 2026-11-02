@@ -8,14 +8,16 @@ def scale_to_regional_resolution(df, region_country_mapping, populations):
     ASSUME all road transport is subnationally distributed in proportion to population.
     """
     df_population_share = (
-        populations.loc[:, "population_sum"]
+        populations
+        .loc[:, "population_sum"]
         .reindex(region_country_mapping.keys())
         .groupby(by=region_country_mapping)
         .transform(lambda df: df / df.sum())
     )
 
     regional_df = (
-        pd.DataFrame(
+        pd
+        .DataFrame(
             index=df.index,
             data={
                 id: df[country_code]
@@ -51,7 +53,8 @@ def convert_annual_distance_to_electricity_demand(
     controlled charging accounting for conversion factors.
     """
     df_energy_demand = (
-        pd.read_csv(path_to_controlled_annual_demand, index_col=[1, 2])
+        pd
+        .read_csv(path_to_controlled_annual_demand, index_col=[1, 2])
         .xs(slice(first_year, final_year), level="year", drop_level=False)
         .assign(value=lambda x: x["value"] * x["vehicle_type"].map(conversion_factors))
         .groupby(["country_code", "year"])
@@ -76,7 +79,8 @@ def extract_national_ev_charging_potentials(
 ) -> pd.DataFrame:
     # Extract number of EVs per vehicle type
     df_ev_numbers = (
-        pd.read_csv(path_to_ev_numbers, index_col=[0, 1, 2, 3, 4])
+        pd
+        .read_csv(path_to_ev_numbers, index_col=[0, 1, 2, 3, 4])
         .squeeze()
         .droplevel(["vehicle_subtype", "section"])
     )
@@ -93,7 +97,8 @@ def extract_national_ev_charging_potentials(
 
     # Compute available chargeable distance per vehicle type [in transport scaling unit km]
     df_ev_chargeable_distance = (
-        df_ev_numbers.align(battery_size, level="vehicle_type")[1]
+        df_ev_numbers
+        .align(battery_size, level="vehicle_type")[1]
         .squeeze()
         .mul(df_ev_numbers)
         .groupby(level=["country_code", "year"])
@@ -132,7 +137,8 @@ if __name__ == "__main__":
         [pycountry.countries.lookup(c).alpha_3 for c in snakemake.params.countries],
     )
     region_country_mapping = (
-        pd.read_csv(snakemake.input.locations, index_col=0)
+        pd
+        .read_csv(snakemake.input.locations, index_col=0)
         .loc[:, "country_code"]
         .to_dict()
     )

@@ -90,7 +90,8 @@ def filter_countries(load, countries):
     }
 
     national = (
-        load.loc[:, country_codes.keys()]
+        load
+        .loc[:, country_codes.keys()]
         .rename(columns=country_codes)
         .rename_axis(columns="country_code")
     )
@@ -258,7 +259,8 @@ def get_source_choice_per_country(raw_load, gap_filled_load, entsoe_priority):
     """
 
     source_choice = (
-        gap_filled_load.notnull()
+        gap_filled_load
+        .notnull()
         .groupby(level="attribute")
         .sum()
         .loc[entsoe_priority]
@@ -295,7 +297,8 @@ def get_source_choice_per_country(raw_load, gap_filled_load, entsoe_priority):
 
 def _select_load_by_source_priority(load, source_priority):
     load_filtered_by_priority_source = (
-        load.unstack("attribute")
+        load
+        .unstack("attribute")
         .loc[:, source_priority.index]
         .droplevel("attribute", axis="columns")
     )

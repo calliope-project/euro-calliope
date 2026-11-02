@@ -73,9 +73,9 @@ def _read_source_layers(
 
 def _validate_source_layer_crs(source_layers: dict[str, gpd.GeoDataFrame]):
     crs = [layer.crs for layer in source_layers.values()]
-    assert not crs or crs.count(crs[0]) == len(
-        crs
-    ), "Source layers have different crs. They must match."
+    assert not crs or crs.count(crs[0]) == len(crs), (
+        "Source layers have different crs. They must match."
+    )
 
 
 def _validate_resolution_config(
@@ -83,7 +83,9 @@ def _validate_resolution_config(
 ):
     missing_countries = set(all_countries).difference(resolution_config)
 
-    assert not missing_countries, f"Missing countries in {resolution} resolution configuration: {missing_countries}"
+    assert not missing_countries, (
+        f"Missing countries in {resolution} resolution configuration: {missing_countries}"
+    )
 
 
 def _verify_all_countries_captured(
@@ -92,9 +94,9 @@ def _verify_all_countries_captured(
     missing_countries = set(units.country_code).difference([
         _iso3(country) for country in countries
     ])
-    assert (
-        not missing_countries
-    ), f"Countries are missing in {resolution} resolution shapes: {missing_countries}"
+    assert not missing_countries, (
+        f"Countries are missing in {resolution} resolution shapes: {missing_countries}"
+    )
 
 
 def _iso3(country_name: str) -> str:
@@ -124,7 +126,8 @@ def _rename_ehighways_countries(units: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # Extract all digits from a string, merge them in order via string summation, then convert to an integer
     # E.g., "BE.1.2-3" -> 123
     order = (
-        units.id.str.extractall(r"(\d+)")
+        units.id.str
+        .extractall(r"(\d+)")
         .groupby(level=0)
         .sum()
         .reindex(units.index)

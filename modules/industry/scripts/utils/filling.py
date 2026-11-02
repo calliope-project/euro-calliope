@@ -24,7 +24,8 @@ def fill_missing_countries_years(
 
     # Build eurostat annual industry balances
     eurostat_industry_balances = (
-        eurostat_balances.unstack(["year", "country"])
+        eurostat_balances
+        .unstack(["year", "country"])
         .groupby(
             [
                 cat_names.jrc_idees.dropna().to_dict(),
